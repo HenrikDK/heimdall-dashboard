@@ -45,6 +45,28 @@ if (!app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 app.UseRouting();
+app.UseProxies(proxies =>
+{
+    proxies.Map("api/{**rest}",
+        proxy => proxy.UseHttp((context, args) =>
+        {
+            context.Request.Headers.Add("Authorization", $"Bearer {K8sClient.AccessToken}");
+            var qs = context.Request.QueryString.Value;
+            var url = context.Request.Path.ToString().Replace("/api/", "/");
+            var server = K8sClient.Server;
+            return $"{server}{url}{qs}";
+        })
+        .UseWs((context, args) =>
+        {
+            context.Request.Headers.Add("sec-websocket-protocol", "base64url.bearer.authorization.k8s.io."
+                                                                  + K8sClient.AccessToken + ", base64.binary.k8s.io");
+            var qs = context.Request.QueryString.Value;
+            var url = context.Request.Path.ToString().Replace("/api/", "/");
+            var server = K8sClient.Server.Replace("https://", "wss:");
+            return $"{server}{url}{qs}";
+        })
+    );
+});
 app.UseAuthorization();
 app.UseEndpoints(x =>
 {
