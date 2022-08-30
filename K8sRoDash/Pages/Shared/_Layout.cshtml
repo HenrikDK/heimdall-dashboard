@@ -22,18 +22,14 @@
     
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <script src="~/js/site.js" asp-append-version="true"></script>
-    
-    @RenderSection("VueComponents", required: false)
 </head>
 <body>
 
-<div class="container-xxl my-md-4 bd-layout">
-    <main class="col overflow-auto h-100">
-        <div class="container" id="app">
-            @RenderBody()
-        </div>
-    </main>
+<div id="app">
+    @RenderBody()
 </div>
+
+@RenderSection("VueComponents", required: false)
 
 @RenderSection("Scripts", required: false)
 
