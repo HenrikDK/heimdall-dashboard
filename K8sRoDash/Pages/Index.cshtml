@@ -1,14 +1,21 @@
 ﻿@page "/"
 @model IndexModel
 @{
-    ViewBag.Title = "Welcome";
+    ViewBag.Title = "Skúta";
 }
 
 @section VueComponents {
-    @Html.Partial("Components/_CoffeeMaker")
-    @Html.Partial("Components/_ProgressBar")
+    <partial name="Components/_NavBar"/>
+    <partial name="Components/_MainMenu"/>
 }
 
-<div id="app">
-    <coffee-maker></coffee-maker>
+<nav-bar></nav-bar>
+
+<div class="bd-layout">
+
+    <main-menu></main-menu>
+    
+    <main class="col overflow-auto h-100">
+    
+    </main>
 </div>
