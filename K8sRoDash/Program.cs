@@ -40,9 +40,6 @@ builder.Services.AddRazorPages(options =>
 
 var app = builder.Build();
 
-app.UseStatusCodePages();
-app.UseStatusCodePagesWithReExecute("/Status{0}");
-
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
