@@ -1,4 +1,4 @@
-@page "/"
+﻿@page "/"
 @model IndexModel
 @{
     Layout = "_Layout";
@@ -6,8 +6,13 @@
 }
 
 @section VueComponents {
-    <partial name="Components/_NavBar"/>
-    <partial name="Components/_MainMenu"/>
+    <partial name="Components/NavBar"/>
+    <partial name="Components/MainMenu"/>
+    <partial name="Views/Cluster"/>
+    <partial name="Views/Deployments"/>
+    <partial name="Views/Pods"/>
+    <partial name="Views/Services"/>
+    <partial name="Views/Ingresses"/>
 }
 
 <nav-bar @@select-view="(v) => view = v"></nav-bar>
@@ -17,6 +22,6 @@
     <main-menu :view="view" @@select-view="(v) => view = v"></main-menu>
     
     <main class="col overflow-auto h-100">
-    
+        <router-view></router-view>
     </main>
 </div>
