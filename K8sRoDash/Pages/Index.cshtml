@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @model IndexModel
 @{
     ViewBag.Title = "Skúta";
@@ -13,7 +13,7 @@
 
 <div class="bd-layout">
 
-    <main-menu></main-menu>
+    <main-menu :view="view" @@select-view="(v) => view = v"></main-menu>
     
     <main class="col overflow-auto h-100">
     
