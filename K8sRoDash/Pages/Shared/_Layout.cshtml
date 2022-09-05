@@ -39,7 +39,9 @@
     mixins: mixinArray,
     data() {
         return {
-            hello: "Hello from Vue!"
+            view: "cluster",
+            namespace: "",
+            search: "",
         }
     }
     })
@@ -49,6 +51,15 @@
     });
     app.mount('#app');
 </script>
-
+<style>
+  .bd-layout
+  {
+    min-height: calc(100vh - 55px);
+    display:grid;
+    gap:.5rem;
+    grid-template-areas:"sidebar main";
+    grid-template-columns:80px auto
+  }
+</style>
 </body>
 </html>

@@ -1,0 +1,35 @@
+﻿<template id="nav-bar">
+    <header class="navbar titleBar row sticky-top">
+        <nav class="flex-wrap flex-md-nowrap">
+            <a class="text-white title" @@click="$emit('select-view', 'cluster')" >
+                <img src="art/viking-ship.svg" width="65" alt="Skúta"/>
+                <span class="align-middle h1 px-3">Skúta</span>
+            </a>
+        </nav>
+    </header>
+</template>
+
+<script>
+    components["nav-bar"] = {
+        template: "#nav-bar",
+        props: {},
+        computed: {},
+    };
+</script>
+
+<style>
+.title{
+    cursor: pointer;
+}
+
+.titleBar {
+    height: 55px;
+    background-color: #326ce5;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    font-size: 16pt;
+    justify-content: space-between;
+    z-index: 1;
+}
+</style>

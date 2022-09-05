@@ -1,0 +1,65 @@
+﻿<template id="main-menu">
+    <aside class="sidebar">
+        <nav class="menu">
+            <a class="menu_item" @@click="$emit('select-view', 'deployments')">
+                <img v-if="view == 'deployments'" src="art/deploy-blue.svg" width="50" height="50" alt="Deployments"/>
+                <img v-else src="art/deploy-grey.svg" width="50" height="50" alt="Deployments"/>
+                <span class="menu_title">Deployments</span>
+            </a>
+
+            <a class="menu_item" @@click="$emit('select-view', 'pods')">
+                <img v-if="view == 'pods'" src="art/pod-blue.svg" width="50" height="50" alt="Pods"/>
+                <img v-else src="art/pod-grey.svg" width="50" height="50" alt="Pods"/>
+                <span class="menu_title">Pods</span>
+            </a>
+            
+            <a class="menu_item" @@click="$emit('select-view', 'services')">
+                <img v-if="view == 'services'" src="art/svc-blue.svg" width="50" height="50" alt="Services"/>
+                <img v-else src="art/svc-grey.svg" width="50" height="50" alt="Services"/>
+                <span class="menu_title">Service</span>
+            </a>
+
+            <a class="menu_item" @@click="$emit('select-view', 'ingresses')">
+                <img v-if="view == 'ingresses'" src="art/ing-blue.svg" width="50" height="50" alt="Ingress"/>
+                <img v-else src="art/ing-grey.svg" width="50" height="50" alt="Ingress"/>
+                <span class="menu_title">Ingress</span>
+            </a>
+        </nav>
+    </aside>
+</template>
+
+<script>
+    components["main-menu"] = {
+        template: "#main-menu",
+        props: ['view'],
+        computed: {},
+    };
+</script>
+
+<style>
+.menu {
+    min-height: calc(100vh - 55px);
+    background-color: #F0F0F0;
+    padding: 8px;
+}
+.sidebar
+{
+    grid-area:sidebar
+}
+
+.menu_item, .menu_item:visited {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    padding: 12px 0;
+    color: inherit;
+}
+
+.menu_title {
+    font-size: 7pt;
+    margin: 5px 0;
+    text-transform: uppercase;
+}
+
+</style>
