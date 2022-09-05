@@ -1,4 +1,4 @@
-@page "/"
+﻿@page "/"
 @model IndexModel
 @{
     ViewBag.Title = "Skúta";
@@ -9,7 +9,7 @@
     <partial name="Components/_MainMenu"/>
 }
 
-<nav-bar></nav-bar>
+<nav-bar @@select-view="(v) => view = v"></nav-bar>
 
 <div class="bd-layout">
 
