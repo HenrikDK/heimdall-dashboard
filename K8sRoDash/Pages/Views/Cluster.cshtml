@@ -1,16 +1,58 @@
 ﻿<template id="cluster">
-    <h1>Cluster</h1>
+    <div class="content">
+        <div class="header">
+            <span class="content-title">Cluster Overview</span>
+        </div>
+
+        <div class="graphs">
+            <div class="graph">
+                <v-chart :option="nodesAvailable"></v-chart>
+            </div>
+            <div class="graph">
+                <v-chart :option="cpuUsage"></v-chart>
+            </div>
+            <div class="graph">
+                <v-chart :option="memoryUsage"></v-chart>
+            </div>
+            <div class="graph">
+                <v-chart :option="nodesAvailable"></v-chart>
+            </div>
+            <div class="graph">
+                <v-chart :option="cpuUsage"></v-chart>
+            </div>
+            <div class="graph">
+                <v-chart :option="memoryUsage"></v-chart>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
     components["cluster"] = {
         template: "#cluster",
+        data() {
+            return {
+                option: {},
+                namespace: "",
+                search: "",
+            }
+        },
         props: {},
-        computed: {},
+        computed: {
+            memoryUsage: function() {
+               return nodeMemoryUsage(); 
+            },
+            cpuUsage: function (){
+               return nodeCpuUsage();
+            },
+            nodesAvailable: () => {return nodeReady()}            
+        },
     };
     
     routes.push({path:'/', component: components["cluster"]})
 </script>
+
+<script src="~/js/cluster-graphs.js" asp-append-version="true"></script>
 
 <style>
 
