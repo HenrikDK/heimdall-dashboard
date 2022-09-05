@@ -1,29 +1,29 @@
 ﻿<template id="main-menu">
     <aside class="sidebar">
         <nav class="menu">
-            <a class="menu_item" @@click="$emit('select-view', 'deployments')">
+            <router-link to="/deployments" class="menu_item" @@click="$emit('select-view', 'deployments')">
                 <img v-if="view == 'deployments'" src="art/deploy-blue.svg" width="50" height="50" alt="Deployments"/>
                 <img v-else src="art/deploy-grey.svg" width="50" height="50" alt="Deployments"/>
                 <span class="menu_title">Deployments</span>
-            </a>
+            </router-link>
 
-            <a class="menu_item" @@click="$emit('select-view', 'pods')">
+            <router-link to="/pods" class="menu_item" @@click="$emit('select-view', 'pods')">
                 <img v-if="view == 'pods'" src="art/pod-blue.svg" width="50" height="50" alt="Pods"/>
                 <img v-else src="art/pod-grey.svg" width="50" height="50" alt="Pods"/>
                 <span class="menu_title">Pods</span>
-            </a>
+            </router-link>
             
-            <a class="menu_item" @@click="$emit('select-view', 'services')">
+            <router-link to="/services" class="menu_item" @@click="$emit('select-view', 'services')">
                 <img v-if="view == 'services'" src="art/svc-blue.svg" width="50" height="50" alt="Services"/>
                 <img v-else src="art/svc-grey.svg" width="50" height="50" alt="Services"/>
                 <span class="menu_title">Service</span>
-            </a>
+            </router-link>
 
-            <a class="menu_item" @@click="$emit('select-view', 'ingresses')">
+            <router-link to="/ingresses" class="menu_item" @@click="$emit('select-view', 'ingresses')">
                 <img v-if="view == 'ingresses'" src="art/ing-blue.svg" width="50" height="50" alt="Ingress"/>
                 <img v-else src="art/ing-grey.svg" width="50" height="50" alt="Ingress"/>
                 <span class="menu_title">Ingress</span>
-            </a>
+            </router-link>
         </nav>
     </aside>
 </template>

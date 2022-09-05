@@ -1,10 +1,10 @@
 ﻿<template id="nav-bar">
     <header class="navbar titleBar row sticky-top">
         <nav class="flex-wrap flex-md-nowrap">
-            <a class="text-white title" @@click="$emit('select-view', 'cluster')" >
+            <router-link class="text-white title" to="/" @@click="$emit('select-view', 'cluster')" >
                 <img src="art/viking-ship.svg" width="65" alt="Skúta"/>
                 <span class="align-middle h1 px-3">Skúta</span>
-            </a>
+            </router-link>
         </nav>
     </header>
 </template>
