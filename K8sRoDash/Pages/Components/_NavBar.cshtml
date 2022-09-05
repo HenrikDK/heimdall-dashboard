@@ -1,7 +1,7 @@
 ﻿<template id="nav-bar">
     <header class="navbar titleBar row sticky-top">
         <nav class="flex-wrap flex-md-nowrap">
-            <a class="text-white" href="#">
+            <a class="text-white title" @@click="$emit('select-view', 'cluster')" >
                 <img src="art/viking-ship.svg" width="65" alt="Skúta"/>
                 <span class="align-middle h1 px-3">Skúta</span>
             </a>
@@ -18,6 +18,10 @@
 </script>
 
 <style>
+.title{
+    cursor: pointer;
+}
+
 .titleBar {
     height: 55px;
     background-color: #326ce5;
