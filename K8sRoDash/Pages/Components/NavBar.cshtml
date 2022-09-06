@@ -1,19 +1,60 @@
 ﻿<template id="nav-bar">
-    <header class="navbar titleBar row sticky-top">
-        <nav class="flex-wrap flex-md-nowrap">
-            <router-link class="text-white title" to="/" @@click="$emit('select-view', 'cluster')" >
-                <img src="art/viking-ship.svg" width="65" alt="Skúta"/>
-                <span class="align-middle h1 px-3">Skúta</span>
-            </router-link>
+    <header class="titleBar sticky-top">
+        <nav>
+            <div class="d-flex d-flex-row justify-content-between">
+                <div>
+                    <router-link class="text-white title" to="/" @@click="$emit('select-view', 'cluster')">
+                        <div class="d-inline-flex pt-1">
+                            <div>
+                                <img src="art/viking-ship.svg" width="65" alt="Skúta"/>
+                            </div>
+                            <div class="px-3 pt-2">
+                                <span class="h1-only-text text-white">Skúta</span>
+                            </div>
+                        </div>
+                    </router-link>
+                </div>
+                <div class="col-4">
+                    <div class="d-flex pt-1 align-items-center">
+                        <div class="col-5 pt-2 pe-4">
+                            <span class="h2-only-text text-white">Ingresses</span>
+                        </div>
+                        <div class="pt-1">
+                            <select class="header-select">
+                                <option value="">All namespaces</option>
+                                <option value="planning-sit">planning-sit</option>
+                                <option value="planning-uat">planning-uat</option>
+                                <option value="planning-dev">planning-dev</option>
+                            </select>
+                        </div>
+                    </div>   
+                </div>
+                <div class="col-4 d-flex flex-row-reverse">
+                    <div class="d-inline-flex pb-1 align-items-center">
+                        <div class="pt-1 faded-line">
+                            <input class="header-search" placeholder="Type to filter">
+                        </div>
+                        <div class="ps-2">
+                            <img src="art/search.svg" width="25" alt="Search"/>
+                        </div>
+                    </div>   
+                </div>
+            </div>
         </nav>
     </header>
 </template>
 
 <script>
     components["nav-bar"] = {
-        template: "#nav-bar",
-        props: {},
-        computed: {},
+      template: "#nav-bar",
+      data() {
+        return {
+            selected: 'all',
+            namespaces: ['planning-sit', "planning-tst", "planning-uat"]
+        }
+      },
+      props: {},
+      computed: {},
     };
 </script>
 
@@ -25,11 +66,63 @@
 .titleBar {
     height: 55px;
     background-color: #326ce5;
-    display: flex;
-    align-items: center;
-    padding: 0 8px;
+    padding: 0 7px;
     font-size: 16pt;
-    justify-content: space-between;
     z-index: 1;
+}
+.h1-only-text {
+    font-size: 2.5rem;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+}
+
+.h2-only-text {
+    font-size: 2rem;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+}
+.header-select {
+    display: block;
+    width: 230px;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    background-color: #326ce5;
+    color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.15rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.header-search::placeholder{
+    color:#fff;
+    opacity: 1;
+}
+
+.header-search {
+    display: block;
+    width: 300px;
+    padding: 0.275rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: right;
+    background-color: #326ce5;
+    color: #fff;
+    background-clip: padding-box;
+    border-width: 0;
+}
+
+.faded-line{
+    border-bottom: 1px solid transparent;
+    border-image: linear-gradient(to left, #fff, rgba(0,0,0,0));
+    border-image-slice: 1;
+    width:100%;
 }
 </style>
