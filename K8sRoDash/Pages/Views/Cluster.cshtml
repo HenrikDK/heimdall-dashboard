@@ -9,19 +9,19 @@
                 <v-chart :option="nodesAvailable"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="cpuUsage"></v-chart>
+                <v-chart :option="nodeCpuUsage"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="memoryUsage"></v-chart>
+                <v-chart :option="nodeMemoryUsage"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="nodesAvailable"></v-chart>
+                <v-chart :option="podsAvailable"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="cpuUsage"></v-chart>
+                <v-chart :option="podCpuUsage"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="memoryUsage"></v-chart>
+                <v-chart :option="podMemoryUsage"></v-chart>
             </div>
         </div>
     </div>
@@ -39,13 +39,12 @@
         },
         props: {},
         computed: {
-            memoryUsage: function() {
-               return nodeMemoryUsage(); 
-            },
-            cpuUsage: function (){
-               return nodeCpuUsage();
-            },
-            nodesAvailable: () => {return nodeReady()}            
+            nodesAvailable: () => nodeReady(),        
+            nodeCpuUsage: () => nodeCpu(),
+            nodeMemoryUsage: () => nodeMemory(),
+            podsAvailable: () => podReady(),
+            podCpuUsage: () => podCpu(),
+            podMemoryUsage: () => podMemory(),
         },
     };
     
