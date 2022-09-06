@@ -21,7 +21,7 @@
                         </div>
                         <div class="pt-1">
                             <select class="header-select" v-model="selected" @@change="$emit('select-ns', $event.target.value)">
-                                <option value="">All namespaces</option>
+                                <option selected value="">All namespaces</option>
                                 <option v-for="ns in namespaces" :value="ns">{{ ns }}</option>
                             </select>
                         </div>
@@ -30,10 +30,12 @@
                 <div class="col-4 d-flex flex-row-reverse">
                     <div class="d-inline-flex pb-1 align-items-center">
                         <div class="pt-1 faded-line">
-                            <input class="header-search" placeholder="Type to filter" v-model="search" />
+                            <input type="search" class="header-search" placeholder="Type to filter" v-model="search"/>
                         </div>
                         <div class="ps-2">
-                            <img src="art/search.svg" width="25" alt="Search"/>
+                            <a @@click="$emit('search', search)">
+                                <img src="art/search.svg" class="search-button" width="25" alt="Search"/>
+                            </a>
                         </div>
                     </div>   
                 </div>
@@ -129,4 +131,9 @@
     border-image-slice: 1;
     width:100%;
 }
+
+.search-button:hover {
+   transform: scale(1.1);   
+}
+
 </style>
