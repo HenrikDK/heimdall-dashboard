@@ -2,3 +2,38 @@ a, a:visited {
     color: #326ce5;
     text-decoration: none;
 }
+
+.content {
+    padding: 0 20px 0 10px;
+    flex: 1 1;
+    width: calc(100vw - 90px);
+}
+
+.content-title {
+    color: #344055;
+    font-family: sans-serif;
+    font-weight: 300;
+    font-size: 16pt;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 0;
+}
+
+.graphs {
+    margin-top: 5px;
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    text-align: center;
+}
+
+.graph{
+    width: 200px;
+    height: 260px;
+    max-width: 200px;
+    max-height: 260px;
+}
