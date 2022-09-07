@@ -1,4 +1,4 @@
-﻿<template id="nav-bar">
+<template id="nav-bar">
     <header class="titleBar sticky-top">
         <nav>
             <div class="d-flex d-flex-row justify-content-between">
@@ -47,6 +47,7 @@
 <script>
     components["nav-bar"] = {
       template: "#nav-bar",
+      emits: ['search','select-ns','select-view'],
       data() {
         return {
             selected: 'all',
@@ -54,11 +55,25 @@
             namespaces: ['planning-sit', "planning-tst", "planning-uat"]
         }
       },
-      props: ['view'],
       methods: {
-        capitlize: function(value) {
-          return value.charAt(0).toUpperCase() + value.slice(1);
+        searchChange: function($event) {
+            if ($event.charCode === 13) {
+                this.$emit('search', this.search);
+            }
+            
+            if ($event.charCode === 27) {
+                $event.target.value = '';
+                this.search = '';
+                this.$emit('search', this.search);
+            }
         },
+      },
+      watch: {
+        search: function(val) {
+            if (val === '') {
+                this.$emit('search', this.search);
+            }
+        }
       },
       computed: {},
     };
