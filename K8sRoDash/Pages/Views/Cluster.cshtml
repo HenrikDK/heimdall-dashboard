@@ -39,7 +39,15 @@
         <p>
             I'm a bit of a stickler Meeseeks, what about your short game? Principal Vagina here, don't let the name fool you; I'm very much in charge. Reminding you that tonight is our annual flu season dance. I don't know how many times I have to say this, but if you have the flu, stay home. The flu season dance is about awareness, not celebration. You don't bring dead babies to Passover. Earth's going tah tah. You might wanna do that thing where you find a new universe where you can suck yourself off. You know what a vole is, Morty? You know what a vole is?
         </p>
-        
+
+        <template v-if="pirateData.length > 0">
+            <div class="header">
+                <span class="content-title">Pirates Currently in cluster</span>
+            </div>
+        </template>
+
+        <div ref="pirates" v-show="pirateData.length > 0" class="vh-80"></div>
+
         <p>
             I ain't better than shit, Jack! Looks like some sort of legally safe knockoff of an '80s horror character with miniature swords for fingers instead of knives! Wha, me irresponsible ?! All I wanted you to do was to hand me a screwdriver, Morty! You gotta shove these seeds way up your butt Morty, waay up there.
         </p>
@@ -56,8 +64,10 @@
             I love morty and i hope morty loves me. I want to wrap my arms around him and feel him deep inside me. Must… continue… moving… in… ways… that… lead… to… dying… with… you. You're young, you have your whole life ahead of you, and your anal cavity is still taut yet malleable. I know the two of you are very different from each other in a lot of ways, but you have to understand that as far as Grandpa's concerned, you're both pieces of shit! Yeah. I can prove it mathematically. Actually, l-l-let me grab my whiteboard. This has been a long time coming, anyways.            
         </p>
         
-        <div class="events">
-            
+        <div class="header">
+            <span class="content-title">Pirate related events</span>
+        </div>
+        <div ref="events" class="vh-80">
         </div>
     </div>
 </template>
@@ -67,12 +77,13 @@
         template: "#cluster",
         data() {
             return {
-                option: {},
-                namespace: "",
-                search: "",
+                pirates: {},
+                pirateData: [],
+                events: {},
+                eventData: [],
             }
         },
-        props: {},
+        props: ['namespace', 'search'],
         computed: {
             nodesAvailable: () => nodeReady(),        
             nodeCpuUsage: () => nodeCpu(),
@@ -81,6 +92,18 @@
             podCpuUsage: () => podCpu(),
             podMemoryUsage: () => podMemory(),
         },
+        mounted() {
+          this.pirates = new Tabulator(this.$refs.pirates, {
+            data: this.pirateData,
+            reactiveData:true,
+            columns: [],
+          });
+          this.events = new Tabulator(this.$refs.events, {
+            data: this.eventData,
+            reactiveData:true,
+            columns: [],
+          });
+        }
     };
     
     routes.push({path:'/', component: components["cluster"]})
