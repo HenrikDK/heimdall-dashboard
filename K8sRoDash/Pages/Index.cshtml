@@ -15,7 +15,7 @@
     <partial name="Views/Ingresses"/>
 }
 
-<nav-bar :view="view" @@select-view="(v) => view = v" @@select-ns="(n) => namespace = n" @@search="(s) => search = s"></nav-bar>
+<nav-bar @@select-view="(v) => view = v" @@select-ns="(n) => namespace = n" @@search="(s) => search = s"></nav-bar>
 
 <div class="bd-layout">
 
