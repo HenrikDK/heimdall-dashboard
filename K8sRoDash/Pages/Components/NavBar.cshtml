@@ -1,19 +1,78 @@
 ﻿<template id="nav-bar">
-    <header class="navbar titleBar row sticky-top">
-        <nav class="flex-wrap flex-md-nowrap">
-            <router-link class="text-white title" to="/" @@click="$emit('select-view', 'cluster')" >
-                <img src="art/viking-ship.svg" width="65" alt="Skúta"/>
-                <span class="align-middle h1 px-3">Skúta</span>
-            </router-link>
+    <header class="titleBar sticky-top">
+        <nav>
+            <div class="d-flex d-flex-row justify-content-between">
+                <div class="col-4">
+                    <router-link class="text-white title" to="/" @@click="$emit('select-view', 'cluster')">
+                        <div class="d-inline-flex pt-1">
+                            <div>
+                                <img src="art/viking-ship.svg" width="65" alt="Skúta"/>
+                            </div>
+                            <div class="px-3 pt-2">
+                                <span class="h1-only-text text-white">Skúta</span>
+                            </div>
+                        </div>
+                    </router-link>
+                </div>
+                <div class="col-4">
+                    <div class="d-flex justify-content-center pt-1">
+                        <div class="pt-2">
+                            <select required class="header-select" v-model="selected" @@change="$emit('select-ns', $event.target.value)">
+                                <option selected value="">All namespaces</option>
+                                <option v-for="ns in namespaces" :value="ns">{{ ns }}</option>
+                            </select>
+                        </div>
+                    </div>   
+                </div>
+                <div class="col-4 d-flex flex-row-reverse">
+                    <div class="d-inline-flex pb-1 align-items-center">
+                        <div class="pt-1 faded-line">
+                            <input type="search" class="header-search" placeholder="Filter results" v-model="search" @@keypress="searchChange($event)"/>
+                        </div>
+                        <div class="ps-2">
+                            <a @@click="$emit('search', search)">
+                                <img src="art/search.svg" class="search-button" width="25" alt="Search"/>
+                            </a>
+                        </div>
+                    </div>   
+                </div>
+            </div>
         </nav>
     </header>
 </template>
 
 <script>
     components["nav-bar"] = {
-        template: "#nav-bar",
-        props: {},
-        computed: {},
+      template: "#nav-bar",
+      emits: ['search','select-ns','select-view'],
+      data() {
+        return {
+            selected: 'all',
+            search: '',
+            namespaces: ['planning-sit', "planning-tst", "planning-uat"]
+        }
+      },
+      methods: {
+        searchChange: function($event) {
+            if ($event.charCode === 13) {
+                this.$emit('search', this.search);
+            }
+            
+            if ($event.charCode === 27) {
+                $event.target.value = '';
+                this.search = '';
+                this.$emit('search', this.search);
+            }
+        },
+      },
+      watch: {
+        search: function(val) {
+            if (val === '') {
+                this.$emit('search', this.search);
+            }
+        }
+      },
+      computed: {},
     };
 </script>
 
@@ -25,11 +84,82 @@
 .titleBar {
     height: 55px;
     background-color: #326ce5;
-    display: flex;
-    align-items: center;
-    padding: 0 8px;
+    padding: 0 7px;
     font-size: 16pt;
-    justify-content: space-between;
     z-index: 1;
+}
+
+.h1-only-text {
+    font-size: 2.5rem;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+}
+
+.header-select {
+    display: block;
+    width: 230px;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    background-color: #326ce5;
+    color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.15rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.header-search:required:invalid {
+  color: #fff;
+}
+
+.header-search::placeholder{
+    color:#fff;
+    opacity: 1;
+}
+
+.header-search {
+    display: block;
+    width: 300px;
+    padding: 0.3442rem 0.5rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: right;
+    background-color: #326ce5;
+    color: #fff;
+    background-clip: padding-box;
+    border-width: 0;
+}
+
+.faded-line{
+    border-bottom: 1px solid transparent;
+    border-image: linear-gradient(to left, #fff, rgba(0,0,0,0));
+    border-image-slice: 1;
+    width:100%;
+}
+
+.search-button:hover {
+   transform: scale(1.1);   
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  height: 1em;
+  width: 1em;
+  margin-left: .4em;
+  border-radius: 50em;
+  background: url(art/times-circle.svg) no-repeat 50% 50%;
+  background-size: contain;
+  opacity: 0;
+  pointer-events: none;
+}
+
+input[type="search"]:focus::-webkit-search-cancel-button {
+  opacity: .3;
+  pointer-events: all;
 }
 </style>
