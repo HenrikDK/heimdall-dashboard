@@ -85,7 +85,12 @@
                     {id: 4, name: "Brendon Philips", location: "USA", gender: "male", rating: 1, color: "orange", dateOfBirth: "2001-02-21"},
                 ],
                 events: {},
-                eventData: [],
+                eventData: [
+                    {id: 1, name: "Oli Bob", progress: 20, location: "United Kingdom", gender: "male", rating: 1, color: "red", dateOfBirth: "1990-01-01", driver: true},
+                    {id: 2, name: "Mary May", location: "Germany",  gender: "female", rating: 2, color: "blue", dateOfBirth: "1986-11-05"},
+                    {id: 3, name: "Christine Lobowski", location: "France", gender: "female", rating: 0, color: "green", dateOfBirth: "1974-08-10", isDelete: true},
+                    {id: 4, name: "Brendon Philips", location: "USA", gender: "male", rating: 1, color: "orange", dateOfBirth: "2001-02-21"},                    
+                ],
             }
         },
         props: ['namespace', 'search'],
@@ -99,7 +104,7 @@
         },
         mounted() {
           this.pirates = new Tabulator(this.$refs.pirates, {
-            height:"80vh",
+            maxHeight:"80vh",
             layout:"fitData",
             persistence:true,
             persistenceMode:true,
@@ -116,9 +121,21 @@
             ],
           });
           this.events = new Tabulator(this.$refs.events, {
+            height:"80vh",
+            layout:"fitData",
+            persistence:true,
+            persistenceMode:true,
             data: this.eventData,
             reactiveData:true,
-            columns: [],
+            columns: [
+                {title:"Name", field:"name", sorter:"string", width:200},
+                {title:"Progress", field:"progress", hozAlign:"left", formatter:"progress"},
+                {title:"Gender", field:"gender", sorter:"string"},
+                {title:"Rating", field:"rating", formatter:"star", hozAlign:"center", width:100},
+                {title:"Favourite Color", field:"color", sorter:"string"},
+                {title:"Date Of Birth", field:"dateOfBirth", sorter:"date", hozAlign:"center"},
+                {title:"Driver", field:"driver", hozAlign:"center", formatter:"tickCross", sorter:"boolean"},   
+            ],
           });
         }
     };
