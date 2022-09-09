@@ -5,19 +5,19 @@
   display: block;
   font-family: "Inter", system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   width: 230px;
-  padding: 2px 30px 2px 32px;
+  padding: 0 30px 0 32px;
   font-size: 16px;
   font-weight: normal;
   height: 34px;
-  color: #333;
-  background-color: #f6f9fc;
-  border: 1px solid #f6f9fc;
+  color: #ffffff;
+  background-color: #326ce5; /*#f6f9fc;*/
+  border: 1px solid rgba(255,255,255,0.4);
   border-radius: 0.35rem;
   transition: border-color 0.15s ease-in-out;
 }
 .search-input-wrapper input[data-search-input=true]:focus {
-  background-color: white;
-  border-color: #1ea7fd;
+  background-color: #326ce5; /* white; */
+  border-color: #ffffff; /* #1ea7fd; */ 
   outline: 0;
   box-shadow: none;
 }
@@ -55,8 +55,8 @@
   height: 24px;
   cursor: text;
   right: 8px;
-  bottom: 7px;
-  background-color: #e7eff7;
+  bottom: 5px;
+  background-color: rgba(255,255,255,0.1);
   border-radius: 3px;
   z-index: 50;
 }
@@ -76,7 +76,7 @@
 }
 .search-input-wrapper .search-icon.clear {
   right: 5px;
-  bottom: 7px;
+  bottom: 5px;
   cursor: pointer;
   z-index: 10;
   box-sizing: border-box;
@@ -90,7 +90,7 @@
   outline: none;
 }
 .search-input-wrapper .search-icon.clear:focus {
-  background: #e7eff7;
+  background: rgba(255,255,255,0.1);
 }
 .search-input-wrapper .search-icon.clear::after, .search-input-wrapper .search-icon.clear::before {
   content: "";
