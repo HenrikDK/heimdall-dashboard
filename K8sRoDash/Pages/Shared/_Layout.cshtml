@@ -9,15 +9,20 @@
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tabulator-tables@5.3.4/dist/css/tabulator_semanticui.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vue-select@4.0.0-beta.5/dist/vue-select.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vue-search-input@1.1.10/dist/styles.css">
     
-    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.37"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue-router@4.1.5"></script>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.3.3"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue-echarts@6.1.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.3"></script>
     <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@5.3.4"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.3.3"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.37"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-router@4.1.5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-echarts@6.1.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-select@4.0.0-beta.5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-search-input@1.1.10"></script>
+
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <script src="~/js/site.js" asp-append-version="true"></script>
 </head>
@@ -31,7 +36,7 @@
 
 @RenderSection("Scripts", required: false)
 
-<script>
+<script type="module">
     const router = VueRouter.createRouter({
       history: VueRouter.createWebHashHistory(),
       routes
@@ -48,7 +53,9 @@
         }
     }
     })
-    .component('v-chart', VueECharts);
+    .component('v-chart', VueECharts)
+    .component('v-select', window['vue-select'])
+    .component('v-search', VueSearchInput);
     Object.entries(components).forEach(([k,v]) =>{
         app.component(k, v)
     });
