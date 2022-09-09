@@ -20,7 +20,7 @@
                             <v-select v-model="selected" :clearable="false" :options="namespaces" class="header-select" @@update:model-value="$emit('select-ns', $event.value)"></v-select>
                         </div>
                         <div class="me-3">
-                            <v-search v-model="search" class="header-search" @@update:model-value="$emit('search', $event.value);"></v-search>
+                            <v-search v-model="search" @@update:model-value="$emit('search', $event);"></v-search>
                         </div>
                     </div>   
                 </div>
@@ -44,20 +44,6 @@
                 { label: 'planning-uat', value: 'planning-uat' },
             ],
             search: '',
-            searchOptions:{
-              "type": "search",
-              "modelValue": "",
-              "wrapperClass": "search-input-wrapper",
-              "searchIcon": true,
-              "shortcutIcon": true,
-              "clearIcon": true,
-              "hideShortcutIconOnBlur": true,
-              "clearOnEsc": true,
-              "blurOnEsc": true,
-              "selectOnFocus": true,
-              "shortcutListenerEnabled": true,
-              "shortcutKey": "/"
-            }
         }
       },
       methods: {},
@@ -92,6 +78,7 @@
 
 .header-select {
     width: 230px;
+    height: 34px;
     font-size: 1rem;
     --vs-controls-color: rgba(255, 255, 255, 0.4);
     --vs-border-color: rgba(255, 255, 255, 0.4);
@@ -108,17 +95,12 @@
     --vs-search-input-placeholder-color: #ffffff;
 
     /* Active State */
-    --vs-dropdown-option--active-bg: #5897fb;
+    --vs-dropdown-option--active-bg: #1d5ce1;
     --vs-dropdown-option--active-color: #ffffff;
 }
 
-.header-search {
-    width: 300px;
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.5;
-    --vs-selected-bg: #326ce5;
-    --vs-selected-color: #ffffff;
-    --vs-selected-border-color: #ffffff;
+.header-select:focus{
+    --vs-border-color: #ffffff;
 }
+
 </style>
