@@ -1,29 +1,37 @@
 ﻿<template id="main-menu">
     <aside class="sidebar">
         <nav class="menu">
-            <router-link to="/deployments" class="menu_item" @@click="$emit('select-view', 'deployments')">
-                <img v-if="view == 'deployments'" src="art/deploy-blue.svg" width="50" height="50" alt="Deployments"/>
-                <img v-else src="art/deploy-grey.svg" width="50" height="50" alt="Deployments"/>
-                <span class="menu_title">Deployments</span>
-            </router-link>
+            <div class="menu-button">
+                <router-link to="/deployments" class="menu-item" @@click="$emit('select-view', 'deployments')">
+                    <img v-if="view == 'deployments'" src="art/deploy-blue.svg" class="menu-image" alt="Deployments"/>
+                    <img v-else src="art/deploy-grey.svg" class="menu-image" alt="Deployments"/>
+                    <span class="menu-title">Deployments</span>
+                </router-link>
+            </div>
 
-            <router-link to="/pods" class="menu_item" @@click="$emit('select-view', 'pods')">
-                <img v-if="view == 'pods'" src="art/pod-blue.svg" width="50" height="50" alt="Pods"/>
-                <img v-else src="art/pod-grey.svg" width="50" height="50" alt="Pods"/>
-                <span class="menu_title">Pods</span>
-            </router-link>
-            
-            <router-link to="/services" class="menu_item" @@click="$emit('select-view', 'services')">
-                <img v-if="view == 'services'" src="art/svc-blue.svg" width="50" height="50" alt="Services"/>
-                <img v-else src="art/svc-grey.svg" width="50" height="50" alt="Services"/>
-                <span class="menu_title">Service</span>
-            </router-link>
+            <div class="menu-button">
+                <router-link to="/pods" class="menu-item" @@click="$emit('select-view', 'pods')">
+                    <img v-if="view == 'pods'" src="art/pod-blue.svg" class="menu-image" alt="Pods"/>
+                    <img v-else src="art/pod-grey.svg" class="menu-image" alt="Pods"/>
+                    <span class="menu-title">Pods</span>
+                </router-link>
+            </div>
 
-            <router-link to="/ingresses" class="menu_item" @@click="$emit('select-view', 'ingresses')">
-                <img v-if="view == 'ingresses'" src="art/ing-blue.svg" width="50" height="50" alt="Ingress"/>
-                <img v-else src="art/ing-grey.svg" width="50" height="50" alt="Ingress"/>
-                <span class="menu_title">Ingress</span>
-            </router-link>
+            <div class="menu-button">
+                <router-link to="/services" class="menu-item" @@click="$emit('select-view', 'services')">
+                    <img v-if="view == 'services'" src="art/svc-blue.svg" class="menu-image" alt="Services"/>
+                    <img v-else src="art/svc-grey.svg" class="menu-image" alt="Services"/>
+                    <span class="menu-title">Service</span>
+                </router-link>
+            </div>
+
+            <div class="menu-button">
+                <router-link to="/ingresses" class="menu-item" @@click="$emit('select-view', 'ingresses')">
+                    <img v-if="view == 'ingresses'" src="art/ing-blue.svg" class="menu-image" alt="Ingress"/>
+                    <img v-else src="art/ing-grey.svg" class="menu-image" alt="Ingress"/>
+                    <span class="menu-title">Ingress</span>
+                </router-link>
+            </div>
         </nav>
     </aside>
 </template>
@@ -45,12 +53,28 @@
     padding: 8px;
 }
 
+.menu-button{
+    min-width: 50px;
+    min-height: 50px;
+    justify-content: center!important;
+    vertical-align: center;!important;
+}
+
+.menu-image{
+    width: 40px;
+    height: 40px;
+}
+
+.menu-image:hover {
+   transform: scale(1.1);   
+}
+
 .sidebar
 {
     grid-area:sidebar
 }
 
-.menu_item, .menu_item:visited {
+.menu-item, .menu-item:visited {
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -59,10 +83,9 @@
     color: inherit;
 }
 
-.menu_title {
+.menu-title {
     font-size: 7pt;
     margin: 5px 0;
     text-transform: uppercase;
 }
-
 </style>
