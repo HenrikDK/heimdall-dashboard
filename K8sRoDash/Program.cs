@@ -40,7 +40,7 @@ builder.Services.AddRazorPages(options =>
 
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment() || Debugger.IsAttached)
 {
     app.UseExceptionHandler("/Error");
     app.UseHsts();
@@ -61,8 +61,8 @@ app.UseProxies(proxies =>
         }, builder => builder.WithHttpClientName("K8sClient"))
         .UseWs((context, args) =>
         {
-            context.Request.Headers.Add("sec-websocket-protocol", "base64url.bearer.authorization.k8s.io."
-                                                                  + K8sClient.AccessToken + ", base64.binary.k8s.io");
+            context.Request.Headers.Add("sec-websocket-protocol", 
+                "base64url.bearer.authorization.k8s.io." + K8sClient.AccessToken + ", base64.binary.k8s.io");
             var qs = context.Request.QueryString.Value;
             var url = context.Request.Path.ToString().Replace("/k8s/", "/");
             var server = K8sClient.Server.Replace("https://", "wss:");
