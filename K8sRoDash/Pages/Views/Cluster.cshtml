@@ -1,5 +1,5 @@
 ﻿<template id="cluster">
-    <div class="pl-3 pr-4 w-fit">
+    <div class="pl-3 pr-4 w-100">
         <div class="flex my-2 items-center">
             <span class="text-slate-500 text-2xl font-light sans">Cluster Overview</span>
         </div>
@@ -33,7 +33,7 @@
             </div>
         </template>
 
-        <div ref="events" v-show="eventData.length > 0" class="vh-80"></div>
+        <div ref="events" v-show="eventData.length > 0" class="vh-80 w-full"></div>
     </div>
 </template>
 
@@ -70,9 +70,9 @@
             reactiveData:true,
             columns: [
                 {title:"Name", field:"name", sorter:"string", width:200},
-                {title:"Progress", field:"progress", hozAlign:"left", formatter:"progress"},
+                {title:"Progress", field:"progress", hozAlign:"left", formatter:"number"},
                 {title:"Gender", field:"gender", sorter:"string"},
-                {title:"Rating", field:"rating", formatter:"star", hozAlign:"center", width:100},
+                {title:"Rating", field:"rating", formatter:"number", width:100},
                 {title:"Favourite Color", field:"color", sorter:"string"},
                 {title:"Date Of Birth", field:"dateOfBirth", sorter:"date", hozAlign:"center"},
                 {title:"Driver", field:"driver", hozAlign:"center", formatter:"tickCross", sorter:"boolean"},   
