@@ -1,10 +1,10 @@
 ﻿<template id="cluster">
-    <div class="content">
-        <div class="header">
-            <span class="content-title">Cluster Overview</span>
+    <div class="pl-3 pr-4 w-fit">
+        <div class="flex my-2 items-center">
+            <span class="text-slate-500 text-2xl font-light sans">Cluster Overview</span>
         </div>
 
-        <div class="graphs">
+        <div class="flex justify-between mb-4 mt-1">
             <div class="graph">
                 <v-chart :option="nodesAvailable"></v-chart>
             </div>
@@ -27,48 +27,13 @@
         
         <hr/>
         
-        <p>
-            I'd like to order one large phone with extra phones please. cell phone, no no no rotary... and payphone on half. Congratulations on making it into print media. Real bright future there. What, you think I'd waste our home teaching you a fucking lesson? I am gonna miss this place, though: Johnny Carson's still alive and on the air, 9/11 never happened, and Rocky Road ice cream has peanut butter and jelly instead of marshmallows. I am not putting my father in a home! He just came back into my life, and you want to, grab him and, stuff him under a mattress like last month's Victoria's Secret?!
-        </p>
-        <p>
-            Listen, Morty, I hate to break it to you but what people call love is just a chemical reaction that compels animals to breed. Life is effort and I'll stop when I die! Yea. If you spend all day shuffling words around you can make anything sound bad, Morty. It’s a new machine. It detects stuff all the way up your butt.
-        </p>            
-        <p>
-            I'd like to order one large sofa chair with extra chair please. high chair, no no no recliner... and wheelchair on half. I'm man enough to simply say, 'I'm going to poop', and I'd be honored to have Ron Howard involved. We all wanna die, we're meeseeks! That just sounds like slavery with extra steps.
-        </p>
-        <p>
-            I'm a bit of a stickler Meeseeks, what about your short game? Principal Vagina here, don't let the name fool you; I'm very much in charge. Reminding you that tonight is our annual flu season dance. I don't know how many times I have to say this, but if you have the flu, stay home. The flu season dance is about awareness, not celebration. You don't bring dead babies to Passover. Earth's going tah tah. You might wanna do that thing where you find a new universe where you can suck yourself off. You know what a vole is, Morty? You know what a vole is?
-        </p>
-
-        <template v-if="pirateData.length > 0">
-            <div class="header">
-                <span class="content-title">Pirates Currently in cluster</span>
+        <template v-if="eventData.length > 0">
+            <div class="flex my-2 items-center">
+                <span class="text-slate-500 content-title">Events</span>
             </div>
         </template>
 
-        <div ref="pirates" v-show="pirateData.length > 0" class="vh-80"></div>
-
-        <p>
-            I ain't better than shit, Jack! Looks like some sort of legally safe knockoff of an '80s horror character with miniature swords for fingers instead of knives! Wha, me irresponsible ?! All I wanted you to do was to hand me a screwdriver, Morty! You gotta shove these seeds way up your butt Morty, waay up there.
-        </p>
-        
-        <p>
-            What are you looking at, mother fucker! Nobody's killing me until after I catch my wife with another man. I'm sorry, Morty, it's a bummer. In reality, you're as dumb as they come. And I needed those seeds real bad, and I had to give them up just to get your parents off my back. So now we're gonna have to go get more. And then we're gonna go on even more adventures after that, Morty. And you're gonna keep your mouth shut about it, Morty. Because the world is full of idiots that don't understand what's important. And they'll tear us apart, Morty. But if you stick with me, I'm gonna accomplish great things, Morty. And you're gonna be part of them. And together, we're gonna run around, Morty. We're gonna- do all kinds of wonderful things, Morty. Just you and me, Morty. The outside world is our enemy, Morty. We're the only friends we've got, Morty. It's just Rick and Morty. Rick and Morty and their adventures, Morty. Rick and Morty forever and forever. 100 years, Rick and Morty's things. Me and Rick and Morty running around, and Rick and Morty time. All day long forever. All a hundred days. Rick and Morty forever a hundred times. Over and over, rickandmortyadventures.com. www.rickandmorty.com. www.rickandmortyadventures. All 100 years every minute, rickandmorty.com. www.100timesrickandmorty.com. Well look where being smart got you.
-        </p>
-        
-        <p>
-            I've replaced them both as the de facto patriarch of your family and your universe. Your mom wouldn't have accepted me if I came home without you and your sister, so now you know the real reason I rescued you. I just took over the family, Morty! And if you tell your mom or sister I said any of this, I'll deny it, and they'll take my side because I'm a hero, Morty! And now you're gonna have to go and do whatever I say, Morty! Forever! An-and I-I-I'll go out and I'll find some more of that Mulan szechuan teriyaki dipping sauce, Morty! Th-b-because that's what this is all about Morty! Th-that's my one-armed man! I'm not driven by avenging my dead family, Morty, that was fake! I-I-I'm driven by finding that mcnuggut sauce! I want that Mulan mcnuggut sauce, Morty! That's my series arc, Morty! If it takes nine seasons, I want my mcnuggut dipping sauce szechuan sauce, Morty! That's what's gon-it's gonna take us all the way to the end, Morty! Season nine more seasons, Morty! Nine more seasons until I get that dipping szechuan sauce! For ninety-seven more years, Morty! I want that mcnuggut sauce Morty! This is because you give Morty Smith bad grades, bitch! I'd like to order one large phone with extra phones please. cell phone, no no no rotary... and payphone on half. Countries known for their sexually aggressive men.
-        </p>
-        
-        <p>
-            I love morty and i hope morty loves me. I want to wrap my arms around him and feel him deep inside me. Must… continue… moving… in… ways… that… lead… to… dying… with… you. You're young, you have your whole life ahead of you, and your anal cavity is still taut yet malleable. I know the two of you are very different from each other in a lot of ways, but you have to understand that as far as Grandpa's concerned, you're both pieces of shit! Yeah. I can prove it mathematically. Actually, l-l-let me grab my whiteboard. This has been a long time coming, anyways.            
-        </p>
-        
-        <div class="header">
-            <span class="content-title">Pirate related events</span>
-        </div>
-        <div ref="events" class="vh-80">
-        </div>
+        <div ref="events" v-show="eventData.length > 0" class="vh-80"></div>
     </div>
 </template>
 
@@ -77,13 +42,6 @@
         template: "#cluster",
         data() {
             return {
-                pirates: {},
-                pirateData: [
-                    {id: 1, name: "Oli Bob", progress: 20, location: "United Kingdom", gender: "male", rating: 1, color: "red", dateOfBirth: "1990-01-01", driver: true},
-                    {id: 2, name: "Mary May", location: "Germany",  gender: "female", rating: 2, color: "blue", dateOfBirth: "1986-11-05"},
-                    {id: 3, name: "Christine Lobowski", location: "France", gender: "female", rating: 0, color: "green", dateOfBirth: "1974-08-10", isDelete: true},
-                    {id: 4, name: "Brendon Philips", location: "USA", gender: "male", rating: 1, color: "orange", dateOfBirth: "2001-02-21"},
-                ],
                 events: {},
                 eventData: [
                     {id: 1, name: "Oli Bob", progress: 20, location: "United Kingdom", gender: "male", rating: 1, color: "red", dateOfBirth: "1990-01-01", driver: true},
@@ -103,23 +61,6 @@
             podMemoryUsage: () => podMemory(),
         },
         mounted() {
-          this.pirates = new Tabulator(this.$refs.pirates, {
-            maxHeight:"80vh",
-            layout:"fitData",
-            persistence:true,
-            persistenceMode:true,
-            data: this.pirateData,
-            reactiveData:true,
-            columns: [
-                {title:"Name", field:"name", sorter:"string", width:200},
-                {title:"Progress", field:"progress", hozAlign:"left", formatter:"progress"},
-                {title:"Gender", field:"gender", sorter:"string"},
-                {title:"Rating", field:"rating", formatter:"star", hozAlign:"center", width:100},
-                {title:"Favourite Color", field:"color", sorter:"string"},
-                {title:"Date Of Birth", field:"dateOfBirth", sorter:"date", hozAlign:"center"},
-                {title:"Driver", field:"driver", hozAlign:"center", formatter:"tickCross", sorter:"boolean"},                
-            ],
-          });
           this.events = new Tabulator(this.$refs.events, {
             height:"80vh",
             layout:"fitData",
@@ -145,6 +86,6 @@
 
 <script src="~/js/cluster-graphs.js" asp-append-version="true"></script>
 
-<style>
+<style type="text/tailwindcss">
 
 </style>
