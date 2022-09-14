@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @model IndexModel
 @{
     Layout = "_Layout";
@@ -15,7 +15,7 @@
     <partial name="Views/Ingresses"/>
 }
 
-<nav-bar @@select-view="(v) => view = v" @@select-ns="(n) => namespace = n" @@search="(s) => search = s"></nav-bar>
+<nav-bar :view="view" @@select-view="(v) => view = v" @@select-ns="(n) => namespace = n" @@search="(s) => search = s"></nav-bar>
 
 <div class="bd-layout">
 
