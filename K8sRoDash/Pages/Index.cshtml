@@ -15,6 +15,11 @@
     <partial name="Views/Ingresses"/>
 }
 
+@section Scripts
+{
+    <script src="~/js/cluster-graphs.js" asp-append-version="true"></script>
+}
+
 <nav-bar :view="view" @@select-view="(v) => view = v" @@select-ns="(n) => namespace = n" @@search="(s) => search = s"></nav-bar>
 
 <div class="grid grid-cols-[85px_1fr] gap-2 h-screen">
