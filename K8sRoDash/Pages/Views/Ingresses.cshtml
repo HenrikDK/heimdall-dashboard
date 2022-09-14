@@ -3,14 +3,45 @@
         <div class="flex my-2 items-center">
             <span class="text-slate-500 text-2xl font-light sans">Ingresses</span>
         </div>
+
+        <div ref="ingresses" v-show="ingressData.length > 0" class="vh-80 w-full"></div>
     </div>
 </template>
 
 <script>
     components["ingresses"] = {
         template: "#ingresses",
-        props: {},
-        computed: {},
+        data() {
+            return {
+                ingresses: {},
+                ingressData: [
+                    {id: 1, name: "Oli Bob", progress: 20, location: "United Kingdom", gender: "male", rating: 1, color: "red", dateOfBirth: "1990-01-01", driver: true},
+                    {id: 2, name: "Mary May", location: "Germany",  gender: "female", rating: 2, color: "blue", dateOfBirth: "1986-11-05"},
+                    {id: 3, name: "Christine Lobowski", location: "France", gender: "female", rating: 0, color: "green", dateOfBirth: "1974-08-10", isDelete: true},
+                    {id: 4, name: "Brendon Philips", location: "USA", gender: "male", rating: 1, color: "orange", dateOfBirth: "2001-02-21"},                    
+                ],
+            }
+        },
+        props: ['namespace', 'search'],        
+        mounted() {
+              this.events = new Tabulator(this.$refs.ingresses, {
+                height:"80vh",
+                layout:"fitData",
+                persistence:true,
+                persistenceMode:true,
+                data: this.ingressData,
+                reactiveData:true,
+                columns: [
+                    {title:"Name", field:"name", sorter:"string", width:200},
+                    {title:"Progress", field:"progress", hozAlign:"left", formatter:"number"},
+                    {title:"Gender", field:"gender", sorter:"string"},
+                    {title:"Rating", field:"rating", formatter:"number", width:100},
+                    {title:"Favourite Color", field:"color", sorter:"string"},
+                    {title:"Date Of Birth", field:"dateOfBirth", sorter:"date", hozAlign:"center"},
+                    {title:"Driver", field:"driver", hozAlign:"center", formatter:"tickCross", sorter:"boolean"},   
+                ],
+              });
+        },
     };
 
     routes.push({path:'/ingresses', component: components["ingresses"]})    
