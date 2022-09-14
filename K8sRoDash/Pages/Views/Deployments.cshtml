@@ -1,19 +1,19 @@
-<template id="deployments">
+﻿<template id="workloads">
     <div class="pl-2 pr-4 w-100">
         <div class="flex my-2 items-center">
-            <span class="text-slate-500 text-2xl font-light sans">Deployments</span>
+            <span class="text-slate-500 text-2xl font-light sans">Workloads</span>
         </div>
     </div>
 </template>
 
 <script>
-    components["deployments"] = {
-        template: "#deployments",
+    components["workloads"] = {
+        template: "#workloads",
         props: {},
         computed: {},
     };
 
-    routes.push({path:'/deployments', component: components["deployments"]})
+    routes.push({path:'/workloads', component: components["workloads"]})
 </script>
 
 <style>
