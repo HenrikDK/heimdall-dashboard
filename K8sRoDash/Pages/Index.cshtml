@@ -1,4 +1,4 @@
-@page "/"
+﻿@page "/"
 @model IndexModel
 @{
     Layout = "_Layout";
@@ -17,11 +17,10 @@
 
 <nav-bar :view="view" @@select-view="(v) => view = v" @@select-ns="(n) => namespace = n" @@search="(s) => search = s"></nav-bar>
 
-<div class="bd-layout">
-
+<div class="grid grid-cols-[85px_1fr] gap-2 h-screen">
     <main-menu :view="view" @@select-view="(v) => view = v"></main-menu>
     
-    <main class="col overflow-auto h-100">
+    <main class="overflow-auto">
         <router-view></router-view>
     </main>
 </div>
