@@ -1,39 +1,39 @@
 ﻿<template id="main-menu">
-    <aside class="sidebar">
-        <nav class="menu">
-            <div class="menu-button">
-                <router-link to="/deployments" class="menu-item" @@click="$emit('select-view', 'deployments')">
-                    <img v-if="view == 'deployments'" src="art/deploy-blue.svg" class="menu-image" alt="Deployments"/>
-                    <img v-else src="art/deploy-grey.svg" class="menu-image" alt="Deployments"/>
-                    <span class="menu-title">Deployments</span>
+    <div class="bg-neutral-200">
+        <nav class="fixed">
+            <div class="min-w-12 min-h-12">
+                <router-link to="/workloads" class="flex flex-col items-center pointer py-3 !text-black" @@click="$emit('select-view', 'workloads')">
+                    <img v-if="view == 'workloads'" src="art/deploy-blue.svg" class="w-10 h-10 hover:scale-125" alt="Deployments"/>
+                    <img v-else src="art/deploy-grey.svg" class="w-10 h-10 hover:scale-125" alt="Deployments"/>
+                    <span class="text-xs m-1 uppercase">Workloads</span>
                 </router-link>
             </div>
 
-            <div class="menu-button">
-                <router-link to="/pods" class="menu-item" @@click="$emit('select-view', 'pods')">
-                    <img v-if="view == 'pods'" src="art/pod-blue.svg" class="menu-image" alt="Pods"/>
-                    <img v-else src="art/pod-grey.svg" class="menu-image" alt="Pods"/>
-                    <span class="menu-title">Pods</span>
+            <div class="min-w-12 min-h-12">
+                <router-link to="/pods" class="flex flex-col items-center pointer py-3 !text-black" @@click="$emit('select-view', 'pods')">
+                    <img v-if="view == 'pods'" src="art/pod-blue.svg" class="w-10 h-10 hover:scale-125" alt="Pods"/>
+                    <img v-else src="art/pod-grey.svg" class="w-10 h-10 hover:scale-125" alt="Pods"/>
+                    <span class="text-xs m-1 uppercase">Pods</span>
                 </router-link>
             </div>
 
-            <div class="menu-button">
-                <router-link to="/services" class="menu-item" @@click="$emit('select-view', 'services')">
-                    <img v-if="view == 'services'" src="art/svc-blue.svg" class="menu-image" alt="Services"/>
-                    <img v-else src="art/svc-grey.svg" class="menu-image" alt="Services"/>
-                    <span class="menu-title">Service</span>
+            <div class="min-w-12 min-h-12">
+                <router-link to="/services" class="flex flex-col items-center pointer py-3 !text-black" @@click="$emit('select-view', 'services')">
+                    <img v-if="view == 'services'" src="art/svc-blue.svg" class="w-10 h-10 hover:scale-125" alt="Services"/>
+                    <img v-else src="art/svc-grey.svg" class="w-10 h-10 hover:scale-125" alt="Services"/>
+                    <span class="text-xs m-1 uppercase">Service</span>
                 </router-link>
             </div>
 
-            <div class="menu-button">
-                <router-link to="/ingresses" class="menu-item" @@click="$emit('select-view', 'ingresses')">
-                    <img v-if="view == 'ingresses'" src="art/ing-blue.svg" class="menu-image" alt="Ingress"/>
-                    <img v-else src="art/ing-grey.svg" class="menu-image" alt="Ingress"/>
-                    <span class="menu-title">Ingress</span>
+            <div class="min-w-12 min-h-12">
+                <router-link to="/ingresses" class="flex flex-col items-center pointer py-3 !text-black" @@click="$emit('select-view', 'ingresses')">
+                    <img v-if="view == 'ingresses'" src="art/ing-blue.svg" class="w-10 h-10 hover:scale-125" alt="Ingress"/>
+                    <img v-else src="art/ing-grey.svg" class="w-10 h-10 hover:scale-125" alt="Ingress"/>
+                    <span class="text-xs m-1 uppercase">Ingress</span>
                 </router-link>
             </div>
         </nav>
-    </aside>
+    </div>
 </template>
 
 <script>
@@ -45,47 +45,4 @@
 </script>
 
 <style>
-.menu {
-    position: fixed;
-    display:block !important;
-    min-height: calc(100vh - 55px);
-    background-color: #F0F0F0;
-    padding: 8px;
-}
-
-.menu-button{
-    min-width: 50px;
-    min-height: 50px;
-    justify-content: center!important;
-    vertical-align: center;!important;
-}
-
-.menu-image{
-    width: 40px;
-    height: 40px;
-}
-
-.menu-image:hover {
-   transform: scale(1.1);   
-}
-
-.sidebar
-{
-    grid-area:sidebar
-}
-
-.menu-item, .menu-item:visited {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    padding: 12px 0;
-    color: inherit;
-}
-
-.menu-title {
-    font-size: 7pt;
-    margin: 5px 0;
-    text-transform: uppercase;
-}
 </style>

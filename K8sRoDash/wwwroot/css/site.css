@@ -7,16 +7,7 @@ a, a:visited {
     text-decoration: none;
 }
 
-.content-title {
-    color: #344055;
-    font-family: sans-serif;
-    font-weight: 300;
-    font-size: 16pt;
-}
-
 .graph{
-    width: 200px;
-    height: 260px;
-    max-width: 200px;
-    max-height: 260px;
+    width: 13rem;
+    height: 18rem;
 }
