@@ -27,11 +27,11 @@
             return {
                 pods: {},
                 podData: [
-                    {type: "info", name: "flux-something",  age: "22d4h", namespace: "petstore", restarts: "2", containers: "1,1"},
-                    {type: "error", name: "flux-something", age: "10d5h", namespace: "petstore", restarts: "0", containers: "1"},
-                    {type: "info", name: "kube-controller", age: "13d5h", namespace: "petstore", restarts: "3", containers: "1"},
-                    {type: "warning", name: "cert-manager", age: "14min", namespace: "petstore", restarts: "0", containers: "0"},
-                    {type: "error", name: "pod-manager", age: "1h20m", namespace: "petstore", restarts: "0", containers: "1,2"},
+                    {name: "flux-something", namespace: "petstore", restarts: "2", containers: "1,1", age: "22d4h", status:"Running"},
+                    {name: "flux-something", namespace: "petstore", restarts: "0", containers: "1", age: "10d5h", status:"Running"},
+                    {name: "kube-controller", namespace: "petstore", restarts: "3", containers: "1", age: "13d5h", status:"Running"},
+                    {name: "cert-manager", namespace: "petstore", restarts: "0", containers: "0", age: "14min", status:"Running"},
+                    {name: "pod-manager", namespace: "petstore", restarts: "0", containers: "1,2", age: "1h20m", status:"Running"},
                 ],
             }
         },
@@ -43,19 +43,20 @@
         },
         mounted() {
               this.events = new Tabulator(this.$refs.events, {
-                height:"80vh",
+                maxHeight:"80vh",
                 layout:"fitData",
+                movableColumns: true,
                 persistence:true,
                 persistenceMode:true,
                 data: this.podData,
                 reactiveData:true,
                 columns: [
-                    {title:"Type", field:"type", sorter:"string", minWidth:150},
                     {title:"Name", field:"name", sorter:"string", minWidth:280},
                     {title:"Namespace", field:"namespace", sorter:"string", minWidth:200},
                     {title:"Containers", field:"containers", sorter:"string", minWidth:250},
-                    {title:"Age", field:"age", sorter:"string", minWidth:200},
                     {title:"Restarts", field:"restarts", sorter:"string", minWidth:150},
+                    {title:"Status", field:"status", sorter:"string", minWidth:150},
+                    {title:"Age", field:"age", sorter:"string", minWidth:200},
                 ],
               });
         },

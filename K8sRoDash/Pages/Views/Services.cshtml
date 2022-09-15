@@ -26,8 +26,9 @@
         props: ['namespace', 'search'],        
         mounted() {
           this.events = new Tabulator(this.$refs.services, {
-            height:"80vh",
+            maxHeight:"80vh",
             layout:"fitData",
+            movableColumns: true,
             persistence:true,
             persistenceMode:true,
             data: this.serviceData,

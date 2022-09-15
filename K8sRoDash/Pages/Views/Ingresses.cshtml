@@ -15,30 +15,29 @@
             return {
                 ingresses: {},
                 ingressData: [
-                    {id: 1, name: "Oli Bob", progress: 20, location: "United Kingdom", gender: "male", rating: 1, color: "red", dateOfBirth: "1990-01-01", driver: true},
-                    {id: 2, name: "Mary May", location: "Germany",  gender: "female", rating: 2, color: "blue", dateOfBirth: "1986-11-05"},
-                    {id: 3, name: "Christine Lobowski", location: "France", gender: "female", rating: 0, color: "green", dateOfBirth: "1974-08-10", isDelete: true},
-                    {id: 4, name: "Brendon Philips", location: "USA", gender: "male", rating: 1, color: "orange", dateOfBirth: "2001-02-21"},                    
+                    {name: "user-api", namespace:"petstore", class:"nginx", hosts:"https://user-api.petstore.dk", address:"192.168.0.1", age: "22d"},
+                    {name: "store-api", namespace:"petstore", class:"nginx", hosts:"https://store-api.petstore.dk", address:"192.168.0.1", age: "10d"},
+                    {name: "order-api", namespace:"petstore", class:"nginx", hosts:"https://order-api.petstore.dk", address:"192.168.0.1", age: "13d"},
                 ],
             }
         },
         props: ['namespace', 'search'],        
         mounted() {
               this.events = new Tabulator(this.$refs.ingresses, {
-                height:"80vh",
+                maxHeight:"80vh",
                 layout:"fitData",
+                movableColumns: true,
                 persistence:true,
                 persistenceMode:true,
                 data: this.ingressData,
                 reactiveData:true,
                 columns: [
-                    {title:"Name", field:"name", sorter:"string", width:200},
-                    {title:"Progress", field:"progress", hozAlign:"left", formatter:"number"},
-                    {title:"Gender", field:"gender", sorter:"string"},
-                    {title:"Rating", field:"rating", formatter:"number", width:100},
-                    {title:"Favourite Color", field:"color", sorter:"string"},
-                    {title:"Date Of Birth", field:"dateOfBirth", sorter:"date", hozAlign:"center"},
-                    {title:"Driver", field:"driver", hozAlign:"center", formatter:"tickCross", sorter:"boolean"},   
+                {title:"Namespace", field:"namespace", sorter:"string", minWidth:200},
+                {title:"Name", field:"name", sorter:"string", minWidth:250},
+                {title:"Class", field:"class", sorter:"string", minWidth:100},
+                {title:"Hosts", field:"hosts", sorter:"string", minWidth:500},
+                {title:"Address", field:"address", sorter:"string", minWidth:150},
+                {title:"Age", field:"age", sorter:"string", minWidth:100},                    
                 ],
               });
         },
