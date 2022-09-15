@@ -22,7 +22,13 @@
         template: "#workloads",
         data() {
             return {
+                cronJobs: {},
+                daemonSets: {},
                 workloads: {},
+                jobs: {},
+                statefulSets: {},
+                result: [],
+                updateTimer: '',
                 workloadData: [
                     {type: "deamonset", name: "petstore-pet-api", namespace: "petstore", age: "22d4h", pods: "petstore-pet-api-dxsflj"},
                     {type: "statefulset", name: "petstore-store-api", namespace: "petstore", age: "10d5h", pods: "petstore-store-api-xfdse"},
@@ -37,7 +43,56 @@
             workloadsAvailable: () => workloadsReady(),
             podsAvailable: () => podReady(),
         },
-        mounted() {
+        watch: {
+          namespace: function (val){
+              this.updateWorkloads()
+          },
+          workloads: function (val){
+              this.updateWorkloads()
+          }
+        },
+        methods: {
+            fetchWorkloads() {
+                fetch('/k8s/apis/apps/v1/deployments')
+                .then(d => d.json())
+                .then(j => this.workloads = j);
+
+                fetch('/k8s/apis/apps/v1/daemonsets')
+                .then(d => d.json())
+                .then(j => this.daemonSets = j);
+
+                fetch('/k8s/apis/batch/v1/cronjobs')
+                .then(d => d.json())
+                .then(j => this.cronJobs = j);
+
+                fetch('/k8s/apis/batch/v1/jobs')
+                .then(d => d.json())
+                .then(j => this.jobs = j);
+
+                fetch('/k8s/apis/apps/v1/statefulsets')
+                .then(d => d.json())
+                .then(j => this.statefulsets = j);
+            },
+            updateWorkloads(){
+                if (!this.workloads || !this.workloads.items) return;
+                if (!this.daemonSets) return;
+                if (!this.cronJobs) return;
+                if (!this.jobs) return;
+                if (!this.statefulSets) return;
+                
+                this.result = this.workloads.items
+                        .map(x => new { 
+                            name: x.metadata.name,
+                            namespace: x.metadata.namespace,
+                            pod: x.spec.template.spec.name,
+                            age: x.metadata.creationTimestamp,
+                })
+            },
+            cancelAutoUpdate () {
+                clearInterval(this.workloadsTimer);
+            }
+        },
+        async mounted() {
               this.events = new Tabulator(this.$refs.workloads, {
                 maxHeight:"80vh",
                 layout:"fitData",
@@ -54,7 +109,13 @@
                     {title:"Pods", field:"pods", sorter:"string", minWidth:300},
                 ],
               });
+              this.fetchWorkloads();
+              
+              this.workloadsTimer = setInterval(this.fetchWorkloads, 30000);
         },
+        beforeUnmount () {
+          this.cancelAutoUpdate();
+        }
     };
 
     routes.push({path:'/workloads', component: components["workloads"]})
