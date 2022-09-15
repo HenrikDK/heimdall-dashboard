@@ -25,21 +25,21 @@
         },
         props: ['namespace', 'search'],        
         mounted() {
-              this.events = new Tabulator(this.$refs.services, {
-                height:"80vh",
-                layout:"fitData",
-                persistence:true,
-                persistenceMode:true,
-                data: this.serviceData,
-                reactiveData:true,
-                columns: [
-                    {title:"Type", field:"type", sorter:"string", minWidth:250},
-                    {title:"Name", field:"name", sorter:"string", minWidth:250},
-                    {title:"Namespace", field:"namespace", sorter:"string", minWidth:200},
-                    {title:"KubeDNS", field:"kubeDNS", sorter:"string", minWidth:400},
-                    {title:"Age", field:"age", sorter:"string", minWidth:200},
-                ],
-              });
+          this.events = new Tabulator(this.$refs.services, {
+            height:"80vh",
+            layout:"fitData",
+            persistence:true,
+            persistenceMode:true,
+            data: this.serviceData,
+            reactiveData:true,
+            columns: [
+                {title:"Type", field:"type", sorter:"string", minWidth:250},
+                {title:"Name", field:"name", sorter:"string", minWidth:250},
+                {title:"Namespace", field:"namespace", sorter:"string", minWidth:200},
+                {title:"KubeDNS", field:"kubeDNS", sorter:"string", minWidth:400},
+                {title:"Age", field:"age", sorter:"string", minWidth:200},
+            ],
+          });
         },
     };
     
