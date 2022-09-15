@@ -4,7 +4,7 @@
             <span class="text-slate-500 text-2xl font-light sans">Pods</span>
         </div>
         
-        <div class="flex justify-between mb-4 mt-1 px-36">
+        <div class="flex justify-around mb-4 mt-1">
             <div class="graph">
                 <v-chart :option="podsAvailable"></v-chart>
             </div>
@@ -27,10 +27,11 @@
             return {
                 pods: {},
                 podData: [
-                    {id: 1, name: "Oli Bob", progress: 20, location: "United Kingdom", gender: "male", rating: 1, color: "red", dateOfBirth: "1990-01-01", driver: true},
-                    {id: 2, name: "Mary May", location: "Germany",  gender: "female", rating: 2, color: "blue", dateOfBirth: "1986-11-05"},
-                    {id: 3, name: "Christine Lobowski", location: "France", gender: "female", rating: 0, color: "green", dateOfBirth: "1974-08-10", isDelete: true},
-                    {id: 4, name: "Brendon Philips", location: "USA", gender: "male", rating: 1, color: "orange", dateOfBirth: "2001-02-21"},                    
+                    {type: "info", name: "flux-something",  age: "22d4h", namespace: "petstore", restarts: "2", containers: "1,1"},
+                    {type: "error", name: "flux-something", age: "10d5h", namespace: "petstore", restarts: "0", containers: "1"},
+                    {type: "info", name: "kube-controller", age: "13d5h", namespace: "petstore", restarts: "3", containers: "1"},
+                    {type: "warning", name: "cert-manager", age: "14min", namespace: "petstore", restarts: "0", containers: "0"},
+                    {type: "error", name: "pod-manager", age: "1h20m", namespace: "petstore", restarts: "0", containers: "1,2"},
                 ],
             }
         },
@@ -49,13 +50,12 @@
                 data: this.podData,
                 reactiveData:true,
                 columns: [
-                    {title:"Name", field:"name", sorter:"string", width:200},
-                    {title:"Progress", field:"progress", hozAlign:"left", formatter:"number"},
-                    {title:"Gender", field:"gender", sorter:"string"},
-                    {title:"Rating", field:"rating", formatter:"number", width:100},
-                    {title:"Favourite Color", field:"color", sorter:"string"},
-                    {title:"Date Of Birth", field:"dateOfBirth", sorter:"date", hozAlign:"center"},
-                    {title:"Driver", field:"driver", hozAlign:"center", formatter:"tickCross", sorter:"boolean"},   
+                    {title:"Type", field:"type", sorter:"string", minWidth:150},
+                    {title:"Name", field:"name", sorter:"string", minWidth:280},
+                    {title:"Namespace", field:"namespace", sorter:"string", minWidth:200},
+                    {title:"Containers", field:"containers", sorter:"string", minWidth:250},
+                    {title:"Age", field:"age", sorter:"string", minWidth:200},
+                    {title:"Restarts", field:"restarts", sorter:"string", minWidth:150},
                 ],
               });
         },
