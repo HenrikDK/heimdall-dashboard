@@ -295,3 +295,53 @@ function podCpu(){
     
     return pod_cpu
 }
+
+function workloadsReady(){
+    var workloads_ready = {
+        title: {
+            text: 'WORKLOADS',
+            subtext: 'Ready vs Requested',
+            bottom:'5%',
+            textStyle: {
+                fontSize: '16'
+            },
+            subtextStyle: {
+                fontSize: '16',
+            },
+            left: 'center',
+        },
+        tooltip: {
+            show: false,
+            trigger: 'none'
+        },
+        legend: {
+            show: false,
+        },
+        series: [
+            {
+                name: 'Workloads',
+                type: 'pie',
+                top: '-5%',
+                height: '85%',
+                radius: ['55%', '85%'],
+                avoidLabelOverlap: false,
+                label: {
+                    show: true,
+                    position: 'center',
+                    fontSize: '16',
+                    fontWeight: 'bold',
+                    formatter: (s) => { return '7 / 8\nNodes' }
+                },
+                emphasis: {
+                    show: false,
+                },
+                data: [
+                    { value: 7, name: 'Ready' },
+                    { value: 0, name: 'Loading'},
+                    { value: 1, name: 'Waiting' },
+                ]
+            }
+        ]
+    };
+    return workloads_ready;
+}
