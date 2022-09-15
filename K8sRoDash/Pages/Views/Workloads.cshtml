@@ -1,0 +1,63 @@
+﻿<template id="workloads">
+    <div class="pl-2 pr-4 w-100">
+        <div class="flex my-2 items-center">
+            <span class="text-slate-500 text-2xl font-light sans">Workloads</span>
+        </div>
+        
+        <div class="flex justify-around mb-4 mt-1">
+            <div class="graph">
+                <v-chart :option="workloadsAvailable"></v-chart>
+            </div>
+            <div class="graph">
+                <v-chart :option="podsAvailable"></v-chart>
+            </div>
+        </div>
+        
+        <div id="workloads-table" ref="workloads" v-show="workloadData.length > 0" class="vh-80 w-full"></div>        
+    </div>
+</template>
+
+<script>
+    components["workloads"] = {
+        template: "#workloads",
+        data() {
+            return {
+                workloads: {},
+                workloadData: [
+                    {type: "deamonset", name: "petstore-pet-api", namespace: "petstore", age: "22d4h", pods: "petstore-pet-api-dxsflj"},
+                    {type: "statefulset", name: "petstore-store-api", namespace: "petstore", age: "10d5h", pods: "petstore-store-api-xfdse"},
+                    {type: "replicaset", name: "petstore-lobster-api", namespace: "petstore", age: "13d5h", pods: "petstore-lobster-api-dflkj"},
+                    {type: "cronjob", name: "petstore-order-api", namespace: "petstore", age: "14min", pods: "petstore-order-api-ysdfs"},
+                    {type: "jobs", name: "petstore-user-api", namespace: "petstore", age: "1h20m", pods: "petstore-user-api-kdlfjg"},
+                ],                
+            }
+        },
+        props: ['namespace', 'search'],        
+        computed: {
+            workloadsAvailable: () => workloadsReady(),
+            podsAvailable: () => podReady(),
+        },
+        mounted() {
+              this.events = new Tabulator(this.$refs.workloads, {
+                height:"80vh",
+                layout:"fitData",
+                persistence:true,
+                persistenceMode:true,
+                data: this.workloadData,
+                reactiveData:true,
+                columns: [
+                    {title:"Type", field:"type", sorter:"string", minWidth:250},
+                    {title:"Name", field:"name", sorter:"string", minWidth:350},
+                    {title:"Namespace", field:"namespace", sorter:"string", minWidth:200},
+                    {title:"Age", field:"age", sorter:"string", minWidth:200},
+                    {title:"Pods", field:"pods", sorter:"string", minWidth:300},
+                ],
+              });
+        },
+    };
+
+    routes.push({path:'/workloads', component: components["workloads"]})
+</script>
+
+<style>
+</style>
