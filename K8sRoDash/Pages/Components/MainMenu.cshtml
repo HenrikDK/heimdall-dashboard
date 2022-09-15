@@ -1,34 +1,34 @@
 ﻿<template id="main-menu">
     <div class="bg-neutral-200">
         <nav class="fixed">
-            <div class="min-w-12 min-h-12">
+            <div class="group min-w-12 min-h-12">
                 <router-link to="/workloads" class="flex flex-col items-center pointer py-3 !text-black" @@click="$emit('select-view', 'workloads')">
-                    <img v-if="view == 'workloads'" src="art/deploy-blue.svg" class="w-10 h-10 hover:scale-125" alt="Deployments"/>
-                    <img v-else src="art/deploy-grey.svg" class="w-10 h-10 hover:scale-125" alt="Deployments"/>
+                    <img v-if="view == 'workloads'" src="art/deploy-blue.svg" class="w-10 h-10 group-hover:scale-125" alt="Deployments"/>
+                    <img v-else src="art/deploy-grey.svg" class="w-10 h-10 group-hover:scale-125" alt="Deployments"/>
                     <span class="text-xs m-1 uppercase">Workloads</span>
                 </router-link>
             </div>
 
-            <div class="min-w-12 min-h-12">
+            <div class="group min-w-12 min-h-12">
                 <router-link to="/pods" class="flex flex-col items-center pointer py-3 !text-black" @@click="$emit('select-view', 'pods')">
-                    <img v-if="view == 'pods'" src="art/pod-blue.svg" class="w-10 h-10 hover:scale-125" alt="Pods"/>
-                    <img v-else src="art/pod-grey.svg" class="w-10 h-10 hover:scale-125" alt="Pods"/>
+                    <img v-if="view == 'pods'" src="art/pod-blue.svg" class="w-10 h-10 group-hover:scale-125" alt="Pods"/>
+                    <img v-else src="art/pod-grey.svg" class="w-10 h-10 group-hover:scale-125" alt="Pods"/>
                     <span class="text-xs m-1 uppercase">Pods</span>
                 </router-link>
             </div>
 
-            <div class="min-w-12 min-h-12">
+            <div class="group min-w-12 min-h-12">
                 <router-link to="/services" class="flex flex-col items-center pointer py-3 !text-black" @@click="$emit('select-view', 'services')">
-                    <img v-if="view == 'services'" src="art/svc-blue.svg" class="w-10 h-10 hover:scale-125" alt="Services"/>
-                    <img v-else src="art/svc-grey.svg" class="w-10 h-10 hover:scale-125" alt="Services"/>
+                    <img v-if="view == 'services'" src="art/svc-blue.svg" class="w-10 h-10 group-hover:scale-125" alt="Services"/>
+                    <img v-else src="art/svc-grey.svg" class="w-10 h-10 group-hover:scale-125" alt="Services"/>
                     <span class="text-xs m-1 uppercase">Service</span>
                 </router-link>
             </div>
 
-            <div class="min-w-12 min-h-12">
+            <div class="group min-w-12 min-h-12">
                 <router-link to="/ingresses" class="flex flex-col items-center pointer py-3 !text-black" @@click="$emit('select-view', 'ingresses')">
-                    <img v-if="view == 'ingresses'" src="art/ing-blue.svg" class="w-10 h-10 hover:scale-125" alt="Ingress"/>
-                    <img v-else src="art/ing-grey.svg" class="w-10 h-10 hover:scale-125" alt="Ingress"/>
+                    <img v-if="view == 'ingresses'" src="art/ing-blue.svg" class="w-10 h-10 group-hover:scale-125" alt="Ingress"/>
+                    <img v-else src="art/ing-grey.svg" class="w-10 h-10 group-hover:scale-125" alt="Ingress"/>
                     <span class="text-xs m-1 uppercase">Ingress</span>
                 </router-link>
             </div>
