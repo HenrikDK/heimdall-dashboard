@@ -1,4 +1,4 @@
-﻿async function streamResults(url, cb, errCb) {
+﻿async function streamResults(url, cb) {
     let isCancelled = false;
     let socket = {};
     const results = {};
@@ -19,11 +19,10 @@
 
             add(items, kind);
 
-            const watchUrl = `${url}?watch=1&resourceVersion=${metadata.resourceVersion}`;
+            const watchUrl = `${url}?watch=1&resourceVersion=${metadata.resourceVersion}`.replace('http', 'ws');
             socket = stream(watchUrl, update, {isJson: true});
         } catch (err) {
-            log.error('Error in api request', {err, url});
-            if (errCb) errCb(err);
+            console.error('Error in api request', {err, url});
         }
     }
 
@@ -70,26 +69,52 @@
                 delete results[object.metadata.uid];
                 break;
             case 'ERROR':
-                log.error('Error in update', {type, object});
+                console.error('Error in update', {type, object});
                 break;
             default:
-                log.error('Unknown update type', {type});
+                console.error('Unknown update type', {type});
         }
 
         debouncedCallback();
     }
 }
 
-function connectStream(path, cb, onFail, isJson, additionalProtocols) {
+async function streamResult(url, name, cb) {
+    let isCancelled = false;
+    let socket= {};
+    run();
+
+    return cancel;
+
+    async function run() {
+        try {
+            const item = await request(`${url}/${name}`);
+            const debouncedCallback = _.debounce(cb, 250, {leading: true});
+
+            if (isCancelled) return;
+            debouncedCallback(item);
+
+            const fieldSelector = encodeURIComponent(`metadata.name=${name}`);
+            const watchUrl = `${url}?watch=1&fieldSelector=${fieldSelector}`.replace('http', 'ws');
+
+            socket = stream(watchUrl, x => debouncedCallback(x.object), {isJson: true});
+        } catch (err) {
+            console.error('Error in api request', {err, url});
+        }
+    }
+
+    function cancel() {
+        if (isCancelled) return;
+        isCancelled = true;
+
+        if (socket) socket.cancel();
+    }
+}
+
+function connectStream(path, cb, onFail, isJson) {
     let isClosing = false;
     
-    const protocols = [
-        'base64.binary.k8s.io',
-        ...additionalProtocols,
-    ];
-
-    const url = path.replace('http', 'ws');
-    const socket = new WebSocket(url, protocols);
+    const socket = new WebSocket(path);
     socket.binaryType = 'arraybuffer';
     socket.addEventListener('message', onMessage);
     socket.addEventListener('close', onClose);
@@ -117,12 +142,12 @@ function connectStream(path, cb, onFail, isJson, additionalProtocols) {
         socket.removeEventListener('close', onClose);
         socket.removeEventListener('error', onError);
 
-        log.warn('Socket closed unexpectedly', {path, args});
+        console.warn('Socket closed unexpectedly', {path, args});
         onFail();
     }
 
     function onError(err) {
-        log.error('Error in api stream', {err, path});
+        console.error('Error in api stream', {err, path});
     }
 }
 
@@ -149,13 +174,13 @@ function stream(url, cb, args) {
 
     function connect() {
         if (connectCb) connectCb();
-        connection = connectStream(url, cb, onFail, isJson, additionalProtocols);
+        connection = connectStream(url, cb, onFail, isJson);
     }
 
     function onFail() {
         if (isCancelled) return;
 
-        log.info('Reconnecting in 3 seconds', {url});
+        console.info('Reconnecting in 3 seconds', {url});
         setTimeout(connect, 3000);
     }
 }
@@ -170,7 +195,7 @@ async function request(path) {
             const json = await response.json();
             message += ` - ${json.message}`;
         } catch (err) {
-            log.error('Unable to parse error json', {err});
+            console.error('Unable to parse error json', {err});
         }
 
         const error = new Error(message);
