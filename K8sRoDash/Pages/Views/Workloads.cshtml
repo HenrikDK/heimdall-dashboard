@@ -45,34 +45,9 @@
         },
         watch: {
           namespace: function (val){
-              this.updateWorkloads()
           },
-          workloads: function (val){
-              this.updateWorkloads()
-          }
         },
         methods: {
-            fetchWorkloads() {
-                fetch('/k8s/apis/apps/v1/deployments')
-                .then(d => d.json())
-                .then(j => this.workloads = j);
-
-                fetch('/k8s/apis/apps/v1/daemonsets')
-                .then(d => d.json())
-                .then(j => this.daemonSets = j);
-
-                fetch('/k8s/apis/batch/v1/cronjobs')
-                .then(d => d.json())
-                .then(j => this.cronJobs = j);
-
-                fetch('/k8s/apis/batch/v1/jobs')
-                .then(d => d.json())
-                .then(j => this.jobs = j);
-
-                fetch('/k8s/apis/apps/v1/statefulsets')
-                .then(d => d.json())
-                .then(j => this.statefulsets = j);
-            },
             updateWorkloads(){
                 if (!this.workloads || !this.workloads.items) return;
                 if (!this.daemonSets) return;
@@ -80,16 +55,14 @@
                 if (!this.jobs) return;
                 if (!this.statefulSets) return;
                 
-                this.result = this.workloads.items
+                /* 
+                    this.result = this.workloads.items
                         .map(x => new { 
                             name: x.metadata.name,
                             namespace: x.metadata.namespace,
                             pod: x.spec.template.spec.name,
                             age: x.metadata.creationTimestamp,
-                })
-            },
-            cancelAutoUpdate () {
-                clearInterval(this.workloadsTimer);
+                })*/
             }
         },
         async mounted() {
@@ -109,12 +82,13 @@
                     {title:"Pods", field:"pods", sorter:"string", minWidth:300},
                 ],
               });
-              this.fetchWorkloads();
               
-              this.workloadsTimer = setInterval(this.fetchWorkloads, 30000);
-        },
-        beforeUnmount () {
-          this.cancelAutoUpdate();
+              var host = window.location.origin;
+              streamResults(host + '/k8s/apis/apps/v1/deployments', j => this.workloads = j)
+              //streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => this.daemonSets = j)
+              //streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => this.statefulsets = j)
+              //streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => this.cronJobs = j)
+              //streamResults(host + '/k8s/apis/batch/v1/jobs', j => this.jobs = j)
         }
     };
 
