@@ -62,6 +62,7 @@ app.UseProxies(proxies =>
         }, builder => builder.WithHttpClientName("K8sClient"))
         .UseWs((context, args) => 
         {
+            context.Request.Headers.Add("Authorization", $"Bearer {K8sClient.AccessToken}");
             var qs = context.Request.QueryString.Value;
             var url = context.Request.Path.ToString().Replace("/k8s/", "/");
             var server = K8sClient.Server.Replace("https://", "wss://");
@@ -70,8 +71,6 @@ app.UseProxies(proxies =>
             {
                 context.Request.Headers.Remove("Origin");
                 wso.RemoteCertificateValidationCallback = (sender, certificate, chain, errors) => true; 
-                wso.AddSubProtocol("base64url.bearer.authorization.k8s.io." + K8sClient.AccessToken);
-                wso.AddSubProtocol("base64.binary.k8s.io");
                 return Task.CompletedTask;
             })
             .WithHandleFailure((context, e) =>
