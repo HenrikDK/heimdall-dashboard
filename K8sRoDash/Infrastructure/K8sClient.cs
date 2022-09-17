@@ -59,6 +59,11 @@ public class K8sClient
             server = entry.cluster.server;
             break;
         }
+        
+        if (!string.IsNullOrEmpty(server) && server.Contains("://0.0.0.0:"))
+        {
+            server = server.Replace("://0.0.0.0:", "://127.0.0.1:");
+        }
 
         var token = "";
         foreach (var entry in config.users)
@@ -70,7 +75,16 @@ public class K8sClient
             } catch (Exception e) { }
             break;
         }
+        
+        if (string.IsNullOrEmpty(token))
+        {
+            var customToken = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "c:\\tmp\\token" : "/var/tmp/token";
 
+            if (File.Exists(customToken))
+            {
+                token = File.ReadAllText(customToken);
+            }
+        }
         return (server, token);
     }
 }
