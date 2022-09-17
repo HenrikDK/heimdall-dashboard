@@ -3,6 +3,7 @@ global using System.Diagnostics;
 global using System.Collections.Generic;
 global using System.Dynamic;
 global using System.Runtime.InteropServices;
+global using System.Text;
 
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Hosting;
