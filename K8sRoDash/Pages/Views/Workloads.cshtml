@@ -85,10 +85,10 @@
               
               var host = window.location.origin;
               streamResults(host + '/k8s/apis/apps/v1/deployments', j => this.workloads = j)
-              //streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => this.daemonSets = j)
-              //streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => this.statefulsets = j)
-              //streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => this.cronJobs = j)
-              //streamResults(host + '/k8s/apis/batch/v1/jobs', j => this.jobs = j)
+              streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => this.daemonSets = j)
+              streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => this.statefulsets = j)
+              streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => this.cronJobs = j)
+              streamResults(host + '/k8s/apis/batch/v1/jobs', j => this.jobs = j)
         }
     };
 
