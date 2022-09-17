@@ -33,7 +33,7 @@
             </div>
         </template>
 
-        <div ref="events" v-show="eventData.length > 0" class="vh-80 w-full"></div>
+        <div id="events-table" ref="events" v-show="eventData.length > 0" class="vh-80 w-full"></div>
     </div>
 </template>
 
@@ -44,10 +44,11 @@
             return {
                 events: {},
                 eventData: [
-                    {id: 1, name: "Oli Bob", progress: 20, location: "United Kingdom", gender: "male", rating: 1, color: "red", dateOfBirth: "1990-01-01", driver: true},
-                    {id: 2, name: "Mary May", location: "Germany",  gender: "female", rating: 2, color: "blue", dateOfBirth: "1986-11-05"},
-                    {id: 3, name: "Christine Lobowski", location: "France", gender: "female", rating: 0, color: "green", dateOfBirth: "1974-08-10", isDelete: true},
-                    {id: 4, name: "Brendon Philips", location: "USA", gender: "male", rating: 1, color: "orange", dateOfBirth: "2001-02-21"},                    
+                    {type: "info", name: "flux-something", time: "22d4h", reason: "explosion in main reactor core", event: "bla bla bla"},
+                    {type: "error", name: "flux-something", time: "10d5h", reason: "explosion in main reactor core", event: "bla bla bla"},
+                    {type: "info", name: "kube-controller", time: "13d5h", reason: "explosion in main reactor core", event: "bla bla bla"},
+                    {type: "warning", name: "cert-manager", time: "14min", reason: "explosion in main reactor core", event: "bla bla bla"},
+                    {type: "error", name: "pod-manager", time: "1h20m", reason: "explosion in main reactor core", event: "bla bla bla"},
                 ],
             }
         },
@@ -62,20 +63,19 @@
         },
         mounted() {
           this.events = new Tabulator(this.$refs.events, {
-            height:"80vh",
+            maxHeight:"80vh",
             layout:"fitData",
+            movableColumns: true,
             persistence:true,
             persistenceMode:true,
             data: this.eventData,
             reactiveData:true,
             columns: [
-                {title:"Name", field:"name", sorter:"string", width:200},
-                {title:"Progress", field:"progress", hozAlign:"left", formatter:"number"},
-                {title:"Gender", field:"gender", sorter:"string"},
-                {title:"Rating", field:"rating", formatter:"number", width:100},
-                {title:"Favourite Color", field:"color", sorter:"string"},
-                {title:"Date Of Birth", field:"dateOfBirth", sorter:"date", hozAlign:"center"},
-                {title:"Driver", field:"driver", hozAlign:"center", formatter:"tickCross", sorter:"boolean"},   
+                {title:"Type", field:"type", sorter:"string", minWidth:200},
+                {title:"Name", field:"name", sorter:"string", minWidth:250},
+                {title:"Time", field:"time", sorter:"time", minWidth:200},
+                {title:"Reason", field:"reason", sorter:"string", minWidth:450},
+                {title:"Event", field:"event", sorter:"string", minWidth:350},
             ],
           });
         }

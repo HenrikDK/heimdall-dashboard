@@ -46,6 +46,7 @@ if (!app.Environment.IsDevelopment() || Debugger.IsAttached)
     app.UseHsts();
 }
 
+app.UseWebSockets();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseProxies(proxies =>
@@ -59,15 +60,25 @@ app.UseProxies(proxies =>
             var server = K8sClient.Server;
             return $"{server}{url}{qs}";
         }, builder => builder.WithHttpClientName("K8sClient"))
-        .UseWs((context, args) =>
+        .UseWs((context, args) => 
         {
-            context.Request.Headers.Add("sec-websocket-protocol", 
-                "base64url.bearer.authorization.k8s.io." + K8sClient.AccessToken + ", base64.binary.k8s.io");
+            context.Request.Headers.Add("Authorization", $"Bearer {K8sClient.AccessToken}");
             var qs = context.Request.QueryString.Value;
             var url = context.Request.Path.ToString().Replace("/k8s/", "/");
-            var server = K8sClient.Server.Replace("https://", "wss:");
+            var server = K8sClient.Server.Replace("https://", "wss://");
             return $"{server}{url}{qs}";
-        })
+        }, options => options.WithBeforeConnect((context, wso) =>
+            {
+                context.Request.Headers.Remove("Origin");
+                wso.RemoteCertificateValidationCallback = (sender, certificate, chain, errors) => true; 
+                return Task.CompletedTask;
+            })
+            .WithHandleFailure((context, e) =>
+            {
+                app.Logger.LogError(e, "Exception proxying websocket");
+                context.Response.StatusCode = 502;
+                return Task.CompletedTask;
+            }).Build())
     );
 });
 app.UseAuthorization();
