@@ -114,7 +114,7 @@ async function streamResult(url, name, cb) {
 function connectStream(path, cb, onFail, isJson) {
     let isClosing = false;
     
-    const socket = new WebSocket(path);
+    const socket = new WebSocket(path, ['base64.binary.k8s.io']);
     socket.binaryType = 'arraybuffer';
     socket.addEventListener('message', onMessage);
     socket.addEventListener('close', onClose);
