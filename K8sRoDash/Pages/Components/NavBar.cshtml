@@ -36,20 +36,33 @@
       data() {
         return {
             selected: '',
+            filters: [],
+            cluster: [],
             namespaces: [
                 { label: 'All namespaces', value: ''},
-                { label: 'planning-dev', value: 'planning-dev' },
-                { label: 'planning-sit', value: 'planning-sit' },
-                { label: 'planning-tst', value: 'planning-tst'},
-                { label: 'planning-uat', value: 'planning-uat' },
             ],
             search: '',
         }
       },
-      methods: {},
+      methods: {
+          async updateList() {
+              if (!this.cluster || !this.cluster.items) return;
+              if (!this.filters) return;
+              
+          }
+      },
       props: ['view'],
-      watch: {},
-      mounted() {
+      watch: {
+        filters: () => updateList,
+        cluster: () => updateList,
+      },
+      async mounted() {
+        fetch("/?handler=filters")
+         .then(d => d.json())
+         .then(j => this.filters = j);
+        
+        streamResults(host + '/api/v1/namespaces', j => this.cluster = j)
+
         this.selected = this.namespaces[0];
       },
       computed: {},
