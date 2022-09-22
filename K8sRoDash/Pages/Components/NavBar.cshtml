@@ -46,22 +46,35 @@
       },
       methods: {
           async updateList() {
-              if (!this.cluster || !this.cluster.items) return;
-              if (!this.filters) return;
+              if (!this.cluster && this.cluster.length > 0) return;
               
+              var ns = [{ label: 'All namespaces', value: ''}]
+
+              var clusterNs = this.cluster;
+              
+              if (this.filters && this.filters.length > 0){
+                  clusterNs = this.cluster.filter(x => nsEndsWith(x, this.filters));
+              }
+              
+              clusterNs = clusterNs.map(x => { return { label: x.metadata.name, value: x.metadata.name}})
+              
+              ns = ns.concat(clusterNs)
+              
+              this.namespaces = ns;
           }
       },
       props: ['view'],
       watch: {
-        filters: () => updateList,
-        cluster: () => updateList,
+        filters: function (){this.updateList()},
+        cluster: function (){this.updateList()},
       },
       async mounted() {
         fetch("/?handler=filters")
          .then(d => d.json())
          .then(j => this.filters = j);
         
-        streamResults(host + '/api/v1/namespaces', j => this.cluster = j)
+        var host = window.location.origin;
+        streamResults(host + '/k8s/api/v1/namespaces', j => this.cluster = j)
 
         this.selected = this.namespaces[0];
       },
