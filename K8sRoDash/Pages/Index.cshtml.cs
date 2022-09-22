@@ -14,6 +14,8 @@ public class IndexModel : PageModel
         var filters = _configuration.GetValue("filters", "").Split(",")
             .Select(x => x.Trim()).ToList();
 
+        filters = filters.Where(x => !string.IsNullOrEmpty(x)).ToList();
+
         return new JsonResult(filters);
     }
 }
