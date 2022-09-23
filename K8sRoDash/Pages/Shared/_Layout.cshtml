@@ -61,12 +61,10 @@
     mixins: mixinArray,
     data() {
         return {
-            view: "cluster",
             namespace: "",
             search: "",
         }
-    }
-    })
+    }})
     .component('v-chart', VueECharts)
     .component('v-select', window['vue-select'])
     .component('v-search', VueSearchInput);
