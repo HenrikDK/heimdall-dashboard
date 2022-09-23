@@ -3,7 +3,7 @@
         <nav>
             <div class="flex justify-between">
                 <div>
-                    <router-link class="text-white cursor-pointer" to="/" @@click="$emit('select-view', 'cluster')">
+                    <router-link class="text-white cursor-pointer" to="/">
                         <div class="flex pt-1">
                             <div>
                                 <img src="art/viking-ship.svg" width="65" alt="Skúta"/>
@@ -15,7 +15,7 @@
                     </router-link>
                 </div>
                 <div class="flex justify-end items-center">
-                    <template v-if="view != 'cluster'">
+                    <template v-if="$route.path != '/'">
                     <div class="mr-3">
                         <v-select v-model="selected" :clearable="false" :options="namespaces" class="header-select" @@update:model-value="$emit('select-ns', $event.value)"></v-select>
                     </div>
@@ -32,24 +32,49 @@
 <script>
     components["nav-bar"] = {
       template: "#nav-bar",
-      emits: ['search','select-ns','select-view'],
+      emits: ['search','select-ns'],
       data() {
         return {
             selected: '',
+            filters: [],
+            cluster: [],
             namespaces: [
                 { label: 'All namespaces', value: ''},
-                { label: 'planning-dev', value: 'planning-dev' },
-                { label: 'planning-sit', value: 'planning-sit' },
-                { label: 'planning-tst', value: 'planning-tst'},
-                { label: 'planning-uat', value: 'planning-uat' },
             ],
             search: '',
         }
       },
-      methods: {},
-      props: ['view'],
-      watch: {},
-      mounted() {
+      methods: {
+          async updateList() {
+              if (!this.cluster && this.cluster.length > 0) return;
+              
+              var ns = [{ label: 'All namespaces', value: ''}]
+
+              var clusterNs = this.cluster;
+              
+              if (this.filters && this.filters.length > 0){
+                  clusterNs = this.cluster.filter(x => nsEndsWith(x, this.filters));
+              }
+              
+              clusterNs = clusterNs.map(x => { return { label: x.metadata.name, value: x.metadata.name}})
+              
+              ns = ns.concat(clusterNs)
+              
+              this.namespaces = ns;
+          }
+      },
+      watch: {
+        filters: function (){this.updateList()},
+        cluster: function (){this.updateList()},
+      },
+      async mounted() {
+        fetch("/?handler=filters")
+         .then(d => d.json())
+         .then(j => this.filters = j);
+        
+        var host = window.location.origin;
+        streamResults(host + '/k8s/api/v1/namespaces', j => this.cluster = j)
+
         this.selected = this.namespaces[0];
       },
       computed: {},
