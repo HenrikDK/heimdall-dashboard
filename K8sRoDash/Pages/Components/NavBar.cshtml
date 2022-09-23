@@ -3,7 +3,7 @@
         <nav>
             <div class="flex justify-between">
                 <div>
-                    <router-link class="text-white cursor-pointer" to="/" @@click="$emit('select-view', 'cluster')">
+                    <router-link class="text-white cursor-pointer" to="/">
                         <div class="flex pt-1">
                             <div>
                                 <img src="art/viking-ship.svg" width="65" alt="Skúta"/>
@@ -15,7 +15,7 @@
                     </router-link>
                 </div>
                 <div class="flex justify-end items-center">
-                    <template v-if="view != 'cluster'">
+                    <template v-if="!$route.path.startsWith('/cluster')">
                     <div class="mr-3">
                         <v-select v-model="selected" :clearable="false" :options="namespaces" class="header-select" @@update:model-value="$emit('select-ns', $event.value)"></v-select>
                     </div>
