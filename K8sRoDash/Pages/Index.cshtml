@@ -20,10 +20,10 @@
     <script src="~/js/cluster-graphs.js" asp-append-version="true"></script>
 }
 
-<nav-bar :view="view" @@select-view="(v) => view = v" @@select-ns="(n) => namespace = n" @@search="(s) => search = s"></nav-bar>
+<nav-bar @@select-ns="(n) => namespace = n" @@search="(s) => search = s"></nav-bar>
 
 <div class="grid grid-cols-[85px_1fr] gap-2 h-screen">
-    <main-menu :view="view" @@select-view="(v) => view = v"></main-menu>
+    <main-menu></main-menu>
     
     <main class="overflow-auto">
         <router-view></router-view>
