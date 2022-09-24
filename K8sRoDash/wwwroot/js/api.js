@@ -43,7 +43,7 @@
         debouncedCallback();
     }
 
-    function update(type, object) {
+    function update({object, type}) {
         object.actionType = type;
 
         switch (type) {
