@@ -63,6 +63,8 @@
                   }
                   
                   this.events = events;
+                  this.table.setData(this.events);
+                  this.table.redraw(true);
               }
           },
           watch: {
