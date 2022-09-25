@@ -9,3 +9,11 @@ let nsEndsWith = (ns, ends) => {
     });
     return value;
 };
+
+let filterName = (name, ns) => {
+    let value = false;
+    value = ns.some(element => {
+        return name.toLowerCase().includes(element);
+    });
+    return value;
+};
