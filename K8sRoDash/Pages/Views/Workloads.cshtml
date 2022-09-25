@@ -22,51 +22,59 @@
         template: "#workloads",
         data() {
             return {
-                cronJobs: {},
-                daemonSets: {},
-                workloads: {},
-                jobs: {},
-                statefulSets: {},
-                result: [],
-                updateTimer: '',
-                workloadData: [
-                    {type: "deamonset", name: "petstore-pet-api", namespace: "petstore", age: "22d4h", pods: "petstore-pet-api-dxsflj"},
-                    {type: "statefulset", name: "petstore-store-api", namespace: "petstore", age: "10d5h", pods: "petstore-store-api-xfdse"},
-                    {type: "replicaset", name: "petstore-lobster-api", namespace: "petstore", age: "13d5h", pods: "petstore-lobster-api-dflkj"},
-                    {type: "cronjob", name: "petstore-order-api", namespace: "petstore", age: "14min", pods: "petstore-order-api-ysdfs"},
-                    {type: "jobs", name: "petstore-user-api", namespace: "petstore", age: "1h20m", pods: "petstore-user-api-kdlfjg"},
-                ],                
+                cronJobs: null,
+                daemonSets: null,
+                workloads: null,
+                jobs: null,
+                statefulSets: null,
+                table: null,
+                workloadData: [],                
             }
         },
-        props: ['namespace', 'search'],        
+        props: ['namespaces', 'search'],        
         computed: {
             workloadsAvailable: () => workloadsReady(),
             podsAvailable: () => podReady(),
         },
-        watch: {
-          namespace: function (val){
-          },
-        },
         methods: {
             updateWorkloads(){
-                if (!this.workloads || !this.workloads.items) return;
+                if (!this.workloads) return;
                 if (!this.daemonSets) return;
                 if (!this.cronJobs) return;
                 if (!this.jobs) return;
                 if (!this.statefulSets) return;
                 
-                /* 
-                    this.result = this.workloads.items
-                        .map(x => new { 
-                            name: x.metadata.name,
-                            namespace: x.metadata.namespace,
-                            pod: x.spec.template.spec.name,
-                            age: x.metadata.creationTimestamp,
-                })*/
+                let items = [this.workloads, this.daemonSets, this.cronJobs, this.jobs, this.statefulSets];
+                
+                let result = items.flat().filter(x => !!x);
+                
+                if (this.namespaces){
+                    result.filter(x => filterName(x, this.namespaces))
+                }
+                
+                this.workloadData = result;
+                this.table.setData(this.workloadData);
+                this.table.redraw(true);
+            },
+            async searchTable() {
+                if (!this.cluster && this.cluster.length > 0) return;
+              
+                let ns = [{ label: 'All namespaces', value: ''}]
+              
+                this.namespaces = ns;
             }
         },
+        watch: {
+            namespace: function (){this.updateWorkloads()},
+            cronJobs: function (){this.updateWorkloads()},
+            daemonSets: function (){this.updateWorkloads()},
+            workloads: function (){this.updateWorkloads()},
+            jobs: function (){this.updateWorkloads()},
+            statefulSets: function (){this.updateWorkloads()},
+            search: function (){this.searchTable()},
+        },
         async mounted() {
-              this.events = new Tabulator(this.$refs.workloads, {
+              this.table = new Tabulator(this.$refs.workloads, {
                 maxHeight:"80vh",
                 layout:"fitData",
                 movableColumns: true,
@@ -75,18 +83,18 @@
                 data: this.workloadData,
                 reactiveData:true,
                 columns: [
-                    {title:"Type", field:"type", sorter:"string", minWidth:250},
-                    {title:"Name", field:"name", sorter:"string", minWidth:350},
-                    {title:"Namespace", field:"namespace", sorter:"string", minWidth:200},
-                    {title:"Age", field:"age", sorter:"string", minWidth:200},
-                    {title:"Pods", field:"pods", sorter:"string", minWidth:300},
+                    {title:"Type", field:"kind", sorter:"string", minWidth:250},
+                    {title:"Name", field:"metadata.name", sorter:"string", minWidth:350},
+                    {title:"Namespace", field:"metadata.namespace", sorter:"string", minWidth:200},
+                    {title:"Age", field:"metadata.creationTimestamp", sorter:"time", minWidth:200},
+                    {title:"Pods", field:"status", sorter:"string", minWidth:300},
                 ],
               });
               
               var host = window.location.origin;
               streamResults(host + '/k8s/apis/apps/v1/deployments', j => this.workloads = j)
               streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => this.daemonSets = j)
-              streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => this.statefulsets = j)
+              streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => this.statefulSets = j)
               streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => this.cronJobs = j)
               streamResults(host + '/k8s/apis/batch/v1/jobs', j => this.jobs = j)
         }
