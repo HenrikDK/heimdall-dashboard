@@ -16,9 +16,12 @@
                 </div>
                 <div class="flex justify-end items-center">
                     <template v-if="$route.path != '/'">
-                    <div class="mr-3">
-                        <v-select v-model="selected" :clearable="false" :options="namespaces" class="header-select" @@update:model-value="$emit('select-ns', $event.value)"></v-select>
+                    <div class="mr-3 w-60">
+                        <v-multi v-model="selected" mode="multiple" :classes="styles" :close-on-select="false" :hide-selected="false" placeholder="All namespaces" :options="namespaces" @@update:model-value="$emit('select-ns', $event.value)"></v-multi>
                     </div>
+<!--                    <div class="mr-3">
+                        <v-select v-model="selected" :clearable="false" :options="namespaces" class="header-select" @@update:model-value="$emit('select-ns', $event.value)"></v-select>
+                    </div> -->
                     <div class="mr-3">
                         <v-search v-model="search" @@update:model-value="$emit('search', $event);"></v-search>
                     </div>
@@ -35,12 +38,10 @@
       emits: ['search','select-ns'],
       data() {
         return {
-            selected: '',
+            selected: [],
             filters: [],
             cluster: [],
-            namespaces: [
-                { label: 'All namespaces', value: ''},
-            ],
+            namespaces: [],
             search: '',
         }
       },
@@ -48,18 +49,16 @@
           async updateList() {
               if (!this.cluster && this.cluster.length > 0) return;
               
-              var ns = [{ label: 'All namespaces', value: ''}]
+              var ns = []
 
-              var clusterNs = this.cluster;
+              var ns = this.cluster;
               
               if (this.filters && this.filters.length > 0){
-                  clusterNs = this.cluster.filter(x => nsEndsWith(x, this.filters));
+                  ns = this.cluster.filter(x => nsEndsWith(x, this.filters));
               }
               
-              clusterNs = clusterNs.map(x => { return { label: x.metadata.name, value: x.metadata.name}})
-              
-              ns = ns.concat(clusterNs)
-              
+              ns = ns.map(x => { return { label: x.metadata.name, value: x.metadata.name}})
+                            
               this.namespaces = ns;
           }
       },
