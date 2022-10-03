@@ -8,7 +8,6 @@
     <link rel="icon" href="/favicon.svg">
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tabulator-tables@5.3.4/dist/css/tabulator_semanticui.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vue-select@4.0.0-beta.5/dist/vue-select.css">
     <link rel="stylesheet" href="/css/search-styles.css" asp-append-version="true">
 
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21"></script>    
@@ -72,7 +71,6 @@
         }
     }})
     .component('v-chart', VueECharts)
-    .component('v-select', window['vue-select'])
     .component('v-multi', VueformMultiselect)
     .component('v-search', VueSearchInput);
     Object.entries(components).forEach(([k,v]) =>{
