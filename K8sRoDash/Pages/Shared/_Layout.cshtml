@@ -73,6 +73,7 @@
     }})
     .component('v-chart', VueECharts)
     .component('v-select', window['vue-select'])
+    .component('v-multi', VueformMultiselect)
     .component('v-search', VueSearchInput);
     Object.entries(components).forEach(([k,v]) =>{
         app.component(k, v)
