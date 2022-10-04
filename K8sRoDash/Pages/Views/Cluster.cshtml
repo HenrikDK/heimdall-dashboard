@@ -37,7 +37,9 @@
     </div>
 </template>
 
-<script>
+<script type="module">
+    import { TabulatorFull as Tabulator } from 'tabulator'
+
     components["cluster"] = {
         template: "#cluster",
         data() {
@@ -79,7 +81,7 @@
             podCpuUsage: () => podCpu(),
             podMemoryUsage: () => podMemory(),
         },
-        mounted() {
+        async mounted() {
           this.table = new Tabulator(this.$refs.events, {
             maxHeight:"80vh",
             layout:"fitData",
