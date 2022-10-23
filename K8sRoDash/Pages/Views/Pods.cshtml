@@ -16,7 +16,7 @@
             </div>
         </div>
         
-        <div id="pods-table" ref="events" v-show="podData.length > 0" class="vh-80 w-full"></div>
+        <div id="pods-table" ref="pods" v-show="podData.length > 0" class="vh-80 w-full"></div>
     </div>
 </template>
 
@@ -43,24 +43,26 @@
             podCpuUsage: () => podCpu(),
             podMemoryUsage: () => podMemory(),
         },
-        mounted() {
-              this.events = new Tabulator(this.$refs.events, {
-                maxHeight:"80vh",
-                layout:"fitData",
-                movableColumns: true,
-                persistence:true,
-                persistenceMode:true,
-                data: this.podData,
-                reactiveData:true,
-                columns: [
-                    {title:"Name", field:"name", sorter:"string", minWidth:280},
-                    {title:"Namespace", field:"namespace", sorter:"string", minWidth:200},
-                    {title:"Containers", field:"containers", sorter:"string", minWidth:250},
-                    {title:"Restarts", field:"restarts", sorter:"string", minWidth:150},
-                    {title:"Status", field:"status", sorter:"string", minWidth:150},
-                    {title:"Age", field:"age", sorter:"string", minWidth:200},
-                ],
-              });
+        async mounted() {
+            this.events = new Tabulator(this.$refs.pods, {
+              maxHeight:"80vh",
+              layout:"fitData",
+              movableColumns: true,
+              persistence:true,
+              persistenceMode:true,
+              data: this.podData,
+              reactiveData:true,
+              columns: [
+                {title:"Name", field:"name", sorter:"string", minWidth:280},
+                {title:"Namespace", field:"namespace", sorter:"string", minWidth:200},
+                {title:"Containers", field:"containers", sorter:"string", minWidth:250},
+                {title:"Restarts", field:"restarts", sorter:"string", minWidth:150},
+                {title:"Status", field:"status", sorter:"string", minWidth:150},
+                {title:"Age", field:"age", sorter:"string", minWidth:200},
+              ],
+            });
+            
+            streamResults(host + '/k8s/api/v1/pods', j => this.clusterPods = j);
         },
     };
     
