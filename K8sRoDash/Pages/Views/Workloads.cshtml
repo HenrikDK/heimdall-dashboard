@@ -18,6 +18,82 @@
 </template>
 
 <script type="module">
+    function formatPods(cell, formatterParams, onRendered){
+        let data = cell.getData();
+        if (!data.kind) return "";
+        let result = "";
+        if (data.kind === "DaemonSet")
+        {
+            let scheduled = data.status.currentNumberScheduled;
+            let ready = data.status.numberReady;
+            let waiting = 0;
+            if (scheduled > ready){
+                waiting = scheduled - ready;
+            }
+            
+            result += [...Array(waiting)].map(x => '<div class="h-4 w-4 bg-gray-300 rounded-sm"></div>').join('');
+            result += [...Array(ready)].map(x => '<div class="h-4 w-4 bg-green-500 rounded-sm"></div>').join('');
+        }
+        
+        if (data.kind === "Deployment")
+        {
+            let scheduled = data.status.replicas;
+            let ready = data.status.readyReplicas;
+            let waiting = 0;
+            if (scheduled > ready){
+                waiting = scheduled - ready;
+            }
+            result += [...Array(waiting)].map(x => '<div class="h-4 w-4 bg-gray-300 rounded-sm"></div>').join('');
+            result += [...Array(ready)].map(x => '<div class="h-4 w-4 bg-green-500 rounded-sm"></div>').join('');
+        }
+        return result;
+    }
+    function formatAge(cell, formatterParams, onRendered){
+        var DT = window.DateTime || luxon.DateTime;
+        var invalid = "";
+        const unit = ["years", "days", "hours", "minutes", "seconds"]
+        var date = DT.now();
+        
+        var value = cell.getValue();
+        var newDatetime = DT.fromISO(String(value));
+        return toHuman(newDatetime.diff(date, unit));
+    }
+    
+    function toHuman(dur) {
+      let result = "";
+      if (dur.values.years && Math.abs(dur.values.years) > 0)
+      {
+          result += Math.abs(dur.values.years) + "y"
+          if (Math.abs(dur.values.years) < 10 && Math.abs(dur.values.days) > 0)
+          {
+              result += Math.abs(dur.values.days) + "d"
+          }
+          return result;
+      }
+      
+      if (dur.values.days && Math.abs(dur.values.days) > 0)
+      {
+          result += Math.abs(dur.values.days) + "d"
+          if (Math.abs(dur.values.days) < 10 && Math.abs(dur.values.minutes) > 0)
+          {
+              result += Math.abs(dur.values.minutes) + "m"
+          }
+          return result;
+      }
+
+      if (dur.values.minutes && Math.abs(dur.values.minutes) > 0)
+      {
+          result += Math.abs(dur.values.minutes) + "m"
+          if (Math.abs(dur.values.minutes) < 10 && Math.abs(dur.values.seconds) > 0)
+          {
+              result += Math.abs(dur.values.seconds) + "s"
+          }
+          return result;
+      }
+
+      return result += Math.abs(dur.values.seconds) + "m"
+    }
+    
     import { TabulatorFull as Tabulator } from 'tabulator'
 
     components["workloads"] = {
@@ -85,11 +161,17 @@
                 data: this.workloadData,
                 reactiveData:true,
                 columns: [
-                    {title:"Type", field:"kind", sorter:"string", minWidth:250},
+                    {title:"Type", field:"kind", minWidth:150},
                     {title:"Name", field:"metadata.name", sorter:"string", minWidth:350},
                     {title:"Namespace", field:"metadata.namespace", sorter:"string", minWidth:200},
-                    {title:"Age", field:"metadata.creationTimestamp", sorter:"time", minWidth:200},
-                    {title:"Pods", field:"status", sorter:"string", minWidth:300},
+                    {title:"Pods", field:"this", formatter:formatPods, sorter:"string", minWidth:150},
+                    {title:"Age", field:"metadata.creationTimestamp",
+                     sorter:"date", sorterParams:{
+                         format:"iso",
+                         alignEmptyValues:"top",
+                     },
+                     minWidth:100, formatter:formatAge},
+                    {title:"Status", field:"status", sorter:"string", minWidth:200},
                 ],
               });
               
