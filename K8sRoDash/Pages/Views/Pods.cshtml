@@ -57,11 +57,12 @@
                 {title:"Namespace", field:"namespace", sorter:"string", minWidth:200},
                 {title:"Containers", field:"containers", sorter:"string", minWidth:250},
                 {title:"Restarts", field:"restarts", sorter:"string", minWidth:150},
-                {title:"Status", field:"status", sorter:"string", minWidth:150},
-                {title:"Age", field:"age", sorter:"string", minWidth:200},
+                {title:"Age", field:"age", sorter:"string", minWidth:100},
+                {title:"Status", field:"status", sorter:"string", minWidth:250},
               ],
             });
             
+            var host = window.location.origin;
             streamResults(host + '/k8s/api/v1/pods', j => this.clusterPods = j);
         },
     };
