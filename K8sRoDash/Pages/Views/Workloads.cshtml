@@ -18,6 +18,13 @@
 </template>
 
 <script type="module">
+    function formatType(cell, formatterParams, onRendered){
+         let data = cell.getData();
+         if (!data.kind) return "";
+         let result = `<img src="art/${data.kind.toLowerCase()}.svg" class="w-5 h-5" alt="${data.kind}"/>`;
+         return result;
+    }
+    
     function formatDeploymentStatus(cell, formatterParams, onRendered){
         let data = cell.getData();
         if (!data.kind) return "";
@@ -108,7 +115,7 @@
         if (data.kind === "CronJob")
         {
             let active = data.status.active;
-            result += active.map(x => '<div class="h-4 w-4 bg-green-500 rounded-sm"></div>').join('');
+            result += active.map(x => '<div class="h-6 w-6 bg-green-500 rounded-sm"></div>').join('');
         }
          
         return result;
@@ -186,7 +193,7 @@
                     {title:"Namespace", field:"metadata.namespace", sorter:"string", minWidth:200},
                     {title:"Pods", field:"pods", formatter:formatPods, minWidth:150, headerSort:false},
                     {title:"Age", field:"metadata.creationTimestamp", formatter:formatAge, minWidth:100,
-                     sorter:"date", sorterParams:{
+                     sorter:"datetime", sorterParams:{
                          format:"iso",
                          alignEmptyValues:"top",
                      }},
