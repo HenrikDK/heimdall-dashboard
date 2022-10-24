@@ -13,11 +13,50 @@
             </div>
         </div>
         
-        <div id="workloads-table" ref="workloads" v-show="workloadData.length > 0" class="vh-80 w-full"></div>        
+        <div id="workloads-table" ref="workloads" v-show="workloadData.length > 0" class="vh-85 w-full"></div>        
     </div>
 </template>
 
 <script type="module">
+    function formatDeploymentStatus(cell, formatterParams, onRendered){
+        let data = cell.getData();
+        if (!data.kind) return "";
+        let result = "";
+        if (["DaemonSet", "StatefulSet"].includes(data.kind))
+        {
+            result += '<div class="px-1 text-green-500">Running</div>'
+        }
+        
+        if (data.kind === "Deployment")
+        {
+            let conditions = data.status.conditions;
+            result += '<div class="flex">';
+            result += conditions.map(x => x.type).sort().map(x => {
+              let color = x === "Available" ? "text-blue-500" : "text-green-500";
+              return `<div class="px-1 ${color}">${x}</div>`  
+            }).join('');
+            result += '</div>'
+        }
+        
+        if (data.kind === "Job")
+        {
+            let conditions = data.status.conditions;
+            result += conditions.map(x => `<div class="px-1 text-green-500">${x.type}</div>`).join('');
+        }
+         
+        if (data.kind === "CronJob")
+        {
+            let active = data.status.active;
+            if (active){
+                result += '<div class="px-1 text-green-500">Running</div>'
+            }else {
+                result += '<div class="px-1 text-grey-300">Waiting</div>'
+            }
+        }
+        
+        return result;           
+    }
+        
     function formatPods(cell, formatterParams, onRendered){
         let data = cell.getData();
         if (!data.kind) return "";
@@ -30,10 +69,21 @@
             if (scheduled > ready){
                 waiting = scheduled - ready;
             }
-            
             result += [...Array(waiting)].map(x => '<div class="h-4 w-4 bg-gray-300 rounded-sm"></div>').join('');
             result += [...Array(ready)].map(x => '<div class="h-4 w-4 bg-green-500 rounded-sm"></div>').join('');
         }
+        
+        if (data.kind === "StatefulSet")
+        {
+            let desired = data.status.replicas;
+            let current = data.status.currentReplicas;
+            let waiting = 0;
+            if (desired > current){
+                waiting = desired - current;
+            }
+            result += [...Array(waiting)].map(x => '<div class="h-4 w-4 bg-gray-300 rounded-sm"></div>').join('');
+            result += [...Array(current)].map(x => '<div class="h-4 w-4 bg-green-500 rounded-sm"></div>').join('');
+        }        
         
         if (data.kind === "Deployment")
         {
@@ -46,6 +96,21 @@
             result += [...Array(waiting)].map(x => '<div class="h-4 w-4 bg-gray-300 rounded-sm"></div>').join('');
             result += [...Array(ready)].map(x => '<div class="h-4 w-4 bg-green-500 rounded-sm"></div>').join('');
         }
+        
+        if (data.kind === "Job")
+        {
+            let ready = data.status.ready;
+            let succeeded = data.status.succeeded;
+            result += [...Array(ready)].map(x => '<div class="h-4 w-4 bg-green-500 rounded-sm"></div>').join('');
+            result += [...Array(succeeded)].map(x => '<div class="h-4 w-4 bg-gray-300 rounded-sm"></div>').join('');
+        }
+         
+        if (data.kind === "CronJob")
+        {
+            let active = data.status.active;
+            result += active.map(x => '<div class="h-4 w-4 bg-green-500 rounded-sm"></div>').join('');
+        }
+         
         return result;
     }
     
@@ -108,7 +173,7 @@
         },
         async mounted() {
               this.table = new Tabulator(this.$refs.workloads, {
-                maxHeight:"80vh",
+                maxHeight:"85vh",
                 layout:"fitData",
                 movableColumns: true,
                 persistence:true,
@@ -116,17 +181,16 @@
                 data: this.workloadData,
                 reactiveData:true,
                 columns: [
-                    {title:"Type", field:"kind", minWidth:150},
+                    {title:"Type", field:"kind", minWidth:150, headerSort:false},
                     {title:"Name", field:"metadata.name", sorter:"string", minWidth:350},
                     {title:"Namespace", field:"metadata.namespace", sorter:"string", minWidth:200},
-                    {title:"Pods", field:"this", formatter:formatPods, sorter:"string", minWidth:150},
-                    {title:"Age", field:"metadata.creationTimestamp",
+                    {title:"Pods", field:"pods", formatter:formatPods, minWidth:150, headerSort:false},
+                    {title:"Age", field:"metadata.creationTimestamp", formatter:formatAge, minWidth:100,
                      sorter:"date", sorterParams:{
                          format:"iso",
                          alignEmptyValues:"top",
-                     },
-                     minWidth:100, formatter:formatAge},
-                    {title:"Status", field:"status", sorter:"string", minWidth:200},
+                     }},
+                    {title:"Status", field:"status", formatter:formatDeploymentStatus, minWidth:200, headerSort:false},
                 ],
               });
               
