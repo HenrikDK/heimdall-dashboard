@@ -41,6 +41,17 @@
     import { Grid } from 'gridjs'
     import { TabulatorFull as Tabulator } from 'tabulator'
 
+    function formatMessage(cell, formatterParams, onRendered){
+         let data = cell.getData();
+         let fontClass = data.type === "Warning" ? "text-red-500" : ""; 
+         return `<div class="${fontClass}">${data.message}</div>`;
+    }
+
+    function formatSource(cell, formatterParams, onRendered){
+         let data = cell.getData();
+         return `<div class="text-blue-500">${data.involvedObject.kind + ": " + data.involvedObject.name}</div>`;
+    }
+
     components["cluster"] = {
         template: "#cluster",
         data() {
@@ -85,20 +96,23 @@
         async mounted() {
           this.table = new Tabulator(this.$refs.events, {
             maxHeight:"80vh",
-            layout:"fitData",
+            layout:"fitColumns",
             movableColumns: true,
             persistence:true,
             persistenceMode:true,
             data: this.events,
             reactiveData:true,
             columns: [
-                {title:"Type", field:"involvedObject.kind", sorter:"string", minWidth:200},
-                {title:"Name", field:"involvedObject.name", sorter:"string", minWidth:250},
-                {title:"Namespace", field:"involvedObject.namespace", sorter:"string", minWidth:250},
-                {title:"Events", field:"count", sorter:"number", minWidth:250},
-                {title:"Time", field:"lastTimestamp", sorter:"time", minWidth:200},
-                {title:"Reason", field:"reason", sorter:"string", minWidth:450},
-                {title:"Message", field:"message", sorter:"string", minWidth:350},
+                {title:"Type", field:"type", sorter:"string", minWidth:150},
+                {title:"Message", field:"message", formatter:formatMessage, sorter:"string", minWidth:350, headerSort:false},
+                {title:"Namespace", field:"involvedObject.namespace", sorter:"string", minWidth:150},
+                {title:"Source", field:"involvedObject.name", formatter:formatSource, sorter:"string", minWidth:250, headerSort:false},
+                {title:"Events", field:"count", sorter:"number", minWidth:100},
+                {title:"Last Seen", field:"lastTimestamp", formatter:formatAge, minWidth:100,
+                 sorter:"datetime", sorterParams:{
+                     format:"iso",
+                     alignEmptyValues:"top",
+                 }},
             ],
           });
           
