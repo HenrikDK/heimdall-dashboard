@@ -8,13 +8,12 @@
     <link rel="icon" href="/favicon.svg">
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tabulator-tables@5.3.4/dist/css/tabulator_semanticui.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vue-select@4.0.0-beta.5/dist/vue-select.css">
     <link rel="stylesheet" href="/css/search-styles.css" asp-append-version="true">
 
-    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21"></script>    
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.3"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@5.3.4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.3.3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.0.4"></script>
+    
     <script src="https://cdn.tailwindcss.com"></script> 
     <!-- <script src="https://cdn.jsdelivr.net/npm/tailwindcss@3.1.8"></script> -->
 
@@ -24,18 +23,17 @@
             extend: {
               colors: {
                 k8s: '#326ce5',
+              },
+              backgroundImage: {
+                'multiselect-caret': "url('/art/ms-caret.svg')",
+                'multiselect-spinner': "url('/art/ms-spinner.svg')",
+                'multiselect-remove': "url('/art/ms-clear.svg')",
               }
             }
           }
-        }
+        }        
       </script>
     
-    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.37"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue-router@4.1.5"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue-echarts@6.1.0"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue-select@4.0.0-beta.5"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue-search-input@1.1.10"></script>
-
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <script src="~/js/api.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
@@ -46,33 +44,64 @@
     @RenderBody()
 </div>
 
+<script type="importmap">
+{
+    "imports": {
+        "vue": "https://cdn.jsdelivr.net/npm/vue@3.2.40/dist/vue.esm-browser.js",
+        "@@vue/devtools-api": "https://cdn.jsdelivr.net/npm/@@vue/devtools-api@6.4.3/lib/esm/index.min.js",
+        
+        "vue-router": "https://cdn.jsdelivr.net/npm/vue-router@4.1.5/dist/vue-router.esm-browser.js",
+        
+        "vue-search-input": "https://cdn.jsdelivr.net/npm/vue-search-input@1.1.10/dist/vue-search-input.es.js",
+                
+        "tabulator": "https://cdn.jsdelivr.net/npm/tabulator-tables@5.3.4/dist/js/tabulator_esm.min.js",
+        
+        "vue-echarts": "https://cdn.jsdelivr.net/npm/vue-echarts@6.2.3/dist/index.esm.min.js",
+        "vue-demi": "https://cdn.jsdelivr.net/npm/vue-demi@0.13.11/lib/index.mjs",
+        "resize-detector": "https://cdn.jsdelivr.net/npm/resize-detector@0.3.0/esm/index.js",
+        "echarts/core": "https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.esm.min.js",
+        
+        "vue-multiselect": "https://cdn.jsdelivr.net/npm/@@vueform/multiselect@2.5.6/dist/multiselect.js",
+        
+        "gridjs": "https://cdn.jsdelivr.net/npm/gridjs@5.1.0/dist/gridjs.production.es.min.js"        
+    }
+}
+</script>
+
 @RenderSection("VueComponents", required: false)
 
 @RenderSection("Scripts", required: false)
 
 <script type="module">
-    const router = VueRouter.createRouter({
-      history: VueRouter.createWebHashHistory(),
+    import { createApp } from 'vue'
+    import { createRouter, createWebHashHistory } from 'vue-router'
+    import { default as Search } from 'vue-search-input'
+    import { default as ECharts } from 'vue-echarts'
+    import { default as Multiselect } from 'vue-multiselect'
+    
+    const router = createRouter({
+      history: createWebHashHistory(),
       routes
     })
 
-    const app = Vue.createApp({
+    const app = createApp({
     methods: {},
     mixins: mixinArray,
     data() {
         return {
-            namespace: "",
+            namespaces: [],
             search: "",
         }
     }})
-    .component('v-chart', VueECharts)
-    .component('v-select', window['vue-select'])
-    .component('v-search', VueSearchInput);
+    .component('v-chart', ECharts)
+    .component('v-multi', Multiselect)
+    .component('v-search', Search);
     Object.entries(components).forEach(([k,v]) =>{
         app.component(k, v)
     });
     app.use(router)
     app.mount('#app');
 </script>
+
 </body>
 </html>

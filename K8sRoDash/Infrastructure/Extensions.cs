@@ -10,7 +10,8 @@ public static class Extensions
         return Convert.ToBase64String(bytes);
     }
 
-    public static string FromBase64(string value) {
+    public static string FromBase64(string value)
+    {
         if (string.IsNullOrEmpty(value)) return value;
 
         var bytes = Convert.FromBase64String(value);

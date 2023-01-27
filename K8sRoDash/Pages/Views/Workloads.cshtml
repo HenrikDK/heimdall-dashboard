@@ -13,61 +13,174 @@
             </div>
         </div>
         
-        <div id="workloads-table" ref="workloads" v-show="workloadData.length > 0" class="vh-80 w-full"></div>        
+        <div id="workloads-table" ref="workloads" v-show="workloadData.length > 0" class="vh-85 w-full"></div>        
     </div>
 </template>
 
-<script>
+<script type="module">
+    function formatType(cell, formatterParams, onRendered){
+         let data = cell.getData();
+         if (!data.kind) return "";
+         let result = `<img src="art/${data.kind.toLowerCase()}.svg" class="w-5 h-5" alt="${data.kind}"/>`;
+         return result;
+    }
+    
+    function formatDeploymentStatus(cell, formatterParams, onRendered){
+        let data = cell.getData();
+        if (!data.kind) return "";
+        let result = "";
+        if (["DaemonSet", "StatefulSet"].includes(data.kind))
+        {
+            result += '<div class="px-1 text-green-500">Running</div>'
+        }
+        
+        if (data.kind === "Deployment")
+        {
+            let conditions = data.status.conditions;
+            result += '<div class="flex">';
+            result += conditions.map(x => x.type).sort().map(x => {
+              let color = x === "Available" ? "text-blue-500" : "text-green-500";
+              return `<div class="px-1 ${color}">${x}</div>`  
+            }).join('');
+            result += '</div>'
+        }
+        
+        if (data.kind === "Job")
+        {
+            let conditions = data.status.conditions;
+            result += conditions.map(x => `<div class="px-1 text-green-500">${x.type}</div>`).join('');
+        }
+         
+        if (data.kind === "CronJob")
+        {
+            let active = data.status.active;
+            if (active){
+                result += '<div class="px-1 text-green-500">Running</div>'
+            }else {
+                result += '<div class="px-1 text-grey-300">Waiting</div>'
+            }
+        }
+        
+        return result;           
+    }
+        
+    function formatPods(cell, formatterParams, onRendered){
+        let data = cell.getData();
+        if (!data.kind) return "";
+        let result = "";
+        if (data.kind === "DaemonSet")
+        {
+            let scheduled = data.status.currentNumberScheduled;
+            let ready = data.status.numberReady;
+            let waiting = 0;
+            if (scheduled > ready){
+                waiting = scheduled - ready;
+            }
+            result += [...Array(waiting)].map(x => '<div class="h-4 w-4 bg-gray-300 rounded-sm"></div>').join('');
+            result += [...Array(ready)].map(x => '<div class="h-4 w-4 bg-green-500 rounded-sm"></div>').join('');
+        }
+        
+        if (data.kind === "StatefulSet")
+        {
+            let desired = data.status.replicas;
+            let current = data.status.currentReplicas;
+            let waiting = 0;
+            if (desired > current){
+                waiting = desired - current;
+            }
+            result += [...Array(waiting)].map(x => '<div class="h-4 w-4 bg-gray-300 rounded-sm"></div>').join('');
+            result += [...Array(current)].map(x => '<div class="h-4 w-4 bg-green-500 rounded-sm"></div>').join('');
+        }        
+        
+        if (data.kind === "Deployment")
+        {
+            let scheduled = data.status.replicas;
+            let ready = data.status.readyReplicas;
+            let waiting = 0;
+            if (scheduled > ready){
+                waiting = scheduled - ready;
+            }
+            result += [...Array(waiting)].map(x => '<div class="h-4 w-4 bg-gray-300 rounded-sm"></div>').join('');
+            result += [...Array(ready)].map(x => '<div class="h-4 w-4 bg-green-500 rounded-sm"></div>').join('');
+        }
+        
+        if (data.kind === "Job")
+        {
+            let ready = data.status.ready;
+            let succeeded = data.status.succeeded;
+            result += [...Array(ready)].map(x => '<div class="h-4 w-4 bg-green-500 rounded-sm"></div>').join('');
+            result += [...Array(succeeded)].map(x => '<div class="h-4 w-4 bg-gray-300 rounded-sm"></div>').join('');
+        }
+         
+        if (data.kind === "CronJob")
+        {
+            let active = data.status.active;
+            result += active.map(x => '<div class="h-6 w-6 bg-green-500 rounded-sm"></div>').join('');
+        }
+         
+        return result;
+    }
+    
+    import { TabulatorFull as Tabulator } from 'tabulator'
+
     components["workloads"] = {
         template: "#workloads",
         data() {
             return {
-                cronJobs: {},
-                daemonSets: {},
-                workloads: {},
-                jobs: {},
-                statefulSets: {},
-                result: [],
-                updateTimer: '',
-                workloadData: [
-                    {type: "deamonset", name: "petstore-pet-api", namespace: "petstore", age: "22d4h", pods: "petstore-pet-api-dxsflj"},
-                    {type: "statefulset", name: "petstore-store-api", namespace: "petstore", age: "10d5h", pods: "petstore-store-api-xfdse"},
-                    {type: "replicaset", name: "petstore-lobster-api", namespace: "petstore", age: "13d5h", pods: "petstore-lobster-api-dflkj"},
-                    {type: "cronjob", name: "petstore-order-api", namespace: "petstore", age: "14min", pods: "petstore-order-api-ysdfs"},
-                    {type: "jobs", name: "petstore-user-api", namespace: "petstore", age: "1h20m", pods: "petstore-user-api-kdlfjg"},
-                ],                
+                cronJobs: null,
+                daemonSets: null,
+                workloads: null,
+                jobs: null,
+                statefulSets: null,
+                table: null,
+                workloadData: [],                
             }
         },
-        props: ['namespace', 'search'],        
+        props: ['namespaces', 'search'],        
         computed: {
             workloadsAvailable: () => workloadsReady(),
             podsAvailable: () => podReady(),
         },
-        watch: {
-          namespace: function (val){
-          },
-        },
         methods: {
             updateWorkloads(){
-                if (!this.workloads || !this.workloads.items) return;
+                if (!this.workloads) return;
                 if (!this.daemonSets) return;
                 if (!this.cronJobs) return;
                 if (!this.jobs) return;
                 if (!this.statefulSets) return;
                 
-                /* 
-                    this.result = this.workloads.items
-                        .map(x => new { 
-                            name: x.metadata.name,
-                            namespace: x.metadata.namespace,
-                            pod: x.spec.template.spec.name,
-                            age: x.metadata.creationTimestamp,
-                })*/
+                let items = [this.workloads, this.daemonSets, this.cronJobs, this.jobs, this.statefulSets];
+                
+                let result = items.flat().filter(x => !!x);
+                
+                if (this.namespaces){
+                    result.filter(x => filterName(x, this.namespaces))
+                }
+                
+                this.workloadData = result;
+                this.table.setData(this.workloadData);
+                this.table.redraw(true);
+            },
+            async searchTable() {
+                if (!this.cluster && this.cluster.length > 0) return;
+              
+                let ns = [{ label: 'All namespaces', value: ''}]
+              
+                this.namespaces = ns;
             }
         },
+        watch: {
+            namespace: function (){this.updateWorkloads()},
+            cronJobs: function (){this.updateWorkloads()},
+            daemonSets: function (){this.updateWorkloads()},
+            workloads: function (){this.updateWorkloads()},
+            jobs: function (){this.updateWorkloads()},
+            statefulSets: function (){this.updateWorkloads()},
+            search: function (){this.searchTable()},
+        },
         async mounted() {
-              this.events = new Tabulator(this.$refs.workloads, {
-                maxHeight:"80vh",
+              this.table = new Tabulator(this.$refs.workloads, {
+                maxHeight:"85vh",
                 layout:"fitData",
                 movableColumns: true,
                 persistence:true,
@@ -75,18 +188,23 @@
                 data: this.workloadData,
                 reactiveData:true,
                 columns: [
-                    {title:"Type", field:"type", sorter:"string", minWidth:250},
-                    {title:"Name", field:"name", sorter:"string", minWidth:350},
-                    {title:"Namespace", field:"namespace", sorter:"string", minWidth:200},
-                    {title:"Age", field:"age", sorter:"string", minWidth:200},
-                    {title:"Pods", field:"pods", sorter:"string", minWidth:300},
+                    {title:"Type", field:"kind", minWidth:150, headerSort:false},
+                    {title:"Name", field:"metadata.name", sorter:"string", minWidth:350},
+                    {title:"Namespace", field:"metadata.namespace", sorter:"string", minWidth:200},
+                    {title:"Pods", field:"pods", formatter:formatPods, minWidth:150, headerSort:false},
+                    {title:"Age", field:"metadata.creationTimestamp", formatter:formatAge, minWidth:100,
+                     sorter:"datetime", sorterParams:{
+                         format:"iso",
+                         alignEmptyValues:"top",
+                     }},
+                    {title:"Status", field:"status", formatter:formatDeploymentStatus, minWidth:200, headerSort:false},
                 ],
               });
               
               var host = window.location.origin;
               streamResults(host + '/k8s/apis/apps/v1/deployments', j => this.workloads = j)
               streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => this.daemonSets = j)
-              streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => this.statefulsets = j)
+              streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => this.statefulSets = j)
               streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => this.cronJobs = j)
               streamResults(host + '/k8s/apis/batch/v1/jobs', j => this.jobs = j)
         }

@@ -27,30 +27,62 @@
         
         <hr/>
         
-        <template v-if="eventData.length > 0">
+        <template v-if="events.length > 0">
             <div class="flex my-2 items-center">
                 <span class="text-slate-500 text-2xl font-light sans">Events</span>
             </div>
         </template>
 
-        <div id="events-table" ref="events" v-show="eventData.length > 0" class="vh-80 w-full"></div>
+        <div id="events-table" ref="events" v-show="events.length > 0" class="vh-80 w-full"></div>
     </div>
 </template>
 
-<script>
+<script type="module">
+    import { Grid } from 'gridjs'
+    import { TabulatorFull as Tabulator } from 'tabulator'
+
+    function formatMessage(cell, formatterParams, onRendered){
+         let data = cell.getData();
+         let fontClass = data.type === "Warning" ? "text-red-500" : ""; 
+         return `<div class="${fontClass}">${data.message}</div>`;
+    }
+
+    function formatSource(cell, formatterParams, onRendered){
+         let data = cell.getData();
+         return `<div class="text-blue-500">${data.involvedObject.kind + ": " + data.involvedObject.name}</div>`;
+    }
+
     components["cluster"] = {
         template: "#cluster",
         data() {
             return {
-                events: {},
-                eventData: [
-                    {type: "info", name: "flux-something", time: "22d4h", reason: "explosion in main reactor core", event: "bla bla bla"},
-                    {type: "error", name: "flux-something", time: "10d5h", reason: "explosion in main reactor core", event: "bla bla bla"},
-                    {type: "info", name: "kube-controller", time: "13d5h", reason: "explosion in main reactor core", event: "bla bla bla"},
-                    {type: "warning", name: "cert-manager", time: "14min", reason: "explosion in main reactor core", event: "bla bla bla"},
-                    {type: "error", name: "pod-manager", time: "1h20m", reason: "explosion in main reactor core", event: "bla bla bla"},
-                ],
+                clusterEvents: null,
+                events: [],
+                table: null,
+                clusterPods: null,
+                clusterPodMetrics: null,
+                clusterNodes: null,
+                clusterNodeMetrics: null,
             }
+        },
+        methods: {
+              async updateEvents() {
+                  if (!this.clusterEvents) return;
+                  
+                  const currentTime = new Date();
+                  const before12Hours = new Date(currentTime.setHours(currentTime.getHours() - 12))
+                  var events = this.clusterEvents.filter(x=>(new Date(x.lastTimestamp)) >= before12Hours)
+                  if (events.length === 0){
+                      events = this.clusterEvents.slice(0, 100);
+                  }
+                  
+                  this.events = events;
+                  this.table.setData(this.events);
+                  this.table.redraw(true);
+              }
+          },
+          watch: {
+            clusterEvents: function (){this.updateEvents()},
         },
         props: ['namespace', 'search'],
         computed: {
@@ -61,23 +93,35 @@
             podCpuUsage: () => podCpu(),
             podMemoryUsage: () => podMemory(),
         },
-        mounted() {
-          this.events = new Tabulator(this.$refs.events, {
+        async mounted() {
+          this.table = new Tabulator(this.$refs.events, {
             maxHeight:"80vh",
-            layout:"fitData",
+            layout:"fitColumns",
             movableColumns: true,
             persistence:true,
             persistenceMode:true,
-            data: this.eventData,
+            data: this.events,
             reactiveData:true,
             columns: [
-                {title:"Type", field:"type", sorter:"string", minWidth:200},
-                {title:"Name", field:"name", sorter:"string", minWidth:250},
-                {title:"Time", field:"time", sorter:"time", minWidth:200},
-                {title:"Reason", field:"reason", sorter:"string", minWidth:450},
-                {title:"Event", field:"event", sorter:"string", minWidth:350},
+                {title:"Type", field:"type", sorter:"string", minWidth:150},
+                {title:"Message", field:"message", formatter:formatMessage, sorter:"string", minWidth:350, headerSort:false},
+                {title:"Namespace", field:"involvedObject.namespace", sorter:"string", minWidth:150},
+                {title:"Source", field:"involvedObject.name", formatter:formatSource, sorter:"string", minWidth:250, headerSort:false},
+                {title:"Events", field:"count", sorter:"number", minWidth:100},
+                {title:"Last Seen", field:"lastTimestamp", formatter:formatAge, minWidth:100,
+                 sorter:"datetime", sorterParams:{
+                     format:"iso",
+                     alignEmptyValues:"top",
+                 }},
             ],
           });
+          
+          var host = window.location.origin;
+          streamResults(host + '/k8s/api/v1/events', j => this.clusterEvents = j);
+          streamResults(host + '/k8s/api/v1/nodes', j => this.clusterNodes = j);
+          streamResults(host + '/k8s/api/v1/pods', j => this.clusterPods = j);
+          //streamResults(host + '/k8s/apis/metrics.k8s.io/v1beta1/nodes', j => this.clusterNodeMetrics = j);
+          //streamResults(host + '/k8s/apis/metrics.k8s.io/v1beta1/pods', j => this.clusterPodMetrics = j);
         }
     };
     
