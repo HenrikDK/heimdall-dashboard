@@ -1,4 +1,4 @@
-﻿namespace K8sRoDash.Pages;
+﻿namespace Heimdall.Dashboard.Ui.Pages;
 
 public class IndexModel : PageModel
 {
