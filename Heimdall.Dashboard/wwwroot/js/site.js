@@ -21,7 +21,7 @@ let filterName = (name, ns) => {
 function formatAge(cell, formatterParams, onRendered){
     var DT = window.DateTime || luxon.DateTime;
     var invalid = "";
-    const unit = ["years", "days", "hours", "minutes", "seconds"]
+    const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
     var date = DT.now();
 
     var value = cell.getValue();
