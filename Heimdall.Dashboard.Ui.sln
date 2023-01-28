@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Heimdall.Dashboard", "Heimdall.Dashboard\Heimdall.Dashboard.csproj", "{0113EBEF-ECB8-48B8-834B-B9A80FBCACF7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Heimdall.Dashboard.Ui", "Heimdall.Dashboard.Ui\Heimdall.Dashboard.Ui.csproj", "{0113EBEF-ECB8-48B8-834B-B9A80FBCACF7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
