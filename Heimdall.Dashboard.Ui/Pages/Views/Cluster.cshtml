@@ -38,7 +38,6 @@
 </template>
 
 <script type="module">
-    import { Grid } from 'gridjs'
     import { TabulatorFull as Tabulator } from 'tabulator'
 
     function formatMessage(cell, formatterParams, onRendered){
@@ -125,5 +124,5 @@
         }
     };
     
-    routes.push({path:'/', component: components["cluster"]})
+    routes.push({path:'/', name:'cluster',  component: components["cluster"]})
 </script>
