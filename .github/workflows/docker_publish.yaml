@@ -1,0 +1,28 @@
+name: Docker Publish
+
+on:
+  push:
+    # Publish `master` as Docker `latest` image.
+    branches:
+      - main
+      - master
+jobs:
+  build-dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Build image
+        run: docker build . --file Dockerfile --tag heimdall-dashboard-ui
+        working-directory: Heimdall.Dashboard.Ui
+
+      - name: Log into registry
+        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USER }} --password-stdin
+
+      - name: Push image
+        run: |
+          build_id=$(date +'%Y%m%d')
+          build_id+="-"
+          build_id+=$(git rev-parse --short "$GITHUB_SHA")
+          docker tag heimdall-dashboard-ui ${{ secrets.DOCKER_USER }}/heimdall-dashboard-ui:$build_id
+          docker push ${{ secrets.DOCKER_USER }}/heimdall-dashboard-ui:$build_id
