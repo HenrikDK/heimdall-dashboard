@@ -1,4 +1,4 @@
-namespace K8sRoDash.Infrastructure;
+namespace Heimdall.Dashboard.Ui.Infrastructure;
 
 public static class Extensions
 {

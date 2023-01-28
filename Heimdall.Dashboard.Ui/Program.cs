@@ -1,4 +1,4 @@
-using K8sRoDash.Infrastructure;
+using Heimdall.Dashboard.Ui.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
