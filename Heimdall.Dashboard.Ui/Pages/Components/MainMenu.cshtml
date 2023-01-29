@@ -21,9 +21,7 @@
 
             <div class="group min-w-12 min-h-12">
                 <router-link to="/ingresses" class="flex flex-col items-center pointer py-3 !text-black">
-                    <img v-if="$route.path.startsWith('/ingresses')" src="art/ing-blue.svg" class="w-10 h-10 group-hover:scale-125" alt="Ingress"/>
-                    <img v-else src="art/ing-grey.svg" class="w-10 h-10 group-hover:scale-125" alt="Ingress"/>
-                    <span class="text-xs m-1 uppercase">Ingress</span>
+                    <ingress-btn :active="$route.path.startsWith('/ingresses')"></ingress-btn>
                 </router-link>
             </div>
         </nav>
