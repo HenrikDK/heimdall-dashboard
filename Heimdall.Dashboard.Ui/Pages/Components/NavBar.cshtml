@@ -16,15 +16,12 @@
                 </div>
                 <div class="flex justify-end items-center">
                     <template v-if="$route.path != '/'">
-                    <div class="mr-3 w-60">
-                        <v-multi v-model="selected" mode="multiple" :classes="styles" :close-on-select="false" :hide-selected="false" placeholder="All namespaces" :options="namespaces" @@update:model-value="$emit('select-ns', $event.value)"></v-multi>
-                    </div>
-<!--                    <div class="mr-3">
-                        <v-select v-model="selected" :clearable="false" :options="namespaces" class="header-select" @@update:model-value="$emit('select-ns', $event.value)"></v-select>
-                    </div> -->
-                    <div class="mr-3">
-                        <v-search v-model="search" @@update:model-value="$emit('search', $event);"></v-search>
-                    </div>
+                        <div class="mr-3 w-60">
+                            <v-multi v-model="selected" mode="multiple" :classes="styles" :close-on-select="false" :hide-selected="false" placeholder="All namespaces" :options="namespaces" @@update:model-value="$emit('select-ns', $event.value)"></v-multi>
+                        </div>
+                        <div class="mr-3">
+                            <v-search v-model="search" @@update:model-value="$emit('search', $event);"></v-search>
+                        </div>
                     </template>
                 </div>
             </div>
