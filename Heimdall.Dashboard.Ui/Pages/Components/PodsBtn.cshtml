@@ -1,0 +1,34 @@
+﻿<template id="pods-btn">
+    <div class="flex flex-col items-center !text-black">
+        <div class="w-10 h-10 group-hover:scale-125" alt="Pods" :class="[active ? 'fill-k8s' : 'fill-[#888098]']">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18.035334 17.500378" id="svg13826">
+                <g id="layer1" transform="translate(-0.99262638,-1.174181)">
+                    <g id="g70" transform="matrix(1.0148887,0,0,1.0148887,16.902146,-2.698726)">
+                        <path id="path3055"
+                              d="m -6.8492015,4.2724668 a 1.1191255,1.1099671 0 0 0 -0.4288818,0.1085303 l -5.8524037,2.7963394 a 1.1191255,1.1099671 0 0 0 -0.605524,0.7529759 l -1.443828,6.2812846 a 1.1191255,1.1099671 0 0 0 0.151943,0.851028 1.1191255,1.1099671 0 0 0 0.06362,0.08832 l 4.0508,5.036555 a 1.1191255,1.1099671 0 0 0 0.874979,0.417654 l 6.4961011,-0.0015 a 1.1191255,1.1099671 0 0 0 0.8749788,-0.416906 L 1.3818872,15.149453 A 1.1191255,1.1099671 0 0 0 1.5981986,14.210104 L 0.15212657,7.9288154 A 1.1191255,1.1099671 0 0 0 -0.45339794,7.1758396 L -6.3065496,4.3809971 A 1.1191255,1.1099671 0 0 0 -6.8492015,4.2724668 Z"
+                              style="stroke:none;stroke-width:0;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"/>
+                    </g>
+                    <g id="g3341" transform="translate(0.12766661,0.35147801)">
+                        <path id="path910"
+                              style="fill:#ffffff;fill-rule:evenodd;stroke:none;stroke-width:0.26458332;stroke-linecap:square;stroke-miterlimit:10"
+                              d="M 6.2617914,7.036086 9.8826317,5.986087 13.503462,7.036086 9.8826317,8.086087 Z"/>
+                        <path id="path912"
+                              style="fill:#ffffff;fill-rule:evenodd;stroke:none;stroke-width:0.26458332;stroke-linecap:square;stroke-miterlimit:10"
+                              d="m 6.2617914,7.43817 0,3.852778 3.3736103,1.868749 0.0167,-4.713193 z"/>
+                        <path id="path914"
+                              style="fill:#ffffff;fill-rule:evenodd;stroke:none;stroke-width:0.26458332;stroke-linecap:square;stroke-miterlimit:10"
+                              d="m 13.503462,7.43817 0,3.852778 -3.37361,1.868749 -0.0167,-4.713193 z"/>
+                    </g>
+                </g>
+            </svg>
+        </div>
+        <span class="text-xs m-1 uppercase">Pods</span>
+    </div>
+</template>
+
+<script>
+    components["pods-btn"] = {
+      template: "#pods-btn",
+      props: ['active']
+    };
+</script>
