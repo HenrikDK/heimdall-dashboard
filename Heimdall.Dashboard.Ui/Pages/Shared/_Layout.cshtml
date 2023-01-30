@@ -47,23 +47,22 @@
 <script type="importmap">
 {
     "imports": {
-        "vue": "https://cdn.jsdelivr.net/npm/vue@3.2.40/dist/vue.esm-browser.js",
-        "@@vue/devtools-api": "https://cdn.jsdelivr.net/npm/@@vue/devtools-api@6.4.3/lib/esm/index.min.js",
+        "vue": "https://cdn.jsdelivr.net/npm/vue@3.2.45/dist/vue.esm-browser.js",
+        "@@vue/devtools-api": "https://cdn.jsdelivr.net/npm/@@vue/devtools-api@6.5.0/lib/esm/index.min.js",
         
         "vue-router": "https://cdn.jsdelivr.net/npm/vue-router@4.1.6/dist/vue-router.esm-browser.js",
         
-        "vue-search-input": "https://cdn.jsdelivr.net/npm/vue-search-input@1.1.10/dist/vue-search-input.es.js",
-                
+        "vue-search-input": "https://cdn.jsdelivr.net/npm/vue-search-input@1.1.11/dist/vue-search-input.es.js",
+        
         "tabulator": "https://cdn.jsdelivr.net/npm/tabulator-tables@5.3.4/dist/js/tabulator_esm.min.js",
         
-        "vue-echarts": "https://cdn.jsdelivr.net/npm/vue-echarts@6.2.3/dist/index.esm.min.js",
+        "vue-echarts": "https://cdn.jsdelivr.net/npm/vue-echarts@6.5.2/dist/index.esm.min.js",
         "vue-demi": "https://cdn.jsdelivr.net/npm/vue-demi@0.13.11/lib/index.mjs",
         "resize-detector": "https://cdn.jsdelivr.net/npm/resize-detector@0.3.0/esm/index.js",
         "echarts/core": "https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.esm.min.js",
         
-        "vue-multiselect": "https://cdn.jsdelivr.net/npm/@@vueform/multiselect@2.5.6/dist/multiselect.js",
-        
-        "gridjs": "https://cdn.jsdelivr.net/npm/gridjs@5.1.0/dist/gridjs.production.es.min.js"        
+        "headless-ui": "https://cdn.jsdelivr.net/npm/@@headlessui/vue@1.7.8/+esm",
+        "vue-multiselect": "https://cdn.jsdelivr.net/npm/@@vueform/multiselect@2.5.6/dist/multiselect.js"        
     }
 }
 </script>
@@ -78,6 +77,7 @@
     import { default as Search } from 'vue-search-input'
     import { default as ECharts } from 'vue-echarts'
     import { default as Multiselect } from 'vue-multiselect'
+    import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from 'headless-ui'
     
     const router = createRouter({
       history: createWebHashHistory(),
@@ -93,6 +93,10 @@
             search: "",
         }
     }})
+    .component('listbox',Listbox)
+    .component('listboxbutton',ListboxButton)
+    .component('listboxoption',ListboxOption)
+    .component('listboxoptions',ListboxOptions)
     .component('v-chart', ECharts)
     .component('v-multi', Multiselect)
     .component('v-search', Search);
