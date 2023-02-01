@@ -37,38 +37,33 @@
         }        
       </script>
     
+    <script type="importmap">
+    {
+        "imports": {
+            "vue": "https://cdn.jsdelivr.net/npm/vue@3.2.45/dist/vue.esm-browser.js",
+            "@@vue/devtools-api": "https://cdn.jsdelivr.net/npm/@@vue/devtools-api@6.5.0/lib/esm/index.min.js",
+            
+            "vue-router": "https://cdn.jsdelivr.net/npm/vue-router@4.1.6/dist/vue-router.esm-browser.js",
+            
+            "vue-search-input": "https://cdn.jsdelivr.net/npm/vue-search-input@1.1.11/dist/vue-search-input.es.js",
+            
+            "tabulator": "https://cdn.jsdelivr.net/npm/tabulator-tables@5.3.4/dist/js/tabulator_esm.min.js",
+            
+            "vue-echarts": "https://cdn.jsdelivr.net/npm/vue-echarts@6.5.2/dist/index.esm.min.js",
+            "vue-demi": "https://cdn.jsdelivr.net/npm/vue-demi@0.13.11/lib/index.mjs",
+            "resize-detector": "https://cdn.jsdelivr.net/npm/resize-detector@0.3.0/esm/index.js",
+            "echarts/core": "https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.esm.min.js",            
+        "echarts/core": "https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.esm.min.js",
+            "echarts/core": "https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.esm.min.js",            
+        }
+    }
+    </script>
+    
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <script src="~/js/api.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 </head>
 <body>
-
-<div id="app">
-    @RenderBody()
-</div>
-
-<script type="importmap">
-{
-    "imports": {
-        "vue": "https://cdn.jsdelivr.net/npm/vue@3.2.45/dist/vue.esm-browser.js",
-        "@@vue/devtools-api": "https://cdn.jsdelivr.net/npm/@@vue/devtools-api@6.5.0/lib/esm/index.min.js",
-        
-        "vue-router": "https://cdn.jsdelivr.net/npm/vue-router@4.1.6/dist/vue-router.esm-browser.js",
-        
-        "vue-search-input": "https://cdn.jsdelivr.net/npm/vue-search-input@1.1.11/dist/vue-search-input.es.js",
-        
-        "tabulator": "https://cdn.jsdelivr.net/npm/tabulator-tables@5.3.4/dist/js/tabulator_esm.min.js",
-        
-        "vue-echarts": "https://cdn.jsdelivr.net/npm/vue-echarts@6.5.2/dist/index.esm.min.js",
-        "vue-demi": "https://cdn.jsdelivr.net/npm/vue-demi@0.13.11/lib/index.mjs",
-        "resize-detector": "https://cdn.jsdelivr.net/npm/resize-detector@0.3.0/esm/index.js",
-        "echarts/core": "https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.esm.min.js",
-        
-        "headless-ui": "https://cdn.jsdelivr.net/npm/@@headlessui/vue@1.7.8/+esm",
-        "vue-multiselect": "https://cdn.jsdelivr.net/npm/@@vueform/multiselect@2.5.6/dist/multiselect.js"        
-    }
-}
-</script>
 
 @RenderSection("VueComponents", required: false)
 
