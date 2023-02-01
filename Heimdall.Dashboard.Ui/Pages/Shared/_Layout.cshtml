@@ -65,6 +65,10 @@
 </head>
 <body>
 
+<div id="app">
+    @RenderBody()
+</div>
+
 @RenderSection("VueComponents", required: false)
 
 @RenderSection("Scripts", required: false)
@@ -74,9 +78,10 @@
     import { createRouter, createWebHashHistory } from 'vue-router'
     import { default as Search } from 'vue-search-input'
     import { default as ECharts } from 'vue-echarts'
-    import { default as Multiselect } from 'vue-multiselect'
-    import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from 'headless-ui'
     
+    components['v-chart'] = ECharts;
+    components['v-search'] = Search;
+        
     const router = createRouter({
       history: createWebHashHistory(),
       routes
@@ -84,20 +89,12 @@
 
     const app = createApp({
     methods: {},
-    mixins: mixinArray,
     data() {
         return {
             namespaces: [],
             search: "",
         }
     }})
-    .component('listbox',Listbox)
-    .component('listboxbutton',ListboxButton)
-    .component('listboxoption',ListboxOption)
-    .component('listboxoptions',ListboxOptions)
-    .component('v-chart', ECharts)
-    .component('v-multi', Multiselect)
-    .component('v-search', Search);
     Object.entries(components).forEach(([k,v]) =>{
         app.component(k, v)
     });
