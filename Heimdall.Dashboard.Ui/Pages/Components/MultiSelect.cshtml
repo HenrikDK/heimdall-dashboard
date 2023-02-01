@@ -1,0 +1,157 @@
+﻿<template id="multiselect">
+  <div class="relative mx-auto w-full text-gray-200 flex items-center justify-end box-border cursor-pointer border border-white/[.4] outline-0 rounded bg-k8s text-base leading-snug outline-none">
+    <div class="" @@mousedown="handleMousedown" role="combobox" :aria-expanded="isOpen">
+      
+      <!-- Label -->
+      <template v-if="values.length > 0 && selected.length > 0">
+        <div class="flex items-center h-8 absolute left-0 top-0 pointer-events-none bg-transparent leading-snug pl-3.5">
+          Selected ({{selected.length}}) 
+        </div>
+      </template>
+      <template v-if="values.length > 0 && selected.length === 0">
+        <div class="flex items-center h-8 absolute left-0 top-0 pointer-events-none bg-transparent leading-snug pl-3.5">
+          Select namespace 
+        </div>
+      </template>
+      
+      <!-- Spinner -->
+      <template v-if="values.length === 0">
+        <span class="w-4 h-4 z-10 mr-3.5 animate-spin flex-shrink-0 flex-grow-0" aria-hidden="true">
+          <svg viewBox="0 0 512 512" fill="white" xmlns="http://www.w3.org/2000/svg">
+              <path d="M456.433 371.72l-27.79-16.045c-7.192-4.152-10.052-13.136-6.487-20.636 25.82-54.328 23.566-118.602-6.768-171.03-30.265-52.529-84.802-86.621-144.76-91.424C262.35 71.922 256 64.953 256 56.649V24.56c0-9.31 7.916-16.609 17.204-15.96 81.795 5.717 156.412 51.902 197.611 123.408 41.301 71.385 43.99 159.096 8.042 232.792-4.082 8.369-14.361 11.575-22.424 6.92z">
+              </path>
+          </svg>
+        </span>
+      </template>
+      
+      <!-- Clear -->
+      <template v-if="values.length > 0 && selected.length > 0">
+        <span aria-hidden="true" tabindex="0" role="button" data-clear aria-roledescription="❎" @@click="clear" @@keyup.enter="clear"
+              class="pr-3.5 relative z-10 opacity-40 text-white transition duration-300 flex-shrink-0 flex-grow-0 flex hover:opacity-80">
+          <span class="w-2.5 h-4 py-px box-content inline-block">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75L14.25 12m0 0l2.25 2.25M14.25 12l2.25-2.25M14.25 12L12 14.25m-2.58 4.92l-6.375-6.375a1.125 1.125 0 010-1.59L9.42 4.83c.211-.211.498-.33.796-.33H19.5a2.25 2.25 0 012.25 2.25v10.5a2.25 2.25 0 01-2.25 2.25h-9.284c-.298 0-.585-.119-.796-.33z" />
+            </svg>
+          </span>
+        </span>
+      </template>
+      
+      <!-- Caret -->
+      <template v-if="values.length > 0 && selected.length > 0">
+        <span class="w-2.5 h-4 py-px box-content mr-3.5 relative z-10 opacity-40 flex-shrink-0 flex-grow-0 transition-transform transform pointer-events-none"
+              @@click="handleCaretClick" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+          </svg>
+        </span>
+      </template>
+      
+      <!-- Options -->
+      <div class="max-h-60 absolute -left-px -right-px bottom-0 transform translate-y-full border border-gray-300 -mt-px overflow-y-scroll z-50 bg-k8s flex flex-col rounded-b" tabindex="-1">
+        <ul class="flex flex-col p-0 m-0 list-none text-white/[.7]" role="listbox">
+          <li v-for="v in values" @@click="handleOptionClick(v)" role="option">
+            <template v-if="selected.contains(v)">
+              <span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </span>  
+            </template>
+            <span>{{ v }}</span>
+          </li>
+        </ul>
+
+        <template v-if="values.length === 0" name="nooptions">
+          <div class="py-2 px-2 text-gray-200 bg-k8s text-left">
+            Loading...
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script type="module">        
+    components["multiselect"] = {
+      data() {
+        return {
+            noOptions: false,
+            isOpen: false,
+            selected: []
+        }
+      },
+      template: "#multiselect",
+      props: ['values'],
+      computed: {
+        handleOptionClick(option){
+          if (this.selected.contains(option)) {
+            this.selected.remove(option);
+            return
+          }
+    
+          if (option) {
+            handleOptionAppend(option);
+            select(option);
+          }
+              
+          focus();                  
+        },
+      },
+      watch:{
+        isOpen(val) {
+          if (val) {
+            let firstSelected = multiselect.value.querySelectorAll(`[data-selected]`)[0];
+        
+            if (!firstSelected) {
+              return
+            }
+        
+            let wrapper = firstSelected.parentElement.parentElement;
+              
+            nextTick(() => {
+              /* istanbul ignore next */
+              if (wrapper.scrollTop > 0) {
+                return
+              }
+      
+              wrapper.scrollTop = firstSelected.offsetTop;
+            });
+          }
+        }
+      },
+      methods:{
+        handleCaretClick() {
+          this.deactivate();
+          blur();
+        },
+        handleMousedown(e){
+          mouseClicked.value = true;
+      
+          if (isOpen.value && (e.target.isEqualNode(wrapper.value) || e.target.isEqualNode(tags.value))) {
+            setTimeout(() => {
+              this.deactivate();
+            }, 0);
+          } else if (document.activeElement.isEqualNode(wrapper.value) && !isOpen.value) {
+            activate();    
+          }
+      
+          setTimeout(() => {
+            mouseClicked.value = false;
+          }, 0);
+        },
+        deactivate() {
+          isActive.value = false;
+      
+          setTimeout(() => {
+            if (!isActive.value) {
+              close();
+      
+              if (clearOnBlur.value) {
+                clearSearch();
+              }
+            }
+          }, 1);
+        },  
+      },
+    };
+</script>
