@@ -3,33 +3,25 @@
         <nav class="fixed">
             <div class="group min-w-12 min-h-12">
                 <router-link to="/workloads" class="flex flex-col items-center pointer py-3 !text-black">
-                    <img v-if="$route.path.startsWith('/workloads')" src="art/deploy-blue.svg" class="w-10 h-10 group-hover:scale-125" alt="Deployments"/>
-                    <img v-else src="art/deploy-grey.svg" class="w-10 h-10 group-hover:scale-125" alt="Deployments"/>
-                    <span class="text-xs m-1 uppercase">Workloads</span>
+                    <deployments-btn :active="$route.path.startsWith('/workloads')"></deployments-btn>
                 </router-link>
             </div>
 
             <div class="group min-w-12 min-h-12">
                 <router-link to="/pods" class="flex flex-col items-center pointer py-3 !text-black">
-                    <img v-if="$route.path.startsWith('/pods')" src="art/pod-blue.svg" class="w-10 h-10 group-hover:scale-125" alt="Pods"/>
-                    <img v-else src="art/pod-grey.svg" class="w-10 h-10 group-hover:scale-125" alt="Pods"/>
-                    <span class="text-xs m-1 uppercase">Pods</span>
+                    <pods-btn :active="$route.path.startsWith('/pods')"></pods-btn>
                 </router-link>
             </div>
 
             <div class="group min-w-12 min-h-12">
                 <router-link to="/services" class="flex flex-col items-center pointer py-3 !text-black">
-                    <img v-if="$route.path.startsWith('/services')" src="art/svc-blue.svg" class="w-10 h-10 group-hover:scale-125" alt="Services"/>
-                    <img v-else src="art/svc-grey.svg" class="w-10 h-10 group-hover:scale-125" alt="Services"/>
-                    <span class="text-xs m-1 uppercase">Service</span>
+                    <services-btn :active="$route.path.startsWith('/services')"></services-btn>
                 </router-link>
             </div>
 
             <div class="group min-w-12 min-h-12">
                 <router-link to="/ingresses" class="flex flex-col items-center pointer py-3 !text-black">
-                    <img v-if="$route.path.startsWith('/ingresses')" src="art/ing-blue.svg" class="w-10 h-10 group-hover:scale-125" alt="Ingress"/>
-                    <img v-else src="art/ing-grey.svg" class="w-10 h-10 group-hover:scale-125" alt="Ingress"/>
-                    <span class="text-xs m-1 uppercase">Ingress</span>
+                    <ingress-btn :active="$route.path.startsWith('/ingresses')"></ingress-btn>
                 </router-link>
             </div>
         </nav>
@@ -39,11 +31,5 @@
 <script>
     components["main-menu"] = {
       template: "#main-menu",
-      data() {
-          return {}
-      }
     };
 </script>
-
-<style>
-</style>

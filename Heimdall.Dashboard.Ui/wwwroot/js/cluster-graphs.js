@@ -26,6 +26,7 @@
                 top: '-5%',
                 height: '85%',
                 radius: ['55%', '85%'],
+                animationDuration: 300,
                 avoidLabelOverlap: false,
                 label: {
                     show: true,
@@ -76,6 +77,7 @@ function nodeCpu(){
                 top: '-5%',
                 height: '85%',
                 radius: ['55%', '85%'],
+                animationDuration: 300,
                 avoidLabelOverlap: false,
                 label: {
                     show: true,
@@ -125,6 +127,7 @@ function nodeReady(){
                 top: '-5%',
                 height: '85%',
                 radius: ['55%', '85%'],
+                animationDuration: 300,
                 avoidLabelOverlap: false,
                 label: {
                     show: true,
@@ -175,6 +178,7 @@ function podReady(){
                 top: '-5%',
                 height: '85%',
                 radius: ['55%', '85%'],
+                animationDuration: 300,
                 avoidLabelOverlap: false,
                 label: {
                     show: true,
@@ -225,6 +229,7 @@ function podMemory(){
                 top: '-5%',
                 height: '85%',
                 radius: ['55%', '85%'],
+                animationDuration: 300,
                 avoidLabelOverlap: false,
                 label: {
                     show: true,
@@ -274,6 +279,7 @@ function podCpu(){
                 top: '-5%',
                 height: '85%',
                 radius: ['55%', '85%'],
+                animationDuration: 300,
                 avoidLabelOverlap: false,
                 label: {
                     show: true,
@@ -324,6 +330,7 @@ function workloadsReady(){
                 top: '-5%',
                 height: '85%',
                 radius: ['55%', '85%'],
+                animationDuration: 300,
                 avoidLabelOverlap: false,
                 label: {
                     show: true,

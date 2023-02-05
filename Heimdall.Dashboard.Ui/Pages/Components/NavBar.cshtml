@@ -5,26 +5,25 @@
                 <div>
                     <router-link class="text-white cursor-pointer" to="/">
                         <div class="flex pt-1">
-                            <div>
-                                <img src="art/viking-ship.svg" width="65" alt="Skúta"/>
+                            <div class="w-16 fill-white" alt="Heimdall">
+                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 501 372">
+                                <path d="M 18.41 375.899 C -13.648 275.169 9.337 173.843 63.998 102.773 C 118.659 31.703 205.192 -9.418 299.785 10.054 C 375.317 25.602 435.781 76.897 470.819 144.294 C 505.857 211.692 515.588 295.477 489.978 375.908 L 489.82 376.406 L 489.344 376.408 C 451.932 376.565 414.52 376.685 377.108 376.767 C 383.641 372.539 426.311 342.902 432.134 286.547 C 436.062 248.512 421.278 224.825 414.915 216.573 C 411.087 210.974 404.651 207.3 397.364 207.3 C 385.619 207.3 376.115 216.814 376.115 228.55 C 376.115 240.291 385.618 249.794 397.364 249.794 C 400.057 249.794 402.636 249.292 405.009 248.377 C 410.966 269.714 398.056 288.538 342.812 298.943 C 338.208 295.704 332.594 293.804 326.536 293.804 C 317.738 293.804 309.876 297.811 304.679 304.1 C 296.709 304.846 288.179 305.476 279.058 305.987 C 275.237 300.438 269.489 296.318 262.779 294.592 L 262.779 268.892 C 309.371 270.269 345.916 277.901 346.315 277.976 C 348.317 278.413 350.401 277.934 352.042 276.711 C 353.535 275.589 354.511 273.93 354.782 272.083 C 354.914 271.564 355.341 270.111 355.734 268.824 C 359.046 257.682 367.844 228.106 367.886 194.539 C 367.916 175.331 365.02 157.806 359.305 142.45 C 352.28 123.576 340.919 107.794 325.541 95.52 C 324.285 94.522 322.729 93.972 321.121 93.972 L 262.779 93.972 L 262.779 72.732 C 262.779 68.81 259.611 65.646 255.699 65.646 C 251.787 65.646 248.617 68.81 248.617 72.732 L 248.617 93.972 L 149.459 93.972 C 146.761 93.972 144.302 95.508 143.108 97.925 C 141.915 100.334 142.195 103.218 143.83 105.366 C 166.875 135.498 176.187 171.887 171.512 213.505 C 167.981 244.98 157.328 267.787 157.225 268.016 C 156.048 270.485 156.406 273.431 158.149 275.548 C 159.513 277.209 161.532 278.14 163.62 278.14 C 164.203 278.14 164.784 278.059 165.361 277.914 C 189.517 271.793 217.531 268.682 248.617 268.68 L 248.617 294.592 C 241.446 296.437 235.374 301.019 231.581 307.156 C 223.374 307.067 215.674 306.812 208.45 306.417 C 203.369 298.812 194.705 293.804 184.872 293.804 C 177.26 293.804 170.348 296.805 165.257 301.69 C 130.103 295.519 113.315 285.65 104.774 280.093 C 104.77 280.093 104.764 280.093 104.759 280.093 C 103.489 278.888 101.771 278.12 99.876 278.12 C 95.963 278.12 92.796 281.295 92.796 285.219 C 92.296 304.625 115.16 357.823 134.586 376.769 C 96.071 376.686 57.558 376.562 19.044 376.399 L 18.568 376.397 L 18.41 375.899 Z"></path>
+                                </svg>
                             </div>
-                            <div class="px-3">
-                                <span class="text-5xl text-white">Skúta</span>
+                            <div class="px-4">
+                                <span class="text-5xl text-white">Heimdall</span>
                             </div>
                         </div>
                     </router-link>
                 </div>
                 <div class="flex justify-end items-center">
                     <template v-if="$route.path != '/'">
-                    <div class="mr-3 w-60">
-                        <v-multi v-model="selected" mode="multiple" :classes="styles" :close-on-select="false" :hide-selected="false" placeholder="All namespaces" :options="namespaces" @@update:model-value="$emit('select-ns', $event.value)"></v-multi>
-                    </div>
-<!--                    <div class="mr-3">
-                        <v-select v-model="selected" :clearable="false" :options="namespaces" class="header-select" @@update:model-value="$emit('select-ns', $event.value)"></v-select>
-                    </div> -->
-                    <div class="mr-3">
-                        <v-search v-model="search" @@update:model-value="$emit('search', $event);"></v-search>
-                    </div>
+                        <div class="mr-3 w-60">
+                            <multiselect v-model="selected" :values="namespaces" @@update:model-value="$emit('select-ns', $event.value)"></multiselect>
+                        </div>
+                        <div class="mr-3 w-60">
+                            <search v-model="search" @@update:model-value="$emit('search', $event);"></search>
+                        </div>
                     </template>
                 </div>
             </div>
@@ -43,46 +42,6 @@
             cluster: [],
             namespaces: [],
             search: '',
-            styles:{
-             container: 'relative mx-auto w-full text-gray-200 flex items-center justify-end box-border cursor-pointer border border-white/[.4] outline-0 rounded bg-k8s text-base leading-snug outline-none',
-             containerOpen: 'rounded-b-none',
-             containerOpenTop: 'rounded-t-none',
-             containerActive: 'focus:border-white',
-             multipleLabel: 'flex items-center h-8 absolute left-0 top-0 pointer-events-none bg-transparent leading-snug pl-3.5 rtl:left-auto rtl:right-0 rtl:pl-0 rtl:pr-3.5',
-             search: 'w-full absolute inset-0 outline-none focus:ring-0 appearance-none box-border border-0 text-base font-sans bg-k8s rounded pl-3.5 rtl:pl-0 rtl:pr-3.5',
-             tags: 'flex-grow flex-shrink flex flex-wrap items-center mt-1 pl-2 rtl:pl-0 rtl:pr-2',
-             tag: 'bg-green-500 text-white text-sm font-semibold py-0.5 pl-2 rounded mr-1 mb-1 flex items-center whitespace-nowrap rtl:pl-0 rtl:pr-2 rtl:mr-0 rtl:ml-1',
-             tagDisabled: 'pr-2 opacity-50 rtl:pl-2',
-             tagRemove: 'flex items-center justify-center p-1 mx-0.5 rounded-sm hover:bg-black hover:bg-opacity-10 group',
-             tagRemoveIcon: 'bg-multiselect-remove bg-center bg-no-repeat opacity-30 inline-block w-3 h-3 group-hover:opacity-60',
-             tagsSearchWrapper: 'inline-block relative mx-1 mb-1 flex-grow flex-shrink h-8',
-             tagsSearch: 'absolute inset-0 border-0 outline-none focus:ring-0 appearance-none p-0 text-base font-sans box-border w-full',
-             tagsSearchCopy: 'invisible whitespace-pre-wrap inline-block h-px',
-             placeholder: 'flex items-center h-8 absolute left-0 top-0 pointer-events-none bg-transparent leading-snug pl-3.5 text-gray-200 rtl:left-auto rtl:right-0 rtl:pl-0 rtl:pr-3.5',
-             caret: 'bg-multiselect-caret bg-center bg-no-repeat w-2.5 h-4 py-px box-content mr-3.5 relative z-10 opacity-40 flex-shrink-0 flex-grow-0 transition-transform transform pointer-events-none rtl:mr-0 rtl:ml-3.5',
-             caretOpen: 'rotate-180 pointer-events-auto',
-             clear: 'pr-3.5 relative z-10 opacity-40 text-white transition duration-300 flex-shrink-0 flex-grow-0 flex hover:opacity-80 rtl:pr-0 rtl:pl-3.5',
-             clearIcon: 'bg-multiselect-remove bg-center bg-no-repeat w-2.5 h-4 py-px box-content inline-block',
-             spinner: 'bg-multiselect-spinner bg-center bg-no-repeat w-4 h-4 z-10 mr-3.5 animate-spin flex-shrink-0 flex-grow-0 rtl:mr-0 rtl:ml-3.5',
-             inifite: 'flex items-center justify-center w-full',
-             inifiteSpinner: 'bg-multiselect-spinner bg-center bg-no-repeat w-4 h-4 z-10 animate-spin flex-shrink-0 flex-grow-0 m-3.5',
-             dropdown: 'max-h-60 absolute -left-px -right-px bottom-0 transform translate-y-full border border-gray-300 -mt-px overflow-y-scroll z-50 bg-k8s flex flex-col rounded-b',
-             dropdownTop: '-translate-y-full top-px bottom-auto rounded-b-none rounded-t',
-             dropdownHidden: 'hidden',
-             options: 'flex flex-col p-0 m-0 list-none text-white/[.7]',
-             optionsTop: '',
-             group: 'p-0 m-0',
-             option: 'flex items-center justify-start box-border text-left cursor-pointer text-base leading-snug py-2 px-2',
-             optionPointed: 'text-white bg-white/[.05]',
-             optionSelected: 'text-white bg-white/[.1]',
-             optionDisabled: 'text-gray-200 cursor-not-allowed',
-             optionSelectedPointed: 'text-gray-200 bg-k8s',
-             optionSelectedDisabled: 'text-green-100 bg-green-500 bg-opacity-50 cursor-not-allowed',
-             noOptions: 'py-2 px-2 text-gray-200 bg-k8s text-left',
-             noResults: 'py-2 px-2 text-gray-200 bg-k8s text-left',
-             fakeInput: 'bg-transparent absolute left-0 right-0 -bottom-px w-full h-px border-0 p-0 appearance-none outline-none text-transparent',
-             spacer: 'h-8 py-px box-content',
-           }
         }
       },
       methods: {
