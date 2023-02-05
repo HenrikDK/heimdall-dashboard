@@ -21,8 +21,8 @@
                         <div class="mr-3 w-60">
                             <multiselect v-model="selected" :values="namespaces" @@update:model-value="$emit('select-ns', $event.value)"></multiselect>
                         </div>
-                        <div class="mr-3">
-                            <v-search v-model="search" @@update:model-value="$emit('search', $event);"></v-search>
+                        <div class="mr-3 w-60">
+                            <search v-model="search" @@update:model-value="$emit('search', $event);"></search>
                         </div>
                     </template>
                 </div>
