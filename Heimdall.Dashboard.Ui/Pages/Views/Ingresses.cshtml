@@ -1,47 +1,133 @@
 ﻿<template id="ingresses">
-    <div class="pl-2 pr-4 w-100">
-        <div class="flex my-2 items-center">
-            <span class="text-slate-500 text-2xl font-light sans">Ingresses</span>
-        </div>
-
-        <div id="ingresses-table" ref="ingresses" v-show="ingressData.length > 0" class="vh-80 w-full"></div>
+  <div class="pl-2 pr-4 w-100">
+    <div class="flex my-2 items-center">
+      <span class="text-slate-500 text-2xl font-light sans">Ingresses</span>
     </div>
+
+    <table v-if="table != null"
+           class="vh-80 w-full mt-4 rounded-t-lg text-left
+                  border-collapse border border-slate-500">
+      <thead>
+        <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+          <th v-for="header in headerGroup.headers" :key="header.id" :colSpan="header.colSpan" :style="{ 'width': header.getSize() + '' }"
+              :draggable="!table.getState().columnSizingInfo.isResizingColumn" :data-column-index="header.index"
+              onDragStart="onDragStart" onDragOver="onDragOver" onDrop="onDrop"
+              @@click="header.column.getToggleSortingHandler()?.($event)"
+              class="px-4 py-2 bg-gray-100 
+                     hover:bg-gray-200 first-child:rounded-tl-lg last-child:rounded-tr-lg" 
+              :class="header.column.getCanSort() ? 'cursor-pointer select-none' : ''">
+              
+            <template v-if="!header.isPlaceholder">
+              <FlexRender :render="header.column.columnDef.header" :props="header.getContext()"/>
+              {{
+              { asc: '🔼', desc: '🔽' }
+              [
+              header.column.getIsSorted()
+              ]
+              }}
+            </template>
+            
+            <div :onMouseDown="header.getResizeHandler()" :onTouchStart="header.getResizeHandler()"
+              class="resizer" :class="header.column.getIsResizing() ? 'isResizing' : ''" />
+          </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="row in table.getRowModel().rows" :key="row.id"
+            class="border border-gray-200 hover:bg-slate-200">
+          <td v-for="cell in row.getVisibleCells()" :key="cell.id"
+              class="px-4">
+            <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()"/>
+          </td>
+        </tr>
+        </tbody>
+    </table>
+
+  </div>
 </template>
 
 <script type="module">
-    import { TabulatorFull as Tabulator } from 'tabulator'
-
+    import { getCoreRowModel, getSortedRowModel, useVueTable, createColumnHelper} from 'vue-table'
+    let columnBeingDragged = -1;
+    const columnHelper = createColumnHelper()
+    
     components["ingresses"] = {
         template: "#ingresses",
         data() {
             return {
-                ingresses: {},
-                ingressData: [
+                table: null,
+                sorting: [],
+                columnOrder:[],                
+                columns:[
+                  columnHelper.accessor('name', {
+                    header: 'Name',
+                    footer: props => props.column.id,
+                  }),                        
+                  columnHelper.accessor('namespace', {
+                    header: 'Namespace',
+                    footer: props => props.column.id,
+                  }),
+                  columnHelper.accessor('class', {
+                    header: 'Type',
+                    footer: props => props.column.id,
+                  }),
+                  columnHelper.accessor('address', {
+                    header: 'LoadBalancers',
+                    footer: props => props.column.id,
+                  }),
+                  columnHelper.accessor('hosts', {
+                    header: 'Host',
+                    footer: props => props.column.id,
+                  }),
+                  columnHelper.accessor('age', {
+                    header: 'Age',
+                    footer: props => props.column.id,
+                  }),
+                ],
+                data: [
                     {name: "user-api", namespace:"petstore", class:"nginx", hosts:"https://user-api.petstore.dk", address:"192.168.0.1", age: "22d"},
                     {name: "store-api", namespace:"petstore", class:"nginx", hosts:"https://store-api.petstore.dk", address:"192.168.0.1", age: "10d"},
                     {name: "order-api", namespace:"petstore", class:"nginx", hosts:"https://order-api.petstore.dk", address:"192.168.0.1", age: "13d"},
                 ],
             }
         },
+        methods:{
+            onDragOver(e){ 
+              e.preventDefault(); 
+            }, 
+            onColumnOrderChange(order){
+              this.$data.columnOrder = order
+            },
+            onSortingChange(updaterOrValue){
+              this.$data.sorting = typeof updaterOrValue === 'function' ? updaterOrValue(this.$data.sorting) : updaterOrValue
+            },
+            onDragStart(e){
+              columnBeingDragged = e.currentTarget.dataset.columnIndex;
+            },
+            onDrop(e){
+              e.preventDefault();
+              const newPosition = Number(e.currentTarget.dataset.columnIndex);
+              const currentCols = instance.getVisibleLeafColumns().map((c) => c.id);
+              const colToBeMoved = currentCols.splice(columnBeingDragged, 1);
+              
+              currentCols.splice(newPosition, 0, colToBeMoved[0]);
+              instance.setColumnOrder(currentCols);
+            },          
+        },
         props: ['namespace', 'search'],        
         mounted() {
-              this.events = new Tabulator(this.$refs.ingresses, {
-                maxHeight:"80vh",
-                layout:"fitData",
-                movableColumns: true,
-                persistence:true,
-                persistenceMode:true,
-                data: this.ingressData,
-                reactiveData:true,
-                columns: [
-                {title:"Namespace", field:"namespace", sorter:"string", minWidth:200},
-                {title:"Name", field:"name", sorter:"string", minWidth:250},
-                {title:"Class", field:"class", sorter:"string", minWidth:100},
-                {title:"Hosts", field:"hosts", sorter:"string", minWidth:500},
-                {title:"Address", field:"address", sorter:"string", minWidth:150},
-                {title:"Age", field:"age", sorter:"string", minWidth:100},                    
-                ],
-              });
+            this.table = useVueTable({
+            data: this.data,
+            columns: this.columns,
+            state: {
+              sorting: this.sorting,
+              columnVisibility: this.columnVisibility,
+              columnOrder: this.columnOrder,
+            },
+            getCoreRowModel: getCoreRowModel(),
+            getSortedRowModel: getSortedRowModel(),
+            debugTable: true,
+          });
         },
     };
 
