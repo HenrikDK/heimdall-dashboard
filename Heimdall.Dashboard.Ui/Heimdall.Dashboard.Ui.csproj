@@ -29,9 +29,6 @@
     <Content Update="wwwroot\js\site.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Update="wwwroot\favicon.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Update="wwwroot\js\cluster-graphs.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
