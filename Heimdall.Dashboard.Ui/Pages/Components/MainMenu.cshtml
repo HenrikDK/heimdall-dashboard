@@ -1,26 +1,26 @@
-﻿<template id="main-menu">
+<template id="main-menu">
     <div class="bg-neutral-200">
         <nav class="fixed">
             <div class="group min-w-12 min-h-12">
-                <router-link to="/workloads" class="flex flex-col items-center pointer py-3 !text-black">
+                <router-link to="/workloads" class="flex flex-col items-center pointer py-3">
                     <deployments-btn :active="$route.path.startsWith('/workloads')"></deployments-btn>
                 </router-link>
             </div>
 
             <div class="group min-w-12 min-h-12">
-                <router-link to="/pods" class="flex flex-col items-center pointer py-3 !text-black">
+                <router-link to="/pods" class="flex flex-col items-center pointer py-3">
                     <pods-btn :active="$route.path.startsWith('/pods')"></pods-btn>
                 </router-link>
             </div>
 
             <div class="group min-w-12 min-h-12">
-                <router-link to="/services" class="flex flex-col items-center pointer py-3 !text-black">
+                <router-link to="/services" class="flex flex-col items-center pointer py-3">
                     <services-btn :active="$route.path.startsWith('/services')"></services-btn>
                 </router-link>
             </div>
 
             <div class="group min-w-12 min-h-12">
-                <router-link to="/ingresses" class="flex flex-col items-center pointer py-3 !text-black">
+                <router-link to="/ingresses" class="flex flex-col items-center pointer py-3">
                     <ingress-btn :active="$route.path.startsWith('/ingresses')"></ingress-btn>
                 </router-link>
             </div>
