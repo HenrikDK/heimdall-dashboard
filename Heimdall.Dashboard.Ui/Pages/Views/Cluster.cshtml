@@ -6,22 +6,22 @@
 
         <div class="flex justify-between mb-4 mt-1">
             <div class="graph">
-                <v-chart :option="nodesAvailable"></v-chart>
+                <v-chart :option="nodesAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="nodeCpuUsage"></v-chart>
+                <v-chart :option="nodeCpuUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="nodeMemoryUsage"></v-chart>
+                <v-chart :option="nodeMemoryUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="podsAvailable"></v-chart>
+                <v-chart :option="podsAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="podCpuUsage"></v-chart>
+                <v-chart :option="podCpuUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="podMemoryUsage"></v-chart>
+                <v-chart :option="podMemoryUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
         </div>
         
@@ -39,7 +39,9 @@
 
 <script type="module">
     import { TabulatorFull as Tabulator } from 'tabulator'
-
+    import {useDark} from "vueuse";
+    const isDark = useDark()
+    
     function formatMessage(cell, formatterParams, onRendered){
          let data = cell.getData();
          let fontClass = data.type === "Warning" ? "text-red-500" : ""; 
@@ -58,10 +60,12 @@
                 clusterEvents: null,
                 events: [],
                 table: null,
+                initOptions: { renderer: "svg" },
                 clusterPods: null,
                 clusterPodMetrics: null,
                 clusterNodes: null,
                 clusterNodeMetrics: null,
+                isDark: isDark
             }
         },
         methods: {
@@ -83,7 +87,7 @@
           watch: {
             clusterEvents: function (){this.updateEvents()},
         },
-        props: ['namespace', 'search'],
+        props: ['namespaces', 'search'],
         computed: {
             nodesAvailable: () => nodeReady(),        
             nodeCpuUsage: () => nodeCpu(),
