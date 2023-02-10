@@ -6,10 +6,10 @@
         
         <div class="flex justify-around mb-4 mt-1">
             <div class="graph">
-                <v-chart :option="workloadsAvailable"></v-chart>
+                <v-chart :option="workloadsAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="podsAvailable"></v-chart>
+                <v-chart :option="podsAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
         </div>
         
@@ -122,18 +122,22 @@
     }
     
     import { TabulatorFull as Tabulator } from 'tabulator'
+    import {useDark} from "vueuse";
+    const isDark = useDark()
 
     components["workloads"] = {
         template: "#workloads",
         data() {
             return {
+                initOptions: { renderer: "svg" },
                 cronJobs: null,
                 daemonSets: null,
                 workloads: null,
                 jobs: null,
                 statefulSets: null,
                 table: null,
-                workloadData: [],                
+                workloadData: [],
+                isDark: isDark                
             }
         },
         props: ['namespaces', 'search'],        
