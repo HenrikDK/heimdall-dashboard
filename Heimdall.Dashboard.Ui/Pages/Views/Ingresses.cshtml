@@ -1,17 +1,15 @@
-<template id="ingresses">
+﻿<template id="ingresses">
   <div class="pl-2 pr-4 w-100">
     <div class="flex my-2 items-center">
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Ingresses</span>
     </div>
 
-    <table v-if="table != null"
-           class="vh-80 w-full mt-4 rounded-t-lg text-left
-                  border-collapse border border-slate-500">
+    <table v-if="table != null" class="vh-80 w-full mt-4 rounded-t-lg text-left border-collapse border border-slate-500">
       <thead>
         <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
           <th v-for="header in headerGroup.headers" :key="header.id" :colSpan="header.colSpan" :style="{ 'width': header.getSize() + '' }"
               :draggable="!table.getState().columnSizingInfo.isResizingColumn" :data-column-index="header.index"
-              onDragStart="onDragStart" onDragOver="onDragOver" onDrop="onDrop"
+              @@onDragStart="onDragStart" @@onDragOver="onDragOver" @@onDrop="onDrop"
               @@click="header.column.getToggleSortingHandler()?.($event)"
               class="px-4 py-2 bg-gray-100 
                      hover:bg-gray-200 first-child:rounded-tl-lg last-child:rounded-tr-lg" 
@@ -27,7 +25,7 @@
               }}
             </template>
             
-            <div :onMouseDown="header.getResizeHandler()" :onTouchStart="header.getResizeHandler()"
+            <div @@onMouseDown="header.getResizeHandler()" @@onTouchStart="header.getResizeHandler()"
               class="resizer" :class="header.column.getIsResizing() ? 'isResizing' : ''" />
           </th>
         </tr>
