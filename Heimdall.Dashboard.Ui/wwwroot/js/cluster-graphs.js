@@ -16,6 +16,7 @@
             show: false,
             trigger: 'none'
         },
+        backgroundColor: '',
         legend: {
             show: false,
         },
@@ -67,6 +68,7 @@ function nodeCpu(){
             show: false,
             trigger: 'none'
         },
+        backgroundColor: '',
         legend: {
             show: false,
         },
@@ -117,6 +119,7 @@ function nodeReady(){
             show: false,
             trigger: 'none'
         },
+        backgroundColor: '',
         legend: {
             show: false,
         },
@@ -168,6 +171,7 @@ function podReady(){
             show: false,
             trigger: 'none'
         },
+        backgroundColor: '',
         legend: {
             show: false,
         },
@@ -219,6 +223,7 @@ function podMemory(){
             show: false,
             trigger: 'none'
         },
+        backgroundColor: '',
         legend: {
             show: false,
         },
@@ -269,6 +274,7 @@ function podCpu(){
             show: false,
                 trigger: 'none'
         },
+        backgroundColor: '',
         legend: {
             show: false,
         },
@@ -320,6 +326,7 @@ function workloadsReady(){
             show: false,
             trigger: 'none'
         },
+        backgroundColor: '',
         legend: {
             show: false,
         },
