@@ -1,8 +1,8 @@
 ﻿<template id="multiselect">
   <div class="relative" aria-label="Select Environment">
     <button @@click="isOpen = !isOpen" type="button" @@focusout="handleFocusOut"
-            class="h-9 w-full text-gray-200 items-center flex justify-end box-border cursor-pointer border border-white/[.4] outline-0 rounded bg-k8s text-white/[.6] leading-snug outline-none 
-                focus:border-white">
+            class="h-9 w-full text-gray-200 items-center flex justify-end box-border cursor-pointer border border-white/[.4] outline-0 rounded 
+                bg-k8s dark:bg-zinc-800 text-white/[.6] leading-snug outline-none focus:border-white">
 
       <!-- Label -->
       <template v-if="values.length > 0 && selected.length > 0">
@@ -57,8 +57,9 @@
         <ul class="flex flex-col p-0 m-0 list-none" role="listbox">
           <template v-if="values.length > 0">
             <li v-for="v in values" @@click="handleOptionClick(v)" role="option" :aria-selected="selected.includes(v)" :data-ns="v"
-                class="py-1 px-1 flex text-gray-200 bg-white text-gray-600 aria-selected:font-medium
-                       hover:bg-blue-200 hover:text-blue-600">
+                class="py-1 px-1 flex aria-selected:font-medium aria-selected:text-black dark:aria-selected:text-white
+                       bg-white text-gray-600 hover:bg-blue-200 hover:text-blue-600
+                       dark:bg-zinc-800 dark:text-gray-400 dark:hover:text-white dark:hover:bg-zinc-700/[.9]">
               <template v-if="selected.includes(v)">
                 <span class="absolute text-blue-600">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -72,7 +73,7 @@
         </ul>
 
         <template v-if="values.length === 0" name="loading">
-          <div class="py-1 px-1 text-gray-200 bg-k8s text-left">
+          <div class="py-1 px-1 text-gray-400 bg-k8s dark:bg-zinc-800 text-left">
             Loading...
           </div>
         </template>
