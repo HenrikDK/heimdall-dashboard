@@ -11,17 +11,14 @@
           <th v-for="header in headerGroup.headers" :key="header.id" :colSpan="header.colSpan" :style="{ 'width': header.getSize() + '' }"
               :draggable="!table.getState().columnSizingInfo.isResizingColumn" :data-column-index="header.index"
               @@onDragStart="onDragStart" @@onDragOver="onDragOver" @@onDrop="onDrop"
-              @@click="header.column.getToggleSortingHandler()?.($event)"
+                @@click="header.column.getToggleSortingHandler()?.($event)"
               class="px-4 py-2 text-left text-xs font-strong text-black dark:text-gray-200 uppercase hover:bg-gray-200 dark:hover:bg-zinc-700" 
               :class="header.column.getCanSort() ? 'cursor-pointer select-none' : ''">
               
             <template v-if="!header.isPlaceholder">
               <FlexRender :render="header.column.columnDef.header" :props="header.getContext()"/>
               {{
-              { asc: '🔼', desc: '🔽' }
-              [
-              header.column.getIsSorted()
-              ]
+                header.column.getIsSorted()
               }}
             </template>
             
@@ -46,40 +43,36 @@
 
 <script type="module">
     import { getCoreRowModel, getSortedRowModel, useVueTable, createColumnHelper} from 'vue-table'
+    import { h, ref } from 'vue'
+    
     let columnBeingDragged = -1;
-    const columnHelper = createColumnHelper()
+    const columnHelper = createColumnHelper();
+    const sorting = ref([]);
     
     components["ingresses"] = {
         template: "#ingresses",
         data() {
             return {
                 table: null,
-                sorting: [],
-                columnOrder:[],                
+                columnOrder:[],
                 columns:[
                   columnHelper.accessor('name', {
                     header: 'Name',
-                    footer: props => props.column.id,
-                  }),                        
+                  }),
                   columnHelper.accessor('namespace', {
                     header: 'Namespace',
-                    footer: props => props.column.id,
                   }),
                   columnHelper.accessor('class', {
                     header: 'Type',
-                    footer: props => props.column.id,
                   }),
                   columnHelper.accessor('address', {
                     header: 'LoadBalancers',
-                    footer: props => props.column.id,
                   }),
                   columnHelper.accessor('hosts', {
                     header: 'Host',
-                    footer: props => props.column.id,
                   }),
                   columnHelper.accessor('age', {
                     header: 'Age',
-                    footer: props => props.column.id,
                   }),
                 ],
                 data: [
@@ -95,9 +88,6 @@
             }, 
             onColumnOrderChange(order){
               this.$data.columnOrder = order
-            },
-            onSortingChange(updaterOrValue){
-              this.$data.sorting = typeof updaterOrValue === 'function' ? updaterOrValue(this.$data.sorting) : updaterOrValue
             },
             onDragStart(e){
               columnBeingDragged = e.currentTarget.dataset.columnIndex;
@@ -118,9 +108,17 @@
             data: this.data,
             columns: this.columns,
             state: {
-              sorting: this.sorting,
+              get sorting() {
+                  return sorting.value
+                },
               columnVisibility: this.columnVisibility,
               columnOrder: this.columnOrder,
+            },
+            onSortingChange: updaterOrValue => {
+              sorting.value =
+                typeof updaterOrValue === 'function'
+                  ? updaterOrValue(sorting.value)
+                  : updaterOrValue
             },
             getCoreRowModel: getCoreRowModel(),
             getSortedRowModel: getSortedRowModel(),
