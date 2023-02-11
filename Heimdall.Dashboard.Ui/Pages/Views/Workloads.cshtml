@@ -1,15 +1,15 @@
 ﻿<template id="workloads">
     <div class="pl-2 pr-4 w-100">
         <div class="flex my-2 items-center">
-            <span class="text-slate-500 text-2xl font-light sans">Workloads</span>
+            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Workloads</span>
         </div>
         
         <div class="flex justify-around mb-4 mt-1">
             <div class="graph">
-                <v-chart :option="workloadsAvailable"></v-chart>
+                <v-chart :option="workloadsAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="podsAvailable"></v-chart>
+                <v-chart :option="podsAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
         </div>
         
@@ -122,18 +122,22 @@
     }
     
     import { TabulatorFull as Tabulator } from 'tabulator'
+    import {useDark} from "vueuse";
+    const isDark = useDark()
 
     components["workloads"] = {
         template: "#workloads",
         data() {
             return {
+                initOptions: { renderer: "svg" },
                 cronJobs: null,
                 daemonSets: null,
                 workloads: null,
                 jobs: null,
                 statefulSets: null,
                 table: null,
-                workloadData: [],                
+                workloadData: [],
+                isDark: isDark                
             }
         },
         props: ['namespaces', 'search'],        

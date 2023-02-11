@@ -1,18 +1,18 @@
 ﻿<template id="pods">
     <div class="pl-2 pr-4 w-100">
         <div class="flex my-2 items-center">
-            <span class="text-slate-500 text-2xl font-light sans">Pods</span>
+            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pods</span>
         </div>
         
         <div class="flex justify-around mb-4 mt-1">
             <div class="graph">
-                <v-chart :option="podsAvailable"></v-chart>
+                <v-chart :option="podsAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="podCpuUsage"></v-chart>
+                <v-chart :option="podCpuUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="podMemoryUsage"></v-chart>
+                <v-chart :option="podMemoryUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
         </div>
         
@@ -22,12 +22,15 @@
 
 <script type="module">
     import { TabulatorFull as Tabulator } from 'tabulator'
-
+    import {useDark} from "vueuse";
+    const isDark = useDark()
+    
     components["pods"] = {
         template: "#pods",
         data() {
             return {
                 pods: {},
+                initOptions: { renderer: "svg" },
                 podData: [
                     {name: "flux-something", namespace: "petstore", restarts: "2", containers: "1,1", age: "22d4h", status:"Running"},
                     {name: "flux-something", namespace: "petstore", restarts: "0", containers: "1", age: "10d5h", status:"Running"},
@@ -35,9 +38,10 @@
                     {name: "cert-manager", namespace: "petstore", restarts: "0", containers: "0", age: "14min", status:"Running"},
                     {name: "pod-manager", namespace: "petstore", restarts: "0", containers: "1,2", age: "1h20m", status:"Running"},
                 ],
+                isDark: isDark
             }
         },
-        props: ['namespace', 'search'],        
+        props: ['namespaces', 'search'],        
         computed: {
             podsAvailable: () => podReady(),
             podCpuUsage: () => podCpu(),

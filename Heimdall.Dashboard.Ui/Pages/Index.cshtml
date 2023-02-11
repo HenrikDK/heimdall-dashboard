@@ -8,10 +8,10 @@
 }
 
 @section VueComponents {
-    <partial name="Components/DeploymentsBtn"/>
-    <partial name="Components/PodsBtn"/>
-    <partial name="Components/ServicesBtn"/>
-    <partial name="Components/IngressBtn"/>
+    <partial name="Buttons/Deployments"/>
+    <partial name="Buttons/Pods"/>
+    <partial name="Buttons/Services"/>
+    <partial name="Buttons/Ingress"/>
     <partial name="Components/MultiSelect"/>
     <partial name="Components/SearchInput"/>
     <partial name="Components/NavBar"/>
@@ -35,6 +35,6 @@
     <main-menu></main-menu>
     
     <main class="overflow-auto">
-        <router-view></router-view>
+        <router-view :namespaces="namespaces" :search="search"></router-view>
     </main>
 </div>
