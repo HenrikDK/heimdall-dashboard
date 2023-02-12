@@ -42,7 +42,7 @@
               </div>
 
               <div @@onMouseDown="header.getResizeHandler()" @@onTouchStart="header.getResizeHandler()"
-                   class="h-8 w-0.5 justify-self-end bg-gray-200 hover:bg-gray-800 cursor-resize"
+                   class="h-8 w-0.5 justify-self-end bg-gray-200 hover:bg-gray-800 dark:bg-zinc-700 dark:hover:bg-zinc-200 cursor-resize"
                    :class="header.column.getIsResizing() ? 'isResizing' : ''"/>
             </div>
           </th>
