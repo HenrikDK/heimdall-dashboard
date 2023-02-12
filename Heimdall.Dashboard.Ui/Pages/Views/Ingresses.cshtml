@@ -8,22 +8,21 @@
       <table v-if="table != null" class="vh-80 min-w-full divide-y divide-gray-200 text-left dark:divide-zinc-700">
         <thead class="bg-gray-100 dark:bg-zinc-800">
         <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-          <th v-for="header in headerGroup.headers" :key="header.id" :colSpan="header.colSpan" :style="{ 'width': header.getSize() + '' }"
-              :draggable="!table.getState().columnSizingInfo.isResizingColumn" :data-column-index="header.index"
-              @@onDragStart="onDragStart" @@onDragOver="onDragOver" @@onDrop="onDrop"
-              @@click="header.column.getToggleSortingHandler()?.($event)"
+          <th v-for="header in headerGroup.headers" :key="header.id" :style="{ 'width': header.getSize() + '' }"
               class="text-left text-xs font-strong text-black dark:text-gray-200 uppercase hover:bg-gray-200 dark:hover:bg-zinc-700">
 
             <div class="flex">
-              <div class="px-4 py-2 grow" :class="header.column.getCanSort() ? 'cursor-pointer select-none' : ''">
+              <div @@dragStart="onDragStart($event)" @@dragOver="onDragOver" @@drop="onDrop"
+                   :draggable="!table.getState().columnSizingInfo.isResizingColumn" :data-column-index="header.index"
+                   class="px-4 py-2 grow">
                 <template v-if="!header.isPlaceholder">
                   <FlexRender :render="header.column.columnDef.header" :props="header.getContext()"/>
                 </template>
               </div>
 
               <div v-if="header.column.getCanSort()"
-                   class="px-4 py-2 float-right"
-                   :class="header.column.getCanSort() ? 'cursor-pointer select-none' : ''">
+                   class="px-4 py-2 float-right cursor-pointer select-none"
+                   @@click="header.column.getToggleSortingHandler()?.($event)">
                 <template v-if="!header.column.getIsSorted()">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/>
@@ -42,8 +41,8 @@
               </div>
 
               <div @@onMouseDown="header.getResizeHandler()" @@onTouchStart="header.getResizeHandler()"
-                   class="h-8 w-0.5 justify-self-end bg-gray-200 hover:bg-gray-800 dark:bg-zinc-700 dark:hover:bg-zinc-200 cursor-resize"
-                   :class="header.column.getIsResizing() ? 'isResizing' : ''"/>
+                   class="top-0 right-0 h-8 w-0.5 justify-self-end bg-gray-200 hover:bg-gray-800 dark:bg-zinc-700 dark:hover:bg-zinc-200 cursor-resize"
+                   :class="header.column.getIsResizing() ? 'bg-blue-200' : ''"/>
             </div>
           </th>
         </tr>
@@ -59,16 +58,16 @@
         </tbody>
       </table>
     </div>
+    
+    <vuetable :columns="columns2" :sorting="sorting" :data="data"></vuetable>
+    
   </div>
 </template>
 
 <script type="module">
     import { getCoreRowModel, getSortedRowModel, useVueTable, createColumnHelper} from 'vue-table'
-    import { h, ref } from 'vue'
-    
-    let columnBeingDragged = -1;
+    import { ref, getCurrentInstance } from 'vue'
     const columnHelper = createColumnHelper();
-    const sorting = ref([]);
     
     components["ingresses"] = {
         template: "#ingresses",
@@ -76,6 +75,40 @@
             return {
                 table: null,
                 columnOrder:[],
+                sorting: [],
+                columnBeingDragged: 0,
+                columns2:[
+                    {
+                      name: 'name',
+                      header: 'Name',
+                      canSort: true
+                    },
+                    {
+                      name: 'namespace',
+                      header: 'Namespace',
+                      canSort: true
+                    },
+                    {
+                      name: 'class',
+                      header: 'Type',
+                      canSort: false,
+                    },
+                    {
+                      name: 'address',
+                      header: 'LoadBalancers',
+                      canSort: true
+                    },
+                    {
+                      name: 'hosts',
+                      header: 'Host',
+                      canSort: true
+                    },
+                    {
+                      name: 'age',
+                      header: 'Age',
+                      canSort: false
+                    }
+                ],
                 columns:[
                   columnHelper.accessor('name', {
                     header: 'Name',
@@ -106,46 +139,50 @@
             }
         },
         methods:{
-            onDragOver(e){ 
+            onDragOver(e){
               e.preventDefault(); 
-            }, 
-            onColumnOrderChange(order){
-              this.$data.columnOrder = order
             },
             onDragStart(e){
-              columnBeingDragged = e.currentTarget.dataset.columnIndex;
+              console.log('drag start ' + e);
+              this.$data.columnBeingDragged = Number(e.currentTarget.dataset.columnIndex);
             },
             onDrop(e){
+              console.log('drop ' + e);
               e.preventDefault();
-              const newPosition = Number(e.currentTarget.dataset.columnIndex);
-              const currentCols = instance.getVisibleLeafColumns().map((c) => c.id);
-              const colToBeMoved = currentCols.splice(columnBeingDragged, 1);
               
+              const newPosition = Number(e.currentTarget.dataset.columnIndex);
+              const currentCols = this.$data.table.getVisibleLeafColumns().map((c) => c.id);
+              const colToBeMoved = currentCols.splice(this.$data.columnBeingDragged, 1);
               currentCols.splice(newPosition, 0, colToBeMoved[0]);
-              instance.setColumnOrder(currentCols);
-            },          
+              this.$data.columnOrder = currentCols;
+            },
         },
         props: ['namespaces', 'search'],        
         mounted() {
-            this.table = useVueTable({
-            data: this.data,
-            columns: this.columns,
+            this.$data.table = useVueTable({
+            data: this.$data.data,
+            columns: this.$data.columns,
             state: {
-              get sorting() {
-                  return sorting.value
-                },
-              columnVisibility: this.columnVisibility,
-              columnOrder: this.columnOrder,
+              get sorting(){
+                const instance = getCurrentInstance();
+                return instance.data.sorting
+              },
+              get columnOrder(){
+                const instance = getCurrentInstance();
+                return instance.data.columnOrder
+              },
             },
             onSortingChange: updaterOrValue => {
-              sorting.value =
+              this.$data.sorting =
                 typeof updaterOrValue === 'function'
-                  ? updaterOrValue(sorting.value)
+                  ? updaterOrValue(this.$data.sorting)
                   : updaterOrValue
             },
             getCoreRowModel: getCoreRowModel(),
             getSortedRowModel: getSortedRowModel(),
             debugTable: true,
+            debugHeaders: true,
+            debugColumns: true,
           });
         },
     };
