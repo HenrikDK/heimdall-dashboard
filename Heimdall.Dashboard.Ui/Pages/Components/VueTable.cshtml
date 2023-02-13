@@ -64,6 +64,14 @@
     components["vuetable"] = {
       template: "#vuetable",
       methods:{
+          getNested(row, name){
+            let result = row;
+            var fields = name.split('.')
+            fields.forEach(f => {
+              result = result[f]
+            })
+            return result;
+          },
           onSort(e){
             
           }
