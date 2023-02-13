@@ -53,7 +53,7 @@
          return `<div class="text-blue-500">${row.involvedObject.kind + ": " + row.involvedObject.name}</div>`;
     }
     
-    function formatClusterAge(row){
+    function formatEventAge(row){
         var DT = window.DateTime || luxon.DateTime;
         var invalid = "";
         const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
@@ -85,7 +85,7 @@
                     {header:"Message", name:"message", formatter:formatMessage, canSort:false},
                     {header:"Source", name:"involvedObject.name", formatter:formatSource, canSort:false, classes: "w-80"},
                     {header:"Events", name:"count", sorter:"number", classes:"w-32"},
-                    {header:"Age", name:"lastTimestamp", formatter:formatClusterAge, sorter:"datetime", classes:"w-32"},
+                    {header:"Age", name:"lastTimestamp", formatter:formatEventAge, sorter:"datetime", classes:"w-32"},
                 ],
                 initOptions: { renderer: "svg" },
                 clusterEvents: null,
