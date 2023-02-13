@@ -4,46 +4,37 @@
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Services</span>
         </div>
         
-        <div id="services-table" ref="services" v-show="serviceData.length > 0" class="vh-80 w-full"></div>
+        <template v-if="services && services.length > 0">
+            <vuetable :columns="columns" :sorting="sorting" :data="services"></vuetable>
+        </template>
     </div>
 </template>
 
 <script type="module">
-    import { TabulatorFull as Tabulator } from 'tabulator'
-
     components["services"] = {
         template: "#services",
         data() {
             return {
-                services: {},
-                serviceData: [
+                services: [
                     {type: "ClusterIP", name: "user-api", namespace:"petstore", kubeDNS:"petstore.user-api:8080", age: "22d4h"},
                     {type: "NodeIP", name: "store-api", namespace:"petstore", kubeDNS:"petstore.store-api:8080", age: "10d5h"},
                     {type: "LoadBalancer", name: "order-api", namespace:"petstore", kubeDNS:"petstore.order-api:8080", age: "13d5h"},
                     {type: "ClusterIP", name: "management-ui", namespace:"petstore", kubeDNS:"petstore.management-ui:8080", age: "14min"},
-                    {type: "NodeIP", name: "pet-api", namespace:"petstore", kubeDNS:"petstore.pet-api:8080", age: "1h20m"},
+                    {type: "NodeIP", name: "pet-api", namespace:"petstore", kubeDNS:"petstore.pet-api:8080", age: "1h20m"},                    
                 ],
+                columns: [
+                    {header:"Type", name:"type", classes:"w-64", canSort: false},
+                    {header:"Name", name:"name", classes:"w-64"},
+                    {header:"Namespace", name:"namespace", classes:"w-64"},
+                    {header:"KubeDNS", name:"kubeDNS", minWidth:400},
+                    {header:"Age", name:"age", minWidth:200, classes:"w-32"},                    
+                ],
+                sorting: [],
+                clusterServices:[],
             }
         },
         props: ['namespaces', 'search'],
-        mounted() {
-          this.events = new Tabulator(this.$refs.services, {
-            maxHeight:"80vh",
-            layout:"fitData",
-            movableColumns: true,
-            persistence:true,
-            persistenceMode:true,
-            data: this.serviceData,
-            reactiveData:true,
-            columns: [
-                {title:"Type", field:"type", sorter:"string", minWidth:250},
-                {title:"Name", field:"name", sorter:"string", minWidth:250},
-                {title:"Namespace", field:"namespace", sorter:"string", minWidth:200},
-                {title:"KubeDNS", field:"kubeDNS", sorter:"string", minWidth:400},
-                {title:"Age", field:"age", sorter:"string", minWidth:200},
-            ],
-          });
-        },
+        mounted() {},
     };
     
     routes.push({path:'/services', name:'services', component: components["services"]})    
