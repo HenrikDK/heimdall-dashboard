@@ -30,11 +30,14 @@
                     {header:"Age", name:"age", minWidth:200, classes:"w-32"},                    
                 ],
                 sorting: [],
-                clusterServices:[],
+                clusterServices: null,
             }
         },
         props: ['namespaces', 'search'],
-        mounted() {},
+        mounted() {
+          var host = window.location.origin;
+          streamResults(host + '/api/v1/services', j => this.clusterServices = j)
+        },
     };
     
     routes.push({path:'/services', name:'services', component: components["services"]})    

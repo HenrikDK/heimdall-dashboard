@@ -196,12 +196,12 @@
             search(){this.searchTable()},
         },
         async mounted() {
-              var host = window.location.origin;
-              streamResults(host + '/k8s/apis/apps/v1/deployments', j => this.workloads = j)
-              streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => this.daemonSets = j)
-              streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => this.statefulSets = j)
-              streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => this.cronJobs = j)
-              streamResults(host + '/k8s/apis/batch/v1/jobs', j => this.jobs = j)
+          var host = window.location.origin;
+          streamResults(host + '/k8s/apis/apps/v1/deployments', j => this.clusterWorkloads = j)
+          streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => this.clusterDaemonSets = j)
+          streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => this.clusterStatefulSets = j)
+          streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => this.clusterCronJobs = j)
+          streamResults(host + '/k8s/apis/batch/v1/jobs', j => this.clusterJobs = j)
         }
     };
 
