@@ -25,42 +25,70 @@
             </div>
         </div>
         
-        <hr/>
+        <hr class="border border-gray-200 dark:border-zinc-700"/>
         
-        <template v-if="events.length > 0">
+        <template v-if="events && events.length > 0">
+            
             <div class="flex my-2 items-center">
-                <span class="text-slate-500 text-2xl font-light sans">Events</span>
+                <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
             </div>
+
+            <vuetable :columns="columns" :sorting="sorting" :data="events"></vuetable>
+
         </template>
 
-        <div id="events-table" ref="events" v-show="events.length > 0" class="vh-80 w-full"></div>
     </div>
 </template>
 
 <script type="module">
-    import { TabulatorFull as Tabulator } from 'tabulator'
     import {useDark} from "vueuse";
     const isDark = useDark()
     
-    function formatMessage(cell, formatterParams, onRendered){
-         let data = cell.getData();
-         let fontClass = data.type === "Warning" ? "text-red-500" : ""; 
-         return `<div class="${fontClass}">${data.message}</div>`;
+    function formatMessage(row){
+         let fontClass = row.type === "Warning" ? "text-red-500" : ""; 
+         return `<div class="${fontClass}">${row.message}</div>`;
     }
 
-    function formatSource(cell, formatterParams, onRendered){
-         let data = cell.getData();
-         return `<div class="text-blue-500">${data.involvedObject.kind + ": " + data.involvedObject.name}</div>`;
+    function formatSource(row){
+         return `<div class="text-blue-500">${row.involvedObject.kind + ": " + row.involvedObject.name}</div>`;
+    }
+    
+    function formatEventAge(row){
+        var DT = window.DateTime || luxon.DateTime;
+        var invalid = "";
+        const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
+        var date = DT.now();
+    
+        var newDatetime = DT.fromISO(String(row.lastTimestamp));
+        return toHuman(newDatetime.diff(date, unit));
     }
 
     components["cluster"] = {
         template: "#cluster",
         data() {
             return {
-                clusterEvents: null,
-                events: [],
-                table: null,
+                events: [{
+                    type: "Warning",
+                    message:"Some dangerous message",
+                    involvedObject: {
+                        namespace: "test",
+                        kind: "lobster",
+                        name: "thing"
+                    },
+                    count: 23,
+                    lastTimestamp: "2011-10-05T14:48:00.000Z"
+                }],
+                sorting: [],
+                columns: [
+                    {header:"Type", name:"type", sorter:"string", classes:"w-32"},
+                    {header:"Namespace", name:"involvedObject.namespace", sorter:"string", classes:"w-40"},
+                    {header:"Message", name:"message", formatter:formatMessage, canSort:false},
+                    {header:"Source", name:"involvedObject.name", formatter:formatSource, canSort:false, classes: "w-80"},
+                    {header:"Events", name:"count", sorter:"number", classes:"w-32"},
+                    {header:"Age", name:"lastTimestamp", formatter:formatEventAge, sorter:"datetime", classes:"w-32"},
+                ],
                 initOptions: { renderer: "svg" },
+                clusterEvents: null,
                 clusterPods: null,
                 clusterPodMetrics: null,
                 clusterNodes: null,
@@ -69,23 +97,21 @@
             }
         },
         methods: {
-              async updateEvents() {
-                  if (!this.clusterEvents) return;
-                  
-                  const currentTime = new Date();
-                  const before12Hours = new Date(currentTime.setHours(currentTime.getHours() - 12))
-                  var events = this.clusterEvents.filter(x=>(new Date(x.lastTimestamp)) >= before12Hours)
-                  if (events.length === 0){
-                      events = this.clusterEvents.slice(0, 100);
-                  }
-                  
-                  this.events = events;
-                  this.table.setData(this.events);
-                  this.table.redraw(true);
-              }
-          },
-          watch: {
-            clusterEvents: function (){this.updateEvents()},
+          async updateEvents() {
+            if (!this.clusterEvents) return;
+            
+            const currentTime = new Date();
+            const before12Hours = new Date(currentTime.setHours(currentTime.getHours() - 12))
+            var events = this.clusterEvents.filter(x=>(new Date(x.lastTimestamp)) >= before12Hours)
+            if (events.length === 0){
+                events = this.clusterEvents.slice(0, 100);
+            }
+            
+            this.events = events;
+          }
+        },
+        watch: {
+          clusterEvents: function (){this.updateEvents()},
         },
         props: ['namespaces', 'search'],
         computed: {
@@ -97,28 +123,6 @@
             podMemoryUsage: () => podMemory(),
         },
         async mounted() {
-          this.table = new Tabulator(this.$refs.events, {
-            maxHeight:"80vh",
-            layout:"fitColumns",
-            movableColumns: true,
-            persistence:true,
-            persistenceMode:true,
-            data: this.events,
-            reactiveData:true,
-            columns: [
-                {title:"Type", field:"type", sorter:"string", minWidth:150},
-                {title:"Message", field:"message", formatter:formatMessage, sorter:"string", minWidth:350, headerSort:false},
-                {title:"Namespace", field:"involvedObject.namespace", sorter:"string", minWidth:150},
-                {title:"Source", field:"involvedObject.name", formatter:formatSource, sorter:"string", minWidth:250, headerSort:false},
-                {title:"Events", field:"count", sorter:"number", minWidth:100},
-                {title:"Last Seen", field:"lastTimestamp", formatter:formatAge, minWidth:100,
-                 sorter:"datetime", sorterParams:{
-                     format:"iso",
-                     alignEmptyValues:"top",
-                 }},
-            ],
-          });
-          
           var host = window.location.origin;
           streamResults(host + '/k8s/api/v1/events', j => this.clusterEvents = j);
           streamResults(host + '/k8s/api/v1/nodes', j => this.clusterNodes = j);

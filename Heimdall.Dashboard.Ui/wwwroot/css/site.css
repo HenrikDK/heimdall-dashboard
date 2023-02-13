@@ -11,3 +11,8 @@ a, a:visited {
     width: 13rem;
     height: 18rem;
 }
+
+.cursor-resize
+{
+    cursor: col-resize;   
+}
