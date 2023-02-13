@@ -42,11 +42,16 @@
         <td v-for="column in columns"
             class="px-4 py-2 whitespace-nowrap text-sm text-gray-700 dark:text-gray-400"
             :class="column.classes">
-          <template v-if="column.display == undefined">
-            {{ row[column.name] }}            
+          <template v-if="column.formatter == undefined">
+            <template v-if="column.name.includes('.')">
+              {{ getNested(row, column.name)}}
+            </template>
+            <template v-else>
+              {{ row[column.name] }}
+            </template>
           </template>
           <template v-else>
-            {{ column.display(row[column.name]) }}
+            <span v-html="column.formatter(row)"></span>
           </template>
         </td>
       </tr>
