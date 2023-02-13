@@ -18,25 +18,17 @@
 </template>
 
 <script type="module">
-    function formatType(cell, formatterParams, onRendered){
-         let data = cell.getData();
-         if (!data.kind) return "";
-         let result = `<img src="art/${data.kind.toLowerCase()}.svg" class="w-5 h-5" alt="${data.kind}"/>`;
-         return result;
-    }
-    
-    function formatDeploymentStatus(cell, formatterParams, onRendered){
-        let data = cell.getData();
-        if (!data.kind) return "";
+    function formatDeploymentStatus(row){
+        if (!row.kind) return "";
         let result = "";
-        if (["DaemonSet", "StatefulSet"].includes(data.kind))
+        if (["DaemonSet", "StatefulSet"].includes(row.kind))
         {
             result += '<div class="px-1 text-green-500">Running</div>'
         }
         
-        if (data.kind === "Deployment")
+        if (row.kind === "Deployment")
         {
-            let conditions = data.status.conditions;
+            let conditions = row.status.conditions;
             result += '<div class="flex">';
             result += conditions.map(x => x.type).sort().map(x => {
               let color = x === "Available" ? "text-blue-500" : "text-green-500";
@@ -45,15 +37,15 @@
             result += '</div>'
         }
         
-        if (data.kind === "Job")
+        if (row.kind === "Job")
         {
-            let conditions = data.status.conditions;
+            let conditions = row.status.conditions;
             result += conditions.map(x => `<div class="px-1 text-green-500">${x.type}</div>`).join('');
         }
          
-        if (data.kind === "CronJob")
+        if (row.kind === "CronJob")
         {
-            let active = data.status.active;
+            let active = row.status.active;
             if (active){
                 result += '<div class="px-1 text-green-500">Running</div>'
             }else {
@@ -64,14 +56,13 @@
         return result;           
     }
         
-    function formatPods(cell, formatterParams, onRendered){
-        let data = cell.getData();
-        if (!data.kind) return "";
+    function formatPods(row){
+        if (!row.kind) return "";
         let result = "";
-        if (data.kind === "DaemonSet")
+        if (row.kind === "DaemonSet")
         {
-            let scheduled = data.status.currentNumberScheduled;
-            let ready = data.status.numberReady;
+            let scheduled = row.status.currentNumberScheduled;
+            let ready = row.status.numberReady;
             let waiting = 0;
             if (scheduled > ready){
                 waiting = scheduled - ready;
@@ -80,10 +71,10 @@
             result += [...Array(ready)].map(x => '<div class="h-4 w-4 bg-green-500 rounded-sm"></div>').join('');
         }
         
-        if (data.kind === "StatefulSet")
+        if (row.kind === "StatefulSet")
         {
-            let desired = data.status.replicas;
-            let current = data.status.currentReplicas;
+            let desired = row.status.replicas;
+            let current = row.status.currentReplicas;
             let waiting = 0;
             if (desired > current){
                 waiting = desired - current;
@@ -92,10 +83,10 @@
             result += [...Array(current)].map(x => '<div class="h-4 w-4 bg-green-500 rounded-sm"></div>').join('');
         }        
         
-        if (data.kind === "Deployment")
+        if (row.kind === "Deployment")
         {
-            let scheduled = data.status.replicas;
-            let ready = data.status.readyReplicas;
+            let scheduled = row.status.replicas;
+            let ready = row.status.readyReplicas;
             let waiting = 0;
             if (scheduled > ready){
                 waiting = scheduled - ready;
@@ -104,24 +95,23 @@
             result += [...Array(ready)].map(x => '<div class="h-4 w-4 bg-green-500 rounded-sm"></div>').join('');
         }
         
-        if (data.kind === "Job")
+        if (row.kind === "Job")
         {
-            let ready = data.status.ready;
-            let succeeded = data.status.succeeded;
+            let ready = row.status.ready;
+            let succeeded = row.status.succeeded;
             result += [...Array(ready)].map(x => '<div class="h-4 w-4 bg-green-500 rounded-sm"></div>').join('');
             result += [...Array(succeeded)].map(x => '<div class="h-4 w-4 bg-gray-300 rounded-sm"></div>').join('');
         }
          
-        if (data.kind === "CronJob")
+        if (row.kind === "CronJob")
         {
-            let active = data.status.active;
+            let active = row.status.active;
             result += active.map(x => '<div class="h-6 w-6 bg-green-500 rounded-sm"></div>').join('');
         }
          
         return result;
     }
     
-    import { TabulatorFull as Tabulator } from 'tabulator'
     import {useDark} from "vueuse";
     const isDark = useDark()
 
