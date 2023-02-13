@@ -15,18 +15,18 @@
 
             <div v-if="column.canSort || column.canSort == undefined"
                  class="px-4 py-2 float-right cursor-pointer select-none"
-                 @@click="onSort">
-              <template v-if="sorting[column.name]?.isSorted || sorting[column.name] == undefined">
+                 @@click="onSelectSort($event, column.name)">
+              <template v-if="sorting.find(x => x.name === column.name) == undefined">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/>
                 </svg>
               </template>
-              <template v-if="sorting[column.name]?.isSorted === 'asc'">
+              <template v-if="sorting.find(x => x.name === column.name)?.sort === 'asc'">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/>
                 </svg>
               </template>
-              <template v-if="sorting[column.name]?.isSorted === 'desc'">
+              <template v-if="sorting.find(x => x.name === column.name)?.sort === 'desc'">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
                 </svg>
@@ -37,7 +37,7 @@
       </tr>
       </thead>
       <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
-      <tr v-for="row in data"
+      <tr v-for="row in rows"
           class="hover:bg-blue-100 dark:bg-zinc-900 dark:hover:bg-zinc-700">
         <td v-for="column in columns"
             class="px-4 py-2 whitespace-nowrap text-sm text-gray-700 dark:text-gray-400"
@@ -63,6 +63,12 @@
 <script type="module">
     components["vuetable"] = {
       template: "#vuetable",
+      data() {
+        return {
+            rows: [],
+            sorting: []
+        }
+      },
       methods:{
           getNested(row, name){
             let result = row;
@@ -72,12 +78,37 @@
             })
             return result;
           },
-          onSort(e){
+          onSelectSort(e, name){
+            var existing = this.$data.sorting.find(x => x.name === name);
+            if (!e.shiftKey){
+              this.$data.sorting = [];
+            }
+            if (existing === undefined){
+              let sort = {
+                 name: name, sort: 'asc'
+              }
+              this.$data.sorting.push(sort)
+              return;
+            }
             
+            if (existing['sort'] === 'asc'){
+              existing['sort'] = 'desc'
+              if (this.$data.sorting.length === 0){
+                this.$data.sorting.push(existing) 
+              }
+              return;
+            }
+            
+            if (existing['sort'] === 'desc'){
+              this.$data.sorting = this.$data.sorting.filter(x => x.name !== existing['name']);
+            }            
           }
       },
-      props: ['data', 'columns', 'sorting'],        
+      props: ['data', 'columns', 'initialSort'],        
       mounted() {
+        if (this.$props.initialSort !== undefined && this.$props.initialSort.length > 0){
+          this.$data.sorting = [...this.$props.initialSort];
+        }
       },
     };
 </script>
