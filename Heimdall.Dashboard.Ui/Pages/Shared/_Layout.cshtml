@@ -48,8 +48,6 @@
             "vue-router": "https://cdn.jsdelivr.net/npm/vue-router@4.1.6/dist/vue-router.esm-browser.js",
             
             "tabulator": "https://cdn.jsdelivr.net/npm/tabulator-tables@5.3.4/dist/js/tabulator_esm.min.js",
-            "vue-table": "https://cdn.jsdelivr.net/npm/@@tanstack/vue-table@8.7.9/build/lib/index.esm.js",
-            "@@tanstack/table-core": "https://cdn.jsdelivr.net/npm/@@tanstack/table-core@8.7.9/build/lib/index.esm.js",
             
             "vue-echarts": "https://cdn.jsdelivr.net/npm/vue-echarts@6.5.4/dist/index.esm.min.js",
             "vue-demi": "https://cdn.jsdelivr.net/npm/vue-demi@0.13.11/lib/index.mjs",
@@ -77,10 +75,8 @@
     import { createApp } from 'vue'
     import { createRouter, createWebHashHistory } from 'vue-router'
     import { default as ECharts } from 'vue-echarts'
-    import { FlexRender } from 'vue-table'
     
     components['v-chart'] = ECharts;
-    components['Flexrender'] = FlexRender
         
     const router = createRouter({
       history: createWebHashHistory(),
