@@ -15,29 +15,51 @@
                 <v-chart :option="podMemoryUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
         </div>
-        
-        <div id="pods-table" ref="pods" v-show="podData.length > 0" class="vh-80 w-full"></div>
+
+        <template v-if="pods && pods.length > 0">
+            
+            <vuetable :columns="columns" :sorting="sorting" :data="pods"></vuetable>
+            
+        </template>
     </div>
 </template>
 
 <script type="module">
-    import { TabulatorFull as Tabulator } from 'tabulator'
     import {useDark} from "vueuse";
     const isDark = useDark()
+    
+   function formatPodAge(row){
+        var DT = window.DateTime || luxon.DateTime;
+        var invalid = "";
+        const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
+        var date = DT.now();
+    
+        var newDatetime = DT.fromISO(String(row.lastTimestamp));
+        return toHuman(newDatetime.diff(date, unit));
+    }
     
     components["pods"] = {
         template: "#pods",
         data() {
             return {
-                pods: {},
-                initOptions: { renderer: "svg" },
-                podData: [
-                    {name: "flux-something", namespace: "petstore", restarts: "2", containers: "1,1", age: "22d4h", status:"Running"},
-                    {name: "flux-something", namespace: "petstore", restarts: "0", containers: "1", age: "10d5h", status:"Running"},
-                    {name: "kube-controller", namespace: "petstore", restarts: "3", containers: "1", age: "13d5h", status:"Running"},
-                    {name: "cert-manager", namespace: "petstore", restarts: "0", containers: "0", age: "14min", status:"Running"},
-                    {name: "pod-manager", namespace: "petstore", restarts: "0", containers: "1,2", age: "1h20m", status:"Running"},
+                pods: [
+                    {name: "flux-something", namespace: "monitoring", restarts: 2, containers: [1,1], lastTimestamp: "2023-01-05T14:48:00.000Z", status:"Running"},
+                    {name: "flux-something", namespace: "flux-system", restarts: 0, containers: [1], lastTimestamp: "2023-02-05T14:48:00.000Z", status:"Running"},
+                    {name: "kube-controller", namespace: "default", restarts: 3, containers: [1], lastTimestamp: "2023-02-12T14:48:00.000Z",status:"Running"},
+                    {name: "cert-manager", namespace: "ingress", restarts: 0, containers: [0], lastTimestamp: "2023-02-11T14:48:00.000Z", status:"Running"},
+                    {name: "pod-manager", namespace: "kube-system", restarts: 0, containers: [1,2], lastTimestamp: "2023-02-10T14:48:00.000Z", status:"Running"},
                 ],
+                columns:[
+                {header:"Name", name:"name"},
+                {header:"Namespace", name:"namespace", classes:"w-64"},
+                {header:"Containers", name:"containers", classes:"w-20", canSort:false},
+                {header:"Restarts", name:"restarts", classes:"w-20"},
+                {header:"Age", name:"lastTimestamp", formatter:formatPodAge, classes:"w-32"},
+                {header:"Status", name:"status", classes:"w-32"},
+                ],
+                sorting:[],
+                initOptions: { renderer: "svg" },
+                clusterPods: {},
                 isDark: isDark
             }
         },
@@ -48,24 +70,6 @@
             podMemoryUsage: () => podMemory(),
         },
         async mounted() {
-            this.events = new Tabulator(this.$refs.pods, {
-              maxHeight:"80vh",
-              layout:"fitData",
-              movableColumns: true,
-              persistence:true,
-              persistenceMode:true,
-              data: this.podData,
-              reactiveData:true,
-              columns: [
-                {title:"Name", field:"name", sorter:"string", minWidth:280},
-                {title:"Namespace", field:"namespace", sorter:"string", minWidth:200},
-                {title:"Containers", field:"containers", sorter:"string", minWidth:250},
-                {title:"Restarts", field:"restarts", sorter:"string", minWidth:150},
-                {title:"Age", field:"age", sorter:"string", minWidth:100},
-                {title:"Status", field:"status", sorter:"string", minWidth:250},
-              ],
-            });
-            
             var host = window.location.origin;
             streamResults(host + '/k8s/api/v1/pods', j => this.clusterPods = j);
         },
