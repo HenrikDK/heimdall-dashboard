@@ -4,8 +4,8 @@
       <thead class="bg-gray-100 dark:bg-zinc-800">
       <tr>
         <th v-for="column in columns" 
-          class="text-left text-xs font-strong text-black dark:text-gray-200 uppercase hover:bg-gray-200 dark:hover:bg-zinc-700"
-          :class="column.classes"
+            class="text-left text-xs font-strong text-black dark:text-gray-200 uppercase hover:bg-gray-200 dark:hover:bg-zinc-700"
+            :class="column.classes"
         >
 
           <div class="flex">
@@ -37,109 +37,117 @@
       </tr>
       </thead>
       <tbody class="divide-y divide-gray-200 dark:divide-zinc-700">
-      <tr v-for="row in rows"
-          class="hover:bg-blue-100 dark:bg-zinc-900 dark:hover:bg-zinc-700">
-        <td v-for="column in columns"
-            class="px-4 py-2 whitespace-nowrap text-sm text-gray-700 dark:text-gray-400"
-            :class="column.classes">
-          <template v-if="column.formatter == undefined">
-            {{ getRowValue(row, column.name)}}
-          </template>
-          <template v-else>
-            <span v-html="column.formatter(row)"></span>
-          </template>
-        </td>
-      </tr>
+      <template v-for="row in rows">
+        <tr v-if="!row?.filtered && !row?.nsFiltered"
+            class="hover:bg-blue-100 dark:bg-zinc-900 dark:hover:bg-zinc-700">
+          <td v-for="column in columns"
+              class="px-4 py-2 whitespace-nowrap text-sm text-gray-700 dark:text-gray-400"
+              :class="column.classes">
+            <template v-if="column.formatter == undefined">
+              {{ getRowValue(row, column.name)}}
+            </template>
+            <template v-else>
+              <span v-html="column.formatter(row)"></span>
+            </template>
+          </td>
+        </tr>
+      </template>
       </tbody>
     </table>
   </div>
 </template>
 
 <script type="module">
-    components["vuetable"] = {
-      template: "#vuetable",
-      data() {
-        return {
-            rows: [],
-            sorting: []
-        }
+  components["vuetable"] = {
+    template: "#vuetable",
+    data() {
+      return {
+          rows: [],
+          sorting: []
+      }
+    },
+    methods:{
+      getRowValue(row, name){
+        return getRowValue(row, name)
       },
-      methods:{
-        getRowValue(row, name){
-          if (!name.includes('.')){
-            return row[name]
-          }
-          
-          let result = row;
-          var fields = name.split('.')
-          fields.forEach(f => {
-            result = result[f]
-          })
-          
-          return result;
-        },
-        onSelectSort(e, header){
-          var existing = this.$data.sorting.find(x => x.header === header);
-          if (!e.shiftKey){
-            this.$data.sorting = [];
-          }
-          if (existing === undefined){
-            let sort = {
-               header: header, sort: 'asc'
-            }
-            this.$data.sorting.push(sort)
-            return;
-          }
-          
-          if (existing['sort'] === 'asc'){
-            existing['sort'] = 'desc'
-            if (this.$data.sorting.length === 0){
-              this.$data.sorting.push(existing) 
-            }
-            return;
-          }
-          
-          if (existing['sort'] === 'desc'){
-            this.$data.sorting = this.$data.sorting.filter(x => x.header !== existing['header']);
-          }            
-        },
-        updateTable () {
-          if ((this.$props.columns?.length ?? 0) === 0) return
-          
-          this.$data.rows = sortRows(this.$data.sorting, this.$props.columns, this.$props.data)
-          
-          filterRows(this.$data.rows, this.$props.columns, this.$props.namespaces, this.$props.search)
+      onSelectSort(e, header){
+        var existing = this.$data.sorting.find(x => x.header === header);
+        if (!e.shiftKey){
+          this.$data.sorting = [];
         }
-      },
-      watch:{
-        sorting(){
-          this.updateTable();
-        },
-        columns(){
-          this.updateTable();
-        },
-        data(){
-          this.updateTable();
-        },
-        namespaces(){
-          this.updateTable();
-        },
-        search(){
-          this.updateTable();
-        }
-      },
-      props: ['data', 'columns', 'initialSort', 'namespaces', 'search'],
-      mounted() {
-        if (this.$props.initialSort !== undefined && this.$props.initialSort.length > 0){
-          this.$data.sorting = [...this.$props.initialSort];
+        if (existing === undefined){
+          let sort = {
+             header: header, sort: 'asc'
+          }
+          this.$data.sorting.push(sort)
+          return;
         }
         
+        if (existing['sort'] === 'asc'){
+          existing['sort'] = 'desc'
+          if (this.$data.sorting.length === 0){
+            this.$data.sorting.push(existing) 
+          }
+          return;
+        }
+        
+        if (existing['sort'] === 'desc'){
+          this.$data.sorting = this.$data.sorting.filter(x => x.header !== existing['header']);
+        }            
+      },
+      updateTable () {
+        if ((this.$props.columns?.length ?? 0) === 0) return
+        
+        this.$data.rows = sortRows(this.$data.sorting, this.$props.columns, this.$props.data)
+        
+        this.$data.rows.forEach(x => x.filtered = false)
+        
+        filterRows(this.$data.rows, this.$props.columns, this.$props.namespaces, this.$props.search)
+      }
+    },
+    watch:{
+      sorting(){
         this.updateTable();
       },
-    };
+      columns(){
+        this.updateTable();
+      },
+      data(){
+        this.updateTable();
+      },
+      namespaces(){
+        this.updateTable();
+      },
+      search(){
+        this.updateTable();
+      }
+    },
+    props: ['data', 'columns', 'initialSort', 'namespaces', 'search'],
+    mounted() {
+      if (this.$props.initialSort !== undefined && this.$props.initialSort.length > 0){
+        this.$data.sorting = [...this.$props.initialSort];
+      }
+      
+      this.updateTable();
+    },
+  };
 </script>
 
-<script id="sorting">
+<script>
+function getRowValue(row, name){
+    if (!name.includes('.')){
+        return row[name]
+    }
+
+    let result = row;
+    var fields = name.split('.')
+    fields.forEach(f => {
+        result = result[f]
+    })
+
+    return result;
+}
+
 function getSortFn(sorter = 'auto'){
   if (typeof sorter === 'function'){
     return sorter
@@ -324,9 +332,7 @@ function compareAlphanumeric(aStr, bStr) {
 
   return a.length - b.length
 }
-</script>
 
-<script id="filtering">
 function filterRows(rows, columns, namespaces, search){
   if ((search === undefined || search?.length === 0) && (namespaces === undefined || namespaces?.length === 0)) return;
   
