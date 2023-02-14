@@ -1,29 +1,10 @@
-﻿let nsEndsWith = (ns, ends) => {
-    let value = false;
-    value = ends.some(element => {
-        return ns.endsWith(element);
-    });
-    return value;
-};
-
-let filterName = (name, ns) => {
+﻿let filterName = (name, ns) => {
     let value = false;
     value = ns.some(element => {
         return name.toLowerCase().includes(element);
     });
     return value;
 };
-
-function formatAge(cell){
-    var DT = window.DateTime || luxon.DateTime;
-    var invalid = "";
-    const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
-    var date = DT.now();
-
-    var value = cell.getValue();
-    var newDatetime = DT.fromISO(String(value));
-    return toHuman(newDatetime.diff(date, unit));
-}
 
 function toHuman(dur) {
     let result = "";
