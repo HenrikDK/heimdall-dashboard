@@ -103,7 +103,7 @@
             this.$data.sorting = this.$data.sorting.filter(x => x.header !== existing['header']);
           }            
         },
-        doSort () {
+        updateTable () {
           if ((this.$props.columns?.length ?? 0) === 0) return
           
           this.$data.rows = sortRows(this.$data.sorting, this.$props.columns, this.$props.data)
@@ -111,13 +111,14 @@
       },
       watch:{
         sorting(){
-          this.doSort();
+          this.updateTable();
         },
         columns(){
-          this.doSort();
+          this.updateTable();
         },
         data(){
-          this.doSort();
+          this.updateTable();
+        },
         }
       },
       props: ['data', 'columns', 'initialSort'],        
@@ -126,7 +127,7 @@
           this.$data.sorting = [...this.$props.initialSort];
         }
         
-        this.doSort();
+        this.updateTable();
       },
     };
 </script>
