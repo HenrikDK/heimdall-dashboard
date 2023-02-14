@@ -119,9 +119,14 @@
         data(){
           this.updateTable();
         },
+        namespaces(){
+          this.updateTable();
+        },
+        search(){
+          this.updateTable();
         }
       },
-      props: ['data', 'columns', 'initialSort'],        
+      props: ['data', 'columns', 'initialSort', 'namespaces', 'search'],
       mounted() {
         if (this.$props.initialSort !== undefined && this.$props.initialSort.length > 0){
           this.$data.sorting = [...this.$props.initialSort];
