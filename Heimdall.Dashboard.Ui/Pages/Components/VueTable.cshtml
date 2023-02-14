@@ -318,3 +318,35 @@ function compareAlphanumeric(aStr, bStr) {
   return a.length - b.length
 }
 </script>
+
+<script id="filtering">
+function filterRows(rows, columns, namespaces, search){
+  if ((search === undefined || search?.length === 0) && (namespaces === undefined || namespaces?.length === 0)) return;
+  
+  const filterColumns = columns.filter(x => (x.canFilter ?? true))
+  let nsColumn = columns.filter(x => x.header === 'Namespace')
+  let tokens = [];
+  if (search?.length > 0){
+    tokens = search.split(' ')
+  }
+  
+  rows.forEach(row => {
+    if (namespaces.length){
+      let val = getRowValue(row, nsColumn.name)
+      row.nsFiltered = !namespaces.includes(val)
+    }
+    
+    if (tokens.length){
+      let values = filterColumns.map(fc => {
+         let val = row[fc.name]
+         if (typeof val === 'object'){
+           return JSON.stringify(val)
+         }
+         return val
+      })
+      
+      row.filtered = !values.some(x => tokens.some(y => x.includes(y)))
+    }
+  });
+}
+</script>
