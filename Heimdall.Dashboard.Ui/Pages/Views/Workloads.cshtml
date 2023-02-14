@@ -1,4 +1,4 @@
-<template id="workloads">
+﻿<template id="workloads">
     <div class="pl-2 pr-4 w-100">
         <div class="flex my-2 items-center">
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Workloads</span>
@@ -173,27 +173,20 @@
                 
                 let result = items.flat().filter(x => !!x);
                 
-                if (this.namespaces){
-                    result.filter(x => filterName(x, this.namespaces))
+                if (this.filters){
+                    result.filter(x => filterName(x, this.filters))
                 }
                 
                 this.workloads = result;
-            },
-            async searchTable() {
-                if (!this.cluster && this.cluster.length > 0) return;
-              
-                let ns = [{ label: 'All namespaces', value: ''}]
-              
-                this.namespaces = ns;
             }
         },
         watch: {
+            filters(){this.updateWorkloads()},
             namespace(){this.updateWorkloads()},
             clusterCronJobs(){this.updateWorkloads()},
             clusterDaemonSets(){this.updateWorkloads()},
             clusterJobs(){this.updateWorkloads()},
             clusterStatefulSets(){this.updateWorkloads()},
-            search(){this.searchTable()},
         },
         async mounted() {
           var host = window.location.origin;
