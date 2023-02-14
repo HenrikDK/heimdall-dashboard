@@ -1,7 +1,7 @@
-﻿let filterName = (name, ns) => {
+﻿let filterNamespace = (name, namespaces) => {
     let value = false;
-    value = ns.some(element => {
-        return name.toLowerCase().includes(element);
+    value = namespaces.some(ns => {
+        return name.toLowerCase().includes(ns.value);
     });
     return value;
 };
