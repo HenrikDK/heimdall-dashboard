@@ -33,7 +33,7 @@
                 clusterServices: null,
             }
         },
-        props: ['namespaces', 'search'],
+        props: ['namespaces', 'search', 'filters'],
         mounted() {
           var host = window.location.origin;
           streamResults(host + '/api/v1/services', j => this.clusterServices = j)
