@@ -14,7 +14,7 @@
         </div>
         
         <template v-if="workloads && workloads.length > 0">
-            <vuetable :columns="columns" :sorting="sorting" :data="workloads"></vuetable>
+            <vuetable :columns="columns" :sorting="sorting" :data="workloads" :namespaces="namespaces" :search="search"></vuetable>
         </template>
     </div>
 </template>
@@ -145,7 +145,7 @@
                     {header:"Name", name:"metadata.name", minWidth:350},
                     {header:"Namespace", name:"metadata.namespace", sorter:"string", minWidth:200},
                     {header:"Pods", name:"pods", formatter:formatPods, minWidth:150, canSort:false},
-                    {header:"Age", name:"metadata.creationTimestamp", formatter:formatWorkloadAge, minWidth:100, sorter:"datetime"},
+                    {header:"Age", name:"metadata.creationTimestamp", formatter:formatWorkloadAge, minWidth:100},
                     {header:"Status", field:"status", formatter:formatDeploymentStatus, minWidth:200, canSort:false},                    
                 ],
                 sorting:[],

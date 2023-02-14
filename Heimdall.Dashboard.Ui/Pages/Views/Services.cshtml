@@ -5,7 +5,7 @@
         </div>
         
         <template v-if="services && services.length > 0">
-            <vuetable :columns="columns" :sorting="sorting" :data="services"></vuetable>
+            <vuetable :columns="columns" :sorting="sorting" :data="services" :namespaces="namespaces" :search="search"></vuetable>
         </template>
     </div>
 </template>
