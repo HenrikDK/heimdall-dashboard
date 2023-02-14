@@ -132,7 +132,7 @@
     };
 </script>
 
-<script>
+<script id="sorting">
 function getSortFn(sorter = 'auto'){
   if (typeof sorter === 'function'){
     return sorter
@@ -161,12 +161,9 @@ function sortRows(sorting, columns, rows){
   if (!rows.length || !sorting?.length) {
     return rows
   }
-
-  const sortingState = sorting
-  const sortedFlatRows = []
-
+  
   // Filter out sortings that correspond to non existing columns
-  const availableSorting = sortingState.filter(s =>
+  const availableSorting = sorting.filter(s =>
     {
       let column = columns.find(x => x.header === s.header);
       if (!column) return false
