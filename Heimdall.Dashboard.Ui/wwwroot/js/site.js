@@ -1,12 +1,4 @@
-﻿let filterNamespace = (name, namespaces) => {
-    let value = false;
-    value = namespaces.some(ns => {
-        return name.toLowerCase().includes(ns.value);
-    });
-    return value;
-};
-
-function toHuman(dur) {
+﻿function toHuman(dur) {
     let result = "";
     if (dur.values.years && Math.abs(dur.values.years) > 0)
     {
