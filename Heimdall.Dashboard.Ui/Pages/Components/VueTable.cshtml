@@ -107,6 +107,8 @@
           if ((this.$props.columns?.length ?? 0) === 0) return
           
           this.$data.rows = sortRows(this.$data.sorting, this.$props.columns, this.$props.data)
+          
+          filterRows(this.$data.rows, this.$props.columns, this.$props.namespaces, this.$props.search)
         }
       },
       watch:{
