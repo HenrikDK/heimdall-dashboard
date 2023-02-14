@@ -43,12 +43,7 @@
             class="px-4 py-2 whitespace-nowrap text-sm text-gray-700 dark:text-gray-400"
             :class="column.classes">
           <template v-if="column.formatter == undefined">
-            <template v-if="column.name.includes('.')">
-              {{ getNested(row, column.name)}}
-            </template>
-            <template v-else>
-              {{ row[column.name] }}
-            </template>
+            {{ getRowValue(row, column.name)}}
           </template>
           <template v-else>
             <span v-html="column.formatter(row)"></span>
@@ -70,12 +65,17 @@
         }
       },
       methods:{
-        getNested(row, name){
+        getRowValue(row, name){
+          if (!name.includes('.')){
+            return row[name]
+          }
+          
           let result = row;
           var fields = name.split('.')
           fields.forEach(f => {
             result = result[f]
           })
+          
           return result;
         },
         onSelectSort(e, header){
@@ -199,7 +199,9 @@ function sortData(rows, sorting, columnInfos){
       const isDesc = columnInfo?.direction === 'desc' ?? false
 
       // This function should always return in ascending order
-      let sortInt = columnInfo.sorter(rowA[columnInfo.column], rowB[columnInfo.column])
+      let valA = getRowValue(rowA, columnInfo.column)
+      let valB = getRowValue(rowB, columnInfo.column)
+      let sortInt = columnInfo.sorter(valA, valB)
 
       if (sortInt !== 0) {
         if (isDesc) {
