@@ -65,22 +65,26 @@
         }
       },
       methods: {
-          toggleDark: toggleDark,
-          async updateList() {
-              if (!this.cluster && this.cluster.length > 0) return;
-              
-              var ns = []
-
-              var ns = this.cluster;
-              
-              if (this.filters && this.filters.length > 0){
-                  ns = this.cluster.filter(x => nsEndsWith(x, this.filters));
-              }
-              
-              ns = ns.map(x => { return { label: x.metadata.name, value: x.metadata.name}})
-                            
-              this.namespaces = ns;
+        toggleDark: toggleDark,
+        async updateList() {
+          if (!this.cluster && this.cluster.length > 0) return;
+                    
+          let ns = this.cluster.map(x => { return { label: x.metadata.name, value: x.metadata.name}})
+          
+          if (this.filters && this.filters.length > 0){
+            ns = ns.filter(x => nsEndsWith(x.value, this.filters));
+            this.$emit('filters', this.namespaces);
           }
+          
+          this.namespaces = ns;
+        },
+        nsEndsWith(ns, ends){
+          let value = false;
+          value = ends.some(element => {
+            return ns.endsWith(element);
+          });
+          return value;
+        }
       },
       watch: {
         filters: function (){this.updateList()},
