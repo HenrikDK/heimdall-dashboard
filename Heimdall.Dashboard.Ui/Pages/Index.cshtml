@@ -32,10 +32,10 @@
 
 <nav-bar @@select-ns="(n) => namespaces = n" @@filters="(f) => filters = f" @@search="(s) => search = s"></nav-bar>
 
-<div class="grid grid-cols-[85px_1fr] gap-2 h-screen">
+<div class="grid grid-cols-[85px_1fr] gap-2 h-screen fixed w-full">
     <main-menu></main-menu>
     
-    <main class="overflow-auto">
+    <main id="content" class="overflow-auto">
         <router-view :namespaces="namespaces" :search="search" :filters="filters"></router-view>
     </main>
 </div>
