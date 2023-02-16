@@ -17,7 +17,7 @@
         </div>
 
         <template v-if="pods && pods.length > 0">
-            <vuetable :columns="columns" :sorting="sorting" :data="pods" :namespaces="namespaces" :search="search"></vuetable>
+            <vuetable :columns="columns" :initial-sort="sorting" :data="pods" :namespaces="namespaces" :search="search"></vuetable>
         </template>
     </div>
 </template>

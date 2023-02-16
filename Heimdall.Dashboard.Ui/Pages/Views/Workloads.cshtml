@@ -14,7 +14,7 @@
         </div>
         
         <template v-if="workloads && workloads.length > 0">
-            <vuetable :columns="columns" :sorting="sorting" :data="workloads" :namespaces="namespaces" :search="search"></vuetable>
+            <vuetable :columns="columns" :initial-sort="sorting" :data="workloads" :namespaces="namespaces" :search="search"></vuetable>
         </template>
     </div>
 </template>
