@@ -1,4 +1,4 @@
-﻿<template id="cluster">
+<template id="cluster">
     <div class="pl-2 pr-4 w-100">
         <div class="flex my-2 items-center">
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Cluster Overview</span>
@@ -33,7 +33,7 @@
                 <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
             </div>
 
-            <vuetable :columns="columns" :sorting="sorting" :data="events" :namespaces="namespaces" :search="search"></vuetable>
+            <vuetable :columns="columns" :initial-sort="sorting" :data="events" :namespaces="namespaces" :search="search"></vuetable>
 
         </template>
 
