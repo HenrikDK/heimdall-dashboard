@@ -14,7 +14,7 @@
         </div>
         
         <template v-if="workloads && workloads.length > 0">
-            <vuetable :columns="columns" :sorting="sorting" :data="workloads"></vuetable>
+            <vuetable :columns="columns" :sorting="sorting" :data="workloads" :namespaces="namespaces" :search="search"></vuetable>
         </template>
     </div>
 </template>
@@ -144,8 +144,8 @@
                     {header:"Type", name:"kind", minWidth:150, canSort:false},
                     {header:"Name", name:"metadata.name", minWidth:350},
                     {header:"Namespace", name:"metadata.namespace", sorter:"string", minWidth:200},
-                    {header:"Pods", name:"pods", formatter:formatPods, minWidth:150, canSort:false},
-                    {header:"Age", name:"metadata.creationTimestamp", formatter:formatWorkloadAge, minWidth:100, sorter:"datetime"},
+                    {header:"Pods", name:"pods", formatter:formatPods, minWidth:150, canSort:false, canFilter:false},
+                    {header:"Age", name:"metadata.creationTimestamp", formatter:formatWorkloadAge, minWidth:100},
                     {header:"Status", field:"status", formatter:formatDeploymentStatus, minWidth:200, canSort:false},                    
                 ],
                 sorting:[],
@@ -154,10 +154,10 @@
                 clusterJobs: null,
                 clusterStatefulSets: null,
                 initOptions: { renderer: "svg" },
-                isDark: isDark                
+                isDark: isDark
             }
         },
-        props: ['namespaces', 'search'],        
+        props: ['namespaces', 'search', 'filters'],        
         computed: {
             workloadsAvailable: () => workloadsReady(),
             podsAvailable: () => podReady(),
@@ -173,35 +173,28 @@
                 
                 let result = items.flat().filter(x => !!x);
                 
-                if (this.namespaces){
-                    result.filter(x => filterName(x, this.namespaces))
+                if (this.filters){
+                    result.filter(x => filterName(x, this.filters))
                 }
                 
                 this.workloads = result;
-            },
-            async searchTable() {
-                if (!this.cluster && this.cluster.length > 0) return;
-              
-                let ns = [{ label: 'All namespaces', value: ''}]
-              
-                this.namespaces = ns;
             }
         },
         watch: {
+            filters(){this.updateWorkloads()},
             namespace(){this.updateWorkloads()},
             clusterCronJobs(){this.updateWorkloads()},
             clusterDaemonSets(){this.updateWorkloads()},
             clusterJobs(){this.updateWorkloads()},
             clusterStatefulSets(){this.updateWorkloads()},
-            search(){this.searchTable()},
         },
         async mounted() {
-              var host = window.location.origin;
-              streamResults(host + '/k8s/apis/apps/v1/deployments', j => this.workloads = j)
-              streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => this.daemonSets = j)
-              streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => this.statefulSets = j)
-              streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => this.cronJobs = j)
-              streamResults(host + '/k8s/apis/batch/v1/jobs', j => this.jobs = j)
+          var host = window.location.origin;
+          streamResults(host + '/k8s/apis/apps/v1/deployments', j => this.clusterWorkloads = j)
+          streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => this.clusterDaemonSets = j)
+          streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => this.clusterStatefulSets = j)
+          streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => this.clusterCronJobs = j)
+          streamResults(host + '/k8s/apis/batch/v1/jobs', j => this.clusterJobs = j)
         }
     };
 

@@ -7,9 +7,6 @@
     <title>@ViewData["Title"]</title>
     <link rel="icon" href="/favicon.svg">
     
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tabulator-tables@5.3.4/dist/css/tabulator_semanticui.min.css">
-    <link rel="stylesheet" href="/css/search-styles.css" asp-append-version="true">
-
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.3"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3.0.4"></script>
@@ -17,9 +14,6 @@
     <script src="https://cdn.tailwindcss.com"></script> 
 
     <script>
-        window.process = {
-        env: { NODE_ENV: 'development'
-        }};
         var components = {};
         var routes = []
     
@@ -47,8 +41,6 @@
             
             "vue-router": "https://cdn.jsdelivr.net/npm/vue-router@4.1.6/dist/vue-router.esm-browser.js",
             
-            "tabulator": "https://cdn.jsdelivr.net/npm/tabulator-tables@5.3.4/dist/js/tabulator_esm.min.js",
-            
             "vue-echarts": "https://cdn.jsdelivr.net/npm/vue-echarts@6.5.4/dist/index.esm.min.js",
             "vue-demi": "https://cdn.jsdelivr.net/npm/vue-demi@0.13.11/lib/index.mjs",
             "resize-detector": "https://cdn.jsdelivr.net/npm/resize-detector@0.3.0/esm/index.js",
@@ -72,30 +64,84 @@
 @RenderSection("Scripts", required: false)
 
 <script type="module">
-    import { createApp } from 'vue'
-    import { createRouter, createWebHashHistory } from 'vue-router'
-    import { default as ECharts } from 'vue-echarts'
+import { createApp } from 'vue'
+import { createRouter, createWebHashHistory } from 'vue-router'
+import { default as ECharts } from 'vue-echarts'
     
-    components['v-chart'] = ECharts;
-        
-    const router = createRouter({
-      history: createWebHashHistory(),
-      routes
-    })
+components['v-chart'] = ECharts;
 
-    const app = createApp({
-    methods: {},
-    data() {
-        return {
-            namespaces: [],
-            search: "",
-        }
-    }})
-    Object.entries(components).forEach(([k,v]) =>{
-        app.component(k, v)
+let scrollPositions = null;
+
+function beforeEach(to, from, next){
+  if (scrollPositions === null){
+    let stored = window.localStorage.getItem('scroll-state');
+    if (stored){
+      scrollPositions = JSON.parse(stored);
+    } else { 
+      scrollPositions = {};
+    }
+  }
+  
+  const contentEl = document.getElementById('content');
+  scrollPositions[from.fullPath] = {
+    top: contentEl.scrollTop,
+    left: contentEl.scrollLeft
+  };
+  
+  window.localStorage.setItem('scroll-state', JSON.stringify(scrollPositions));
+  next();
+}
+
+function scrollBehavior(to, from, savedPosition) {
+  if (to.fullPath === from.fullPath) {
+    return;
+  }
+  
+  if (scrollPositions === null){
+    let stored = window.localStorage.getItem('scroll-state')
+    if (stored){
+      scrollPositions = JSON.parse(stored)
+    } else { 
+      scrollPositions = {}
+    }
+  }
+
+  const contentEl = document.getElementById('content');
+  console.assert(contentEl !== null, 'Scroll container not found');
+
+  let savedPos = scrollPositions[to.fullPath]
+  if (savedPos) {
+    contentEl.scroll(savedPos);
+  } else {    
+    contentEl.scroll({
+      top: 0,
+      left: 0
     });
-    app.use(router)
-    app.mount('#app');
+  }
+}
+
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes,
+  scrollBehavior,
+})
+
+router.beforeEach(beforeEach)
+
+const app = createApp({
+methods: {},
+data() {
+    return {
+        filters: [],
+        namespaces: [],
+        search: "",
+    }
+}})
+Object.entries(components).forEach(([k,v]) =>{
+    app.component(k, v)
+});
+app.use(router)
+app.mount('#app');
 </script>
 
 </body>
