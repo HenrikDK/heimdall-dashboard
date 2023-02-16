@@ -111,6 +111,7 @@
         handleOptionClick(option){
           if (this.selected.includes(option)) {
             this.selected = this.selected.filter(o => o !== option)
+            this.$emit('update:modelValue', this.$data.selected)
             return
           }
     
