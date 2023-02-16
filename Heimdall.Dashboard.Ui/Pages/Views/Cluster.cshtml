@@ -1,7 +1,15 @@
-<template id="cluster">
+﻿<template id="cluster">
     <div class="pl-2 pr-4 w-100">
         <div class="flex my-2 items-center">
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Cluster Overview</span>
+        </div>
+        
+        <div class="flex">
+            <div class="relative before:z-10 before:absolute before:left-1/2 before:-top-3 before:w-max before:max-w-xs before:-translate-x-1/2 before:-translate-y-full before:rounded-lg before:bg-gray-700 before:px-2 before:py-1.5 before:text-white before:invisible before:content-[attr(data-tip)] after:z-10 after:absolute after:left-1/2 after:-top-3 after:h-0 after:w-0 after:-translate-x-1/2 after:border-8 after:border-t-gray-700 after:border-l-transparent after:border-b-transparent after:border-r-transparent after:invisible hover:before:visible hover:after:visible" data-tip="Improved Workflow">
+                <div class="py-1 px-2 capitalize bg-blue-500 text-white rounded-lg border border-blue-500">
+                  Beyond Builder
+                </div>
+            </div>
         </div>
 
         <div class="flex justify-between mb-4 mt-1">
@@ -46,7 +54,11 @@
     
     function formatMessage(row){
          let fontClass = row.type === "Warning" ? "text-red-500" : ""; 
-         return `<div class="${fontClass}">${row.message}</div>`;
+         return `<div data-tip="${row.message.replace(/"/g, '\'')}" class="${fontClass} 
+                        before:z-10 before:absolute before:left-1/2 before:-top-3 before:w-max before:max-w-xs before:-translate-x-1/2 before:-translate-y-full before:rounded-lg before:bg-gray-700 before:px-2 before:py-1.5 before:text-white before:invisible before:content-[attr(data-tip)] 
+                        after:z-10 after:absolute after:left-1/2 after:-top-3 after:h-0 after:w-0 after:-translate-x-1/2 after:border-8 after:border-t-gray-700 after:border-l-transparent after:border-b-transparent after:border-r-transparent after:invisible hover:before:visible hover:after:visible">
+                    ${row.message}
+                </div>`;
     }
 
     function formatSource(row){
@@ -78,14 +90,16 @@
                     count: 23,
                     lastTimestamp: "2011-10-05T14:48:00.000Z"
                 }],
-                sorting: [],
+                sorting: [
+                    { header:'Age', sort:'asc' }
+                ],
                 columns: [
-                    {header:"Type", name:"type", sorter:"string", classes:"w-32"},
-                    {header:"Namespace", name:"involvedObject.namespace", sorter:"string", classes:"w-40"},
-                    {header:"Message", name:"message", formatter:formatMessage, canSort:false},
-                    {header:"Source", name:"involvedObject.name", formatter:formatSource, canSort:false, classes: "w-80"},
+                    {header:"Type", name:"type", sorter:"text", classes:"w-32"},
+                    {header:"Namespace", name:"involvedObject.namespace", sorter:"text", classes:"w-40"},
+                    {header:"Message", name:"message", formatter:formatMessage, classes:"max-w-3xl text-ellipsis overflow-hidden", canSort:false},
+                    {header:"Source", name:"involvedObject.name", formatter:formatSource, canSort:false, classes: "w-80 truncate"},
                     {header:"Events", name:"count", sorter:"number", classes:"w-32"},
-                    {header:"Age", name:"lastTimestamp", formatter:formatEventAge, sorter:"datetime", classes:"w-32"},
+                    {header:"Age", name:"lastTimestamp", formatter:formatEventAge, sorter:"text", classes:"w-32"},
                 ],
                 initOptions: { renderer: "svg" },
                 clusterEvents: null,
