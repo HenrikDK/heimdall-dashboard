@@ -46,7 +46,7 @@
               {{ getRowValue(row, column.name)}}
             </template>
             <template v-else>
-              <span v-html="column.formatter(row)"></span>
+              <div v-html="column.formatter(row)"></div>
             </template>
           </td>
         </tr>
@@ -99,7 +99,10 @@
         
         this.$data.rows = sortRows(this.$data.sorting, this.$props.columns, this.$props.data)
         
-        this.$data.rows.forEach(x => x.filtered = false)
+        this.$data.rows.forEach(x => {
+          x.filtered = false;
+          x.nsFiltered = false;
+        })
         
         filterRows(this.$data.rows, this.$props.columns, this.$props.namespaces, this.$props.search)
       }
@@ -336,7 +339,7 @@ function filterRows(rows, columns, namespaces, search){
   if ((search === undefined || search?.length === 0) && (namespaces === undefined || namespaces?.length === 0)) return;
   
   const filterColumns = columns.filter(x => (x.canFilter ?? true))
-  let nsColumn = columns.filter(x => x.header === 'Namespace')
+  let nsColumn = columns.filter(x => x.header === 'Namespace')[0]
   let tokens = [];
   if (search?.length > 0){
     tokens = search.split(' ')
