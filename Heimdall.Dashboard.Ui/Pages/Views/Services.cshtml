@@ -14,7 +14,7 @@
 
    function formatKubeDns(row){
         let dns = row.metadata.name + '.' + row.metadata.namespace + ':' + row.spec.ports[0].port
-        return '<div>' + dns + '</div>';
+        return {content: dns, classes:''};
     }
 
    function formatServiceAge(row){
@@ -24,7 +24,7 @@
         var date = DT.now();
     
         var newDatetime = DT.fromISO(String(row.metadata.creationTimestamp));
-        return toHuman(newDatetime.diff(date, unit));
+        return {content:'' + toHuman(newDatetime.diff(date, unit)), classes: ''};
     }
     
     components["services"] = {
