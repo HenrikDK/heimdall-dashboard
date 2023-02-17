@@ -1,59 +1,63 @@
 <template id="vuetable">
-  <div class="h-[85vh] border border-gray-200 shadow-md rounded-lg overflow-hidden dark:border-zinc-700 mt-4">
-    <div class="table min-w-full divide-y divide-gray-200 text-left dark:divide-zinc-700">
-      <div class="table-header-group">
-        <div class="table-row bg-gray-100 dark:bg-zinc-800">
-          <div v-for="column in columns"
-               class="table-cell text-left text-xs font-strong text-black dark:text-gray-200 uppercase hover:bg-gray-200 dark:hover:bg-zinc-700"
-               :class="column.classes">
+  <div class="h-[85vh] border border-gray-200 shadow-md rounded-lg overflow-y-auto dark:border-zinc-700 mt-4">
+    <div class="table w-full divide-y divide-gray-200 text-left dark:divide-zinc-700">
+        <div class="table-header-group">
+          <div class="table-row bg-gray-100 dark:bg-zinc-800">
+            <div v-for="column in columns"
+                 class="table-cell text-left text-xs font-strong text-black dark:text-gray-200 uppercase hover:bg-gray-200 dark:hover:bg-zinc-700"
+                 :class="column.classes">
 
-            <div class="flex">
-              <div class="px-4 py-2 grow">
-                {{ column.header }}
-              </div>
+              <div class="flex shrink">
+                <div class="px-4 py-2 grow shrink">
+                  {{ column.header }}
+                </div>
 
-              <div v-if="column.canSort || column.canSort == undefined"
-                   class="px-4 py-2 float-right cursor-pointer select-none"
-                   @@click="onSelectSort($event, column.header)">
-                <template v-if="sorting.find(x => x.header === column.header) == undefined">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/>
-                  </svg>
-                </template>
-                <template v-if="sorting.find(x => x.header === column.header)?.sort === 'asc'">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/>
-                  </svg>
-                </template>
-                <template v-if="sorting.find(x => x.header === column.header)?.sort === 'desc'">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
-                  </svg>
-                </template>
+                <div v-if="column.canSort || column.canSort == undefined"
+                     class="px-4 py-2 float-right cursor-pointer select-none"
+                     @@click="onSelectSort($event, column.header)">
+                  <template v-if="sorting.find(x => x.header === column.header) == undefined">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/>
+                    </svg>
+                  </template>
+                  <template v-if="sorting.find(x => x.header === column.header)?.sort === 'asc'">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/>
+                    </svg>
+                  </template>
+                  <template v-if="sorting.find(x => x.header === column.header)?.sort === 'desc'">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+                    </svg>
+                  </template>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="table-row-group divide-y divide-gray-200 dark:divide-zinc-700">
-        <template v-for="row in rows">
-          <div v-if="!row?.filtered && !row?.nsFiltered"
-               class="table-row hover:bg-blue-100 dark:bg-zinc-900 dark:hover:bg-zinc-700">
-            <div v-for="column in columns"
-                 class="table-cell px-4 py-2 whitespace-nowrap text-sm text-gray-700 dark:text-gray-400"
-                 :class="column.classes">
-              <template v-if="column.formatter == undefined">
-                {{ getRowValue(row, column.name)}}
-              </template>
-              <template v-else>
-                <div v-html="column.formatter(row)"></div>
-              </template>
+        <div class="table-row-group divide-y divide-gray-200 dark:divide-zinc-700">
+          <template v-for="row in rows">
+            <div v-if="!row?.filtered && !row?.nsFiltered"
+                 class="table-row hover:bg-blue-100 dark:bg-zinc-900 dark:hover:bg-zinc-700">
+              <div v-for="column in columns"
+                   class="table-cell px-4 py-2 text-sm text-gray-700 dark:text-gray-400"
+                   :class="column.classes">
+
+                <template v-if="column.formatter == undefined">
+                  {{ getRowValue(row, column.name) }}
+                </template>
+                <template v-else-if="column.toolTip" v-for="scope in [column.formatter(row)]">
+                  <div-with-tooltip :content="scope.content" :classes="scope.classes"></div-with-tooltip>
+                </template>
+                <template v-else>
+                  <div v-html="column.formatter(row)"></div>
+                </template>
+              </div>
             </div>
-          </div>
-        </template>
+          </template>
+        </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script type="module">
