@@ -38,7 +38,7 @@
         props: ['namespaces', 'search', 'filters'],        
         mounted() {
           var host = window.location.origin;
-          streamResults(host + '/apis/networking.k8s.io/v1/ingresses', j => this.clusterIngresses = j)
+          streamResults(host + '/k8s/apis/networking.k8s.io/v1/ingresses', j => this.clusterIngresses = j)
         },
     };
 
