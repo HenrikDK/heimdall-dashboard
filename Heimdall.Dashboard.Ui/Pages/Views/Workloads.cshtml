@@ -55,7 +55,7 @@
             }
         }
         
-        return result;           
+        return { content:'<div class="flex">' + result + '</div>', classes: ''};           
     }
 
     function formatWorkloadAge(row){
@@ -65,7 +65,7 @@
         var date = DT.now();
     
         var newDatetime = DT.fromISO(String(row.metadata.creationTimestamp));
-        return toHuman(newDatetime.diff(date, unit));
+        return { content:'' + toHuman(newDatetime.diff(date, unit)), classes: '' };
     }
     
     function formatPods(row){
@@ -115,7 +115,7 @@
         result += [...Array(waiting)].map(x => '<div class="h-4 w-4 mr-1 bg-gray-300 dark:bg-zinc-600 rounded-sm"></div>').join('');
         result += [...Array(ready)].map(x => '<div class="h-4 w-4 mr-1 bg-green-500 dark:bg-green-500 rounded-sm"></div>').join('');
          
-        return '<div class="flex">' + result + '</div>';
+        return {content: '<div class="flex">' + result + '</div>', classes:''};
     }
     
     import {useDark} from "vueuse";
@@ -144,9 +144,9 @@
                     {header:"Type", name:"kind", classes:"w-48", canSort:false},
                     {header:"Name", name:"metadata.name", classes:"w-64"},
                     {header:"Namespace", name:"metadata.namespace", sorter:"string", classes:"w-64"},
-                    {header:"Pods", name:"pods", formatter:formatPods, canSort:false, canFilter:false},
+                    {header:"Pods", name:"pods", formatter:formatPods, canSort:false, raw:true, canFilter:false, classes: 'w-48'},
                     {header:"Age", name:"metadata.creationTimestamp", formatter:formatWorkloadAge, sorter:"text", classes:"w-32"},
-                    {header:"Status", field:"status", formatter:formatDeploymentStatus, canSort:false},                    
+                    {header:"Status", field:"status", formatter:formatDeploymentStatus, raw:true, canSort:false},                    
                 ],
                 sorting:[],
                 clusterCronJobs: null,
