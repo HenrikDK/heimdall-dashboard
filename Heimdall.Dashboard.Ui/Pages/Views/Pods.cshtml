@@ -67,6 +67,23 @@
             podCpuUsage: () => podCpu(),
             podMemoryUsage: () => podMemory(),
         },
+        methods: {
+            updatePods(){
+                if (!this.clusterPods) return;
+                
+                let result = [...this.clusterPods];
+                                
+                if (this.filters?.length){
+                    result = result.filter(x => filterName(x, this.filters))
+                }
+                
+                this.pods = result;
+            }
+        },
+        watch: {
+            filters(){this.updatePods()},
+            clusterPods(){this.updatePods()},
+        },        
         async mounted() {
             var host = window.location.origin;
             streamResults(host + '/k8s/api/v1/pods', j => this.clusterPods = j);

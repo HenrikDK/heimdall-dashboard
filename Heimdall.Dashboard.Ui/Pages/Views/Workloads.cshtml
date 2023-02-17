@@ -149,6 +149,7 @@
                     {header:"Status", field:"status", formatter:formatDeploymentStatus, raw:true, canSort:false, classes: 'w-64'},                    
                 ],
                 sorting:[],
+                clusterWorkloads: null,
                 clusterCronJobs: null,
                 clusterDaemonSets: null,
                 clusterJobs: null,
@@ -164,12 +165,13 @@
         },
         methods: {
             updateWorkloads(){
+                if (!this.clusterWorkloads) return;
                 if (!this.clusterDaemonSets) return;
                 if (!this.clusterCronJobs) return;
                 if (!this.clusterJobs) return;
                 if (!this.clusterStatefulSets) return;
                 
-                let items = [this.clusterDaemonSets, this.clusterCronJobs, this.clusterJobs, this.clusterStatefulSets];
+                let items = [this.clusterWorkloads, this.clusterDaemonSets, this.clusterCronJobs, this.clusterJobs, this.clusterStatefulSets];
                 
                 let result = items.flat().filter(x => !!x);
                 

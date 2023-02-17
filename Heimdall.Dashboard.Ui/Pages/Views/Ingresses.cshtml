@@ -14,6 +14,11 @@
         template: "#ingresses",
         data() {
             return {
+                data: [
+                    {name: "user-api", namespace:"petstore", class:"nginx", hosts:"https://user-api.petstore.dk", address:"192.1.0.1", age: "22d"},
+                    {name: "store-api", namespace:"petstore", class:"nginx", hosts:"https://store-api.petstore.dk", address:"192.2.0.1", age: "10d"},
+                    {name: "order-api", namespace:"petstore", class:"nginx", hosts:"https://order-api.petstore.dk", address:"192.3.0.1", age: "13d"},
+                ],                
                 sorting:[
                     {header:'Name', sort:'desc'}
                 ],
@@ -25,15 +30,8 @@
                     { name: 'hosts', header: 'Host', canSort: true },
                     { name: 'age', header: 'Age', canSort: false }
                 ],
-                data: [
-                    {name: "user-api", namespace:"petstore", class:"nginx", hosts:"https://user-api.petstore.dk", address:"192.1.0.1", age: "22d"},
-                    {name: "store-api", namespace:"petstore", class:"nginx", hosts:"https://store-api.petstore.dk", address:"192.2.0.1", age: "10d"},
-                    {name: "order-api", namespace:"petstore", class:"nginx", hosts:"https://order-api.petstore.dk", address:"192.3.0.1", age: "13d"},
-                ],
                 clusterIngresses: null,
             }
-        },
-        methods:{
         },
         props: ['namespaces', 'search', 'filters'],        
         mounted() {
