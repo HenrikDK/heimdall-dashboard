@@ -54,11 +54,11 @@
                     },
                 ],
                 columns: [
-                    {header:"Type", name:"spec.type", classes:"w-64", canSort: false},
+                    {header:"Type", name:"spec.type", classes:"w-40", canSort: false},
                     {header:"Name", name:"metadata.name", classes:"w-64"},
                     {header:"Namespace", name:"metadata.namespace", classes:"w-64"},
                     {header:"Kube-DNS", name:"kubeDNS", formatter:formatKubeDns},
-                    {header:"Age", name:"age", formatter:formatServiceAge, classes:"w-32"},                    
+                    {header:"Age", name:"age", formatter:formatServiceAge, sorter:"text", classes:"w-32"},                    
                 ],
                 sorting: [],
                 clusterServices: null,
