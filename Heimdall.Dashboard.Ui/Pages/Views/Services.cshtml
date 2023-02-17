@@ -11,27 +11,73 @@
 </template>
 
 <script type="module">
+
+   function formatKubeDns(row){
+        let dns = row.metadata.name + '.' + row.metadata.namespace + ':' + row.spec.ports[0].port
+        return '<div>' + dns + '</div>';
+    }
+
+   function formatServiceAge(row){
+        var DT = window.DateTime || luxon.DateTime;
+        var invalid = "";
+        const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
+        var date = DT.now();
+    
+        var newDatetime = DT.fromISO(String(row.metadata.creationTimestamp));
+        return toHuman(newDatetime.diff(date, unit));
+    }
+    
     components["services"] = {
         template: "#services",
         data() {
             return {
                 services: [
-                    {type: "ClusterIP", name: "user-api", namespace:"petstore", kubeDNS:"petstore.user-api:8080", age: "22d4h"},
-                    {type: "NodeIP", name: "store-api", namespace:"petstore", kubeDNS:"petstore.store-api:8080", age: "10d5h"},
-                    {type: "LoadBalancer", name: "order-api", namespace:"petstore", kubeDNS:"petstore.order-api:8080", age: "13d5h"},
-                    {type: "ClusterIP", name: "management-ui", namespace:"petstore", kubeDNS:"petstore.management-ui:8080", age: "14min"},
-                    {type: "NodeIP", name: "pet-api", namespace:"petstore", kubeDNS:"petstore.pet-api:8080", age: "1h20m"},                    
+                    {   
+                        metadata:{name: "user-api", namespace:"petstore", creationTimestamp:'2023-02-11T14:48:00.000Z'},
+                        spec:{type: "ClusterIP", ports: [{port:"8080"}]}
+                    },
+                    {
+                        metadata:{name: "store-api", namespace:"petstore", creationTimestamp:'2023-02-13T15:48:00.000Z'},
+                        spec:{type: "NodeIP", ports: [{port:"8080"}]}
+                    },
+                    {
+                        metadata:{name: "order-api", namespace:"petstore", creationTimestamp:'2023-02-17T12:18:00.000Z'},
+                        spec:{type: "LoadBalancer", ports: [{port:"8080"}]}
+                    },
+                    {
+                        metadata:{name: "management-ui", namespace:"petstore", creationTimestamp:'2023-02-17T12:18:00.000Z'},
+                        spec:{type: "ClusterIP", ports: [{port:"8080"}]}
+                    },
+                    {
+                        metadata:{name: "pet-api", namespace:"petstore", creationTimestamp:'2023-02-17T10:18:00.000Z'},
+                        spec:{type: "NodeIP", ports: [{port:"8080"}]}
+                    },
                 ],
                 columns: [
-                    {header:"Type", name:"type", classes:"w-64", canSort: false},
-                    {header:"Name", name:"name", classes:"w-64"},
-                    {header:"Namespace", name:"namespace", classes:"w-64"},
-                    {header:"KubeDNS", name:"kubeDNS", minWidth:400},
-                    {header:"Age", name:"age", minWidth:200, classes:"w-32"},                    
+                    {header:"Type", name:"spec.type", classes:"w-64", canSort: false},
+                    {header:"Name", name:"metadata.name", classes:"w-64"},
+                    {header:"Namespace", name:"metadata.namespace", classes:"w-64"},
+                    {header:"Kube-DNS", name:"kubeDNS", formatter:formatKubeDns},
+                    {header:"Age", name:"age", formatter:formatServiceAge, classes:"w-32"},                    
                 ],
                 sorting: [],
                 clusterServices: null,
             }
+        },
+        methods: {
+          async updateServices() {
+            if (!this.clusterServices) return;
+            
+            let result = [...this.clusterServices];
+            if (this.filters?.length){
+                result = this.result.filter(x => filterName(x, this.filters))
+            }
+                        
+            this.services = result;
+          }
+        },
+        watch: {
+          clusterServices: function (){this.updateServices()},
         },
         props: ['namespaces', 'search', 'filters'],
         mounted() {
