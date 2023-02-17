@@ -23,12 +23,12 @@
                     {header:'Name', sort:'desc'}
                 ],
                 columns:[
-                    { name: 'name', header: 'Name', canSort: true },
-                    { name: 'namespace', header: 'Namespace', canSort: true},
-                    { name: 'class', header: 'Type', canSort: false },
-                    { name: 'address', header: 'LoadBalancers', canSort: true },
-                    { name: 'hosts', header: 'Host', canSort: true },
-                    { name: 'age', header: 'Age', canSort: false }
+                    { name: 'name', header: 'Name', classes:'w-64', canSort: true },
+                    { name: 'namespace', header: 'Namespace', classes:'w-64', canSort: true},
+                    { name: 'class', header: 'Type', classes:'w-40', canSort: false },
+                    { name: 'address', header: 'LoadBalancers', classes:'w-40', canSort: true },
+                    { name: 'hosts', header: 'Host', classes:'grow shrink', canSort: true },
+                    { name: 'age', header: 'Age', classes:'w-40', canSort: false }
                 ],
                 clusterIngresses: null,
             }
