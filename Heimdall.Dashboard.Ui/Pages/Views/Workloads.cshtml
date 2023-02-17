@@ -33,7 +33,7 @@
             let conditions = row.status.conditions;
             result += '<div class="flex">';
             result += conditions.map(x => x.type).sort().map(x => {
-              let color = x === "Available" ? "text-blue-500" : "text-green-500";
+              let color = x === "Available" ? "text-green-500" : "text-blue-500";
               return `<div class="px-1 ${color}">${x}</div>`  
             }).join('');
             result += '</div>'
