@@ -126,29 +126,19 @@
         data() {
             return {
                 workloads: [{
-                    kind:"Deployment",
-                    metadata:{
-                        name:"some-service-thingy",
-                        namespace: "service-ns",
-                        creationTimestamp: "2023-02-11T14:48:00.000Z"
-                    },
-                    pods: "",
-                    status:{
-                        replicas: 2,
-                        readyReplicas: 1,
-                        conditions: [{type:'Available'}, {type:'Progressing'}]
-                    }
-                    
+                    kind:"Deployment", pods: "",
+                    metadata:{ name:"some-service-thingy", namespace: "service-ns", creationTimestamp: "2023-02-11T14:48:00.000Z" },
+                    status:{ replicas: 2, readyReplicas: 1, conditions: [{type:'Available'}, {type:'Progressing'}] }
                 }],
                 columns:[
-                    {header:"Type", name:"kind", classes:"w-48", canSort:false},
-                    {header:"Name", name:"metadata.name", classes:"w-64"},
-                    {header:"Namespace", name:"metadata.namespace", sorter:"string", classes:"w-64"},
-                    {header:"Pods", name:"pods", formatter:formatPods, canSort:false, raw:true, canFilter:false, classes: 'grow shrink'},
-                    {header:"Age", name:"metadata.creationTimestamp", formatter:formatWorkloadAge, sorter:"text", classes:"w-40"},
-                    {header:"Status", field:"status", formatter:formatDeploymentStatus, raw:true, canSort:false, classes: 'w-64'},                    
+                    { header:"Type", name:"kind", classes:"w-48", canSort:false },
+                    { header:"Name", name:"metadata.name", classes:"w-64" },
+                    { header:"Namespace", name:"metadata.namespace", sorter:"string", classes:"w-64" },
+                    { header:"Pods", name:"pods", formatter:formatPods, canSort:false, raw:true, canFilter:false, classes: 'grow shrink' },
+                    { header:"Age", name:"metadata.creationTimestamp", formatter:formatWorkloadAge, sorter:"text", classes:"w-40" },
+                    { header:"Status", field:"status", formatter:formatDeploymentStatus, raw:true, canSort:false, classes: 'w-64' },                    
                 ],
-                sorting:[],
+                sorting: [],
                 clusterWorkloads: null,
                 clusterCronJobs: null,
                 clusterDaemonSets: null,
