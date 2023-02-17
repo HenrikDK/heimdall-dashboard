@@ -141,12 +141,12 @@
                     
                 }],
                 columns:[
-                    {header:"Type", name:"kind", minWidth:150, canSort:false},
-                    {header:"Name", name:"metadata.name", minWidth:350},
-                    {header:"Namespace", name:"metadata.namespace", sorter:"string", minWidth:200},
-                    {header:"Pods", name:"pods", formatter:formatPods, minWidth:150, canSort:false, canFilter:false},
-                    {header:"Age", name:"metadata.creationTimestamp", formatter:formatWorkloadAge, minWidth:100},
-                    {header:"Status", field:"status", formatter:formatDeploymentStatus, minWidth:200, canSort:false},                    
+                    {header:"Type", name:"kind", classes:"w-48", canSort:false},
+                    {header:"Name", name:"metadata.name", classes:"w-64"},
+                    {header:"Namespace", name:"metadata.namespace", sorter:"string", classes:"w-64"},
+                    {header:"Pods", name:"pods", formatter:formatPods, canSort:false, canFilter:false},
+                    {header:"Age", name:"metadata.creationTimestamp", formatter:formatWorkloadAge, sorter:"text", classes:"w-32"},
+                    {header:"Status", field:"status", formatter:formatDeploymentStatus, canSort:false},                    
                 ],
                 sorting:[],
                 clusterCronJobs: null,
