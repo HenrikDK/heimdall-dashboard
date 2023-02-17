@@ -174,7 +174,7 @@
                 let result = items.flat().filter(x => !!x);
                 
                 if (this.filters?.length){
-                    result.filter(x => filterName(x, this.filters))
+                    result = result.filter(x => filterName(x, this.filters))
                 }
                 
                 this.workloads = result;
