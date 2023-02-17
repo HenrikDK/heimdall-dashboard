@@ -77,7 +77,7 @@
         if (row.kind === "DaemonSet")
         {
             let scheduled = row.status.currentNumberScheduled;
-            let ready = row.status.numberReady;
+            ready = row.status.numberReady;
             
             if (scheduled > ready){
                 waiting = scheduled - ready;
