@@ -69,15 +69,8 @@
         data() {
             return {
                 events: [{
-                    type: "Warning",
-                    message:"Some dangerous message",
-                    involvedObject: {
-                        namespace: "test",
-                        kind: "lobster",
-                        name: "thing"
-                    },
-                    count: 23,
-                    lastTimestamp: "2011-10-05T14:48:00.000Z"
+                    type: "Warning", message:"Some dangerous message", count: 23, lastTimestamp: "2011-10-05T14:48:00.000Z",
+                    involvedObject: { namespace: "test", kind: "lobster", name: "thing" }
                 }],
                 sorting: [
                     { header:'Age', sort: 'desc' }
