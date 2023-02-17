@@ -36,7 +36,7 @@
         props: ['namespaces', 'search', 'filters'],
         mounted() {
           var host = window.location.origin;
-          streamResults(host + '/api/v1/services', j => this.clusterServices = j)
+          streamResults(host + '/k8s/api/v1/services', j => this.clusterServices = j)
         },
     };
     
