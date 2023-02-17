@@ -44,7 +44,7 @@
     const isDark = useDark()
     
     function formatMessage(row){
-         let fontClass = "truncate 2xl:w-[42rem] xl:w-[22rem] lg:w-[18rem]"
+         let fontClass = "truncate 2xl:w-[41rem] xl:w-[22rem] lg:w-[18rem]"
          fontClass += row.type === "Warning" ? " text-red-500" : ''; 
          return { content:row.message.replace(/"/g, '\''), classes: fontClass }
     }
@@ -85,7 +85,7 @@
                 columns: [
                     {header:"Type", name:"type", sorter:"text", classes:"w-32"},
                     {header:"Namespace", name:"involvedObject.namespace", sorter:"text", classes:"w-56"},
-                    {header:"Message", name:"message", formatter:formatMessage, classes:"2xl:w-[46rem] xl:w-[24rem] lg:w-[20rem] grow shrink", canSort:false, toolTip: true},
+                    {header:"Message", name:"message", formatter:formatMessage, classes:"2xl:w-[42rem] xl:w-[24rem] lg:w-[20rem] grow shrink", canSort:false, toolTip: true},
                     {header:"Source", name:"involvedObject.name", formatter:formatSource, canSort:false, classes: "w-80"},
                     {header:"Events", name:"count", sorter:"number", classes:"w-40"},
                     {header:"Age", name:"lastTimestamp", formatter:formatEventAge, sorter:"text", classes:"w-32"},
