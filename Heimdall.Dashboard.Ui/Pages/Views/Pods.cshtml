@@ -26,14 +26,50 @@
     import {useDark} from "vueuse";
     const isDark = useDark()
     
-   function formatPodAge(row){
+    function formatRestarts(row){
+        if (row.status.containerStatuses == undefined){
+              return {content:'', classes: ''}
+        }    
+        let con = row.status.containerStatuses.reduce((a, v) => a + v.restartCount, 0);
+        con += row.status.initContainerStatuses?.reduce((a, v) => a + v.restartCount, 0) ?? 0;
+        return { content:con, classes: '' };
+    }
+
+    function formatSource(row){
+        let con = row.involvedObject.kind + ": " + row.involvedObject.name;
+        return { content:con, classes: 'text-blue-500 w-80' };
+    }
+    function formatStatus(row){
+        let con = row.status.phase;
+        return { content:con, classes: 'text-green-500 w-65' };
+    }
+    
+    function formatContainers(row){
+        let containers = row.status.containerStatuses;
+        let initContainers = row.status.initContainerStatuses ?? [];
+        if (containers === undefined){
+            return {content:'', classes: ''}
+        }
+        let result = [...containers, ...initContainers].map(x => {
+            if (x.state.running){
+                return '<div class="h-4 w-4 mr-1 bg-green-500 dark:bg-green-500 rounded-sm"></div>'    
+            }
+            if (x.state.terminated){
+                return '<div class="h-4 w-4 mr-1 bg-gray-300 dark:bg-zinc-600 rounded-sm"></div>'
+            }
+        }).join('');
+        
+        return { content:result, classes: 'flex py-0.5' };
+    }
+
+    function formatPodAge(row){
         var DT = window.DateTime || luxon.DateTime;
         var invalid = "";
         const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
         var date = DT.now();
     
-        var newDatetime = DT.fromISO(String(row.lastTimestamp));
-        return toHuman(newDatetime.diff(date, unit));
+        var newDatetime = DT.fromISO(String(row.metadata.creationTimestamp));
+        return {content:''+ toHuman(newDatetime.diff(date, unit)), classes: ''};
     }
     
     components["pods"] = {
@@ -41,21 +77,32 @@
         data() {
             return {
                 pods: [
-                    {name: "flux-something", namespace: "monitoring", restarts: 2, containers: [1,1], lastTimestamp: "2023-01-05T14:48:00.000Z", status:"Running"},
-                    {name: "flux-something", namespace: "flux-system", restarts: 0, containers: [1], lastTimestamp: "2023-02-05T14:48:00.000Z", status:"Running"},
-                    {name: "kube-controller", namespace: "default", restarts: 3, containers: [1], lastTimestamp: "2023-02-12T14:48:00.000Z",status:"Running"},
-                    {name: "cert-manager", namespace: "ingress", restarts: 0, containers: [0], lastTimestamp: "2023-02-11T14:48:00.000Z", status:"Running"},
-                    {name: "pod-manager", namespace: "kube-system", restarts: 0, containers: [1,2], lastTimestamp: "2023-02-10T14:48:00.000Z", status:"Running"},
+                    { metadata: { name: "flux-something", namespace: "monitoring", creationTimestamp: "2023-01-05T14:48:00.000Z" },
+                     status: { phase: 'Running', 
+                     containerStatuses: [{ restartCount: 2, state: {running: {}}}], 
+                     initContainerStatuses: [{ restartCount: 0, state: {terminated: {}}}] }},
+                    { metadata: { name: "flux-something", namespace: "flux-system", creationTimestamp: "2023-02-05T14:48:00.000Z" },
+                     status: { phase: 'Running', 
+                     containerStatuses: [{ restartCount: 0, state: {running: {}}}] }},
+                    { metadata: { name: "kube-controller", namespace: "default", creationTimestamp: "2023-02-12T14:48:00.000Z"}, 
+                     status: { phase: 'Running', 
+                     containerStatuses: [{ restartCount: 3, state: {running: {}}}] }},
+                    { metadata: { name: "cert-manager", namespace: "ingress", creationTimestamp: "2023-02-11T14:48:00.000Z"},
+                     status: { phase: 'Running', 
+                     containerStatuses: [{ restartCount: 0, state: {terminated: {}}}] }},
+                    { metadata: { name: "pod-manager", namespace: "kube-system", creationTimestamp: "2023-02-10T14:48:00.000Z"},
+                     status: { phase: 'Running', 
+                     containerStatuses: [{ restartCount: 3, state: {running: {}}}, { restartCount: 0, state: {terminated: {}}}] }}
                 ],
                 columns:[
-                {header:"Name", name:"name"},
-                {header:"Namespace", name:"namespace", classes:"w-64"},
-                {header:"Containers", name:"containers", classes:"w-20", canSort:false},
-                {header:"Restarts", name:"restarts", classes:"w-20"},
-                {header:"Age", name:"lastTimestamp", formatter:formatPodAge, classes:"w-32"},
-                {header:"Status", name:"status", classes:"w-32"},
+                    { header:"Name", name:"metadata.name", classes: "grow shrink"},
+                    { header:"Namespace", name:"metadata.namespace", classes:"w-64" },
+                    { header:"Containers", name:"status.containerStatuses", formatter:formatContainers, canSort:false, raw:true, canFilter:false, classes:"w-64"},
+                    { header:"Restarts", name:"status.containerStatuses", formatter:formatRestarts, classes:"w-40" },
+                    { header:"Age", name:"metadata.creationTimestamp", formatter:formatPodAge, classes:"w-40" },
+                    { header:"Status", name:"status.phase", formatter:formatStatus, classes:"w-64" },
                 ],
-                sorting:[],
+                sorting: [],
                 initOptions: { renderer: "svg" },
                 clusterPods: {},
                 isDark: isDark
