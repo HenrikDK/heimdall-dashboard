@@ -107,6 +107,7 @@
           }
           
           this.$data.isOpen = false;
+          this.$emit('update:modelValue', this.$data.selected)
         },
         handleOptionClick(option){
           if (this.selected.includes(option)) {
@@ -116,10 +117,10 @@
           }
     
           if (option) {
-            this.selected.push(option);
+            this.selected = [...this.selected, option];
+            this.$emit('update:modelValue', this.$data.selected)
           }
           
-          this.$emit('update:modelValue', this.$data.selected)
           focus();                  
         },
       },
