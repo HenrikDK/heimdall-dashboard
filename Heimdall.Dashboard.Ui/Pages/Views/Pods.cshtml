@@ -102,7 +102,7 @@
                     { header:"Age", name:"metadata.creationTimestamp", formatter:formatPodAge, classes:"w-40" },
                     { header:"Status", name:"status.phase", formatter:formatStatus, classes:"w-64" },
                 ],
-                sorting: [],
+                sorting: [{header:'Name', sort:'desc'}],
                 initOptions: { renderer: "svg" },
                 clusterPods: {},
                 isDark: isDark

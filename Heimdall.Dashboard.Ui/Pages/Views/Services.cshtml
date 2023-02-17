@@ -60,7 +60,7 @@
                     {header:"Kube-DNS", name:"kubeDNS", formatter:formatKubeDns, classes: 'grow shrink'},
                     {header:"Age", name:"age", formatter:formatServiceAge, sorter:"text", classes:"w-40"},                    
                 ],
-                sorting: [],
+                sorting: [{header:'Name', sort:'desc'}],
                 clusterServices: null,
             }
         },
