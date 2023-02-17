@@ -38,7 +38,7 @@
           <div v-if="!row?.filtered && !row?.nsFiltered"
                class="flex w-full hover:bg-blue-100 dark:bg-zinc-900 dark:hover:bg-zinc-700">
             <template v-for="column in columns">
-              <div class="px-2 py-1 text-sm text-gray-700 dark:text-gray-400"
+              <div class="px-4 py-1 text-sm text-gray-700 dark:text-gray-400"
                    :class="column.classes">
                 <template v-if="column.formatter == undefined">
                   {{ getRowValue(row, column.name) }}
@@ -47,7 +47,7 @@
                   <template v-if="column.toolTip">
                     <div-with-tooltip :content="scope.content" :classes="scope.classes"></div-with-tooltip>
                   </template>
-                  <template v-if="column.raw">
+                  <template v-else-if="column.raw">
                     <div v-html="scope.content" :class="scope.classes"></div>
                   </template>
                   <template v-else>
