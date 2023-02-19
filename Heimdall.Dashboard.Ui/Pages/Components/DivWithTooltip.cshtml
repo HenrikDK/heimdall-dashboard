@@ -1,0 +1,19 @@
+<template id="div-with-tooltip">
+    <div class="">
+        <div class="group relative">
+            <div :class="classes">{{ content }}</div>
+            <div class="absolute p-4 mx-auto opacity-0 group-hover:opacity-100 z-20 transition-opacity bg-gray-800 text-sm text-gray-100 rounded-md
+                left-1/2 -translate-x-1/2 
+                translate-y-2">
+                <p>{{ content }}</p>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script type="module">
+    components["div-with-tooltip"] = {
+      template: "#div-with-tooltip",
+      props: ['content', 'classes']
+    };
+</script>

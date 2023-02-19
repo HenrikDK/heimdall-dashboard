@@ -45,13 +45,8 @@
     data() {
       return {
         hasFocus: false,
+        modelValue: '',
       }
-    },
-    props: { modelValue : {
-      type: String,
-      default: '',
-      required: true
-     } 
     },
     mounted() {
       window.document.addEventListener('keydown', this.onDocumentKeydown);

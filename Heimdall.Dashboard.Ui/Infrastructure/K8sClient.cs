@@ -52,14 +52,25 @@ public class K8sClient
         var dict = (IDictionary<string, object>) config;
         var currentContext = "" + dict["current-context"];
 
-        var server = "";
-        foreach (var entry in config.clusters)
+        var userName = "";
+        var clusterName = "";
+        foreach (var entry in config.contexts)
         {
             if (entry.name != currentContext) continue;
-            server = entry.cluster.server;
+            clusterName = entry.context.cluster;
+            userName = entry.context.user;
             break;
         }
         
+        
+        var server = "";
+        foreach (var entry in config.clusters)
+        {
+            if (entry.name != clusterName) continue;
+            server = entry.cluster.server;
+            break;
+        }
+
         if (!string.IsNullOrEmpty(server) && server.Contains("://0.0.0.0:"))
         {
             server = server.Replace("://0.0.0.0:", "://127.0.0.1:");
@@ -68,14 +79,14 @@ public class K8sClient
         var token = "";
         foreach (var entry in config.users)
         {
-            if (!entry.name.ToString().EndsWith(currentContext)) continue;
+            if (entry.name != userName) continue;
             try
             {
                 token = entry.user.token;
             } catch (Exception e) { }
             break;
         }
-        
+
         if (string.IsNullOrEmpty(token))
         {
             var customToken = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "c:\\tmp\\token" : "/var/tmp/token";

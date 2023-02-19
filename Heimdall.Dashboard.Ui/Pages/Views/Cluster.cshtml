@@ -3,7 +3,7 @@
         <div class="flex my-2 items-center">
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Cluster Overview</span>
         </div>
-
+        
         <div class="flex justify-between mb-4 mt-1">
             <div class="graph">
                 <v-chart :option="nodesAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
@@ -33,10 +33,9 @@
                 <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
             </div>
 
-            <vuetable :columns="columns" :sorting="sorting" :data="events" :namespaces="namespaces" :search="search"></vuetable>
+            <vuetable :columns="columns" :initial-sort="sorting" :data="events" :namespaces="namespaces" :search="search"></vuetable>
 
         </template>
-
     </div>
 </template>
 
@@ -45,12 +44,14 @@
     const isDark = useDark()
     
     function formatMessage(row){
-         let fontClass = row.type === "Warning" ? "text-red-500" : ""; 
-         return `<div class="${fontClass}">${row.message}</div>`;
+         let fontClass = "truncate 2xl:w-[41rem] xl:w-[22rem] lg:w-[18rem]"
+         fontClass += row.type === "Warning" ? " text-red-500" : ''; 
+         return { content:row.message.replace(/"/g, '\''), classes: fontClass }
     }
 
     function formatSource(row){
-         return `<div class="text-blue-500">${row.involvedObject.kind + ": " + row.involvedObject.name}</div>`;
+        let con = row.involvedObject.kind + ": " + row.involvedObject.name;
+        return { content:con, classes: 'text-blue-500 w-80 truncate 2xl:w-72 xl:w-64 lg:w-64' };
     }
     
     function formatEventAge(row){
@@ -60,7 +61,7 @@
         var date = DT.now();
     
         var newDatetime = DT.fromISO(String(row.lastTimestamp));
-        return toHuman(newDatetime.diff(date, unit));
+        return { content:'' + toHuman(newDatetime.diff(date, unit)), classes: '' };
     }
 
     components["cluster"] = {
@@ -68,24 +69,19 @@
         data() {
             return {
                 events: [{
-                    type: "Warning",
-                    message:"Some dangerous message",
-                    involvedObject: {
-                        namespace: "test",
-                        kind: "lobster",
-                        name: "thing"
-                    },
-                    count: 23,
-                    lastTimestamp: "2011-10-05T14:48:00.000Z"
+                    type: "Warning", message:"Some dangerous message", count: 23, lastTimestamp: "2011-10-05T14:48:00.000Z",
+                    involvedObject: { namespace: "test", kind: "lobster", name: "thing" }
                 }],
-                sorting: [],
+                sorting: [
+                    { header:'Age', sort: 'desc' }
+                ],
                 columns: [
-                    {header:"Type", name:"type", sorter:"string", classes:"w-32"},
-                    {header:"Namespace", name:"involvedObject.namespace", sorter:"string", classes:"w-40"},
-                    {header:"Message", name:"message", formatter:formatMessage, canSort:false},
+                    {header:"Type", name:"type", sorter:"text", classes:"w-32"},
+                    {header:"Namespace", name:"involvedObject.namespace", sorter:"text", classes:"w-56"},
+                    {header:"Message", name:"message", formatter:formatMessage, classes:"2xl:w-[42rem] xl:w-[24rem] lg:w-[20rem] grow shrink", canSort:false, toolTip: true},
                     {header:"Source", name:"involvedObject.name", formatter:formatSource, canSort:false, classes: "w-80"},
-                    {header:"Events", name:"count", sorter:"number", classes:"w-32"},
-                    {header:"Age", name:"lastTimestamp", formatter:formatEventAge, sorter:"datetime", classes:"w-32"},
+                    {header:"Events", name:"count", sorter:"number", classes:"w-40"},
+                    {header:"Age", name:"lastTimestamp", formatter:formatEventAge, sorter:"text", classes:"w-32"},
                 ],
                 initOptions: { renderer: "svg" },
                 clusterEvents: null,
@@ -127,8 +123,8 @@
           streamResults(host + '/k8s/api/v1/events', j => this.clusterEvents = j);
           streamResults(host + '/k8s/api/v1/nodes', j => this.clusterNodes = j);
           streamResults(host + '/k8s/api/v1/pods', j => this.clusterPods = j);
-          //streamResults(host + '/k8s/apis/metrics.k8s.io/v1beta1/nodes', j => this.clusterNodeMetrics = j);
-          //streamResults(host + '/k8s/apis/metrics.k8s.io/v1beta1/pods', j => this.clusterPodMetrics = j);
+          streamResults(host + '/k8s/apis/metrics.k8s.io/v1beta1/nodes', j => this.clusterNodeMetrics = j);
+          streamResults(host + '/k8s/apis/metrics.k8s.io/v1beta1/pods', j => this.clusterPodMetrics = j);
         }
     };
     

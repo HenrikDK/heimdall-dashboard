@@ -19,10 +19,10 @@
                 <div class="flex justify-end items-center">
                     <template v-if="$route.path != '/'">
                         <div class="mr-3 w-60">
-                            <multiselect v-model="selected" :values="namespaces" @@update:model-value="$emit('select-ns', $event.value)"></multiselect>
+                            <multiselect :values="namespaces" @@update:model-value="$emit('select-ns', $event)"></multiselect>
                         </div>
                         <div class="mr-3 w-60">
-                            <search v-model="search" @@update:model-value="$emit('search', $event);"></search>
+                            <search @@update:model-value="$emit('search', $event);"></search>
                         </div>
                     </template>
                     <div class="mx-3">
@@ -53,14 +53,12 @@
 
     components["nav-bar"] = {
       template: "#nav-bar",
-      emits: ['search','select-ns'],
+      emits: ['search', 'select-ns', 'filters'],
       data() {
         return {
-            selected: [],
             filters: [],
             cluster: [],
             namespaces: [],
-            search: '',
             isDark: isDark,
         }
       },
@@ -69,12 +67,14 @@
         async updateList() {
           if (!this.cluster && this.cluster.length > 0) return;
                     
-          let ns = this.cluster.map(x => { return { label: x.metadata.name, value: x.metadata.name}})
+          let ns = this.cluster.map(x => { return x.metadata.name})
           
           if (this.filters && this.filters.length > 0){
-            ns = ns.filter(x => nsEndsWith(x.value, this.filters));
+            ns = ns.filter(x => nsEndsWith(x, this.filters));
             this.$emit('filters', this.namespaces);
           }
+          
+          ns.sort();
           
           this.namespaces = ns;
         },
@@ -97,8 +97,6 @@
         
         var host = window.location.origin;
         streamResults(host + '/k8s/api/v1/namespaces', j => this.cluster = j)
-
-        this.selected = this.namespaces[0];
       }
     };
 </script>

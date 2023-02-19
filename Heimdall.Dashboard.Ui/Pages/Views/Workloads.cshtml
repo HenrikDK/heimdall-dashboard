@@ -14,7 +14,7 @@
         </div>
         
         <template v-if="workloads && workloads.length > 0">
-            <vuetable :columns="columns" :sorting="sorting" :data="workloads" :namespaces="namespaces" :search="search"></vuetable>
+            <vuetable :columns="columns" :initial-sort="sorting" :data="workloads" :namespaces="namespaces" :search="search"></vuetable>
         </template>
     </div>
 </template>
@@ -33,7 +33,7 @@
             let conditions = row.status.conditions;
             result += '<div class="flex">';
             result += conditions.map(x => x.type).sort().map(x => {
-              let color = x === "Available" ? "text-blue-500" : "text-green-500";
+              let color = x === "Available" ? "text-green-500" : "text-blue-500";
               return `<div class="px-1 ${color}">${x}</div>`  
             }).join('');
             result += '</div>'
@@ -55,7 +55,7 @@
             }
         }
         
-        return result;           
+        return { content:'<div class="flex">' + result + '</div>', classes: ''};           
     }
 
     function formatWorkloadAge(row){
@@ -65,7 +65,7 @@
         var date = DT.now();
     
         var newDatetime = DT.fromISO(String(row.metadata.creationTimestamp));
-        return toHuman(newDatetime.diff(date, unit));
+        return { content:'' + toHuman(newDatetime.diff(date, unit)), classes: '' };
     }
     
     function formatPods(row){
@@ -77,7 +77,7 @@
         if (row.kind === "DaemonSet")
         {
             let scheduled = row.status.currentNumberScheduled;
-            let ready = row.status.numberReady;
+            ready = row.status.numberReady;
             
             if (scheduled > ready){
                 waiting = scheduled - ready;
@@ -115,7 +115,7 @@
         result += [...Array(waiting)].map(x => '<div class="h-4 w-4 mr-1 bg-gray-300 dark:bg-zinc-600 rounded-sm"></div>').join('');
         result += [...Array(ready)].map(x => '<div class="h-4 w-4 mr-1 bg-green-500 dark:bg-green-500 rounded-sm"></div>').join('');
          
-        return '<div class="flex">' + result + '</div>';
+        return {content: '<div class="flex">' + result + '</div>', classes:'py-0.5'};
     }
     
     import {useDark} from "vueuse";
@@ -126,29 +126,20 @@
         data() {
             return {
                 workloads: [{
-                    kind:"Deployment",
-                    metadata:{
-                        name:"some-service-thingy",
-                        namespace: "service-ns",
-                        creationTimestamp: "2023-02-11T14:48:00.000Z"
-                    },
-                    pods: "",
-                    status:{
-                        replicas: 2,
-                        readyReplicas: 1,
-                        conditions: [{type:'Available'}, {type:'Progressing'}]
-                    }
-                    
+                    kind:"Deployment", pods: "",
+                    metadata:{ name:"some-service-thingy", namespace: "service-ns", creationTimestamp: "2023-02-11T14:48:00.000Z" },
+                    status:{ replicas: 2, readyReplicas: 1, conditions: [{type:'Available'}, {type:'Progressing'}] }
                 }],
                 columns:[
-                    {header:"Type", name:"kind", minWidth:150, canSort:false},
-                    {header:"Name", name:"metadata.name", minWidth:350},
-                    {header:"Namespace", name:"metadata.namespace", sorter:"string", minWidth:200},
-                    {header:"Pods", name:"pods", formatter:formatPods, minWidth:150, canSort:false, canFilter:false},
-                    {header:"Age", name:"metadata.creationTimestamp", formatter:formatWorkloadAge, minWidth:100},
-                    {header:"Status", field:"status", formatter:formatDeploymentStatus, minWidth:200, canSort:false},                    
+                    { header:"Type", name:"kind", classes:"w-48", canSort:false },
+                    { header:"Name", name:"metadata.name", classes:"w-64" },
+                    { header:"Namespace", name:"metadata.namespace", sorter:"string", classes:"w-64" },
+                    { header:"Pods", name:"pods", formatter:formatPods, canSort:false, raw:true, canFilter:false, classes: 'grow shrink' },
+                    { header:"Age", name:"metadata.creationTimestamp", formatter:formatWorkloadAge, sorter:"text", classes:"w-40" },
+                    { header:"Status", field:"status", formatter:formatDeploymentStatus, raw:true, canSort:false, classes: 'w-64' },                    
                 ],
-                sorting:[],
+                sorting: [],
+                clusterWorkloads: null,
                 clusterCronJobs: null,
                 clusterDaemonSets: null,
                 clusterJobs: null,
@@ -164,17 +155,18 @@
         },
         methods: {
             updateWorkloads(){
+                if (!this.clusterWorkloads) return;
                 if (!this.clusterDaemonSets) return;
                 if (!this.clusterCronJobs) return;
                 if (!this.clusterJobs) return;
                 if (!this.clusterStatefulSets) return;
                 
-                let items = [this.clusterDaemonSets, this.clusterCronJobs, this.clusterJobs, this.clusterStatefulSets];
+                let items = [this.clusterWorkloads, this.clusterDaemonSets, this.clusterCronJobs, this.clusterJobs, this.clusterStatefulSets];
                 
                 let result = items.flat().filter(x => !!x);
                 
-                if (this.filters){
-                    result.filter(x => filterName(x, this.filters))
+                if (this.filters?.length){
+                    result = result.filter(x => filterName(x, this.filters))
                 }
                 
                 this.workloads = result;

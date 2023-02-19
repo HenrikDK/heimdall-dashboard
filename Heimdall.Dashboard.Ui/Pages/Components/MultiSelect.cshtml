@@ -93,10 +93,12 @@
       },
       template: "#multiselect",
       props: ['values'],
+      emits: ['update:modelValue'],
       methods:{
         handleClear(e){
           this.$data.selected = []
           this.$data.isOpen = false;
+          this.$emit('update:modelValue', this.$data.selected)
           e.stopPropagation();
         },
         handleFocusOut(e){
@@ -105,17 +107,20 @@
           }
           
           this.$data.isOpen = false;
+          this.$emit('update:modelValue', this.$data.selected)
         },
         handleOptionClick(option){
           if (this.selected.includes(option)) {
             this.selected = this.selected.filter(o => o !== option)
+            this.$emit('update:modelValue', this.$data.selected)
             return
           }
     
           if (option) {
-            this.selected.push(option);
+            this.selected = [...this.selected, option];
+            this.$emit('update:modelValue', this.$data.selected)
           }
-              
+          
           focus();                  
         },
       },
