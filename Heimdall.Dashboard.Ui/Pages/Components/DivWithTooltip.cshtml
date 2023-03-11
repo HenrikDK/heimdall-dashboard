@@ -1,12 +1,10 @@
 <template id="div-with-tooltip">
-    <div class="">
-        <div class="group relative">
-            <div :class="classes">{{ content }}</div>
-            <div class="absolute p-4 mx-auto opacity-0 group-hover:opacity-100 z-20 transition-opacity bg-gray-800 text-sm text-gray-100 rounded-md
-                left-1/2 -translate-x-1/2 
-                translate-y-2">
-                <p>{{ content }}</p>
-            </div>
+    <div class="group flex flex-col items-center relative cursor-pointer">
+        <div :class="classes">{{ content }}</div>
+        <div role="tooltip" class="invisible fixed items-center translate-y-6
+                    z-10 mb-2 w-64 p-4 text-sm leading-none text-white whitespace-no-wrap bg-black shadow-lg
+                    group-hover:visible group-hover:opacity-100">
+            {{ content }}
         </div>
     </div>
 </template>
