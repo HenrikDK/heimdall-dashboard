@@ -27,7 +27,7 @@
     const isDark = useDark()
     
     function formatRestarts(row){
-        if (row.status.containerStatuses == undefined){
+        if (row.status.containerStatuses === undefined){
               return {content:'', classes: ''}
         }    
         let con = row.status.containerStatuses.reduce((a, v) => a + v.restartCount, 0);
