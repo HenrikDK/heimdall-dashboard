@@ -108,7 +108,7 @@
                     { header:"Containers", name:"status.containerStatuses", formatter:formatContainers, canSort:false, raw:true, canFilter:false, classes:"w-64"},
                     { header:"Restarts", name:"status.containerStatuses", formatter:formatRestarts, classes:"w-40" },
                     { header:"Age", name:"metadata.creationTimestamp", formatter:formatPodAge, classes:"w-40" },
-                    { header:"Status", name:"status.phase", formatter:formatStatus, classes:"w-64" },
+                    { header:"Status", name:"status.phase", formatter:formatStatus, canSort:false, classes:"w-64" },
                 ],
                 sorting: [{header:'Name', sort:'desc'}],
                 initOptions: { renderer: "svg" },
