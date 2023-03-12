@@ -362,7 +362,13 @@ function filterRows(rows, columns, namespaces, search){
     
     if (tokens.length){
       let values = filterColumns.map(fc => {
-         let val = row[fc.name]
+         let val = '';
+         if (fc.formatter && fc.raw){
+           val = fc.formatter(row).content;
+         } else 
+         {
+           val = getRowValue(row, fc.name);
+         }
          if (typeof val === 'object'){
            return JSON.stringify(val)
          }
