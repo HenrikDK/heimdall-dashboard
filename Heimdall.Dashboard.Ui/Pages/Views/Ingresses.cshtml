@@ -4,36 +4,108 @@
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Ingresses</span>
         </div>
     
-        <vuetable :columns="columns" :initial-sort="sorting" :data="data" :namespaces="namespaces" :search="search"></vuetable>
+        <vuetable :columns="columns" :initial-sort="sorting" :data="ingresses" :namespaces="namespaces" :search="search"></vuetable>
       
     </div>
 </template>
 
 <script type="module">
+    function formatLoadBalancer(row){
+        let content = '';
+        if (row.status.loadBalancer.ingress){
+            let lb = row.status.loadBalancer.ingress[0];
+            content = lb.ip
+        }
+        return { content:content, classes: '' };
+    }
+    
+    function formatIngressAge(row){
+        var DT = window.DateTime || luxon.DateTime;
+        var invalid = "";
+        const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
+        var date = DT.now();
+    
+        var newDatetime = DT.fromISO(String(row.metadata.creationTimestamp));
+        return {content:''+ toHuman(newDatetime.diff(date, unit)), classes: ''};
+    }
+    
+    function formatHosts(row){
+        if (!row.spec.rules) return {content: '', classes: ''} 
+        
+        let content = '<div class="flex">';
+        let rules = row.spec.rules
+        for (let i = 0; i < rules.length; i++) {
+            let paths = rules[i].http.paths
+            for (let j = 0; j < paths.length; j++) {
+                i === 0 ? content += '<div>https://' + rules[i].host + paths[j].path + '</div>' : content += '<div>' + paths[j].path + '</div>';
+                content += '<div class="mx-2"> -> </div>'
+                content += '<div>' + paths[j].backend.service.name + ':' + paths[j].backend.service.port.number + '</div>' ;
+            }
+        }
+        
+        content += '</div>'
+        return { content:content, classes: 'grow shrink' };
+    }
+    
     components["ingresses"] = {
         template: "#ingresses",
         data() {
             return {
-                data: [
-                    {name: "user-api", namespace:"petstore", class:"nginx", hosts:"https://user-api.petstore.dk", address:"192.1.0.1", age: "22d"},
-                    {name: "store-api", namespace:"petstore", class:"nginx", hosts:"https://store-api.petstore.dk", address:"192.2.0.1", age: "10d"},
-                    {name: "order-api", namespace:"petstore", class:"nginx", hosts:"https://order-api.petstore.dk", address:"192.3.0.1", age: "13d"},
-                ],                
+                ingresses: [
+                    {metadata: {name: "user-api", namespace:"petstore", creationTimestamp: "2023-03-05T14:48:00.000Z" }, 
+                     spec:{ ingressClassName:"nginx", 
+                     rules:[{ host:"user-api.petstore.dk", 
+                     http:{ paths:[{ path:'/', backend:{service:{name:'petstore-user-api', port:{number:8080}}} }]}
+                     }]},
+                     status:{ loadBalancer:{ingress:[{ip: "192.1.0.1" }]}}
+                    },
+                    {metadata: {name: "store-api", namespace:"petstore", creationTimestamp: "2023-02-15T14:48:00.000Z" },
+                     spec:{ ingressClassName:"nginx",
+                     rules:[{ host:"store-api.petstore.dk", 
+                     http:{ paths:[{ path:'/', backend:{service:{name:'petstore-store-api', port:{number:8080}}} }]}
+                     }]},
+                     status:{ loadBalancer:{ingress:[{ip: "192.2.0.1" }]}}
+                    },
+                    {metadata: {name: "order-api", namespace:"petstore", creationTimestamp: "2023-02-05T14:48:00.000Z" },
+                     spec:{ ingressClassName:"nginx",
+                     rules:[{ host:"order-api.petstore.dk", 
+                     http:{ paths:[{ path:'/', backend:{service:{name:'petstore-order-api', port:{number:8080}}} }]}
+                     }]},
+                     status:{ loadBalancer:{ingress:[{ip: "192.2.0.1" }]}}
+                    },
+                ],
                 sorting:[
                     {header:'Name', sort:'desc'}
                 ],
                 columns:[
-                    { name: 'name', header: 'Name', classes:'w-64', canSort: true },
-                    { name: 'namespace', header: 'Namespace', classes:'w-64', canSort: true},
-                    { name: 'class', header: 'Type', classes:'w-40', canSort: false },
-                    { name: 'address', header: 'LoadBalancers', classes:'w-40', canSort: true },
-                    { name: 'hosts', header: 'Host', classes:'grow shrink', canSort: true },
-                    { name: 'age', header: 'Age', classes:'w-40', canSort: false }
+                    { header: 'Name', name: 'metadata.name', classes:'w-52', canSort: true },
+                    { header: 'Namespace', name: 'metadata.namespace',  classes:'w-52', canSort: true},
+                    { header: 'Type', name: 'spec.ingressClassName', classes:'w-32', canSort: false },
+                    { header: 'LoadBalancers', name: 'status', formatter:formatLoadBalancer, classes:'w-44', canSort: true },
+                    { header: 'Host', name: 'spec.rules', formatter:formatHosts, raw:true, classes:'grow shrink', canSort: true },
+                    { header:"Age", name:"metadata.creationTimestamp", formatter:formatIngressAge, classes:"w-40", canSort: true }
                 ],
                 clusterIngresses: null,
             }
         },
-        props: ['namespaces', 'search', 'filters'],        
+        props: ['namespaces', 'search', 'filters'],
+        methods: {
+            updateIngresses(){
+                if (!this.clusterIngresses) return;
+                
+                let result = [...this.clusterIngresses];
+                                
+                if (this.filters?.length){
+                    result = result.filter(x => filterName(x, this.filters))
+                }
+                
+                this.ingresses = result;
+            }
+        },
+        watch: {
+            filters(){this.updateIngresses()},
+            clusterIngresses(){this.updateIngresses()},
+        },
         mounted() {
           var host = window.location.origin;
           streamResults(host + '/k8s/apis/networking.k8s.io/v1/ingresses', j => this.clusterIngresses = j)
