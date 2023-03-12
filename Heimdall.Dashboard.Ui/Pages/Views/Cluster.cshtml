@@ -1,5 +1,6 @@
 ﻿<template id="cluster">
     <div class="pl-2 pr-4 w-100">
+
         <div class="flex my-2 items-center">
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Cluster Overview</span>
         </div>
@@ -27,8 +28,10 @@
         
         <hr class="border border-gray-200 dark:border-zinc-700"/>
         
+        <br/>
+        
         <template v-if="events && events.length > 0">
-            
+
             <div class="flex my-2 items-center">
                 <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
             </div>
@@ -36,6 +39,9 @@
             <vuetable :columns="columns" :initial-sort="sorting" :data="events" :namespaces="namespaces" :search="search"></vuetable>
 
         </template>
+
+        <br/><br/><br/>
+    
     </div>
 </template>
 
