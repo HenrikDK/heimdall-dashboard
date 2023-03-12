@@ -103,12 +103,12 @@
                      containerStatuses: [{ restartCount: 3, state: {running: {}}}, { restartCount: 0, state: {terminated: {}}}] }}
                 ],
                 columns:[
-                    { header:"Name", name:"metadata.name", classes: "grow shrink"},
-                    { header:"Namespace", name:"metadata.namespace", classes:"w-64" },
-                    { header:"Containers", name:"status.containerStatuses", formatter:formatContainers, canSort:false, raw:true, canFilter:false, classes:"w-64"},
+                    { header:"Name", name:"metadata.name", classes: "truncate grow shrink 2xl:w-[41rem] xl:w-[22rem] lg:w-[16rem]"},
+                    { header:"Namespace", name:"metadata.namespace", classes:"truncate w-48" },
+                    { header:"Containers", name:"status.containerStatuses", formatter:formatContainers, canSort:false, raw:true, canFilter:false, classes:"2xl:w-52 xl:w-44 lg:w-32"},
                     { header:"Restarts", name:"status.containerStatuses", formatter:formatRestarts, classes:"w-40" },
                     { header:"Age", name:"metadata.creationTimestamp", formatter:formatPodAge, classes:"w-40" },
-                    { header:"Status", name:"status.phase", formatter:formatStatus, canSort:false, classes:"w-64" },
+                    { header:"Status", name:"status.phase", formatter:formatStatus, canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-40" },
                 ],
                 sorting: [{header:'Name', sort:'desc'}],
                 initOptions: { renderer: "svg" },
