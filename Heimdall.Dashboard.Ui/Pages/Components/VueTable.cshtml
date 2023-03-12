@@ -71,10 +71,17 @@
     data() {
       return {
           rows: [],
-          sorting: []
+          sorting: [],
+          timer: ''
       }
     },
     methods:{
+      reRender(){
+        this.$forceUpdate();
+      },
+      cancelAutoUpdate () {
+        clearInterval(this.timer);
+      },
       getRowValue(row, name){
         return getRowValue(row, name)
       },
@@ -140,7 +147,11 @@
       }
       
       this.updateTable();
+      this.timer = setInterval(this.reRender, 5000);
     },
+    beforeUnmount () {
+      this.cancelAutoUpdate();
+    }
   };
 </script>
 
