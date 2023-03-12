@@ -36,7 +36,7 @@
       <div class="overflow-y-scroll flex flex-col w-full dark:divide-zinc-700"> <!-- body -->
         <template v-for="row in rows">
           <div v-if="!row?.filtered && !row?.nsFiltered"
-               class="flex w-full hover:bg-blue-100 dark:bg-zinc-900 dark:hover:bg-zinc-700">
+               class="flex w-full hover:bg-blue-100 dark:hover:bg-zinc-700">
             <template v-for="column in columns">
               <div class="px-4 py-2 text-sm text-gray-700 dark:text-gray-400"
                    :class="column.classes">
