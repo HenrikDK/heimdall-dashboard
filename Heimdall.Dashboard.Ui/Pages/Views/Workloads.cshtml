@@ -4,6 +4,12 @@
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Workloads</span>
         </div>
         
+        <template v-if="workloads && workloads.length > 0">
+            <vuetable :columns="columns" :initial-sort="sorting" :data="workloads" :namespaces="namespaces" :search="search"></vuetable>
+        </template>
+        
+        <br/>
+        
         <div class="flex justify-around mb-4 mt-1">
             <div class="graph">
                 <v-chart :option="workloadsAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
@@ -13,9 +19,8 @@
             </div>
         </div>
         
-        <template v-if="workloads && workloads.length > 0">
-            <vuetable :columns="columns" :initial-sort="sorting" :data="workloads" :namespaces="namespaces" :search="search"></vuetable>
-        </template>
+        <br/><br/>
+        
     </div>
 </template>
 
@@ -175,6 +180,7 @@
         watch: {
             filters(){this.updateWorkloads()},
             namespace(){this.updateWorkloads()},
+            clusterWorkloads(){this.updateWorkloads()},
             clusterCronJobs(){this.updateWorkloads()},
             clusterDaemonSets(){this.updateWorkloads()},
             clusterJobs(){this.updateWorkloads()},
