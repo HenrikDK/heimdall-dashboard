@@ -362,7 +362,7 @@ function filterRows(rows, columns, namespaces, search){
   let nsColumn = columns.filter(x => x.header === 'Namespace')[0]
   let tokens = [];
   if (search?.length > 0){
-    tokens = search.split(' ')
+    tokens = search.trim().split(' ')
   }
   
   rows.forEach(row => {
@@ -386,7 +386,7 @@ function filterRows(rows, columns, namespaces, search){
          return '' + val
       })
       
-      row.filtered = !values.some(x => tokens.some(y => x.includes(y)))
+      row.filtered = !values.some(x => tokens.every(y => x.includes(y)))
     }
   });
 }
