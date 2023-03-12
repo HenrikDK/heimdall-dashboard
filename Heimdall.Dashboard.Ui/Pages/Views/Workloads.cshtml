@@ -136,12 +136,12 @@
                     status:{ replicas: 2, readyReplicas: 1, conditions: [{type:'Available'}, {type:'Progressing'}] }
                 }],
                 columns:[
-                    { header:"Type", name:"kind", classes:"w-48", canSort:false },
-                    { header:"Name", name:"metadata.name", classes:"w-64" },
-                    { header:"Namespace", name:"metadata.namespace", sorter:"string", classes:"w-64" },
-                    { header:"Pods", name:"pods", formatter:formatPods, canSort:false, raw:true, canFilter:false, classes: 'grow shrink' },
+                    { header:"Type", name:"kind", canSort:false, classes:"truncate 2xl:w-48 xl:w-40 lg:w-32" },
+                    { header:"Name", name:"metadata.name", classes:"grow shrink truncate 2xl:w-64 xl:w-52 lg:w-40" },
+                    { header:"Namespace", name:"metadata.namespace", sorter:"string", classes:"truncate 2xl:w-64 xl:w-52 lg:w-40" },
+                    { header:"Pods", name:"pods", formatter:formatPods, canSort:false, raw:true, canFilter:false, classes:"2xl:w-52 xl:w-44 lg:w-32" },
                     { header:"Age", name:"metadata.creationTimestamp", formatter:formatWorkloadAge, sorter:"text", classes:"w-40" },
-                    { header:"Status", field:"status", formatter:formatDeploymentStatus, raw:true, canSort:false, classes: 'w-64' },                    
+                    { header:"Status", field:"status", formatter:formatDeploymentStatus, raw:true, canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-44" },                    
                 ],
                 sorting: [],
                 clusterWorkloads: null,
