@@ -313,11 +313,10 @@ function toString(a) {
 // It handles numbers, mixed alphanumeric combinations, and even null, undefined, and Infinity
 function compareAlphanumeric(aStr, bStr) {
   const reSplitAlphaNumeric = /([0-9]+)/gm
-  // Split on number groups, but keep the delimiter, Then remove falsey split values
+
   const a = aStr.split(reSplitAlphaNumeric).filter(Boolean)
   const b = bStr.split(reSplitAlphaNumeric).filter(Boolean)
 
-  // While
   while (a.length && b.length) {
     const aa = a.shift()
     const bb = b.shift()
