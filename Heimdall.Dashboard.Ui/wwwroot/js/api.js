@@ -1,4 +1,34 @@
-﻿async function streamLogs(url, cb) {
+﻿function streamMetrics(url, cb) {
+    let isApiRequestInProgress = false;
+    const handel = setInterval(getMetrics, 10000);
+    getMetrics();
+
+    async function getMetrics() {
+        try {
+            if (!isApiRequestInProgress) {
+                isApiRequestInProgress = true;
+                try {
+                    const metric = await request(url);
+                    cb(metric.items || metric);
+                } catch (err) {
+                    log.error('Unable to send request', {err});
+                } finally {
+                    isApiRequestInProgress = false;
+                }
+            }
+        } catch (err) {
+            log.error('No metrics', {err, url});
+        }
+    }
+
+    return cancel;
+
+    function cancel() {
+        clearInterval(handel);
+    }
+}
+
+async function streamLogs(url, cb) {
     const items = [];
     const {cancel} = stream(url, transformer, {isJson: false, connectCb});
     return cancel;
