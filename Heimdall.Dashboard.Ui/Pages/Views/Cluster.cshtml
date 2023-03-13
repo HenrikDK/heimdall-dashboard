@@ -129,8 +129,8 @@
           streamResults(host + '/k8s/api/v1/events', j => this.clusterEvents = j);
           streamResults(host + '/k8s/api/v1/nodes', j => this.clusterNodes = j);
           streamResults(host + '/k8s/api/v1/pods', j => this.clusterPods = j);
-          //streamResults(host + '/k8s/apis/metrics.k8s.io/v1beta1/nodes', j => this.clusterNodeMetrics = j);
-          //streamResults(host + '/k8s/apis/metrics.k8s.io/v1beta1/pods', j => this.clusterPodMetrics = j);
+          streamMetrics(host + '/k8s/apis/metrics.k8s.io/v1beta1/nodes', j => this.clusterNodeMetrics = j);
+          streamMetrics(host + '/k8s/apis/metrics.k8s.io/v1beta1/pods', j => this.clusterPodMetrics = j);
         }
     };
     
