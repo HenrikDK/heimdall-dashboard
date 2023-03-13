@@ -1,4 +1,27 @@
-﻿async function streamResults(url, cb) {
+﻿async function streamLogs(url, cb) {
+    const items = [];
+    const {cancel} = stream(url, transformer, {isJson: false, connectCb});
+    return cancel;
+
+    function connectCb() {
+        items.length = 0;
+    }
+
+    function transformer(item) {
+        if (!item) return; // This api returns a lot of empty strings
+
+        const message = Base64.decode(item);
+        try {
+            let item = JSON.parse(message)
+            items.push(item)
+        } catch (e){
+            items.push(message);
+        }
+        cb(items);
+    }
+}
+
+async function streamResults(url, cb) {
     let isCancelled = false;
     let socket = {};
     const results = {};
