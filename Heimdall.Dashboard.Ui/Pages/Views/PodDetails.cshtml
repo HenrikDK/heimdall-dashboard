@@ -31,7 +31,8 @@
         data() {
             return {
                 initOptions: { renderer: "svg" },
-                details: {},
+                details: [],
+                metrics: [],
                 isDark: isDark
             }
         },
@@ -58,7 +59,9 @@
         },
         async mounted() {
             var host = window.location.origin;
-            streamResults(host + '/k8s/api/v1/pods', j => this.details = j);
+            
+            streamMetrics(host + '/k8s/apis/metrics.k8s.io/v1beta1/namespaces/{namespace}/pods/{name}', j => this.metrics = j);
+            streamResults(host + '/k8s/api/v1/namespaces/{namespace}/pods/{name}', j => this.details = j);
         },
     };
     
