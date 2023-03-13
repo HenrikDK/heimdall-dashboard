@@ -95,10 +95,22 @@
                 clusterPodMetrics: null,
                 clusterNodes: null,
                 clusterNodeMetrics: null,
-                isDark: isDark
+                isDark: isDark,
+                nodesAvailable: nodeReady(),
+                nodeCpuUsage: nodeCpu(),
+                nodeMemoryUsage: nodeMemory(),
+                podsAvailable: podReady(),
+                podCpuUsage: podCpu(),
+                podMemoryUsage: podMemory(),
             }
         },
         methods: {
+          async updateNodeGraphs() {
+              
+          },
+          async updatePodGraphs() {
+              
+          },
           async updateEvents() {
             if (!this.clusterEvents) return;
             
@@ -116,14 +128,6 @@
           clusterEvents: function (){this.updateEvents()},
         },
         props: ['namespaces', 'search'],
-        computed: {
-            nodesAvailable: () => nodeReady(),        
-            nodeCpuUsage: () => nodeCpu(),
-            nodeMemoryUsage: () => nodeMemory(),
-            podsAvailable: () => podReady(),
-            podCpuUsage: () => podCpu(),
-            podMemoryUsage: () => podMemory(),
-        },
         async mounted() {
           var host = window.location.origin;
           streamResults(host + '/k8s/api/v1/events', j => this.clusterEvents = j);
