@@ -3,7 +3,7 @@
         <nav>
             <div class="px-2 flex justify-between w-full">
                 <div>
-                    <router-link class="cursor-pointer" to="/">
+                    <router-link :to="{ name: 'cluster' }" class="cursor-pointer">
                         <div class="flex pt-1">
                             <div class="w-16 fill-white dark:fill-k8s" alt="Heimdall">
                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 501 372">
@@ -22,7 +22,7 @@
                             <multiselect :values="namespaces" @@update:model-value="$emit('select-ns', $event)"></multiselect>
                         </div>
                         <div class="mr-3 w-60">
-                            <search @@update:model-value="$emit('search', $event);"></search>
+                            <search @@update:model-value="$emit('search', $event)"></search>
                         </div>
                     </template>
                     <div class="mx-3">

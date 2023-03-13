@@ -4,6 +4,12 @@
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pods</span>
         </div>
         
+        <template v-if="pods && pods.length > 0">
+            <vuetable :columns="columns" :initial-sort="sorting" :data="pods" :namespaces="namespaces" :search="search"></vuetable>
+        </template>
+        
+        <br/>
+        
         <div class="flex justify-around mb-4 mt-1">
             <div class="graph">
                 <v-chart :option="podsAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
@@ -15,10 +21,8 @@
                 <v-chart :option="podMemoryUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
         </div>
-
-        <template v-if="pods && pods.length > 0">
-            <vuetable :columns="columns" :initial-sort="sorting" :data="pods" :namespaces="namespaces" :search="search"></vuetable>
-        </template>
+        
+        <br/><br/>
     </div>
 </template>
 
@@ -27,7 +31,7 @@
     const isDark = useDark()
     
     function formatRestarts(row){
-        if (row.status.containerStatuses == undefined){
+        if (row.status.containerStatuses === undefined){
               return {content:'', classes: ''}
         }    
         let con = row.status.containerStatuses.reduce((a, v) => a + v.restartCount, 0);
@@ -39,6 +43,7 @@
         let con = row.involvedObject.kind + ": " + row.involvedObject.name;
         return { content:con, classes: 'text-blue-500 w-80' };
     }
+    
     function formatStatus(row){
         let con = row.status.phase;
         return { content:con, classes: 'text-green-500 w-65' };
@@ -52,10 +57,13 @@
         }
         let result = [...containers, ...initContainers].map(x => {
             if (x.state.running){
-                return '<div class="h-4 w-4 mr-1 bg-green-500 dark:bg-green-500 rounded-sm"></div>'    
+                return '<div class="h-4 w-4 mr-2 bg-green-500 dark:bg-green-500 rounded-sm"></div>'    
+            }
+            if (x.state.waiting){
+                return '<div class="h-4 w-4 mr-2 bg-orange-300 dark:bg-orange-500 rounded-sm"></div>'
             }
             if (x.state.terminated){
-                return '<div class="h-4 w-4 mr-1 bg-gray-300 dark:bg-zinc-600 rounded-sm"></div>'
+                return '<div class="h-4 w-4 mr-2 bg-gray-300 dark:bg-zinc-600 rounded-sm"></div>'
             }
         }).join('');
         
@@ -95,12 +103,12 @@
                      containerStatuses: [{ restartCount: 3, state: {running: {}}}, { restartCount: 0, state: {terminated: {}}}] }}
                 ],
                 columns:[
-                    { header:"Name", name:"metadata.name", classes: "grow shrink"},
-                    { header:"Namespace", name:"metadata.namespace", classes:"w-64" },
-                    { header:"Containers", name:"status.containerStatuses", formatter:formatContainers, canSort:false, raw:true, canFilter:false, classes:"w-64"},
+                    { header:"Name", name:"metadata.name", classes: "truncate grow shrink 2xl:w-[41rem] xl:w-[22rem] lg:w-[16rem]"},
+                    { header:"Namespace", name:"metadata.namespace", classes:"truncate w-48" },
+                    { header:"Containers", name:"status.containerStatuses", formatter:formatContainers, canSort:false, raw:true, canFilter:false, classes:"2xl:w-52 xl:w-44 lg:w-32"},
                     { header:"Restarts", name:"status.containerStatuses", formatter:formatRestarts, classes:"w-40" },
                     { header:"Age", name:"metadata.creationTimestamp", formatter:formatPodAge, classes:"w-40" },
-                    { header:"Status", name:"status.phase", formatter:formatStatus, classes:"w-64" },
+                    { header:"Status", name:"status.phase", formatter:formatStatus, canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-40" },
                 ],
                 sorting: [{header:'Name', sort:'desc'}],
                 initOptions: { renderer: "svg" },
@@ -130,7 +138,7 @@
         watch: {
             filters(){this.updatePods()},
             clusterPods(){this.updatePods()},
-        },        
+        },
         async mounted() {
             var host = window.location.origin;
             streamResults(host + '/k8s/api/v1/pods', j => this.clusterPods = j);

@@ -30,5 +30,5 @@
         return result;
     }
 
-    return result += Math.abs(dur.values.seconds) + "m"
+    return result += Math.abs(dur.values.seconds) + "s"
 }
