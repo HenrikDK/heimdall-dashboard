@@ -1,5 +1,5 @@
 <template id="vuetable">
-  <div class="block border scale-100 overflow-y-scroll border-gray-200 shadow-md rounded-lg dark:border-zinc-700 mt-4"> <!-- table outer border -->
+  <div class="block border scale-100 overflow-hidden border-gray-200 shadow-md rounded-lg dark:border-zinc-700 mt-4"> <!-- table outer border -->
     <div class="w-full h-[85vh] text-left divide-y divide-gray-200 dark:divide-zinc-700"> <!-- table -->
       <div class="flex w-full sticky top-0 z-10 bg-gray-100 dark:bg-zinc-800"> <!-- header -->
           <div v-for="column in columns"
@@ -33,7 +33,7 @@
             </div>
           </div>
       </div>
-      <div class="overflow-y-scroll flex flex-col w-full dark:divide-zinc-700"> <!-- body -->
+      <div class="overflow-y-scroll h-[82.5vh] flex flex-col w-full dark:divide-zinc-700"> <!-- body -->
         <template v-for="row in rows">
           <div v-if="!row?.filtered && !row?.nsFiltered"
                class="flex w-full hover:bg-blue-100 dark:hover:bg-zinc-700">
