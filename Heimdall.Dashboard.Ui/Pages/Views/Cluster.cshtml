@@ -2,7 +2,11 @@
     <div class="pl-2 pr-4 w-100">
 
         <div class="flex my-2 items-center">
-            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Cluster Overview</span>
+            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Cluster</span>
+        </div>
+
+        <div class="flex my-2 items-center">
+            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Workloads</span>
         </div>
         
         <div class="flex justify-between mb-4 mt-1">
@@ -25,23 +29,6 @@
                 <v-chart :option="podMemoryUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
         </div>
-        
-        <hr class="border border-gray-200 dark:border-zinc-700"/>
-        
-        <br/>
-        
-        <template v-if="events && events.length > 0">
-
-            <div class="flex my-2 items-center">
-                <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
-            </div>
-
-            <vuetable :columns="columns" :initial-sort="sorting" :data="events" :namespaces="namespaces" :search="search"></vuetable>
-
-        </template>
-
-        <br/><br/><br/>
-    
     </div>
 </template>
 
@@ -49,88 +36,42 @@
     import {useDark} from "vueuse";
     const isDark = useDark()
     
-    function formatMessage(row){
-         let fontClass = "truncate 2xl:w-[41rem] xl:w-[22rem] lg:w-[18rem]"
-         fontClass += row.type === "Warning" ? " text-red-500" : ''; 
-         return { content:row.message.replace(/"/g, '\''), classes: fontClass }
-    }
-
-    function formatSource(row){
-        let con = row.involvedObject.kind + ": " + row.involvedObject.name;
-        return { content:con, classes: 'text-blue-500 w-80 truncate 2xl:w-72 xl:w-64 lg:w-64' };
-    }
-    
-    function formatEventAge(row){
-        var DT = window.DateTime || luxon.DateTime;
-        var invalid = "";
-        const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
-        var date = DT.now();
-    
-        var newDatetime = DT.fromISO(String(row.lastTimestamp));
-        return { content:'' + toHuman(newDatetime.diff(date, unit)), classes: '' };
-    }
-
     components["cluster"] = {
         template: "#cluster",
         data() {
             return {
-                events: [{
-                    type: "Warning", message:"Some dangerous message", count: 23, lastTimestamp: "2011-10-05T14:48:00.000Z",
-                    involvedObject: { namespace: "test", kind: "lobster", name: "thing" }
-                }],
-                sorting: [
-                    { header:'Age', sort: 'desc' }
-                ],
-                columns: [
-                    {header:"Type", name:"type", sorter:"text", classes:"w-32"},
-                    {header:"Namespace", name:"involvedObject.namespace", sorter:"text", classes:"w-56"},
-                    {header:"Message", name:"message", formatter:formatMessage, classes:"2xl:w-[42rem] xl:w-[24rem] lg:w-[20rem] grow shrink", canSort:false, toolTip: true},
-                    {header:"Source", name:"involvedObject.name", formatter:formatSource, canSort:false, classes: "w-80"},
-                    {header:"Events", name:"count", sorter:"number", classes:"w-40"},
-                    {header:"Age", name:"lastTimestamp", formatter:formatEventAge, sorter:"text", classes:"w-32"},
-                ],
                 initOptions: { renderer: "svg" },
-                clusterEvents: null,
                 clusterPods: null,
                 clusterPodMetrics: null,
                 clusterNodes: null,
                 clusterNodeMetrics: null,
-                isDark: isDark
+                isDark: isDark,
+                nodesAvailable: nodeReady(),
+                nodeCpuUsage: nodeCpu(),
+                nodeMemoryUsage: nodeMemory(),
+                podsAvailable: podReady(),
+                podCpuUsage: podCpu(),
+                podMemoryUsage: podMemory(),
             }
         },
         methods: {
-          async updateEvents() {
-            if (!this.clusterEvents) return;
-            
-            const currentTime = new Date();
-            const before12Hours = new Date(currentTime.setHours(currentTime.getHours() - 12))
-            var events = this.clusterEvents.filter(x=>(new Date(x.lastTimestamp)) >= before12Hours)
-            if (events.length === 0){
-                events = this.clusterEvents.slice(0, 100);
-            }
-            
-            this.events = events;
-          }
+          async updateNodeGraphs() {
+              
+          },
+          async updatePodGraphs() {
+              
+          },
         },
         watch: {
           clusterEvents: function (){this.updateEvents()},
         },
         props: ['namespaces', 'search'],
-        computed: {
-            nodesAvailable: () => nodeReady(),        
-            nodeCpuUsage: () => nodeCpu(),
-            nodeMemoryUsage: () => nodeMemory(),
-            podsAvailable: () => podReady(),
-            podCpuUsage: () => podCpu(),
-            podMemoryUsage: () => podMemory(),
-        },
         async mounted() {
           var host = window.location.origin;
-          streamResults(host + '/k8s/api/v1/events', j => this.clusterEvents = j);
           streamResults(host + '/k8s/api/v1/nodes', j => this.clusterNodes = j);
           streamResults(host + '/k8s/api/v1/pods', j => this.clusterPods = j);
-          //streamResults(host + '/k8s/apis/metrics.k8s.io/v1beta1/nodes', j => this.clusterNodeMetrics = j);
-          //streamResults(host + '/k8s/apis/metrics.k8s.io/v1beta1/pods', j => this.clusterPodMetrics = j);
+          streamMetrics(host + '/k8s/apis/metrics.k8s.io/v1beta1/nodes', j => this.clusterNodeMetrics = j);
+          streamMetrics(host + '/k8s/apis/metrics.k8s.io/v1beta1/pods', j => this.clusterPodMetrics = j);
         }
     };
     

@@ -1,4 +1,4 @@
-﻿function nodeMemory(){
+﻿function nodeMemory(used = 0, available = 1){
     var nodes_ram = {
         title: {
             text: 'NODE RAM USE',
@@ -34,14 +34,14 @@
                     position: 'center',
                     fontSize: '16',
                     fontWeight: 'bold',
-                    formatter: (s) => { return '25 / 48\nGB'}
+                    formatter: (s) => { return used + ' / ' + available + '\nGB'}
                 },
                 emphasis: {
                     show: false,
                 },
                 data: [
-                    { value: 25, name: 'Used' },
-                    { value: 7, name: 'Available' },
+                    { value: used, name: 'Used' },
+                    { value: available, name: 'Available' },
                 ]
             }
         ]
@@ -50,7 +50,7 @@
     return nodes_ram;
 }
 
-function nodeCpu(){
+function nodeCpu(used = 0, available = 1){
     var nodes_cpu = {
         title: {
             text: 'NODE CPU USE',
@@ -86,14 +86,14 @@ function nodeCpu(){
                     position: 'center',
                     fontSize: '16',
                     fontWeight: 'bold',
-                    formatter: (s) => { return '103 / 116\nCores'}
+                    formatter: (s) => { return used + ' / ' + available + '\nCores'}
                 },
                 emphasis: {
                     show: false,
                 },
                 data: [
-                    { value: 103, name: 'Used' },
-                    { value: 13, name: 'Available' },
+                    { value: used, name: 'Used' },
+                    { value: available, name: 'Available' },
                 ]
             }
         ]
@@ -101,7 +101,7 @@ function nodeCpu(){
     return nodes_cpu;
 }
 
-function nodeReady(){
+function nodeReady(ready = 0, waiting = 1){
     var nodes_ready = {
         title: {
             text: 'NODES',
@@ -137,15 +137,15 @@ function nodeReady(){
                     position: 'center',
                     fontSize: '16',
                     fontWeight: 'bold',
-                    formatter: (s) => { return '7 / 8\nNodes' }
+                    formatter: (s) => { return  ready + ' / ' + (ready + waiting) + '\nNodes' }
                 },
                 emphasis: {
                     show: false,
                 },
                 data: [
-                    { value: 7, name: 'Ready' },
+                    { value: ready, name: 'Ready' },
                     { value: 0, name: 'Loading'},
-                    { value: 1, name: 'Waiting' },
+                    { value: waiting, name: 'Waiting' },
                 ]
             }
         ]
@@ -153,7 +153,7 @@ function nodeReady(){
     return nodes_ready;
 }
 
-function podReady(){
+function podReady(ready = 0, requested = 1){
     var pods_ready = {
         title: {
             text: 'PODS',
@@ -189,15 +189,15 @@ function podReady(){
                     position: 'center',
                     fontSize: '16',
                     fontWeight: 'bold',
-                    formatter: (s) => { return '25 / 27'}
+                    formatter: (s) => { return ready + ' / ' + (ready + requested)}
                 },
                 emphasis: {
                     show: false,
                 },
                 data: [
-                    { value: 25, name: 'Ready' },
+                    { value: ready, name: 'Ready' },
                     { value: 0, name: '' },
-                    { value: 2, name: 'Requested' },
+                    { value: requested, name: 'Requested' },
                 ]
             }
         ]
@@ -205,7 +205,7 @@ function podReady(){
     return pods_ready;
 }
 
-function podMemory(){
+function podMemory(reserved = 0, available = 1){
     var pod_memory = {
         title: {
             text: 'POD RAM USE',
@@ -241,14 +241,14 @@ function podMemory(){
                     position: 'center',
                     fontSize: '16',
                     fontWeight: 'bold',
-                    formatter: (s) => { return '15 / 48\nGB'}
+                    formatter: (s) => { return reserved + ' / '+ (available + reserved) + '\nGB'}
                 },
                 emphasis: {
                     show: false,
                 },
                 data: [
-                    { value: 15, name: 'Reserved' },
-                    { value: 33, name: 'Available' },
+                    { value: reserved, name: 'Reserved' },
+                    { value: available, name: 'Available' },
                 ]
             }
         ]
@@ -256,13 +256,13 @@ function podMemory(){
     return pod_memory;
 }
 
-function podCpu(){
+function podCpu(used = 0, available = 1){
     var pod_cpu = {
         title: {
             text: 'POD CPU USE',
-                subtext: 'Actual vs Reserved',
-                bottom:'5%',
-                textStyle: {
+            subtext: 'Actual vs Reserved',
+            bottom:'5%',
+            textStyle: {
                 fontSize: '16'
             },
             subtextStyle: {
@@ -272,7 +272,7 @@ function podCpu(){
         },
         tooltip: {
             show: false,
-                trigger: 'none'
+            trigger: 'none'
         },
         backgroundColor: '',
         legend: {
@@ -292,14 +292,14 @@ function podCpu(){
                     position: 'center',
                     fontSize: '16',
                     fontWeight: 'bold',
-                    formatter: (s) => { return '13 / 116\nCores'}
+                    formatter: (s) => { return used + ' / ' + (available + used) + '\nCores'}
                 },
                 emphasis: {
                     show: false,
                 },
                 data: [
-                    { value: 13, name: 'Used' },
-                    { value: 103, name: 'Available' },
+                    { value: used, name: 'Used' },
+                    { value: available, name: 'Available' },
                 ]
             }
         ]
@@ -308,7 +308,7 @@ function podCpu(){
     return pod_cpu
 }
 
-function workloadsReady(){
+function workloadsReady(ready = 0, waiting = 1){
     var workloads_ready = {
         title: {
             text: 'WORKLOADS',
@@ -344,15 +344,15 @@ function workloadsReady(){
                     position: 'center',
                     fontSize: '16',
                     fontWeight: 'bold',
-                    formatter: (s) => { return '7 / 8\nNodes' }
+                    formatter: (s) => { return ready + ' / ' + (ready + waiting) + '\nNodes' }
                 },
                 emphasis: {
                     show: false,
                 },
                 data: [
-                    { value: 7, name: 'Ready' },
+                    { value: ready, name: 'Ready' },
                     { value: 0, name: 'Loading'},
-                    { value: 1, name: 'Waiting' },
+                    { value: waiting, name: 'Waiting' },
                 ]
             }
         ]

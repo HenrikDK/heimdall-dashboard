@@ -1,4 +1,57 @@
-﻿async function streamResults(url, cb) {
+﻿function streamMetrics(url, cb) {
+    let isApiRequestInProgress = false;
+    const handel = setInterval(getMetrics, 10000);
+    getMetrics();
+
+    async function getMetrics() {
+        try {
+            if (!isApiRequestInProgress) {
+                isApiRequestInProgress = true;
+                try {
+                    const metric = await request(url);
+                    cb(metric.items || metric);
+                } catch (err) {
+                    log.error('Unable to send request', {err});
+                } finally {
+                    isApiRequestInProgress = false;
+                }
+            }
+        } catch (err) {
+            log.error('No metrics', {err, url});
+        }
+    }
+
+    return cancel;
+
+    function cancel() {
+        clearInterval(handel);
+    }
+}
+
+async function streamLogs(url, cb) {
+    const items = [];
+    const {cancel} = stream(url, transformer, {isJson: false, connectCb});
+    return cancel;
+
+    function connectCb() {
+        items.length = 0;
+    }
+
+    function transformer(item) {
+        if (!item) return; // This api returns a lot of empty strings
+
+        const message = Base64.decode(item);
+        try {
+            let item = JSON.parse(message)
+            items.push(item)
+        } catch (e){
+            items.push(message);
+        }
+        cb(items);
+    }
+}
+
+async function streamResults(url, cb) {
     let isCancelled = false;
     let socket = {};
     const results = {};

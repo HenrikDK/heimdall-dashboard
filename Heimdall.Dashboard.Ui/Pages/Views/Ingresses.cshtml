@@ -4,7 +4,7 @@
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Ingresses</span>
         </div>
     
-        <vuetable :columns="columns" :initial-sort="sorting" :data="ingresses" :namespaces="namespaces" :search="search"></vuetable>
+        <vue-table :columns="columns" :initial-sort="sorting" :data="ingresses" :namespaces="namespaces" :search="search"></vue-table>
       
     </div>
 </template>
@@ -81,8 +81,8 @@
                     { header: 'Name', name: 'metadata.name', canSort: true, classes:'truncate 2xl:w-64 xl:w-44 lg:w-32' },
                     { header: 'Namespace', name: 'metadata.namespace', canSort: true, classes:'2xl:w-64 xl:w-44 lg:w-32'},
                     { header: 'Type', name: 'spec.ingressClassName', canSort: false, classes:'2xl:w-40 xl:w-30 lg:w-24' },
-                    { header: 'LoadBalancers', name: 'status', formatter:formatLoadBalancer, canSort: true, classes:'truncate 2xl:w-40 xl:w-30 lg:w-24' },
-                    { header: 'Host', name: 'spec.rules', formatter:formatHosts, raw:true, canSort: true, classes:'truncate grow shrink' },
+                    { header: 'LoadBalancers', name: 'status', formatter:formatLoadBalancer, canSort: true, classes:'truncate w-44' },
+                    { header: 'Host', name: 'spec.rules', formatter:formatHosts, raw:true, canSort: true, classes:'truncate grow shrink 2xl:w-64 xl:w-44 lg:w-32' },
                     { header:"Age", name:"metadata.creationTimestamp", formatter:formatIngressAge, canSort: true, classes:"w-40" }
                 ],
                 clusterIngresses: null,

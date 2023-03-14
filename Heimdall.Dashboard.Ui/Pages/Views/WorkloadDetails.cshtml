@@ -1,0 +1,71 @@
+﻿<template id="workload-details">
+    <div class="pl-2 pr-4 w-100">
+        <div class="flex my-2 items-center">
+            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Workload</span>
+        </div>
+        
+        <br/>
+        
+        <div class="flex justify-around mb-4 mt-1">
+            <div class="graph">
+                <v-chart :option="podsAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+            </div>
+            <div class="graph">
+                <v-chart :option="podCpuUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+            </div>
+            <div class="graph">
+                <v-chart :option="podMemoryUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+            </div>
+        </div>
+        
+        <br/><br/>
+    </div>
+</template>
+
+<script type="module">
+    import {useDark} from "vueuse";
+    const isDark = useDark()
+        
+    components["workload-details"] = {
+        template: "#workload-details",
+        data() {
+            return {
+                initOptions: { renderer: "svg" },
+                details: [],
+                metrics: [],
+                isDark: isDark
+            }
+        },
+        props: ['namespaces', 'search', 'filters'],        
+        computed: {
+            podsAvailable: () => podReady(),
+            podCpuUsage: () => podCpu(),
+            podMemoryUsage: () => podMemory(),
+        },
+        methods: {
+            updatePods(){
+                if (!this.clusterPods) return;
+                
+                let result = [...this.clusterPods];
+                                
+                if (this.filters?.length){
+                    result = result.filter(x => filterName(x, this.filters))
+                }
+                
+                this.pods = result;
+            }
+        },
+        watch: {
+        },
+        async mounted() {
+            var host = window.location.origin;
+            
+            streamResults(host + '/k8s/api/v1/namespaces/{namespace}/pods/{name}', j => this.details = j);
+        },
+    };
+    
+    routes.push({path:'/workloads/{:name}/details', name:'workload-details', component: components["workload-details"]})    
+</script>
+
+<style>
+</style>

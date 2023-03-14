@@ -1,5 +1,5 @@
-<template id="vuetable">
-  <div class="block border scale-100 overflow-y-scroll border-gray-200 shadow-md rounded-lg dark:border-zinc-700 mt-4"> <!-- table outer border -->
+<template id="vue-table">
+  <div class="block border scale-100 overflow-hidden border-gray-200 shadow-md rounded-lg dark:border-zinc-700 mt-4"> <!-- table outer border -->
     <div class="w-full h-[85vh] text-left divide-y divide-gray-200 dark:divide-zinc-700"> <!-- table -->
       <div class="flex w-full sticky top-0 z-10 bg-gray-100 dark:bg-zinc-800"> <!-- header -->
           <div v-for="column in columns"
@@ -12,7 +12,7 @@
               </div>
 
               <div v-if="column.canSort || column.canSort == undefined"
-                   class="px-4 py-2 float-right cursor-pointer select-none"
+                   class="px-2 py-2 float-right cursor-pointer select-none"
                    @@click="onSelectSort($event, column.header)">
                 <template v-if="sorting.find(x => x.header === column.header) == undefined">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
@@ -33,7 +33,7 @@
             </div>
           </div>
       </div>
-      <div class="overflow-y-scroll flex flex-col w-full dark:divide-zinc-700"> <!-- body -->
+      <div class="overflow-y-scroll h-[82.5vh] flex flex-col w-full dark:divide-zinc-700"> <!-- body -->
         <template v-for="row in rows">
           <div v-if="!row?.filtered && !row?.nsFiltered"
                class="flex w-full hover:bg-blue-100 dark:hover:bg-zinc-700">
@@ -66,8 +66,8 @@
 </template>
 
 <script type="module">
-  components["vuetable"] = {
-    template: "#vuetable",
+  components["vue-table"] = {
+    template: "#vue-table",
     data() {
       return {
           rows: [],
@@ -95,6 +95,7 @@
              header: header, sort: 'asc'
           }
           this.$data.sorting.push(sort)
+          this.$data.sorting = [...this.$data.sorting];
           return;
         }
         
@@ -103,6 +104,7 @@
           if (this.$data.sorting.length === 0){
             this.$data.sorting.push(existing) 
           }
+          this.$data.sorting = [...this.$data.sorting];
           return;
         }
         
@@ -224,7 +226,6 @@ function sortRows(sorting, columns, rows){
 }
 
 function sortData(rows, sorting, columnInfos){
-  // This will also perform a stable sorting using the row index if needed.
   const sortedData = [...rows]
 
   sortedData.sort((rowA, rowB) => {
@@ -233,7 +234,6 @@ function sortData(rows, sorting, columnInfos){
       const columnInfo = columnInfos[sortEntry.header]
       const isDesc = columnInfo?.direction === 'desc' ?? false
 
-      // This function should always return in ascending order
       let valA = getRowValue(rowA, columnInfo.column)
       let valB = getRowValue(rowB, columnInfo.column)
       let sortInt = columnInfo.sorter(valA, valB)
@@ -313,11 +313,10 @@ function toString(a) {
 // It handles numbers, mixed alphanumeric combinations, and even null, undefined, and Infinity
 function compareAlphanumeric(aStr, bStr) {
   const reSplitAlphaNumeric = /([0-9]+)/gm
-  // Split on number groups, but keep the delimiter, Then remove falsey split values
+
   const a = aStr.split(reSplitAlphaNumeric).filter(Boolean)
   const b = bStr.split(reSplitAlphaNumeric).filter(Boolean)
 
-  // While
   while (a.length && b.length) {
     const aa = a.shift()
     const bb = b.shift()
