@@ -260,9 +260,9 @@ function podCpu(used = 0, available = 1){
     var pod_cpu = {
         title: {
             text: 'POD CPU USE',
-                subtext: 'Actual vs Reserved',
-                bottom:'5%',
-                textStyle: {
+            subtext: 'Actual vs Reserved',
+            bottom:'5%',
+            textStyle: {
                 fontSize: '16'
             },
             subtextStyle: {
@@ -272,7 +272,7 @@ function podCpu(used = 0, available = 1){
         },
         tooltip: {
             show: false,
-                trigger: 'none'
+            trigger: 'none'
         },
         backgroundColor: '',
         legend: {
