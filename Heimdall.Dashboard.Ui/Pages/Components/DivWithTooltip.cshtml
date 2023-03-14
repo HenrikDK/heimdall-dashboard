@@ -1,20 +1,51 @@
 <template id="div-with-tooltip">
-    <div class="group flex flex-col items-center relative cursor-pointer">
-        <div :class="classes">{{ content }}</div>
-        <div role="tooltip" class="invisible fixed items-center translate-y-6 z-10 
+  <div class="group flex flex-col items-center relative cursor-pointer" @@mouseover="onHover">
+    <div ref="referenceRef" :class="classes">{{ content }}</div>
+    <div ref="floatingRef" role="tooltip" class="invisible absolute items-center z-10 
                     rounded shadow-lg mb-2 w-80 p-4 text-sm border
                     whitespace-no-wrap leading-none break-words 
-                    text-black bg-gray-100 border-gray-300
-                    dark:text-gray-200 dark:bg-zinc-800 dark:border-zinc-700
+                    text-black bg-gray-100
+                    dark:text-gray-200 dark:bg-zinc-800
                     group-hover:visible group-hover:opacity-100">
-            {{ content }}
-        </div>
+
+      {{ content }}
+      
+      <div ref="arrowRef" 
+           class="bg-gray-100 dark:bg-zinc-800 h-2 w-2 rotate-45"></div>
     </div>
+  </div>
 </template>
 
 <script type="module">
-    components["div-with-tooltip"] = {
-      template: "#div-with-tooltip",
+  import { computePosition, offset, arrow } from "floating-ui";
+
+  components["div-with-tooltip"] = {
+    template: "#div-with-tooltip",
+      data() {
+        return {}
+      },
+      methods:{
+        async onHover(e){
+          computePosition(this.$refs.referenceRef, this.$refs.floatingRef, {
+            placement: "bottom",
+            middleware: [offset(10), arrow({ element: this.$refs.arrowRef })]
+          }).then(({ x, y, middlewareData }) => {
+            Object.assign(this.$refs.floatingRef.style, {
+              top: `${y}px`,
+              left: `${x}px`
+            });
+          
+            if (middlewareData.arrow) {
+              const { x } = middlewareData.arrow;
+          
+              Object.assign(this.$refs.arrowRef.style, {
+                left: `${x}px`,
+                top: `${-this.$refs.arrowRef.offsetHeight / 2}px`
+              });
+            }
+          });
+        },
+      },
       props: ['content', 'classes']
-    };
+  };
 </script>
