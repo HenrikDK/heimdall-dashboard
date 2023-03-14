@@ -95,6 +95,7 @@
              header: header, sort: 'asc'
           }
           this.$data.sorting.push(sort)
+          this.$data.sorting = [...this.$data.sorting];
           return;
         }
         
@@ -103,6 +104,7 @@
           if (this.$data.sorting.length === 0){
             this.$data.sorting.push(existing) 
           }
+          this.$data.sorting = [...this.$data.sorting];
           return;
         }
         
@@ -224,7 +226,6 @@ function sortRows(sorting, columns, rows){
 }
 
 function sortData(rows, sorting, columnInfos){
-  // This will also perform a stable sorting using the row index if needed.
   const sortedData = [...rows]
 
   sortedData.sort((rowA, rowB) => {
@@ -233,7 +234,6 @@ function sortData(rows, sorting, columnInfos){
       const columnInfo = columnInfos[sortEntry.header]
       const isDesc = columnInfo?.direction === 'desc' ?? false
 
-      // This function should always return in ascending order
       let valA = getRowValue(rowA, columnInfo.column)
       let valB = getRowValue(rowB, columnInfo.column)
       let sortInt = columnInfo.sorter(valA, valB)
