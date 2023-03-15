@@ -1,5 +1,5 @@
 <template id="vue-table">
-  <div class="block border scale-100 overflow-hidden border-gray-200 shadow-md rounded-lg dark:border-zinc-700 mt-4"> <!-- table outer border -->
+  <div class="border overflow-hidden border-gray-200 shadow-md rounded-lg dark:border-zinc-700 mt-4"> <!-- table outer border -->
     <div class="w-full h-[85vh] text-left divide-y divide-gray-200 dark:divide-zinc-700"> <!-- table -->
       <div class="flex w-full sticky top-0 z-10 bg-gray-100 dark:bg-zinc-800"> <!-- header -->
           <div v-for="column in columns"
@@ -33,30 +33,50 @@
             </div>
           </div>
       </div>
-      <div class="overflow-y-scroll h-[82.5vh] flex flex-col w-full dark:divide-zinc-700"> <!-- body -->
+      <div class="overflow-y-scroll h-[82.5vh] text-sm text-gray-700 dark:text-gray-400 flex flex-col w-full dark:divide-zinc-700 dark:[color-scheme:dark]"> <!-- body -->
         <template v-for="row in rows">
           <div v-if="!row?.filtered && !row?.nsFiltered"
                class="flex w-full hover:bg-blue-100 dark:hover:bg-zinc-700">
             <template v-for="column in columns">
-              <div class="px-4 py-2 text-sm text-gray-700 dark:text-gray-400"
-                   :class="column.classes">
-                <template v-if="column.formatter == undefined">
+              <template v-if="column.formatter == undefined">
+                <div class="px-4 py-2" :class="column.classes">
                   {{ getRowValue(row, column.name) }}
+                </div>
+              </template>
+              <template v-else v-for="scope in [column.formatter(row)]">
+                <template v-if="column.tooltip">
+                  <tooltip :placement="scope.tooltip.placement">
+                    <template v-slot:cell>
+                      <template v-if="scope.cell.raw">
+                        <div v-html="scope.cell.content" :class="scope.cell.classes"></div>
+                      </template>
+                      <template v-else>
+                        <div :class="scope.cell.classes">{{ scope.cell.content }}</div>
+                      </template>
+                    </template>
+                    <template v-slot:tooltip>
+                      <template v-if="scope.tooltip.raw">
+                        <div v-html="scope.tooltip.content" :class="scope.tooltip.classes"></div>
+                      </template>
+                      <template v-else>
+                        <div :class="scope.tooltip.classes">{{ scope.tooltip.content }}</div>
+                      </template>
+                    </template>
+                  </tooltip>
                 </template>
-                <template v-else v-for="scope in [column.formatter(row)]">
-                  <template v-if="column.toolTip">
-                    <div-with-tooltip :content="scope.content" :classes="scope.classes"></div-with-tooltip>
-                  </template>
-                  <template v-else-if="column.raw">
+                <template v-else-if="column.raw">
+                  <div class="px-4 py-2" :class="column.classes">
                     <div v-html="scope.content" :class="scope.classes"></div>
-                  </template>
-                  <template v-else>
+                  </div>
+                </template>
+                <template v-else>
+                  <div class="px-4 py-2" :class="column.classes">
                     <div :class="scope.classes">
                       {{ scope.content }}
                     </div>
-                  </template>
+                  </div>
                 </template>
-              </div>
+              </template>
             </template>
           </div>
         </template>
