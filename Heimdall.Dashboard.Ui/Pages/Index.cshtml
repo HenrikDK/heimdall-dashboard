@@ -14,7 +14,7 @@
     <partial name="Buttons/Pods"/>
     <partial name="Buttons/Services"/>
     
-    <partial name="Components/DivWithTooltip"/>
+    <partial name="Components/Tooltip"/>
     <partial name="Components/MainMenu"/>
     <partial name="Components/MultiSelect"/>
     <partial name="Components/NavBar"/>
@@ -43,7 +43,7 @@
 <div class="grid grid-cols-[85px_1fr] gap-2 h-screen fixed w-full">
     <main-menu></main-menu>
     
-    <main id="content" class="overflow-auto">
+    <main id="content" class="overflow-auto dark:[color-scheme:dark]">
         <router-view :namespaces="namespaces" :search="search" :filters="filters"></router-view>
     </main>
 </div>
