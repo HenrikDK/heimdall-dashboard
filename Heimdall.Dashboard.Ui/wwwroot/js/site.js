@@ -9,17 +9,27 @@
         }
         return result;
     }
-
+    
     if (dur.values.days && Math.abs(dur.values.days) > 0)
     {
         result += Math.abs(dur.values.days) + "d"
-        if (Math.abs(dur.values.days) < 10 && Math.abs(dur.values.minutes) > 0)
+        if (Math.abs(dur.values.days) < 10 && Math.abs(dur.values.hours) > 0)
+        {
+            result += Math.abs(dur.values.hours) + "h"
+        }
+        return result;
+    }
+    
+    if (dur.values.hours && Math.abs(dur.values.hours) > 0)
+    {
+        result += Math.abs(dur.values.hours) + "h"
+        if (Math.abs(dur.values.hours) < 10 && Math.abs(dur.values.minutes) > 0)
         {
             result += Math.abs(dur.values.minutes) + "m"
         }
         return result;
     }
-
+    
     if (dur.values.minutes && Math.abs(dur.values.minutes) > 0)
     {
         result += Math.abs(dur.values.minutes) + "m"
@@ -29,6 +39,6 @@
         }
         return result;
     }
-
+    
     return result += Math.abs(dur.values.seconds) + "s"
 }
