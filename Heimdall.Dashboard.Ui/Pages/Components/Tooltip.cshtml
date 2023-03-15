@@ -1,16 +1,16 @@
 <template id="tooltip">
   <div class="group inline-block cursor-pointer" @@mouseover="onHover">
-    <div ref="referenceRef" class="inline-block">
-      <slot/>
+    <div ref="referenceRef" class="inline-block py-2">
+      <slot name="cell"/>
     </div>
     <div ref="floatingRef" role="tooltip" class="absolute invisible items-center z-50 
-          rounded shadow-lg mb-2 w-80 p-4 text-sm
-          whitespace-no-wrap leading-none break-words 
+          rounded shadow-lg p-4 
           text-black bg-gray-100
           dark:text-gray-200 dark:bg-zinc-800
           group-hover:visible group-hover:opacity-100">
-
-      {{ content }}
+      <div class="inline-block">
+        <slot name="tooltip"/>
+      </div>
       
       <div ref="arrowRef" class="absolute bg-gray-100 dark:bg-zinc-800 h-2 w-2 rotate-45 z-10"></div>
     </div>
@@ -57,7 +57,6 @@
         },
       },
       props: {
-        content: String,
          placement: {
            type: String,
            default: 'bottom'
