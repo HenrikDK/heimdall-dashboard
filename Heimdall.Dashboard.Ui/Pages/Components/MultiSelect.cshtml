@@ -53,6 +53,7 @@
     <div @@focusout="isOpen = false" tabindex="-1" data-ns="1"
          :class="isOpen ? 'visible' : 'hidden'"  
          class="max-h-60 absolute cursor-pointer -left-px -right-px transform translate-y-2 border border-gray-300 -mt-px overflow-y-auto z-50
+       dark:[color-scheme:dark]
        bg-white flex flex-col rounded, dark:bg-zinc-800">
       
       <ul class="flex flex-col p-0 m-0 list-none" role="listbox">
@@ -74,7 +75,7 @@
       </ul>
       
       <template v-if="values.length === 0" name="loading">
-        <div class="py-1 px-1 text-gray-400 bg-k8s dark:bg-zinc-800 text-left">
+        <div class="py-1 px-1 text-gray-300 bg-k8s dark:bg-zinc-800 text-left">
           Loading...
         </div>
       </template>
