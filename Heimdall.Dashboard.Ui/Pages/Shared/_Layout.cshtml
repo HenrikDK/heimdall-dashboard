@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 <html lang="en">
 <head>
@@ -55,6 +55,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <script src="~/js/api.js" asp-append-version="true"></script>
     <script src="~/js/graphs.js" asp-append-version="true"></script>
+    <script src="~/js/themes.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 </head>
 <body class="dark:bg-dark">
@@ -70,8 +71,10 @@
 <script type="module">
 import { createApp } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
+import { registerTheme } from 'echarts/core'
 import { default as ECharts } from 'vue-echarts'
-    
+
+registerTheme('dark', getDarkTheme());  
 components['v-chart'] = ECharts;
 
 let scrollPositions = null;
