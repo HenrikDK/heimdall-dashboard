@@ -359,3 +359,63 @@ function workloadsReady(ready = 0, waiting = 1){
     };
     return workloads_ready;
 }
+
+function workload(type = 'Unknown', running = 0, pending = 0){
+    let data = [];
+    let active = false;
+    
+    if (running > 0 || pending > 0){
+        let runningName = running > 0 ? 'Running': '';
+        let pendingName = pending > 0 ? 'Pending': '';
+        data = [
+            { value: 0, name: '', percentage: 0 },
+            { value: running, name: runningName, percentage: running/(running + pending) },
+            { value: pending, name: pendingName, percentage: pending/(running + pending) }
+        ];
+        
+        active = true;
+    }
+    
+    var graph = {
+        tooltip: {
+            trigger: 'item',
+            formatter: function (params){
+                return res = params.name + " : " + Math.round(params.percent) + '% </br>';
+            }
+        },
+        title: {
+            text: `${type} (${running + pending})`,
+            left: 'center',
+        },
+        backgroundColor: '',
+        legend: {
+            top: '78%',
+            left: 'center',
+            show: active,
+            formatter: formatter = function (name) {
+                let value = data
+                    .filter((a) => a.name === name)
+                    .map((a) => a.value)[0];
+                return `${name}  ${value}`;
+            },
+            itemGap: 20,
+            selectedMode: false,
+            orient: 'vertical',
+        },
+        series: [
+            {
+                top: '-15%',
+                name: 'Pods',
+                type: 'pie',
+                radius: ['65%', '80%'],
+                label: {
+                    show: false,
+                },
+                emptyCircleStyle:{ opacity: 0.2 },
+                data: data
+            },
+        ]
+    };
+
+    return graph
+}
