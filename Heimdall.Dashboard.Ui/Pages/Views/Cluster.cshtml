@@ -8,23 +8,17 @@
         <br/>
         
         <div class="flex justify-between mb-4 mt-1">
-            <div class="graph">
+            <div class="wide-graph">
                 <v-chart :option="nodesAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
-            <div class="graph">
+            <div class="wide-graph">
                 <v-chart :option="nodeCpuUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
-            <div class="graph">
+            <div class="large-graph">
                 <v-chart :option="nodeMemoryUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
-            <div class="graph">
+            <div class="large-graph">
                 <v-chart :option="podsAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
-            </div>
-            <div class="graph">
-                <v-chart :option="podCpuUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
-            </div>
-            <div class="graph">
-                <v-chart :option="podMemoryUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
         </div>
         
