@@ -5,9 +5,7 @@
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Cluster</span>
         </div>
 
-        <div class="flex my-2 items-center">
-            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Workloads</span>
-        </div>
+        <br/>
         
         <div class="flex justify-between mb-4 mt-1">
             <div class="graph">
@@ -29,6 +27,36 @@
                 <v-chart :option="podMemoryUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
         </div>
+        
+        <div class="flex my-2 items-center">
+            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Workloads</span>
+        </div>
+        
+        <br/>
+        
+        <div class="flex justify-between mb-4 mt-1">
+            <div class="graph">
+                <v-chart :option="workloads.pods" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+            </div>
+            <div class="graph">
+                <v-chart :option="workloads.deployments" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+            </div>
+            <div class="graph">
+                <v-chart :option="workloads.daemonsets" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+            </div>
+            <div class="graph">
+                <v-chart :option="workloads.statefullsets" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+            </div>
+            <div class="graph">
+                <v-chart :option="workloads.replicasets" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+            </div>
+            <div class="graph">
+                <v-chart :option="workloads.jobs" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+            </div>
+            <div class="graph">
+                <v-chart :option="workloads.cronjobs" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -46,6 +74,15 @@
                 clusterNodes: null,
                 clusterNodeMetrics: null,
                 isDark: isDark,
+                workloads:{
+                    pods: workload('Pods', 11, 3),
+                    deployments: workload('Deployments', 9, 3),
+                    daemonsets: workload('Daemon Sets', 2, 0),
+                    statefullsets: workload('Stateful Sets', 0, 0),
+                    replicasets: workload('Replica Sets', 9, 3),
+                    jobs: workload('Jobs', 0, 0),
+                    cronjobs: workload('Cron Jobs', 0, 0),
+                },
                 nodesAvailable: nodeReady(),
                 nodeCpuUsage: nodeCpu(),
                 nodeMemoryUsage: nodeMemory(),
