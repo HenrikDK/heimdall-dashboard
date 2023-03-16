@@ -50,35 +50,36 @@
     </button>
 
     <!-- Options -->
-    <template v-if="isOpen">
-      <div @@focusout="isOpen = false" tabindex="-1" data-ns="1"
-        class="max-h-60 absolute cursor-pointer -left-px -right-px transform translate-y-2 border border-gray-300 -mt-px overflow-y-scroll z-50 bg-white flex flex-col rounded">
-        
-        <ul class="flex flex-col p-0 m-0 list-none" role="listbox">
-          <template v-if="values.length > 0">
-            <li v-for="v in values" @@click="handleOptionClick(v)" role="option" :aria-selected="selected.includes(v)" :data-ns="v"
-                class="py-1 px-1 flex aria-selected:font-medium aria-selected:text-black dark:aria-selected:text-white
-                       bg-white text-gray-600 hover:bg-blue-200 hover:text-blue-600
-                       dark:bg-zinc-800 dark:text-gray-400 dark:hover:text-white dark:hover:bg-zinc-700/[.9]">
-              <template v-if="selected.includes(v)">
-                <span class="absolute text-blue-600">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
-                  </svg>
-                </span>
-              </template>
-              <span class="ml-8">{{ v }}</span>
-            </li>
-          </template>
-        </ul>
-
-        <template v-if="values.length === 0" name="loading">
-          <div class="py-1 px-1 text-gray-400 bg-k8s dark:bg-zinc-800 text-left">
-            Loading...
-          </div>
+    <div @@focusout="isOpen = false" tabindex="-1" data-ns="1"
+         :class="isOpen ? 'visible' : 'hidden'"  
+         class="max-h-60 absolute cursor-pointer -left-px -right-px transform translate-y-2 border border-gray-300 -mt-px overflow-y-auto z-50
+       dark:[color-scheme:dark]
+       bg-white flex flex-col rounded, dark:bg-zinc-800">
+      
+      <ul class="flex flex-col p-0 m-0 list-none" role="listbox">
+        <template v-if="values.length > 0">
+          <li v-for="v in values" @@click="handleOptionClick(v)" role="option" :aria-selected="selected.includes(v)" :data-ns="v"
+              class="py-1 px-1 flex aria-selected:font-medium aria-selected:text-black dark:aria-selected:text-white
+                bg-white text-gray-600 hover:bg-blue-200 hover:text-blue-600
+                dark:bg-zinc-800 dark:text-gray-400 dark:hover:text-white dark:hover:bg-zinc-700/[.9]">
+            <template v-if="selected.includes(v)">
+              <span class="absolute text-blue-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                </svg>
+              </span>
+            </template>
+            <span class="ml-8">{{ v }}</span>
+          </li>
         </template>
-      </div>
-    </template>
+      </ul>
+      
+      <template v-if="values.length === 0" name="loading">
+        <div class="py-1 px-1 text-gray-300 bg-k8s dark:bg-zinc-800 text-left">
+          Loading...
+        </div>
+      </template>
+    </div>
   </div>
 </template>
 

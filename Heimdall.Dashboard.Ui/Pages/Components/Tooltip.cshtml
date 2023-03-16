@@ -1,0 +1,66 @@
+<template id="tooltip">
+  <div class="group inline-block cursor-pointer" @@mouseover="onHover">
+    <div ref="referenceRef" class="inline-block py-2">
+      <slot name="cell"/>
+    </div>
+    <div ref="floatingRef" role="tooltip" class="absolute invisible items-center z-50 
+          rounded shadow-lg p-4 
+          text-black bg-gray-100
+          dark:text-gray-200 dark:bg-zinc-800
+          group-hover:visible group-hover:opacity-100">
+      <div class="inline-block">
+        <slot name="tooltip"/>
+      </div>
+      
+      <div ref="arrowRef" class="absolute bg-gray-100 dark:bg-zinc-800 h-2 w-2 rotate-45 z-10"></div>
+    </div>
+  </div>
+</template>
+
+<script type="module">
+  import { computePosition, offset, flip, shift, arrow } from "floating-ui";
+    
+  components["tooltip"] = {
+    template: "#tooltip",
+      data() {
+        return {}
+      },
+      methods:{
+        async onHover(e){
+          computePosition(this.$refs.referenceRef, this.$refs.floatingRef, {
+            placement: this.$props.placement,
+            middleware: [offset(8), flip(), shift({ padding:5 }), arrow({ element: this.$refs.arrowRef })]
+          }).then(({ x, y, middlewareData, placement }) => {
+            
+            Object.assign(this.$refs.floatingRef.style, {
+              top: `${y}px`,
+              left: `${x}px`
+            });
+          
+            const opposingSide = {
+              right:"left",
+              left: "right",
+              top: "bottom",
+              bottom: "top"
+            }[placement.split('-')[0]];
+              
+            const { x: arrowX, y: arrowY } = middlewareData.arrow;
+         
+            Object.assign(this.$refs.arrowRef.style, {
+              left: arrowX ? `${arrowX}px`: "",
+              top: arrowY? `${arrowY}px` : "",
+              bottom: "",
+              right: "",
+              [opposingSide]: '-4px'
+            });
+          });
+        },
+      },
+      props: {
+         placement: {
+           type: String,
+           default: 'bottom'
+         }
+      }
+  };
+</script>
