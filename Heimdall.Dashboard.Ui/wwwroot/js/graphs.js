@@ -431,6 +431,12 @@ function clusterPerformance(){
             }
         },
         backgroundColor: '',
+        grid: {
+            left: '5%',
+            right: '5%',
+            top: '7%',
+            bottom: '5%',
+        },
         legend: {
             data: ['CPU', 'Memory']
         },
