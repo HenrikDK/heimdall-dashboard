@@ -419,3 +419,78 @@ function workload(type = 'Unknown', running = 0, pending = 0){
 
     return graph
 }
+
+function clusterPerformance(){
+    const colors = ['#5470C6', '#91CC75', '#EE6666'];
+    option = {
+        color: colors,
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross'
+            }
+        },
+        backgroundColor: '',
+        legend: {
+            data: ['CPU', 'Memory']
+        },
+        xAxis: [
+            {
+                type: 'category',
+                boundaryGap: false,
+                axisTick: {
+                    alignWithLabel: true
+                },
+                data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value',
+                name: 'Memory',
+                position: 'right',
+                alignTicks: true,
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: colors[1]
+                    }
+                },
+                axisLabel: {
+                    formatter: '{value} GiB'
+                }
+            },
+            {
+                type: 'value',
+                name: 'CPU (vCores)',
+                position: 'left',
+                alignTicks: true,
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: colors[0]
+                    }
+                },
+                axisLabel: {
+                    formatter: '{value}'
+                }
+            }
+        ],
+        series: [
+            {
+                name: 'CPU',
+                type: 'line',
+                yAxisIndex: 1,
+                data: [2.0, 2.2, 3.3, 4.5, 6.3, 10.2, 20.3, 23.4, 23.0, 16.5, 12.0, 6.2]
+            },
+            {
+                name: 'Memory',
+                type: 'line',
+                data: [
+                    2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 150.6, 170.0, 96.4, 83.3
+                ]
+            }
+        ]
+    };
+    return option;
+}
