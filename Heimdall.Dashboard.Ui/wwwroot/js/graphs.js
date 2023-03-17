@@ -511,17 +511,17 @@ function current(type = ''){
 
     usage = [
         { value: 40, name: 'Usage', formatted: '15.5 vCores' },
-        { value: 60, name: '', itemStyle: { color: 'lightgray', opacity:0.2 } },
+        { value: 60, name: '', emphasis :{disabled:true}, itemStyle: { color: 'lightgray', opacity:0.2 } },
     ]
 
     requests = [
         { value: 64, name: 'Requests', formatted: '29 vCores' },
-        { value: 37, name: '', itemStyle: { color: 'lightgray', opacity:0.2 } },
+        { value: 37, name: '', emphasis :{disabled:true}, itemStyle: { color: 'lightgray', opacity:0.2 } },
     ]
 
     limits = [
         { value: 95, name: 'Limits', formatted: '55 vCores' },
-        { value: 5, name: '', itemStyle: { color: 'lightgray', opacity:0.2 } }
+        { value: 5, name: '', emphasis :{disabled:true}, itemStyle: { color: 'lightgray', opacity:0.2 } }
     ];
 
     let data = [...limits, ...requests, ...usage];
