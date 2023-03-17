@@ -9,10 +9,7 @@
         
         <div class="flex justify-between mb-4 mt-1">
             <div class="wide-graph">
-                <v-chart :option="nodesAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
-            </div>
-            <div class="wide-graph">
-                <v-chart :option="nodeCpuUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+                <v-chart :option="cluster.performance" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
             <div class="large-graph">
                 <v-chart :option="nodeMemoryUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
@@ -68,6 +65,9 @@
                 clusterNodes: null,
                 clusterNodeMetrics: null,
                 isDark: isDark,
+                cluster:{
+                    performance: clusterPerformance(),
+                },
                 workloads:{
                     pods: workload('Pods', 11, 3),
                     deployments: workload('Deployments', 9, 3),
