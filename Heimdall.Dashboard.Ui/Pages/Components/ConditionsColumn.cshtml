@@ -1,0 +1,34 @@
+<template id="conditions-column">
+  <div class="flex px-4 py-2" :class="classes">
+    <template v-for="condition in conditions">
+      <template v-if="condition.tooltip">
+        <tooltip :placement="placement">
+          <template v-slot:cell>
+            <div v-html="condition.content"></div>
+          </template>
+
+          <template v-slot:tooltip>
+            <div class="text-sm whitespace-no-wrap leading-none break-words w-fit">{{ condition.tooltip }}</div>
+          </template>
+        </tooltip>
+      </template>
+      <template v-else>
+        <div v-html="condition.content"></div>        
+      </template>
+    </template>
+  </div>
+</template>
+
+<script type="module">
+  components["conditions-column"] = {
+    template: "#conditions-column",
+      props: {
+        classes: String,
+        conditions: Array,
+        placement: {
+          type: String,
+          default: 'bottom'
+        }
+      }
+  };
+</script>
