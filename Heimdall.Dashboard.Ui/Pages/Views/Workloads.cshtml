@@ -29,42 +29,44 @@
         return { namespace: row.metadata.namespace, classes:"truncate 2xl:w-52 xl:w-44 lg:w-40", placement:"right" }
     }
 
-    function formatDeploymentStatus(row){
-        if (!row.kind) return "";
-        let result = "";
+    function formatConditions(row){
+        if (!row.kind) return {conditions:[]};
+
         if (["DaemonSet", "StatefulSet"].includes(row.kind))
         {
-            result += '<div class="px-1 text-green-500">Running</div>'
+            return {conditions:[{content:'<div class="px-1 text-green-500">Running</div>'}]};
         }
         
         if (row.kind === "Deployment")
         {
             let conditions = row.status.conditions;
-            result += '<div class="flex">';
-            result += conditions.map(x => x.type).sort().map(x => {
+            let result = conditions.map(x => x.type).sort().map(x => {
               let color = x === "Available" ? "text-green-500" : "text-blue-500";
-              return `<div class="px-1 ${color}">${x}</div>`  
-            }).join('');
-            result += '</div>'
+              return {content: `<div class="px-1 ${color}">${x}</div>`, tooltip: x.message }  
+            });
+            return {conditions:result };
         }
         
         if (row.kind === "Job")
         {
             let conditions = row.status.conditions;
-            result += conditions.map(x => `<div class="px-1 text-green-500">${x.type}</div>`).join('');
+            let result = conditions.map(x => { 
+                return {content: `<div class="px-1 text-green-500">${x.type}</div>`, tooltip: x.message}
+            });
+            return {conditions:result };
         }
          
         if (row.kind === "CronJob")
         {
             let active = row.status.active;
             if (active){
-                result += '<div class="px-1 text-green-500">Running</div>'
+                return [{content:'<div class="px-1 text-green-500">Running</div>'}];
             }else {
-                result += '<div class="px-1 text-grey-300">Waiting</div>'
+                return [{content:'<div class="px-1 text-grey-300">Waiting</div>'}];
             }
         }
         
-        return { content:'<div class="flex">' + result + '</div>', classes: ''};           
+        return {conditions:[]};           
     }
 
     function formatWorkloadAge(row){
@@ -145,7 +147,7 @@
                     { header:"Type", name:"kind", canSort:false, classes:"truncate 2xl:w-48 xl:w-40 lg:w-32" },
                     { header:"Pods", name:"pods", formatter:formatPods, canSort:false, raw:true, canFilter:false, classes:"2xl:w-52 xl:w-44 lg:w-32" },
                     { header:"Age", name:"metadata.creationTimestamp", formatter:formatWorkloadAge, sorter:"text", classes:"w-40" },
-                    { header:"Status", field:"status", formatter:formatDeploymentStatus, raw:true, canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-44" },                    
+                    { header:"Conditions", field:"status", formatter:formatConditions, conditions:true, canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-44" },                    
                 ],
                 sorting: [],
                 clusterWorkloads: null,
