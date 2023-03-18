@@ -11,7 +11,7 @@
 
 <script type="module">
     import {useDark} from "vueuse";
-    const isDark = useDark()
+    const isDark = useDark();
     
     function formatNamespace(row){
         return { namespace: row.involvedObject.namespace, classes:"truncate 2xl:w-52 xl:w-44 lg:w-32", placement:"right" }
@@ -27,7 +27,7 @@
 
     function formatSource(row){
         let con = row.involvedObject.kind + ": " + row.involvedObject.name;
-        return { content:con, classes: 'text-blue-500 w-80 truncate 2xl:w-72 xl:w-64 lg:w-64' };
+        return { content:con, classes: 'truncate text-blue-500 2xl:w-80 xl:w-64 lg:w-64' };
     }
     
     function formatEventAge(row){
@@ -54,8 +54,8 @@
                 columns: [
                     {header:"Type", name:"type", sorter:"text", classes:"w-32"},
                     {header:"Namespace", name:"involvedObject.namespace", formatter:formatNamespace, namespace: true, classes:"truncate 2xl:w-52 xl:w-44 lg:w-32"},
-                    {header:"Message", name:"message", formatter:formatMessage, canSort:false, tooltip: true, classes:"2xl:w-[42rem] xl:w-[24rem] lg:w-[20rem] grow shrink"},
-                    {header:"Source", name:"involvedObject.name", formatter:formatSource, canSort:false, classes: "w-80"},
+                    {header:"Message", name:"message", formatter:formatMessage, canSort:false, tooltip: true, classes:"2xl:w-[41rem] xl:w-[23rem] lg:w-[19rem] shrink"},
+                    {header:"Source", name:"involvedObject.name", formatter:formatSource, canSort:false, classes: "truncate 2xl:w-80 xl:w-64 lg:w-64"},
                     {header:"Events", name:"count", sorter:"number", classes:"w-40"},
                     {header:"Age", name:"lastTimestamp", formatter:formatEventAge, sorter:"text", classes:"w-32"},
                 ],
