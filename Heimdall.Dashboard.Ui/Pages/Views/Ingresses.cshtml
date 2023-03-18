@@ -10,6 +10,10 @@
 </template>
 
 <script type="module">
+    function formatNamespace(row){
+        return { namespace: row.metadata.namespace, placement:"right" }
+    }
+    
     function formatLoadBalancer(row){
         let content = '';
         if (row.status.loadBalancer.ingress){
@@ -78,12 +82,12 @@
                     {header:'Name', sort:'desc'}
                 ],
                 columns:[
-                    { header: 'Name', name: 'metadata.name', canSort: true, classes:'truncate 2xl:w-64 xl:w-44 lg:w-32' },
-                    { header: 'Namespace', name: 'metadata.namespace', canSort: true, classes:'2xl:w-64 xl:w-44 lg:w-32'},
+                    { header: 'Name', name: 'metadata.name', classes:'truncate 2xl:w-64 xl:w-44 lg:w-32' },
+                    { header: 'Namespace', name: 'metadata.namespace', namespace:true, classes:'2xl:w-64 xl:w-44 lg:w-32'},
                     { header: 'Type', name: 'spec.ingressClassName', canSort: false, classes:'2xl:w-40 xl:w-30 lg:w-24' },
-                    { header: 'LoadBalancers', name: 'status', formatter:formatLoadBalancer, canSort: true, classes:'truncate w-44' },
-                    { header: 'Host', name: 'spec.rules', formatter:formatHosts, raw:true, canSort: true, classes:'truncate grow shrink 2xl:w-64 xl:w-44 lg:w-32' },
-                    { header:"Age", name:"metadata.creationTimestamp", formatter:formatIngressAge, canSort: true, classes:"w-40" }
+                    { header: 'LoadBalancers', name: 'status', formatter:formatLoadBalancer, classes:'truncate w-44' },
+                    { header: 'Host', name: 'spec.rules', formatter:formatHosts, raw:true, classes:'truncate grow shrink 2xl:w-64 xl:w-44 lg:w-32' },
+                    { header:"Age", name:"metadata.creationTimestamp", formatter:formatIngressAge, classes:"w-40" }
                 ],
                 clusterIngresses: null,
             }
