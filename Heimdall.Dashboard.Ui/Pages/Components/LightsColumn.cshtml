@@ -1,0 +1,34 @@
+<template id="lights-column">
+  <div class="px-4 flex" :class="classes">
+    <template v-for="item in items">
+      <template v-if="item.tooltip">
+        <tooltip :placement="placement">
+          <template v-slot:cell>
+            <div v-html="item.content"></div>
+          </template>
+
+          <template v-slot:tooltip>
+            <div :v-html="item.tip"></div>
+          </template>
+        </tooltip>
+      </template>
+      <template v-else>
+        <div v-html="item.content"></div>        
+      </template>
+    </template>
+  </div>
+</template>
+
+<script type="module">
+  components["lights-column"] = {
+    template: "#lights-column",
+      props: {
+        classes: String,
+        conditions: Array,
+        placement: {
+          type: String,
+          default: 'bottom'
+        }
+      }
+  };
+</script>
