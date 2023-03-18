@@ -64,6 +64,9 @@
                     </template>
                   </tooltip>
                 </template>
+                <template v-else-if="column.namespace">
+                  <ns-column :namespace="scope.namespace" :placement="scope.placement"></ns-column>
+                </template>
                 <template v-else-if="column.raw">
                   <div class="px-4 py-2" :class="column.classes">
                     <div v-html="scope.content" :class="scope.classes"></div>
