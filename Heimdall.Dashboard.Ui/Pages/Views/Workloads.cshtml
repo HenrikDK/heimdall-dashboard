@@ -40,18 +40,18 @@
         if (row.kind === "Deployment")
         {
             let conditions = row.status.conditions;
-            let result = conditions.map(x => x.type).sort().map(x => {
-              let color = x === "Available" ? "text-green-500" : "text-blue-500";
-              return {content: `<div class="px-1 ${color}">${x}</div>`, tooltip: x.message }  
+            let result = conditions.sort(x => x.type).map(x => {
+              let color = x.type === "Available" ? "text-green-500" : "text-blue-500";
+              return {content: `<div class="px-1 ${color}">${x.type}</div>`, tooltip: true, tip: x.message }  
             });
-            return {conditions:result };
+            return {conditions:result};
         }
         
         if (row.kind === "Job")
         {
             let conditions = row.status.conditions;
             let result = conditions.map(x => { 
-                return {content: `<div class="px-1 text-green-500">${x.type}</div>`, tooltip: x.message}
+                return {content: `<div class="px-1 text-green-500">${x.type}</div>`, tooltip: true, tip: x.message}
             });
             return {conditions:result };
         }
