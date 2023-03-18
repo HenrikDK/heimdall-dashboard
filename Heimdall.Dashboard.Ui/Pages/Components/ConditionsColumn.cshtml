@@ -1,14 +1,14 @@
 <template id="conditions-column">
-  <div class="flex px-4 py-2" :class="classes">
+  <div class="px-4 flex" :class="classes">
     <template v-for="condition in conditions">
       <template v-if="condition.tooltip">
-        <tooltip :placement="placement">
+        <tooltip :placement="placement" padding="py-2">
           <template v-slot:cell>
             <div v-html="condition.content"></div>
           </template>
 
           <template v-slot:tooltip>
-            <div class="text-sm whitespace-no-wrap leading-none break-words w-fit">{{ condition.tooltip }}</div>
+            <div class="text-sm whitespace-no-wrap leading-none break-words w-fit">{{ condition.tip }}</div>
           </template>
         </tooltip>
       </template>

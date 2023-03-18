@@ -1,6 +1,6 @@
 <template id="ns-column">
   <div :class="classes">
-    <tooltip :placement="placement">
+    <tooltip :placement="placement" padding="pl-4 py-2">
       <template v-slot:cell>
         <div :onclick="`eventBus.emit('${namespace}')`" class="truncate underline text-blue-500">{{ namespace }}</div>
       </template>
