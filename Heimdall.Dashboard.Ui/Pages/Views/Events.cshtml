@@ -18,7 +18,7 @@
     }
     
     function formatMessage(row){
-         let cellClasses = "truncate 2xl:w-[41rem] xl:w-[22rem] lg:w-[18rem]";
+         let cellClasses = "truncate 2xl:w-[40rem] xl:w-[22rem] lg:w-[18rem]";
          cellClasses += row.type === "Warning" ? " text-red-500" : ''; 
          let message = row.message.replace(/"/g, '\'');
          let tooltipClasses = 'text-sm whitespace-no-wrap leading-none break-words w-80';
