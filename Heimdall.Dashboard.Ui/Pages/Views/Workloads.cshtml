@@ -40,7 +40,9 @@
         if (row.kind === "Deployment")
         {
             let conditions = row.status.conditions;
-            let result = conditions.sort(x => x.type).map(x => {
+            let result = conditions.sort((a,b) => (a.type < b.type) ? -1 : 1).map(x => {
+              if (x.status === "False") return {};
+
               let color = x.type === "Available" ? "text-green-500" : "text-blue-500";
               return {content: `<div class="px-1 ${color}">${x.type}</div>`, tooltip: true, tip: x.message }  
             });
