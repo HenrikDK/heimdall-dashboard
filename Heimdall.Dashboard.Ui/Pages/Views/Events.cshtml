@@ -22,7 +22,7 @@
          cellClasses += row.type === "Warning" ? " text-red-500" : ''; 
          let message = row.message.replace(/"/g, '\'');
          let tooltipClasses = 'text-sm whitespace-no-wrap leading-none break-words w-80';
-         return { cell: {content: message, classes: cellClasses}, tooltip:{ content:message, placement:"bottom", classes:tooltipClasses } }
+         return { cell: {content: message, classes: cellClasses, padding: 'pl-4 py-2'}, tooltip:{ content:message, placement:"bottom", classes:tooltipClasses } }
     }
 
     function formatSource(row){

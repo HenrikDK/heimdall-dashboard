@@ -45,13 +45,13 @@
               </template>
               <template v-else v-for="scope in [column.formatter(row)]">
                 <template v-if="column.tooltip">
-                  <tooltip :placement="scope.tooltip.placement">
+                  <tooltip :placement="scope.tooltip.placement" :padding="scope.cell.padding">
                     <template v-slot:cell>
                       <template v-if="scope.cell.raw">
-                        <div v-html="scope.cell.content" :padding="scope.cell.padding" :class="scope.cell.classes"></div>
+                        <div v-html="scope.cell.content" :class="scope.cell.classes"></div>
                       </template>
                       <template v-else>
-                        <div :padding="scope.cell.padding" :class="scope.cell.classes">{{ scope.cell.content }}</div>
+                        <div  :class="scope.cell.classes">{{ scope.cell.content }}</div>
                       </template>
                     </template>
                     <template v-slot:tooltip>
