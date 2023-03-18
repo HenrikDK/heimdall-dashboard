@@ -14,8 +14,9 @@
     <script src="https://cdn.tailwindcss.com"></script> 
 
     <script>
-        var components = {};
-        var routes = []
+        let components = {};
+        let routes = [];
+        let eventBus = {};
     
         tailwind.config = {
         darkMode: 'class',
@@ -73,6 +74,8 @@ import { createApp } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { registerTheme } from 'echarts/core'
 import { default as ECharts } from 'vue-echarts'
+import { useEventBus } from 'vueuse'
+eventBus = useEventBus('filter')
 
 registerTheme('dark', getDarkTheme());  
 components['v-chart'] = ECharts;
