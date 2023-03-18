@@ -67,6 +67,9 @@
                 <template v-else-if="column.namespace">
                   <ns-column :namespace="scope.namespace" :classes="scope.classes" :placement="scope.placement"></ns-column>
                 </template>
+                <template v-else-if="column.conditions">
+                  <conditions-column :conditions="scope.conditions" :classes="column.classes" :placement="scope.placement"></conditions-column>
+                </template>
                 <template v-else-if="column.raw">
                   <div class="px-4 py-2" :class="column.classes">
                     <div v-html="scope.content" :class="scope.classes"></div>
