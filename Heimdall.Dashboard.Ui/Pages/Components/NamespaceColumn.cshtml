@@ -1,0 +1,28 @@
+<template id="ns-column">
+  <div class="group inline-block cursor-pointer w-48">
+    <tooltip :placement="placement">
+      <template v-slot:cell>
+        <div :onclick="`eventBus.emit('${namespace}')`" class="truncate underline text-blue-500">{{ namespace }}</div>
+      </template>
+      
+      <template v-slot:tooltip>
+        <div class="text-sm whitespace-no-wrap leading-none break-words w-fit">{{ 'Set global namespace filter to: ' + namespace }}</div>
+      </template>
+    </tooltip>
+  </div>
+
+</template>
+
+<script type="module">
+  components["ns-column"] = {
+    template: "#ns-column",
+      methods:{},
+      props: {
+        namespace: String,
+        placement: {
+          type: String,
+          default: 'bottom'
+        }
+      }
+  };
+</script>
