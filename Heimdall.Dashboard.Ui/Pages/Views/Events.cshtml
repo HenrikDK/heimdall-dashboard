@@ -14,7 +14,7 @@
     const isDark = useDark()
     
     function formatNamespace(row){
-        return { namespace: row.involvedObject.namespace, placement:"right" }
+        return { namespace: row.involvedObject.namespace, classes:"truncate 2xl:w-52 xl:w-44 lg:w-32", placement:"right" }
     }
     
     function formatMessage(row){
@@ -53,7 +53,7 @@
                 ],
                 columns: [
                     {header:"Type", name:"type", sorter:"text", classes:"w-32"},
-                    {header:"Namespace", name:"involvedObject.namespace", formatter:formatNamespace, namespace: true, classes:"w-48"},
+                    {header:"Namespace", name:"involvedObject.namespace", formatter:formatNamespace, namespace: true, classes:"truncate 2xl:w-52 xl:w-44 lg:w-32"},
                     {header:"Message", name:"message", formatter:formatMessage, canSort:false, tooltip: true, classes:"2xl:w-[42rem] xl:w-[24rem] lg:w-[20rem] grow shrink"},
                     {header:"Source", name:"involvedObject.name", formatter:formatSource, canSort:false, classes: "w-80"},
                     {header:"Events", name:"count", sorter:"number", classes:"w-40"},

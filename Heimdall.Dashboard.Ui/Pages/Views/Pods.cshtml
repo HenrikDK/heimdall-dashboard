@@ -31,12 +31,7 @@
     const isDark = useDark()
     
     function formatNamespace(row){
-        let cellClasses = "truncate w-48 underline text-blue-500";
-        let cellContent = `<div onclick="eventBus.emit('${row.metadata.namespace}')">${row.metadata.namespace}</div>`;
-        let tipMessage = 'Set global namespace filter to: ' + row.metadata.namespace
-        let tipClasses = 'text-sm whitespace-no-wrap leading-none break-words w-fit';
-                 
-        return { cell: {content: cellContent, raw:true, classes: cellClasses}, tooltip:{ content:tipMessage, placement:"left", classes:tipClasses } }
+        return { namespace: row.metadata.namespace, classes:"truncate 2xl:w-52 xl:w-44 lg:w-32", placement:"right" }
     }
     
     function formatRestarts(row){
@@ -113,7 +108,7 @@
                 ],
                 columns:[
                     { header:"Name", name:"metadata.name", classes: "truncate grow shrink 2xl:w-[41rem] xl:w-[22rem] lg:w-[16rem]"},
-                    { header:"Namespace", name:"metadata.namespace", formatter:formatNamespace, tooltip: true, classes:"truncate w-48" },
+                    { header:"Namespace", name:"metadata.namespace", formatter:formatNamespace, namespace: true, classes:"truncate 2xl:w-52 xl:w-44 lg:w-32" },
                     { header:"Containers", name:"status.containerStatuses", formatter:formatContainers, canSort:false, raw:true, canFilter:false, classes:"2xl:w-52 xl:w-44 lg:w-32"},
                     { header:"Restarts", name:"status.containerStatuses", formatter:formatRestarts, classes:"w-40" },
                     { header:"Age", name:"metadata.creationTimestamp", formatter:formatPodAge, classes:"w-40" },

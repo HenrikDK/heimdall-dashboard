@@ -25,6 +25,10 @@
 </template>
 
 <script type="module">
+    function formatNamespace(row){
+        return { namespace: row.metadata.namespace, classes:"truncate 2xl:w-52 xl:w-44 lg:w-40", placement:"right" }
+    }
+
     function formatDeploymentStatus(row){
         if (!row.kind) return "";
         let result = "";
@@ -136,9 +140,9 @@
                     status:{ replicas: 2, readyReplicas: 1, conditions: [{type:'Available'}, {type:'Progressing'}] }
                 }],
                 columns:[
-                    { header:"Type", name:"kind", canSort:false, classes:"truncate 2xl:w-48 xl:w-40 lg:w-32" },
                     { header:"Name", name:"metadata.name", classes:"grow shrink truncate 2xl:w-64 xl:w-52 lg:w-40" },
-                    { header:"Namespace", name:"metadata.namespace", sorter:"string", classes:"truncate 2xl:w-64 xl:w-52 lg:w-40" },
+                    { header:"Namespace", name:"metadata.namespace", formatter:formatNamespace, namespace:true, classes:"truncate 2xl:w-52 xl:w-44 lg:w-40" },
+                    { header:"Type", name:"kind", canSort:false, classes:"truncate 2xl:w-48 xl:w-40 lg:w-32" },
                     { header:"Pods", name:"pods", formatter:formatPods, canSort:false, raw:true, canFilter:false, classes:"2xl:w-52 xl:w-44 lg:w-32" },
                     { header:"Age", name:"metadata.creationTimestamp", formatter:formatWorkloadAge, sorter:"text", classes:"w-40" },
                     { header:"Status", field:"status", formatter:formatDeploymentStatus, raw:true, canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-44" },                    
