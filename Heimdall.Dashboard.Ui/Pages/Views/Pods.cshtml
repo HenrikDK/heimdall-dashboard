@@ -31,7 +31,7 @@
     const isDark = useDark()
     
     function formatNamespace(row){
-        let cellClasses = "truncate w-48";
+        let cellClasses = "truncate w-48 underline text-blue-500";
         let cellContent = `<div onclick="eventBus.emit('${row.metadata.namespace}')">${row.metadata.namespace}</div>`;
         let tipMessage = 'Set global namespace filter to: ' + row.metadata.namespace
         let tipClasses = 'text-sm whitespace-no-wrap leading-none break-words w-fit';
