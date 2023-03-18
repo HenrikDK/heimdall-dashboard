@@ -70,6 +70,9 @@
                 <template v-else-if="column.conditions">
                   <conditions-column :conditions="scope.conditions" :classes="column.classes" :placement="scope.placement"></conditions-column>
                 </template>
+                <template v-else-if="column.lights">
+                  <lights-column :conditions="scope.items" :classes="column.classes" :placement="scope.placement"></lights-column>
+                </template>
                 <template v-else-if="column.raw">
                   <div class="px-4 py-2" :class="column.classes">
                     <div v-html="scope.content" :class="scope.classes"></div>
