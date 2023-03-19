@@ -61,17 +61,43 @@
         }
         let result = [...containers, ...initContainers].map(x => {
             if (x.state.running){
-                return '<div class="h-4 w-4 mr-2 bg-green-500 dark:bg-green-500 rounded-sm"></div>'    
+                let status = x.ready ? 'ready' : ''
+                if (x.state.running){
+                    status += ', running'                
+                }
+                let tip = `<div><div class="flex text-xs"><div>${x.name}</div><div class="pl-2 text-gray-600 dark:text-gray-400">${status}</div></div>
+<div class="flex text-xs"><div>StartedAt</div><div class="pl-2 text-gray-600 dark:text-gray-400">${x.state.running.startedAt}</div></div>
+</div>`
+                let content = '<div class="h-4 w-4 bg-green-500 dark:bg-green-500 rounded-sm"></div>';
+                return {content: content, tip:tip, tooltip:true}
             }
             if (x.state.waiting){
-                return '<div class="h-4 w-4 mr-2 bg-orange-300 dark:bg-orange-500 rounded-sm"></div>'
+                let status = 'waiting'
+                let tip = `<div><div class="flex text-xs justify-center"><div class="pr-2">${x.name}</div><div class="text-orange-600 dark:text-orange-400">${status}</div></div>
+<table class="border-separate border-spacing-1">
+<tr class="text-xs"><td>Reason</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">${x.state.waiting.reason}</td></tr>
+<tr class="text-xs"><td>Message</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">${x.state.waiting.message}</td></tr>
+</table></div>`
+                let content = '<div class="h-4 w-4 bg-orange-300 dark:bg-orange-500 rounded-sm"></div>';
+                return {content: content, tip: tip, tooltip: true}
             }
             if (x.state.terminated){
-                return '<div class="h-4 w-4 mr-2 bg-gray-300 dark:bg-zinc-600 rounded-sm"></div>'
+                let status = 'terminated';
+                let tip = `<div><div class="flex text-xs justify-center"><div class="pr-2">${x.name}</div><div class="text-red-600 dark:text-red-400">${status}</div></div>
+<table class="border-separate border-spacing-1">
+<tr class="text-xs"><td>Reason</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">${x.state.terminated.reason}</td></tr>
+<tr class="text-xs"><td>Exit code</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">${x.state.terminated.exitCode}</td></tr>
+<tr class="text-xs"><td>Started At</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">${x.state.terminated.startedAt}</td></tr>
+<tr class="text-xs"><td>Finished At</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">${x.state.terminated.finishedAt}</td></tr>
+<tr class="text-xs"><td>Container ID</td><td class="text-gray-600 dark:text-gray-400 w-64 break-all">${x.state.terminated.containerID}</td></tr>
+</table>
+</div>`
+                let content = '<div class="h-4 w-4 bg-gray-300 dark:bg-zinc-600 rounded-sm"></div>';
+                return {content: content, tip: tip, tooltip: true}
             }
-        }).join('');
+        });
         
-        return { content:result, classes: 'flex py-0.5' };
+        return { items:result, classes: 'flex py-0.5' };
     }
 
     function formatPodAge(row){
@@ -109,7 +135,7 @@
                 columns:[
                     { header:"Name", name:"metadata.name", classes: "truncate grow shrink 2xl:w-[41rem] xl:w-[22rem] lg:w-[16rem]"},
                     { header:"Namespace", name:"metadata.namespace", formatter:formatNamespace, namespace: true, classes:"truncate 2xl:w-52 xl:w-44 lg:w-32" },
-                    { header:"Containers", name:"status.containerStatuses", formatter:formatContainers, canSort:false, raw:true, canFilter:false, classes:"2xl:w-52 xl:w-44 lg:w-32"},
+                    { header:"Containers", name:"status.containerStatuses", formatter:formatContainers, canSort:false, lights:true, canFilter:false, classes:"2xl:w-52 xl:w-44 lg:w-32"},
                     { header:"Restarts", name:"status.containerStatuses", formatter:formatRestarts, classes:"w-40" },
                     { header:"Age", name:"metadata.creationTimestamp", formatter:formatPodAge, classes:"w-40" },
                     { header:"Status", name:"status.phase", formatter:formatStatus, canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-40" },
