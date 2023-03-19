@@ -41,9 +41,13 @@
         for (let i = 0; i < rules.length; i++) {
             let paths = rules[i].http.paths
             for (let j = 0; j < paths.length; j++) {
-                i === 0 ? content += '<div>https://' + rules[i].host + paths[j].path + '</div>' : content += '<div>' + paths[j].path + '</div>';
-                content += '<div class="mx-2"> -> </div>'
-                content += '<div>' + paths[j].backend.service.name + ':' + paths[j].backend.service.port.number + '</div>' ;
+                if (i === 0){
+                    content += `<div class="underline text-blue-500"><a target="_blank" href="https://${rules[i].host + paths[j].path}">https://${rules[i].host + paths[j].path}</a></div>`
+                } else {
+                    content += `<div>${paths[j].path}</div>`;    
+                }
+                
+                content += `<div class="mx-2"> -> </div><div>${paths[j].backend.service.name + ':' + paths[j].backend.service.port.number}</div>`;
             }
         }
         
