@@ -22,9 +22,6 @@
     
   components["tooltip"] = {
     template: "#tooltip",
-      data() {
-        return {}
-      },
       methods:{
         async onHover(e){
           computePosition(this.$refs.referenceRef, this.$refs.floatingRef, {
