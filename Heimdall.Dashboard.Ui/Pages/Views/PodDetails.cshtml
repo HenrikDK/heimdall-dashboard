@@ -1,4 +1,4 @@
-﻿<template id="pod-details">
+<template id="pod-details">
     <div class="pl-2 pr-4 w-100">
         <div class="flex my-2 items-center">
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pods</span>
@@ -43,25 +43,12 @@
             podMemoryUsage: () => podMemory(),
         },
         methods: {
-            updatePods(){
-                if (!this.clusterPods) return;
-                
-                let result = [...this.clusterPods];
-                                
-                if (this.filters?.length){
-                    result = result.filter(x => filterName(x, this.filters))
-                }
-                
-                this.pods = result;
-            }
         },
         watch: {
         },
         async mounted() {
             var host = window.location.origin;
             
-            streamMetrics(host + '/k8s/apis/metrics.k8s.io/v1beta1/namespaces/{namespace}/pods/{name}', j => this.metrics = j);
-            streamResults(host + '/k8s/api/v1/namespaces/{namespace}/pods/{name}', j => this.details = j);
         },
     };
     
