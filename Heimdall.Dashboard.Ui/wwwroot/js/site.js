@@ -42,3 +42,28 @@
     
     return result += Math.abs(dur.values.seconds) + "s"
 }
+
+function toHumanValues(dur) {
+    let result = [];
+    if (dur.values.years && Math.abs(dur.values.years) > 0)
+    {
+        result.push(Math.abs(dur.values.years) + "y");
+    }
+
+    if (dur.values.days && Math.abs(dur.values.days) > 0)
+    {
+        result.push(Math.abs(dur.values.days) + "d");
+    }
+
+    if (dur.values.hours && Math.abs(dur.values.hours) > 0)
+    {
+        result.push(Math.abs(dur.values.hours) + "h");
+    }
+
+    if (dur.values.minutes && Math.abs(dur.values.minutes) > 0)
+    {
+        result.push(Math.abs(dur.values.minutes) + "m");
+    }
+
+    return result
+}
