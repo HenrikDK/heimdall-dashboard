@@ -3,7 +3,6 @@
 @tailwind utilities;
 
 a, a:visited {
-    color: #326ce5;
     text-decoration: none;
 }
 
