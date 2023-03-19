@@ -1,20 +1,22 @@
 <template id="lights-column">
-  <div class="px-4 flex" :class="classes">
+  <div class="px-4 pt-2 flex" :class="classes">
     <template v-for="item in items">
-      <template v-if="item.tooltip">
-        <tooltip :placement="placement">
-          <template v-slot:cell>
-            <div v-html="item.content"></div>
-          </template>
+      <div class="mr-2">
+        <template v-if="item.tooltip">
+          <tooltip :placement="placement">
+            <template v-slot:cell>
+              <div v-html="item.content"></div>
+            </template>
 
-          <template v-slot:tooltip>
-            <div :v-html="item.tip"></div>
-          </template>
-        </tooltip>
-      </template>
-      <template v-else>
-        <div v-html="item.content"></div>        
-      </template>
+            <template v-slot:tooltip>
+              <div v-html="item.tip"></div>
+            </template>
+          </tooltip>
+        </template>
+        <template v-else>
+          <div v-html="item.content"></div>
+        </template>
+      </div>
     </template>
   </div>
 </template>
@@ -24,7 +26,7 @@
     template: "#lights-column",
       props: {
         classes: String,
-        conditions: Array,
+        items: Array,
         placement: {
           type: String,
           default: 'bottom'
