@@ -1,7 +1,7 @@
-<template id="pod-details">
+﻿<template id="pod-details">
     <div class="pl-2 pr-4 w-100">
         <div class="flex my-2 items-center">
-            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pods</span>
+            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pod Details</span>
         </div>
         
         <br/>
@@ -52,7 +52,7 @@
         },
     };
     
-    routes.push({path:'/pods/{:name}/details', name:'pod-details', component: components["pod-details"]})    
+    routes.push({path:'/namespaces/:namespace/pods/:name/details', name:'pod-details', component: components["pod-details"]})    
 </script>
 
 <style>
