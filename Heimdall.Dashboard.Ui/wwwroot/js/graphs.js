@@ -359,3 +359,252 @@ function workloadsReady(ready = 0, waiting = 1){
     };
     return workloads_ready;
 }
+
+function workload(type = 'Unknown', running = 0, pending = 0){
+    let data = [];
+    let active = false;
+    
+    if (running > 0 || pending > 0){
+        let runningName = running > 0 ? 'Running': '';
+        let pendingName = pending > 0 ? 'Pending': '';
+        data = [
+            { value: 0, name: '', percentage: 0 },
+            { value: running, name: runningName, percentage: running/(running + pending) },
+            { value: pending, name: pendingName, percentage: pending/(running + pending) }
+        ];
+        
+        active = true;
+    }
+    
+    var graph = {
+        tooltip: {
+            trigger: 'item',
+            formatter: function (params){
+                return res = params.name + " : " + Math.round(params.percent) + '% </br>';
+            }
+        },
+        title: {
+            text: `${type} (${running + pending})`,
+            left: 'center',
+        },
+        backgroundColor: '',
+        legend: {
+            top: '78%',
+            left: 'center',
+            show: active,
+            formatter: formatter = function (name) {
+                let value = data
+                    .filter((a) => a.name === name)
+                    .map((a) => a.value)[0];
+                return `${name}  ${value}`;
+            },
+            itemGap: 20,
+            selectedMode: false,
+            orient: 'vertical',
+        },
+        series: [
+            {
+                top: '-15%',
+                name: 'Pods',
+                type: 'pie',
+                animationDuration: 300,
+                radius: ['65%', '80%'],
+                label: {
+                    show: false,
+                },
+                emptyCircleStyle:{ opacity: 0.2 },
+                data: data
+            },
+        ]
+    };
+
+    return graph
+}
+
+function historic(){
+    const colors = ['#5470C6', '#91CC75', '#EE6666'];
+    option = {
+        color: colors,
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross'
+            }
+        },
+        backgroundColor: '',
+        grid: {
+            left: '5%',
+            right: '5%',
+            top: '7%',
+            bottom: '5%',
+        },
+        legend: {
+            data: ['CPU', 'Memory']
+        },
+        xAxis: [
+            {
+                type: 'category',
+                boundaryGap: false,
+                axisTick: {
+                    alignWithLabel: true
+                },
+                data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value',
+                name: 'Memory',
+                position: 'right',
+                alignTicks: true,
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: colors[1]
+                    }
+                },
+                axisLabel: {
+                    formatter: '{value} GiB'
+                }
+            },
+            {
+                type: 'value',
+                name: 'CPU (vCores)',
+                position: 'left',
+                alignTicks: true,
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: colors[0]
+                    }
+                },
+                axisLabel: {
+                    formatter: '{value}'
+                }
+            }
+        ],
+        series: [
+            {
+                name: 'CPU',
+                type: 'line',
+                animationDuration: 300,
+                yAxisIndex: 1,
+                data: [2.0, 2.2, 3.3, 4.5, 6.3, 10.2, 20.3, 23.4, 23.0, 16.5, 12.0, 6.2]
+            },
+            {
+                name: 'Memory',
+                type: 'line',
+                animationDuration: 300,
+                data: [
+                    2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 150.6, 170.0, 96.4, 83.3
+                ]
+            }
+        ]
+    };
+    return option;
+}
+
+function current(type = ''){
+    let usage = []
+    let requests = []
+    let limits = []
+
+    usage = [
+        { value: 40, name: 'Usage', formatted: '15.5 vCores' },
+        { value: 60, name: '', emphasis :{disabled:true}, itemStyle: { color: 'lightgray', opacity:0.2 } },
+    ]
+
+    requests = [
+        { value: 64, name: 'Requests', formatted: '29 vCores' },
+        { value: 37, name: '', emphasis :{disabled:true}, itemStyle: { color: 'lightgray', opacity:0.2 } },
+    ]
+
+    limits = [
+        { value: 95, name: 'Limits', formatted: '55 vCores' },
+        { value: 5, name: '', emphasis :{disabled:true}, itemStyle: { color: 'lightgray', opacity:0.2 } }
+    ];
+
+    let data = [...limits, ...requests, ...usage];
+
+    option = {
+        title: {
+            text: type,
+            left: 'center',
+        },
+        tooltip: {
+            trigger: 'item',
+            formatter: function (params){
+                if (params.name){
+                    return res = params.name + " : " + Math.round(params.percent) + '% </br>';
+                }
+                return ''
+            }
+        },
+        grid: {
+            left: '5%',
+            right: '5%',
+            top: '7%',
+            bottom: '5%',
+        },        
+        backgroundColor: '',
+        legend: {
+            top:'75%',
+            data: [
+                'Requests',
+                'Limits',
+                'Usage',
+            ],
+            formatter: formatter = function (name) {
+                let value = data
+                    .filter((a) => a.name === name)
+                    .map((a) => a.formatted)[0];
+                return `${name}:  ${value}`;
+            },
+            left: 'center',
+            show: true,
+            selectedMode: false,
+            itemGap: 10,
+            orient: 'vertical',
+        },
+        series: [
+            {
+                top: '-15%',
+                name: type,
+                type: 'pie',
+                animationDuration: 300,
+                radius: ['50%', '60%'],
+                label: {
+                    show: false,
+                },
+                emptyCircleStyle:{ opacity: 0.2 },
+                data: limits
+            },
+            {
+                top: '-15%',
+                name: type,
+                type: 'pie',
+                animationDuration: 300,
+                radius: ['65%', '75%'],
+                label: {
+                    show: false,
+                },
+                emptyCircleStyle:{ opacity: 0.2 },
+                data: requests
+            },
+            {
+                top: '-15%',
+                name: type,
+                type: 'pie',
+                animationDuration: 300,
+                radius: ['80%', '90%'],
+                label: {
+                    show: false,
+                },
+                emptyCircleStyle:{ opacity: 0.2 },
+                data: usage
+            }
+        ]
+    };
+    
+    return option;
+}

@@ -11,6 +11,9 @@
 </template>
 
 <script type="module">
+    function formatNamespace(row){
+        return { namespace: row.metadata.namespace, classes: "truncate 2xl:w-52 xl:w-44 lg:w-32", placement:"right" }
+    }
 
    function formatKubeDns(row){
         let dns = row.metadata.name + '.' + row.metadata.namespace + ':' + row.spec.ports[0].port
@@ -56,7 +59,7 @@
                 columns: [
                     {header:"Type", name:"spec.type", canSort: false, classes:"truncate 2xl:w-48 xl:w-40 lg:w-32"},
                     {header:"Name", name:"metadata.name", classes:"truncate 2xl:w-64 xl:w-52 lg:w-40"},
-                    {header:"Namespace", name:"metadata.namespace", classes:"truncate 2xl:w-64 xl:w-52 lg:w-40"},
+                    {header:"Namespace", name:"metadata.namespace", formatter:formatNamespace, namespace:true, classes:"truncate 2xl:w-52 xl:w-44 lg:w-40"},
                     {header:"Kube-DNS", name:"kubeDNS", formatter:formatKubeDns, classes: 'truncate grow shrink'},
                     {header:"Age", name:"age", formatter:formatServiceAge, sorter:"text", classes:"w-40"},                    
                 ],

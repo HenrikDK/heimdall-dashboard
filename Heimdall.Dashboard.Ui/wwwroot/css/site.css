@@ -12,6 +12,16 @@ a, a:visited {
     height: 18rem;
 }
 
+.large-graph{
+    width: 16rem;
+    height: 26rem;
+}
+
+.wide-graph{
+    width: 64rem;
+    height: 26rem;
+}
+
 .cursor-resize
 {
     cursor: col-resize;   

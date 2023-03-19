@@ -14,12 +14,15 @@
     <partial name="Buttons/Pods"/>
     <partial name="Buttons/Services"/>
     
-    <partial name="Components/Tooltip"/>
+    <partial name="Components/ConditionsColumn" />
+    <partial name="Components/LightsColumn"/>
     <partial name="Components/MainMenu"/>
     <partial name="Components/MultiSelect"/>
+    <partial name="Components/NamespaceColumn"/>
     <partial name="Components/NavBar"/>
     <partial name="Components/SearchInput"/>
     <partial name="Components/Spinner"/>
+    <partial name="Components/Tooltip"/>
     <partial name="Components/VueTable"/>
     
     <partial name="Views/Cluster"/>
@@ -35,7 +38,6 @@
 
 @section Scripts
 {
-    <script src="~/js/cluster-graphs.js" asp-append-version="true"></script>
 }
 
 <nav-bar @@select-ns="(n) => namespaces = n" @@filters="(f) => filters = f" @@search="(s) => search = s"></nav-bar>

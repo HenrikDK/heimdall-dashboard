@@ -10,6 +10,10 @@
 </template>
 
 <script type="module">
+    function formatNamespace(row){
+        return { namespace: row.metadata.namespace, classes: "truncate 2xl:w-52 xl:w-44 lg:w-32", placement:"right" }
+    }
+    
     function formatLoadBalancer(row){
         let content = '';
         if (row.status.loadBalancer.ingress){
@@ -37,9 +41,13 @@
         for (let i = 0; i < rules.length; i++) {
             let paths = rules[i].http.paths
             for (let j = 0; j < paths.length; j++) {
-                i === 0 ? content += '<div>https://' + rules[i].host + paths[j].path + '</div>' : content += '<div>' + paths[j].path + '</div>';
-                content += '<div class="mx-2"> -> </div>'
-                content += '<div>' + paths[j].backend.service.name + ':' + paths[j].backend.service.port.number + '</div>' ;
+                if (i === 0){
+                    content += `<div class="underline text-blue-500"><a target="_blank" href="https://${rules[i].host + paths[j].path}">https://${rules[i].host + paths[j].path}</a></div>`
+                } else {
+                    content += `<div>${paths[j].path}</div>`;    
+                }
+                
+                content += `<div class="mx-2"> -> </div><div>${paths[j].backend.service.name + ':' + paths[j].backend.service.port.number}</div>`;
             }
         }
         
@@ -78,12 +86,12 @@
                     {header:'Name', sort:'desc'}
                 ],
                 columns:[
-                    { header: 'Name', name: 'metadata.name', canSort: true, classes:'truncate 2xl:w-64 xl:w-44 lg:w-32' },
-                    { header: 'Namespace', name: 'metadata.namespace', canSort: true, classes:'2xl:w-64 xl:w-44 lg:w-32'},
+                    { header: 'Name', name: 'metadata.name', classes:'truncate 2xl:w-64 xl:w-44 lg:w-32' },
+                    { header: 'Namespace', name: 'metadata.namespace', formatter:formatNamespace, namespace:true, classes:'2xl:w-52 xl:w-44 lg:w-32'},
                     { header: 'Type', name: 'spec.ingressClassName', canSort: false, classes:'2xl:w-40 xl:w-30 lg:w-24' },
-                    { header: 'LoadBalancers', name: 'status', formatter:formatLoadBalancer, canSort: true, classes:'truncate w-44' },
-                    { header: 'Host', name: 'spec.rules', formatter:formatHosts, raw:true, canSort: true, classes:'truncate grow shrink 2xl:w-64 xl:w-44 lg:w-32' },
-                    { header:"Age", name:"metadata.creationTimestamp", formatter:formatIngressAge, canSort: true, classes:"w-40" }
+                    { header: 'LoadBalancers', name: 'status', formatter:formatLoadBalancer, classes:'truncate w-44' },
+                    { header: 'Host', name: 'spec.rules', formatter:formatHosts, raw:true, classes:'truncate grow shrink 2xl:w-64 xl:w-44 lg:w-32' },
+                    { header:"Age", name:"metadata.creationTimestamp", formatter:formatIngressAge, classes:"w-40" }
                 ],
                 clusterIngresses: null,
             }
