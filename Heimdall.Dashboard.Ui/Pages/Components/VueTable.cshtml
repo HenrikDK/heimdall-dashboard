@@ -35,59 +35,61 @@
       </div>
       <div class="overflow-y-scroll h-[82.5vh] text-sm text-gray-700 dark:text-gray-400 flex flex-col w-full dark:divide-zinc-700 dark:[color-scheme:dark]"> <!-- body -->
         <template v-for="row in rows">
-          <div v-if="!row?.filtered && !row?.nsFiltered"
-               class="flex w-full hover:bg-blue-100 dark:hover:bg-zinc-700">
-            <template v-for="column in columns">
-              <template v-if="column.formatter == undefined">
-                <div class="px-4 py-2" :class="column.classes">
-                  {{ getRowValue(row, column.name) }}
-                </div>
-              </template>
-              <template v-else v-for="scope in [column.formatter(row)]">
-                <template v-if="column.tooltip">
-                  <tooltip :placement="scope.tooltip.placement" :padding="scope.cell.padding">
-                    <template v-slot:cell>
-                      <template v-if="scope.cell.raw">
-                        <div v-html="scope.cell.content" :class="scope.cell.classes"></div>
-                      </template>
-                      <template v-else>
-                        <div  :class="scope.cell.classes">{{ scope.cell.content }}</div>
-                      </template>
-                    </template>
-                    <template v-slot:tooltip>
-                      <template v-if="scope.tooltip.raw">
-                        <div v-html="scope.tooltip.content" :class="scope.tooltip.classes"></div>
-                      </template>
-                      <template v-else>
-                        <div :class="scope.tooltip.classes">{{ scope.tooltip.content }}</div>
-                      </template>
-                    </template>
-                  </tooltip>
-                </template>
-                <template v-else-if="column.namespace">
-                  <ns-column :namespace="scope.namespace" :classes="scope.classes" :placement="scope.placement"></ns-column>
-                </template>
-                <template v-else-if="column.conditions">
-                  <conditions-column :conditions="scope.conditions" :classes="column.classes" :placement="scope.placement"></conditions-column>
-                </template>
-                <template v-else-if="column.lights">
-                  <lights-column :items="scope.items" :classes="column.classes" :placement="scope.placement"></lights-column>
-                </template>
-                <template v-else-if="column.raw">
+          <optional-link :row="row">
+            <div v-if="!row?.filtered && !row?.nsFiltered"
+                 class="flex w-full hover:bg-blue-100 dark:hover:bg-zinc-700">
+              <template v-for="column in columns">
+                <template v-if="column.formatter == undefined">
                   <div class="px-4 py-2" :class="column.classes">
-                    <div v-html="scope.content" :class="scope.classes"></div>
+                    {{ getRowValue(row, column.name) }}
                   </div>
                 </template>
-                <template v-else>
-                  <div class="px-4 py-2" :class="column.classes">
-                    <div :class="scope.classes">
-                      {{ scope.content }}
+                <template v-else v-for="scope in [column.formatter(row)]">
+                  <template v-if="column.tooltip">
+                    <tooltip :placement="scope.tooltip.placement" :padding="scope.cell.padding">
+                      <template v-slot:cell>
+                        <template v-if="scope.cell.raw">
+                          <div v-html="scope.cell.content" :class="scope.cell.classes"></div>
+                        </template>
+                        <template v-else>
+                          <div :class="scope.cell.classes">{{ scope.cell.content }}</div>
+                        </template>
+                      </template>
+                      <template v-slot:tooltip>
+                        <template v-if="scope.tooltip.raw">
+                          <div v-html="scope.tooltip.content" :class="scope.tooltip.classes"></div>
+                        </template>
+                        <template v-else>
+                          <div :class="scope.tooltip.classes">{{ scope.tooltip.content }}</div>
+                        </template>
+                      </template>
+                    </tooltip>
+                  </template>
+                  <template v-else-if="column.namespace">
+                    <ns-column :namespace="scope.namespace" :classes="scope.classes" :placement="scope.placement"></ns-column>
+                  </template>
+                  <template v-else-if="column.conditions">
+                    <conditions-column :conditions="scope.conditions" :classes="column.classes" :placement="scope.placement"></conditions-column>
+                  </template>
+                  <template v-else-if="column.lights">
+                    <lights-column :items="scope.items" :classes="column.classes" :placement="scope.placement"></lights-column>
+                  </template>
+                  <template v-else-if="column.raw">
+                    <div class="px-4 py-2" :class="column.classes">
+                      <div v-html="scope.content" :class="scope.classes"></div>
                     </div>
-                  </div>
+                  </template>
+                  <template v-else>
+                    <div class="px-4 py-2" :class="column.classes">
+                      <div :class="scope.classes">
+                        {{ scope.content }}
+                      </div>
+                    </div>
+                  </template>
                 </template>
               </template>
-            </template>
-          </div>
+            </div>
+          </optional-link>
         </template>
       </div>
     </div>
