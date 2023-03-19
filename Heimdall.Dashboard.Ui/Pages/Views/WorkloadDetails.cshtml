@@ -8,13 +8,10 @@
         
         <div class="flex justify-around mb-4 mt-1">
             <div class="graph">
+                <v-chart :option="workloadsAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+            </div>
+            <div class="graph">
                 <v-chart :option="podsAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
-            </div>
-            <div class="graph">
-                <v-chart :option="podCpuUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
-            </div>
-            <div class="graph">
-                <v-chart :option="podMemoryUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
         </div>
         
@@ -38,9 +35,8 @@
         },
         props: ['namespaces', 'search', 'filters'],        
         computed: {
+            workloadsAvailable: () => workloadsReady(),
             podsAvailable: () => podReady(),
-            podCpuUsage: () => podCpu(),
-            podMemoryUsage: () => podMemory(),
         },
         methods: {
         },
