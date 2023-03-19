@@ -4,25 +4,8 @@
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pods</span>
         </div>
         
-        <template v-if="pods && pods.length > 0">
-            <vue-table :columns="columns" :initial-sort="sorting" :data="pods" :namespaces="namespaces" :search="search"></vue-table>
-        </template>
+        <vue-table :columns="columns" :initial-sort="sorting" :data="pods" :namespaces="namespaces" :search="search"></vue-table>
         
-        <br/>
-        
-        <div class="flex justify-around mb-4 mt-1">
-            <div class="graph">
-                <v-chart :option="podsAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
-            </div>
-            <div class="graph">
-                <v-chart :option="podCpuUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
-            </div>
-            <div class="graph">
-                <v-chart :option="podMemoryUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
-            </div>
-        </div>
-        
-        <br/><br/>
     </div>
 </template>
 
@@ -148,9 +131,6 @@
         },
         props: ['namespaces', 'search', 'filters'],        
         computed: {
-            podsAvailable: () => podReady(),
-            podCpuUsage: () => podCpu(),
-            podMemoryUsage: () => podMemory(),
         },
         methods: {
             updatePods(){

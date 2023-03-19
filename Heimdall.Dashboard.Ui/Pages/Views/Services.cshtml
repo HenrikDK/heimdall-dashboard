@@ -4,9 +4,8 @@
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Services</span>
         </div>
         
-        <template v-if="services && services.length > 0">
-            <vue-table :columns="columns" :initial-sort="sorting" :data="services" :namespaces="namespaces" :search="search"></vue-table>
-        </template>
+        <vue-table :columns="columns" :initial-sort="sorting" :data="services" :namespaces="namespaces" :search="search"></vue-table>
+        
     </div>
 </template>
 
