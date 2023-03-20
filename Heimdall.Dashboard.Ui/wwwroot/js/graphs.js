@@ -454,7 +454,7 @@ function historic(){
         yAxis: [
             {
                 type: 'value',
-                name: 'Memory',
+                name: 'Memory GiB',
                 position: 'right',
                 alignTicks: true,
                 axisLine: {
@@ -464,7 +464,7 @@ function historic(){
                     }
                 },
                 axisLabel: {
-                    formatter: '{value} GiB'
+                    formatter: '{value}'
                 }
             },
             {
@@ -603,6 +603,130 @@ function current(type = ''){
                 emptyCircleStyle:{ opacity: 0.2 },
                 data: usage
             }
+        ]
+    };
+    
+    return option;
+}
+
+function historicCpu(){
+    option = {
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross'
+            }
+        },
+        yAxis: {
+            type: 'value',
+            name: 'CPU (vCores)',
+            position: 'right',
+            axisLine: {
+                show: true,
+            },
+        },
+        backgroundColor: '',
+        grid: {
+            left: '7%',
+            right: '10%',
+            top: '10%',
+            bottom: '7%',
+        },
+        series: [
+            {
+                name: 'Limit',
+                z: '-1',
+                data: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
+                type: 'line',
+                color: 'lightgray',
+                emphasis :{
+                    disabled: true
+                },
+                opacity: 0.2,
+                lineStyle: {
+                    color: 'lightgray'
+                },
+                areaStyle: {
+                    opacity: 0.2,
+                    color: 'lightgray'
+                }
+            },
+            {
+                name: 'CPU',
+                z: '10',
+                data: [0.82, 0.932, 0.901, 0.934, 1.290, 1.330, 1.320],
+                type: 'line',
+                areaStyle: {}
+            },
+        ]
+    };
+    return option;
+}
+
+function historicMemory(){
+    option = {
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross'
+            }
+        },
+        yAxis: {
+            type: 'value',
+            name: 'Memory (GiB)',
+            position: 'right',
+            axisLine: {
+                show: true,
+            },
+        },
+        backgroundColor: '',
+        grid: {
+            left: '7%',
+            right: '10%',
+            top: '10%',
+            bottom: '7%',
+        },
+        series: [
+            {
+                name: 'Limit',
+                z: '-1',
+                data: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
+                type: 'line',
+                color: 'lightgray',
+                emphasis :{
+                    disabled: true
+                },
+                opacity: 0.2,
+                lineStyle: {
+                    color: 'lightgray'
+                },
+                areaStyle: {
+                    opacity: 0.2,
+                    color: 'lightgray'
+                }
+            },
+            {
+                name:'',
+                type: 'line',
+                data: [],
+            },
+            {
+                name: 'Memory',
+                z: '10',
+                data: [0.82, 0.932, 0.901, 0.934, 1.290, 1.330, 1.320],
+                type: 'line',
+                areaStyle: {}
+            },
         ]
     };
     
