@@ -1,180 +1,180 @@
-<template id="pod-details">
+﻿<template id="pod-details">
     <div class="pl-2 pr-4 max-w-5xl mx-auto">
-        <br/>
-        
-        <div class="flex my-2 items-center">
-            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pod / {{pod?.metadata?.namespace }} / {{ pod?.metadata?.name }}</span>
-        </div>
-        
-        <div class="flex justify-around mb-4 mt-1">
-            <div class="graph">
-                <v-chart :option="podsAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
-            </div>
-            <div class="graph">
-                <v-chart :option="podCpuUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
-            </div>
-            <div class="graph">
-                <v-chart :option="podMemoryUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
-            </div>
-        </div>
+    
+    <br/>
 
-        <br/>
+    <div class="flex my-2 items-center">
+        <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pod / {{pod?.metadata?.namespace }} / {{ pod?.metadata?.name }}</span>
+    </div>
+    
+    <div class="flex justify-around mb-4 mt-1">
+        <div class="wide-details-graph">
+            <v-chart :option="podCpu" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+        </div>
+        
+        <div class="wide-details-graph">
+             <v-chart :option="podMemory" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+        </div>
+    </div>
 
-        <div class="text-gray-500 dark:text-gray-300 text-md font-light sans">
-            <div class="flex mb-2">
-                <div class="px-2 py-1 w-1/4">Created</div>
-                <div>{{ toLocal(pod?.metadata?.creationTimestamp) }} ({{ toHuman(pod?.metadata?.creationTimestamp) }})</div>
-            </div>
-            <div class="flex mb-2">
-                <div class="px-2 py-1 w-1/4">Name</div>
-                <div class="py-1">{{ pod?.metadata?.name }}</div>
-            </div>
-            <div class="flex mb-2">
-                <div class="px-2 py-1 w-1/4">Namespace</div>
-                <div class="py-1">{{ pod?.metadata?.namespace }}</div>
-            </div>
-            <div v-if="pod?.metadata?.labels" class="flex mb-2">
-                <div class="px-2 py-1 w-1/4">Labels</div>
-                <div class="flex w-3/4 flex-wrap truncate">
-                    <template v-for="(v, k) in pod?.metadata?.labels">
-                        <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ k }}: {{v}}</div>
-                    </template>
-                </div>
-            </div>
-            <div v-if="pod?.metadata?.annotations" class="flex mb-2">
-                <div class="px-2 py-1 w-1/4">Annotations</div>
-                <div class="flex w-3/4 flex-wrap truncate">
-                    <template v-for="(v, k) in pod?.metadata?.annotations">
-                        <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ k }}: {{v}}</div>
-                    </template>
-                </div>
-            </div>
-            <div class="flex mb-2">
-                <div class="px-2 py-1 w-1/4">Controlled by</div>
-                <div class="flex w-3/4 flex-wrap truncate">
-                    <template v-for="owner in pod?.metadata?.ownerReferences">
-                        <div class="py-1 flex">
-                            <div class="pr-2">{{ owner.kind }}:</div>
-                            <div class="text-blue-500">{{ owner.name }}</div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-            <div class="flex mb-2">
-                <div class="px-2 py-1 w-1/4">Status</div>
-                <div class="py-1 text-green-500">{{ pod?.status?.phase }}</div>
-            </div>
-            <div class="flex mb-2">
-                <div class="px-2 py-1 w-1/4">Node</div>
-                <div class="py-1 text-blue-500">{{ pod?.spec?.nodeName }}</div>
-            </div>
-            <div class="flex mb-2">
-                <div class="px-2 py-1 w-1/4">Pod Ips</div>
-                <div class="flex w-3/4 flex-wrap truncate">
-                    <template v-for="p in pod?.status?.podIPs">
-                        <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ p.ip }}</div>
-                    </template>
-                </div>
-            </div>            
-            <div v-if="pod?.spec?.priorityClassName" class="flex mb-2">
-                <div class="px-2 py-1 w-1/4">Priority Class</div>
-                <div class="py-1 text-blue-500">{{ pod?.spec?.priorityClassName }}</div>
-            </div>
-            <div class="flex mb-2">
-                <div class="px-2 py-1 w-1/4">QoS Class</div>
-                <div class="py-1 text-blue-500">{{ pod?.status?.qosClass }}</div>
-            </div>
-            <div class="flex mb-2">
-                <div class="px-2 py-1 w-1/4">Conditions</div>
-                <div class="flex w-3/4 flex-wrap truncate">
-                    <template v-for="s in pod?.status?.conditions">
-                        <div v-if="s.status === 'True'"
-                             class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden"
-                        >{{s.type}}</div>
-                        <div v-else
-                             class="text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-zinc-900 rounded py-1 px-2 mr-2 mb-2 overflow-hidden"
-                        >{{s.type}}</div>
-                    </template>
-                </div>
-            </div>
-        </div>
+    <br/>
 
-        <div class="flex my-4 items-center">
-            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Containers</span>
+    <div class="text-gray-500 dark:text-gray-300 text-md font-light sans">
+        <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Created</div>
+            <div>{{ toLocal(pod?.metadata?.creationTimestamp) }} ({{ toHuman(pod?.metadata?.creationTimestamp) }})</div>
         </div>
+        <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Name</div>
+            <div class="py-1">{{ pod?.metadata?.name }}</div>
+        </div>
+        <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Namespace</div>
+            <div class="py-1">{{ pod?.metadata?.namespace }}</div>
+        </div>
+        <div v-if="pod?.metadata?.labels" class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Labels</div>
+            <div class="flex w-3/4 flex-wrap truncate">
+                <template v-for="(v, k) in pod?.metadata?.labels">
+                    <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ k }}: {{v}}</div>
+                </template>
+            </div>
+        </div>
+        <div v-if="pod?.metadata?.annotations" class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Annotations</div>
+            <div class="flex w-3/4 flex-wrap truncate">
+                <template v-for="(v, k) in pod?.metadata?.annotations">
+                    <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ k }}: {{v}}</div>
+                </template>
+            </div>
+        </div>
+        <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Controlled by</div>
+            <div class="flex w-3/4 flex-wrap truncate">
+                <template v-for="owner in pod?.metadata?.ownerReferences">
+                    <div class="py-1 flex">
+                        <div class="pr-2">{{ owner.kind }}:</div>
+                        <div class="text-blue-500">{{ owner.name }}</div>
+                    </div>
+                </template>
+            </div>
+        </div>
+        <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Status</div>
+            <div class="py-1 text-green-500">{{ pod?.status?.phase }}</div>
+        </div>
+        <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Node</div>
+            <div class="py-1 text-blue-500">{{ pod?.spec?.nodeName }}</div>
+        </div>
+        <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Pod Ips</div>
+            <div class="flex w-3/4 flex-wrap truncate">
+                <template v-for="p in pod?.status?.podIPs">
+                    <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ p.ip }}</div>
+                </template>
+            </div>
+        </div>            
+        <div v-if="pod?.spec?.priorityClassName" class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Priority Class</div>
+            <div class="py-1 text-blue-500">{{ pod?.spec?.priorityClassName }}</div>
+        </div>
+        <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">QoS Class</div>
+            <div class="py-1 text-blue-500">{{ pod?.status?.qosClass }}</div>
+        </div>
+        <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Conditions</div>
+            <div class="flex w-3/4 flex-wrap truncate">
+                <template v-for="s in pod?.status?.conditions">
+                    <div v-if="s.status === 'True'"
+                         class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden"
+                    >{{s.type}}</div>
+                    <div v-else
+                         class="text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-zinc-900 rounded py-1 px-2 mr-2 mb-2 overflow-hidden"
+                    >{{s.type}}</div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex my-4 items-center">
+        <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Containers</span>
+    </div>
+    
         
-        <div class="text-gray-500 dark:text-gray-300 text-md font-light sans rounded-lg shadow-lg border border-gray-200 dark:border-zinc-800">
-            <template v-for="c in pod?.spec?.containers">
-                <div class="my-2">
-                    <div class="flex mb-2">
-                        <div class="px-2 py-1 w-1/4">Container</div>
-                        <div class="py-1">{{ c.name }}</div>
-                    </div>
-                    <div class="flex mb-2">
-                        <div class="px-2 py-1 w-1/4">Status</div>
-                        <div v-html="getContainerStatus(c.name, pod)"></div>
-                    </div>
-                    <div class="flex mb-2">
-                        <div class="px-2 py-1 w-1/4">Image</div>
-                        <div class="py-1 truncate">{{ c.image }}</div>
-                    </div>
-                    <div v-if="c.args" class="flex mb-2">
-                        <div class="px-2 py-1 w-1/4">Arguments</div>
-                        <div class="flex flex-wrap w-3/4 truncate">
-                            <template v-for="a in c.args">
-                                <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ a }}</div>
-                            </template>
-                        </div>
-                    </div>
-                    <div v-if="c.env" class="flex mb-2">
-                        <div class="px-2 py-1 w-1/4">Environment</div>
-                        <div class="flex flex-wrap w-3/4 truncate">
-                            <template v-for="e in c.env">
-                                <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ e.name }}: {{ e.value}}</div>
-                            </template>
-                        </div>
-                    </div>
-                    <div v-if="c.ports" class="flex mb-2">
-                        <div class="px-2 py-1 w-1/4">Ports</div>
-                        <div class="flex flex-wrap w-3/4 truncate">
-                            <template v-for="p in c.ports">
-                                <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ p.containerPort }}/{{ p.protocol}}</div>
-                            </template>
-                        </div>
-                    </div>
-                    <div class="flex mb-2">
-                        <div class="px-2 py-1 w-1/4">Last Status</div>
-                        <div class="py-1 w-3/4">
-                            <div v-for="s in getContainerStatusObjects(c.name, pod)">
-                                <div>Terminated</div>
-                                <div>Reason: {{ s.lastState.terminated.reason }} - Exit code: {{ s.lastState.terminated.exitCode }}</div>
-                                <div>Started At: {{ toLocal(s.lastState.terminated.startedAt) }} ({{ toHuman(s.lastState.terminated.startedAt) }})</div>
-                                <div>Finished At: {{ toLocal(s.lastState.terminated.finishedAt) }} ({{ toHuman(s.lastState.terminated.finishedAt) }})</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div v-if="c.resources?.requests?.cpu" class="flex mb-2">
-                        <div class="px-2 py-1 w-1/4">Cpu Request</div>
-                        <div class="py-1">{{ c.resources?.requests?.cpu }}</div>
-                    </div>
-                    <div v-if="c.resources?.limits?.cpu" class="flex mb-2">
-                        <div class="px-2 py-1 w-1/4">Cpu Limit</div>
-                        <div class="py-1">{{ c.resources?.limits?.cpu }}</div>
-                    </div>
-                    <div v-if="c.resources?.requests?.memory" class="flex mb-2">
-                        <div class="px-2 py-1 w-1/4">Memory Request</div>
-                        <div class="py-1">{{ c.resources?.requests?.memory }}</div>
-                    </div>
-                    <div v-if="c.resources?.limits?.memory" class="flex mb-2">
-                        <div class="px-2 py-1 w-1/4">Memory Limit</div>
-                        <div class="py-1">{{ c.resources?.limits?.memory }}</div>
+    <div class="text-gray-500 dark:text-gray-300 text-md font-light sans rounded-lg shadow-lg border border-gray-200 dark:border-zinc-800">
+        <template v-for="c in pod?.spec?.containers">
+            <div class="my-2">
+                <div class="flex mb-2">
+                    <div class="px-2 py-1 w-1/4">Container</div>
+                    <div class="py-1">{{ c.name }}</div>
+                </div>
+                <div class="flex mb-2">
+                    <div class="px-2 py-1 w-1/4">Status</div>
+                    <div v-html="getContainerStatus(c.name, pod)"></div>
+                </div>
+                <div class="flex mb-2">
+                    <div class="px-2 py-1 w-1/4">Image</div>
+                    <div class="py-1 truncate">{{ c.image }}</div>
+                </div>
+                <div v-if="c.args" class="flex mb-2">
+                    <div class="px-2 py-1 w-1/4">Arguments</div>
+                    <div class="flex flex-wrap w-3/4 truncate">
+                        <template v-for="a in c.args">
+                            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ a }}</div>
+                        </template>
                     </div>
                 </div>
-            </template>
-        </div>
-        
-        <br/>
-        
+                <div v-if="c.env" class="flex mb-2">
+                    <div class="px-2 py-1 w-1/4">Environment</div>
+                    <div class="flex flex-wrap w-3/4 truncate">
+                        <template v-for="e in c.env">
+                            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ e.name }}: {{ e.value}}</div>
+                        </template>
+                    </div>
+                </div>
+                <div v-if="c.ports" class="flex mb-2">
+                    <div class="px-2 py-1 w-1/4">Ports</div>
+                    <div class="flex flex-wrap w-3/4 truncate">
+                        <template v-for="p in c.ports">
+                            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ p.containerPort }}/{{ p.protocol}}</div>
+                        </template>
+                    </div>
+                </div>
+                <div class="flex mb-2">
+                    <div class="px-2 py-1 w-1/4">Last Status</div>
+                    <div class="py-1 w-3/4">
+                        <div v-for="s in getContainerStatusObjects(c.name, pod)">
+                            <div>Terminated</div>
+                            <div>Reason: {{ s.lastState.terminated.reason }} - Exit code: {{ s.lastState.terminated.exitCode }}</div>
+                            <div>Started At: {{ toLocal(s.lastState.terminated.startedAt) }} ({{ toHuman(s.lastState.terminated.startedAt) }})</div>
+                            <div>Finished At: {{ toLocal(s.lastState.terminated.finishedAt) }} ({{ toHuman(s.lastState.terminated.finishedAt) }})</div>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="c.resources?.requests?.cpu" class="flex mb-2">
+                    <div class="px-2 py-1 w-1/4">Cpu Request</div>
+                    <div class="py-1">{{ c.resources?.requests?.cpu }}</div>
+                </div>
+                <div v-if="c.resources?.limits?.cpu" class="flex mb-2">
+                    <div class="px-2 py-1 w-1/4">Cpu Limit</div>
+                    <div class="py-1">{{ c.resources?.limits?.cpu }}</div>
+                </div>
+                <div v-if="c.resources?.requests?.memory" class="flex mb-2">
+                    <div class="px-2 py-1 w-1/4">Memory Request</div>
+                    <div class="py-1">{{ c.resources?.requests?.memory }}</div>
+                </div>
+                <div v-if="c.resources?.limits?.memory" class="flex mb-2">
+                    <div class="px-2 py-1 w-1/4">Memory Limit</div>
+                    <div class="py-1">{{ c.resources?.limits?.memory }}</div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <br/>
+
     <div v-if="events.length > 0" class="flex my-4 items-center">
         <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
     </div>
@@ -230,9 +230,8 @@
         },
         props: ['namespaces', 'search', 'filters'],        
         computed: {
-            podsAvailable: () => podReady(),
-            podCpuUsage: () => podCpu(),
-            podMemoryUsage: () => podMemory(),
+            podCpu: () => historicCpu(),
+            podMemory: () => historicMemory(),
         },
         methods: {
             getContainerStatusObjects(name, pod){
