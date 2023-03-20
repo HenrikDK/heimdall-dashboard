@@ -2,7 +2,7 @@
   <div :class="classes">
     <tooltip :placement="placement" padding="pl-4 py-2">
       <template v-slot:cell>
-        <div :onclick="`eventBus.emit('${namespace}')`" class="truncate underline text-blue-500">{{ namespace }}</div>
+        <div @@click="nsClick" class="truncate underline text-blue-500">{{ namespace }}</div>
       </template>
       
       <template v-slot:tooltip>
@@ -15,6 +15,15 @@
 <script type="module">
   components["ns-column"] = {
     template: "#ns-column",
+      methods:{
+        nsClick(event){
+          eventBus.emit(this.$props.namespace);
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+          return false
+        }
+      },
       props: {
         classes: String,
         namespace: String,
