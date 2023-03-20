@@ -16,6 +16,11 @@ a, a:visited {
     height: 26rem;
 }
 
+.wide-details-graph{
+    width: 30rem;
+    height: 18rem;
+}
+
 .wide-graph{
     width: 64rem;
     height: 26rem;
