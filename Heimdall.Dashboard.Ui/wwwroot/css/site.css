@@ -3,7 +3,6 @@
 @tailwind utilities;
 
 a, a:visited {
-    color: #326ce5;
     text-decoration: none;
 }
 
@@ -15,6 +14,11 @@ a, a:visited {
 .large-graph{
     width: 16rem;
     height: 26rem;
+}
+
+.wide-details-graph{
+    width: 30rem;
+    height: 18rem;
 }
 
 .wide-graph{

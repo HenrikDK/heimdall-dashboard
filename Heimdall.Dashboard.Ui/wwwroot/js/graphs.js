@@ -448,13 +448,13 @@ function historic(){
                 axisTick: {
                     alignWithLabel: true
                 },
-                data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                data: ['18:30', '18:40', '18:50', '19:00', '19:10', '19:20', '19:30', '19:40', '19:50', '20:00', '20:10', '20:20'],
             }
         ],
         yAxis: [
             {
                 type: 'value',
-                name: 'Memory',
+                name: 'Memory GiB',
                 position: 'right',
                 alignTicks: true,
                 axisLine: {
@@ -464,7 +464,7 @@ function historic(){
                     }
                 },
                 axisLabel: {
-                    formatter: '{value} GiB'
+                    formatter: '{value}'
                 }
             },
             {
@@ -603,6 +603,141 @@ function current(type = ''){
                 emptyCircleStyle:{ opacity: 0.2 },
                 data: usage
             }
+        ]
+    };
+    
+    return option;
+}
+
+function historicCpu(){
+    option = {
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: ['18:30', '18:40', '18:50', '19:00', '19:10', '19:20', '19:30']
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross'
+            }
+        },
+        yAxis: {
+            type: 'value',
+            name: 'CPU (vCores)',
+            position: 'right',
+            axisLine: {
+                show: true,
+            },
+        },
+        backgroundColor: '',
+        grid: {
+            left: '7%',
+            right: '10%',
+            top: '10%',
+            bottom: '7%',
+        },
+        series: [
+            {
+                name: 'Limit',
+                animationDuration: 300,
+                z: '-1',
+                data: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 2.5],
+                type: 'line',
+                color: 'lightgray',
+                emphasis :{
+                    disabled: true
+                },
+                opacity: 0.1,
+                lineStyle: {
+                    color: 'lightgray'
+                },
+                areaStyle: {
+                    opacity: 0.1,
+                    color: 'lightgray'
+                }
+            },
+            {
+                name: 'CPU',
+                animationDuration: 300,
+                z: '10',
+                data: [0.82, 0.932, 0.901, 0.934, 1.290, 1.330, 1.320],
+                type: 'line',
+                opacity: 0.4,
+                areaStyle: {
+                    opacity: 0.4,
+                }
+            },
+        ]
+    };
+    return option;
+}
+
+function historicMemory(){
+    option = {
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: ['18:30', '18:40', '18:50', '19:00', '19:10', '19:20', '19:30']
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross'
+            }
+        },
+        yAxis: {
+            type: 'value',
+            name: 'Memory (GiB)',
+            position: 'right',
+            axisLine: {
+                show: true,
+            },
+        },
+        backgroundColor: '',
+        grid: {
+            left: '7%',
+            right: '10%',
+            top: '10%',
+            bottom: '7%',
+        },
+        series: [
+            {
+                name: 'Limit',
+                animationDuration: 300,
+                z: '-1',
+                data: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
+                type: 'line',
+                color: 'lightgray',
+                emphasis :{
+                    disabled: true
+                },
+                opacity: 0.1,
+                lineStyle: {
+                    color: 'lightgray'
+                },
+                areaStyle: {
+                    opacity: 0.1,
+                    color: 'lightgray'
+                }
+            },
+            {
+                name:'',
+                animationDuration: 300,
+                type: 'line',
+                data: [],
+            },
+            {
+                name: 'Memory',
+                animationDuration: 300,
+                z: '10',
+                data: [0.82, 0.932, 0.901, 0.934, 1.290, 1.130, 1.020],
+                type: 'line',
+                opacity: 0.4,
+                areaStyle: {
+                    opacity: 0.4,
+                }
+            },
         ]
     };
     

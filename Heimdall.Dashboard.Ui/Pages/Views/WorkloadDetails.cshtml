@@ -1,24 +1,98 @@
 ﻿<template id="workload-details">
-    <div class="pl-2 pr-4 w-100">
+    <div class="pl-2 pr-4 max-w-5xl mx-auto">
         <div class="flex my-2 items-center">
-            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Workload</span>
+            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">{{item.kind}} / {{item?.metadata?.namespace }} / {{ item?.metadata?.name }}</span>
         </div>
         
         <br/>
         
-        <div class="flex justify-around mb-4 mt-1">
-            <div class="graph">
-                <v-chart :option="podsAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+        <div class="text-gray-500 dark:text-gray-300 text-md font-light sans">
+            <div class="flex mb-2">
+                <div class="px-2 py-1 w-1/4">Created</div>
+                <div>{{ toLocal(item?.metadata?.creationTimestamp) }} ({{ toHuman(item?.metadata?.creationTimestamp) }})</div>
             </div>
-            <div class="graph">
-                <v-chart :option="podCpuUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+            <div class="flex mb-2">
+                <div class="px-2 py-1 w-1/4">Name</div>
+                <div class="py-1">{{ item?.metadata?.name }}</div>
             </div>
-            <div class="graph">
-                <v-chart :option="podMemoryUsage" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+            <div class="flex mb-2">
+                <div class="px-2 py-1 w-1/4">Namespace</div>
+                <div class="py-1">{{ item?.metadata?.namespace }}</div>
+            </div>
+            <div class="flex mb-2">
+                <div class="px-2 py-1 w-1/4">Type</div>
+                <div class="py-1">{{ item?.kind }}</div>
+            </div>
+            <div v-if="item?.metadata?.labels" class="flex mb-2">
+                <div class="px-2 py-1 w-1/4">Labels</div>
+                <div class="flex w-3/4 flex-wrap truncate">
+                    <template v-for="(v, k) in item?.metadata?.labels">
+                        <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ k }}: {{v}}</div>
+                    </template>
+                </div>
+            </div>
+            <div v-if="item?.metadata?.annotations" class="flex mb-2">
+                <div class="px-2 py-1 w-1/4">Annotations</div>
+                <div class="flex w-3/4 flex-wrap truncate">
+                    <template v-for="(v, k) in item?.metadata?.annotations">
+                        <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ k }}: {{v}}</div>
+                    </template>
+                </div>
+            </div>
+            <div v-if="item?.status?.replicas" class="flex mb-2">
+                <div class="px-2 py-1 w-1/4">Replicas</div>
+                <div class="py-1 flex">
+                    <div v-if="item?.status?.replicas !== undefined">{{ item?.status?.replicas }} desired</div>
+                    <div v-if="item?.status?.updatedReplicas !== undefined">, {{ item?.status?.updatedReplicas }} updated</div>
+                    <div v-if="item?.status?.readyReplicas !== undefined">, {{ item?.status?.readyReplicas }} total</div>
+                    <div v-if="item?.status?.availableReplicas !== undefined">, {{ item?.status?.availableReplicas }} available</div>
+                    <div v-if="item?.status?.availableReplicas !== undefined && item?.status?.readyReplicas !== undefined">
+                        , {{ item?.status?.readyReplicas - item?.status?.availableReplicas }} unavailable
+                    </div>
+                </div>
+            </div>
+            <div v-if="item?.spec?.selector" class="flex mb-2">
+                <div class="px-2 py-1 w-1/4">Selector</div>
+                <div class="flex w-3/4 flex-wrap truncate">
+                    <template v-for="(v, k) in item?.spec?.selector?.matchLabels">
+                        <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ k }}: {{v}}</div>
+                    </template>
+                </div>
+            </div>
+            <div v-if="item?.spec?.template?.spec?.nodeSelector" class="flex mb-2">
+                <div class="px-2 py-1 w-1/4">Node Selector</div>
+                <div class="flex w-3/4 flex-wrap truncate">
+                    <template v-for="(v, k) in item?.spec?.template?.spec?.nodeSelector">
+                        <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ k }}: {{v}}</div>
+                    </template>
+                </div>
+            </div>
+            <div v-if="item?.spec?.strategy?.type" class="flex mb-2">
+                <div class="px-2 py-1 w-1/4">Strategy Type</div>
+                <div class="py-1">{{ item?.spec?.strategy?.type }}</div>
+            </div>
+            <div v-if="item?.spec?.updateStrategy?.type" class="flex mb-2">
+                <div class="px-2 py-1 w-1/4">Strategy Type</div>
+                <div class="py-1">{{ item?.spec?.updateStrategy?.type }}</div>
+            </div>            
+
+            <div v-if="item?.status?.conditions" class="flex mb-2">
+                <div class="px-2 py-1 w-1/4">Conditions</div>
+                <div class="flex w-3/4 flex-wrap truncate">
+                    <template v-for="s in item?.status?.conditions">
+                        <div v-if="s.status === 'True'"
+                             class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden"
+                        >{{s.type}}</div>
+                        <div v-else
+                             class="text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-zinc-900 rounded py-1 px-2 mr-2 mb-2 overflow-hidden"
+                        >{{s.type}}</div>
+                    </template>
+                </div>
             </div>
         </div>
         
         <br/><br/>
+        
     </div>
 </template>
 
@@ -31,40 +105,49 @@
         data() {
             return {
                 initOptions: { renderer: "svg" },
-                details: [],
-                metrics: [],
+                item: {},
                 isDark: isDark
             }
         },
         props: ['namespaces', 'search', 'filters'],        
-        computed: {
-            podsAvailable: () => podReady(),
-            podCpuUsage: () => podCpu(),
-            podMemoryUsage: () => podMemory(),
-        },
         methods: {
-            updatePods(){
-                if (!this.clusterPods) return;
-                
-                let result = [...this.clusterPods];
-                                
-                if (this.filters?.length){
-                    result = result.filter(x => filterName(x, this.filters))
+            toLocal:(value) => {
+                if (value){
+                    var DT = window.DateTime || luxon.DateTime;
+                    let result = DT.fromISO(String(value)).setLocale('da-dk').toFormat('y-LL-dd HH:mm:ss');
+                    return result;
                 }
+            },
+            toHuman:(value) => {
+                if (value){
+                    var DT = window.DateTime || luxon.DateTime;
+                    var invalid = "";
+                    const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
+                    var date = DT.now();
                 
-                this.pods = result;
-            }
+                    var newDatetime = DT.fromISO(String(value));
+                    return toHumanValues(newDatetime.diff(date,  unit)).join(' ') + ' Ago';
+                }
+            }            
         },
         watch: {
         },
         async mounted() {
             var host = window.location.origin;
+            let name = this.$route.params.name;
+            let type = this.$route.params.type;
+            let namespace = this.$route.params.namespace;
             
-            streamResults(host + '/k8s/api/v1/namespaces/{namespace}/pods/{name}', j => this.details = j);
+            let url = `/k8s/apis/apps/v1/namespaces/${namespace}/${type}s`;
+            if (['cronjobs', 'jobs'].includes(type + 's')){
+                url = `/k8s/apis/batch/v1/namespaces/${namespace}/${type}s`    
+            }
+            
+            streamResult(host + url, name, j => this.item = j);
         },
     };
     
-    routes.push({path:'/workloads/{:name}/details', name:'workload-details', component: components["workload-details"]})    
+    routes.push({path:'/namespaces/:namespace/workloads/:name/:type', name:'workload-details', component: components["workload-details"]})    
 </script>
 
 <style>

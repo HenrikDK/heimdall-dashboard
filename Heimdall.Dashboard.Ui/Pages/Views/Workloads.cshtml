@@ -4,22 +4,7 @@
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Workloads</span>
         </div>
         
-        <template v-if="workloads && workloads.length > 0">
-            <vue-table :columns="columns" :initial-sort="sorting" :data="workloads" :namespaces="namespaces" :search="search"></vue-table>
-        </template>
-        
-        <br/>
-        
-        <div class="flex justify-around mb-4 mt-1">
-            <div class="graph">
-                <v-chart :option="workloadsAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
-            </div>
-            <div class="graph">
-                <v-chart :option="podsAvailable" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
-            </div>
-        </div>
-        
-        <br/><br/>
+        <vue-table :columns="columns" :initial-sort="sorting" :data="workloads" :namespaces="namespaces" :search="search"></vue-table>
         
     </div>
 </template>
@@ -206,6 +191,3 @@
 
     routes.push({path:'/workloads', name:'workloads', component: components["workloads"]})
 </script>
-
-<style>
-</style>
