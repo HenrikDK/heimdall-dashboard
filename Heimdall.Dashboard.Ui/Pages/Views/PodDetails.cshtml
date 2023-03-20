@@ -1,4 +1,4 @@
-﻿<template id="pod-details">
+<template id="pod-details">
     <div class="pl-2 pr-4 max-w-5xl mx-auto">
         <br/>
         
@@ -175,40 +175,40 @@
         
         <br/>
         
-        <div class="flex my-4 items-center">
-            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
-        </div>
-
-        <div class="text-gray-500 dark:text-gray-300 text-md font-light sans rounded-lg shadow-lg border border-gray-200 dark:border-zinc-800">
-            <template v-for="event in events">
-                <div class="my-3">
-                    <div :class="event.type === 'Warning' ? 'text-red-500' : ''"
-                         class="mb-2 px-4 py-1 w-full break-words">
-                        {{ event.message }}
-                    </div>
-                    <div class="flex mb-2">
-                        <div class="px-2 py-1 w-1/4">Source</div>
-                        <div class="py-1 w-3/4 truncate">{{event.source.host}} {{event.source.component}}</div>
-                    </div>
-                    <div class="flex mb-2">
-                        <div class="px-2 py-1 w-1/4">Count</div>
-                        <div class="py-1 w-3/4 truncate">{{ event.count }}</div>
-                    </div>
-                    <div class="flex mb-2">
-                        <div class="px-2 py-1 w-1/4">Sub object</div>
-                        <div class="py-1 w-3/4 truncate">{{ event?.involvedObject?.name }}</div>
-                    </div>
-                    <div class="flex mb-2">
-                        <div class="px-2 py-1 w-1/4">Last seen</div>
-                        <div class="py-1 w-3/4 truncate">{{ toLocal(event.lastTimestamp) }} ({{ toHuman(event.lastTimestamp) }})</div>
-                    </div>
-                </div>
-            </template>
-        </div>
-
-        <br/><br/><br/><br/>
+    <div v-if="events.length > 0" class="flex my-4 items-center">
+        <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
     </div>
+
+    <div v-if="events.length > 0" class="text-gray-500 dark:text-gray-300 text-md font-light sans rounded-lg shadow-lg border border-gray-200 dark:border-zinc-800">
+        <template v-for="event in events">
+            <div class="my-3">
+                <div :class="event.type === 'Warning' ? 'text-red-500' : ''"
+                     class="mb-2 px-4 py-1 w-full break-words">
+                    {{ event.message }}
+                </div>
+                <div class="flex mb-2">
+                    <div class="px-2 py-1 w-1/4">Source</div>
+                    <div class="py-1 w-3/4 truncate">{{event.source.host}} {{event.source.component}}</div>
+                </div>
+                <div class="flex mb-2">
+                    <div class="px-2 py-1 w-1/4">Count</div>
+                    <div class="py-1 w-3/4 truncate">{{ event.count }}</div>
+                </div>
+                <div class="flex mb-2">
+                    <div class="px-2 py-1 w-1/4">Sub object</div>
+                    <div class="py-1 w-3/4 truncate">{{ event?.involvedObject?.name }}</div>
+                </div>
+                <div class="flex mb-2">
+                    <div class="px-2 py-1 w-1/4">Last seen</div>
+                    <div class="py-1 w-3/4 truncate">{{ toLocal(event.lastTimestamp) }} ({{ toHuman(event.lastTimestamp) }})</div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <br/><br/><br/><br/>
     
+    </div>
 </template>
 
 
