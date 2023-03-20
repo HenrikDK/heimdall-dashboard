@@ -640,6 +640,7 @@ function historicCpu(){
         series: [
             {
                 name: 'Limit',
+                animationDuration: 300,
                 z: '-1',
                 data: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 2.5],
                 type: 'line',
@@ -658,6 +659,7 @@ function historicCpu(){
             },
             {
                 name: 'CPU',
+                animationDuration: 300,
                 z: '10',
                 data: [0.82, 0.932, 0.901, 0.934, 1.290, 1.330, 1.320],
                 type: 'line',
@@ -702,6 +704,7 @@ function historicMemory(){
         series: [
             {
                 name: 'Limit',
+                animationDuration: 300,
                 z: '-1',
                 data: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
                 type: 'line',
@@ -720,11 +723,13 @@ function historicMemory(){
             },
             {
                 name:'',
+                animationDuration: 300,
                 type: 'line',
                 data: [],
             },
             {
                 name: 'Memory',
+                animationDuration: 300,
                 z: '10',
                 data: [0.82, 0.932, 0.901, 0.934, 1.290, 1.130, 1.020],
                 type: 'line',
