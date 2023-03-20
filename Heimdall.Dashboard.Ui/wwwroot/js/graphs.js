@@ -448,7 +448,7 @@ function historic(){
                 axisTick: {
                     alignWithLabel: true
                 },
-                data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                data: ['18:30', '18:40', '18:50', '19:00', '19:10', '19:20', '19:30', '19:40', '19:50', '20:00', '20:10', '20:20'],
             }
         ],
         yAxis: [
@@ -614,7 +614,7 @@ function historicCpu(){
         xAxis: {
             type: 'category',
             boundaryGap: false,
-            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+            data: ['18:30', '18:40', '18:50', '19:00', '19:10', '19:20', '19:30']
         },
         tooltip: {
             trigger: 'axis',
@@ -678,7 +678,7 @@ function historicMemory(){
         xAxis: {
             type: 'category',
             boundaryGap: false,
-            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+            data: ['18:30', '18:40', '18:50', '19:00', '19:10', '19:20', '19:30']
         },
         tooltip: {
             trigger: 'axis',
