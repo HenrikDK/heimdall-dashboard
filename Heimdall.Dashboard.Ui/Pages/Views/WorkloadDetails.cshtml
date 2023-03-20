@@ -39,7 +39,7 @@
                     </template>
                 </div>
             </div>
-            <div class="flex mb-2">
+            <div v-if="item?.status?.replicas" class="flex mb-2">
                 <div class="px-2 py-1 w-1/4">Replicas</div>
                 <div class="py-1 flex">
                     <div v-if="item?.status?.replicas !== undefined">{{ item?.status?.replicas }} desired</div>
@@ -67,12 +67,16 @@
                     </template>
                 </div>
             </div>
-            <div class="flex mb-2">
+            <div v-if="item?.spec?.strategy?.type" class="flex mb-2">
                 <div class="px-2 py-1 w-1/4">Strategy Type</div>
                 <div class="py-1">{{ item?.spec?.strategy?.type }}</div>
             </div>
+            <div v-if="item?.spec?.updateStrategy?.type" class="flex mb-2">
+                <div class="px-2 py-1 w-1/4">Strategy Type</div>
+                <div class="py-1">{{ item?.spec?.updateStrategy?.type }}</div>
+            </div>            
 
-            <div class="flex mb-2">
+            <div v-if="item?.status?.conditions" class="flex mb-2">
                 <div class="px-2 py-1 w-1/4">Conditions</div>
                 <div class="flex w-3/4 flex-wrap truncate">
                     <template v-for="s in item?.status?.conditions">
