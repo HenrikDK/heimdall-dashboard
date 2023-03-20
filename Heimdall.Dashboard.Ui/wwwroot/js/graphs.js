@@ -641,18 +641,18 @@ function historicCpu(){
             {
                 name: 'Limit',
                 z: '-1',
-                data: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
+                data: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 2.5],
                 type: 'line',
                 color: 'lightgray',
                 emphasis :{
                     disabled: true
                 },
-                opacity: 0.2,
+                opacity: 0.1,
                 lineStyle: {
                     color: 'lightgray'
                 },
                 areaStyle: {
-                    opacity: 0.2,
+                    opacity: 0.1,
                     color: 'lightgray'
                 }
             },
@@ -661,7 +661,10 @@ function historicCpu(){
                 z: '10',
                 data: [0.82, 0.932, 0.901, 0.934, 1.290, 1.330, 1.320],
                 type: 'line',
-                areaStyle: {}
+                opacity: 0.4,
+                areaStyle: {
+                    opacity: 0.4,
+                }
             },
         ]
     };
@@ -706,12 +709,12 @@ function historicMemory(){
                 emphasis :{
                     disabled: true
                 },
-                opacity: 0.2,
+                opacity: 0.1,
                 lineStyle: {
                     color: 'lightgray'
                 },
                 areaStyle: {
-                    opacity: 0.2,
+                    opacity: 0.1,
                     color: 'lightgray'
                 }
             },
@@ -723,9 +726,12 @@ function historicMemory(){
             {
                 name: 'Memory',
                 z: '10',
-                data: [0.82, 0.932, 0.901, 0.934, 1.290, 1.330, 1.320],
+                data: [0.82, 0.932, 0.901, 0.934, 1.290, 1.130, 1.020],
                 type: 'line',
-                areaStyle: {}
+                opacity: 0.4,
+                areaStyle: {
+                    opacity: 0.4,
+                }
             },
         ]
     };
