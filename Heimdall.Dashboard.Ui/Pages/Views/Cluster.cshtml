@@ -61,9 +61,13 @@
             return {
                 initOptions: { renderer: "svg" },
                 clusterPods: null,
-                clusterPodMetrics: null,
-                clusterNodes: null,
-                clusterNodeMetrics: null,
+                clusterDeployments: null,
+                clusterDaemonSets: null,
+                clusterStatefulSets: null,
+                clusterReplicaSets: null,
+                clusterJobs: null,
+                clusterCronJobs: null,
+                
                 isDark: isDark,
                 cluster:{
                     performance: historic(),
@@ -71,23 +75,67 @@
                     memory: current('Memory')
                 },
                 workloads:{
-                    pods: workload('Pods', 11, 3),
-                    deployments: workload('Deployments', 9, 3),
-                    daemonsets: workload('Daemon Sets', 2, 0),
+                    pods: workload('Pods', 0, 0),
+                    deployments: workload('Deployments', 0, 0),
+                    daemonsets: workload('Daemon Sets', 0, 0),
                     statefullsets: workload('Stateful Sets', 0, 0),
-                    replicasets: workload('Replica Sets', 9, 3),
+                    replicasets: workload('Replica Sets', 0, 0),
                     jobs: workload('Jobs', 0, 0),
                     cronjobs: workload('Cron Jobs', 0, 0),
-                },
-                nodesAvailable: nodeReady(),
-                nodeCpuUsage: nodeCpu(),
-                nodeMemoryUsage: nodeMemory(),
-                podsAvailable: podReady(),
-                podCpuUsage: podCpu(),
-                podMemoryUsage: podMemory(),
+                }
             }
         },
         methods: {
+          filterNamespace(values){
+            let filtered = values;
+            if (this.$props.namespaces.length > 0){
+                filtered = values?.filter(x => this.$props.namespaces.some(y => x.metadata.namespace === y));
+            }
+            return filtered;
+          },
+          async updateClusterPods() {
+              let filtered = this.filterNamespace(this.clusterPods);
+              let running = filtered?.filter(x => (x.status?.phase === "Running" && x.status?.containerStatuses.every(y => y.state.running)) 
+                  || x.status?.phase === "Succeeded").length ?? 0;
+              let pending = (filtered?.length ?? 0) - running;
+              this.workloads.pods = workload('Pods', running, pending);
+          },
+          async updateClusterDeployments() {
+              let filtered = this.filterNamespace(this.clusterDeployments);
+              let running = filtered?.filter(x => x.status?.replicas === x.status?.readyReplicas).length ?? 0;
+              let pending = (filtered?.length ?? 0) - running;
+              this.workloads.deployments = workload('Deployments', running, pending);
+          },
+          async updateClusterJobs() {
+              let filtered = this.filterNamespace(this.clusterJobs);
+              let running = filtered?.filter(x => x.status?.succeeded).length ?? 0;
+              let pending = (filtered?.length ?? 0) - running;
+              this.workloads.jobs = workload('Jobs', running, pending);                
+          },
+          async updateClusterCronJobs() {
+              let filtered = this.filterNamespace(this.clusterCronJobs);
+              let running = filtered?.filter(x => x.status?.lastSuccessfulTime).length ?? 0;
+              let pending = (filtered?.length ?? 0) - running;
+              this.workloads.cronjobs = workload('Cron Jobs', running, pending);
+          },
+          async updateClusterStatefulSets() {
+              let filtered = this.filterNamespace(this.clusterStatefulSets);
+              let running = filtered?.filter(x => x.status?.replicas === x.status?.readyReplicas).length ?? 0;
+              let pending = (filtered?.length ?? 0) - running;
+              this.workloads.statefullsets = workload('Stateful Sets', running, pending);
+          },
+          async updateClusterReplicaSets() {
+              let filtered = this.filterNamespace(this.clusterReplicaSets);
+              let running = filtered?.filter(x => x.status?.replicas === x.status?.readyReplicas).length ?? 0;
+              let pending = (filtered?.length ?? 0) - running;
+              this.workloads.replicasets = workload('Replica Sets', running, pending);
+          },
+          async updateClusterDaemonSets() {
+              let filtered = this.filterNamespace(this.clusterDaemonSets);
+              let running = filtered?.filter(x => x.status.currentNumberScheduled === x.status.numberReady).length ?? 0;
+              let pending = (filtered?.length ?? 0) - running;
+              this.workloads.daemonsets = workload('Daemon Sets', running, pending);
+          },
           async updateNodeGraphs() {
               
           },
@@ -95,16 +143,50 @@
               
           },
         },
+        
         watch: {
-          clusterEvents: function (){this.updateEvents()},
+            async namespaces() {
+                this.updateClusterPods();
+                this.updateClusterDeployments();
+                this.updateClusterJobs();
+                this.updateClusterCronJobs();
+                this.updateClusterStatefulSets();
+                this.updateClusterReplicaSets();
+                this.updateClusterDaemonSets();
+            },
+            async clusterPods(){
+                this.updateClusterPods();
+            },
+            async clusterDeployments() {
+                this.updateClusterDeployments();
+            },
+            async clusterJobs() {
+                this.updateClusterJobs();            
+            },
+            async clusterCronJobs() {
+                this.updateClusterCronJobs();
+            },
+            async clusterStatefulSets() {
+                this.updateClusterStatefulSets();
+            },
+            async clusterReplicaSets() {
+                this.updateClusterReplicaSets();
+            },
+            async clusterDaemonSets() {
+                this.updateClusterDaemonSets();
+            }
         },
-        props: ['namespaces', 'search'],
+        props: ['namespaces'],
         async mounted() {
           var host = window.location.origin;
-          streamResults(host + '/k8s/api/v1/nodes', j => this.clusterNodes = j);
+          
           streamResults(host + '/k8s/api/v1/pods', j => this.clusterPods = j);
-          streamMetrics(host + '/k8s/apis/metrics.k8s.io/v1beta1/nodes', j => this.clusterNodeMetrics = j);
-          streamMetrics(host + '/k8s/apis/metrics.k8s.io/v1beta1/pods', j => this.clusterPodMetrics = j);
+          streamResults(host + '/k8s/apis/apps/v1/deployments', j => this.clusterDeployments = j)
+          streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => this.clusterDaemonSets = j)
+          streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => this.clusterStatefulSets = j)
+          streamResults(host + '/k8s/apis/apps/v1/replicasets', j => this.clusterReplicaSets = j)
+          streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => this.clusterCronJobs = j)
+          streamResults(host + '/k8s/apis/batch/v1/jobs', j => this.clusterJobs = j)          
         }
     };
     
