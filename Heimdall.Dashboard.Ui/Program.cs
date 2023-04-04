@@ -46,6 +46,8 @@ if (!app.Environment.IsDevelopment() || Debugger.IsAttached)
     app.UseHsts();
 }
 
+var prometheus = app.Configuration.GetValue("prometheus-url", "");
+
 app.UseWebSockets();
 app.UseStaticFiles();
 app.UseRouting();
@@ -80,6 +82,13 @@ app.UseProxies(proxies =>
                 return Task.CompletedTask;
             }).Build())
     );
+    proxies.Map("prometheus/{**rest}",
+        proxy => proxy.UseHttp((context, args) =>
+        {
+            var qs = context.Request.QueryString.Value;
+            var url = context.Request.Path.ToString().Replace("/prometheus/", "/");
+            return $"{prometheus}{url}{qs}";
+        }));
 });
 app.UseAuthorization();
 app.UseEndpoints(x =>
