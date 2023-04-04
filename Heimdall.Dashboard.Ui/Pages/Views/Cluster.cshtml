@@ -1,4 +1,4 @@
-﻿<template id="cluster">
+<template id="cluster">
     <div class="pl-2 pr-4 w-100">
 
         <div class="flex my-2 items-center">
@@ -9,13 +9,13 @@
         
         <div class="flex justify-between mb-4 mt-1">
             <div class="wide-graph">
-                <v-chart :option="cluster.performance" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+                <v-chart :option="charts.cluster.performance" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
             <div class="large-graph">
-                <v-chart :option="cluster.cpus" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+                <v-chart :option="charts.cluster.cpus" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
             <div class="large-graph">
-                <v-chart :option="cluster.memory" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+                <v-chart :option="charts.cluster.memory" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
         </div>
         
@@ -27,25 +27,25 @@
         
         <div class="flex justify-between mb-4 mt-1">
             <div class="graph">
-                <v-chart :option="workloads.pods" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+                <v-chart :option="charts.workloads.pods" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="workloads.deployments" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+                <v-chart :option="charts.workloads.deployments" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="workloads.daemonsets" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+                <v-chart :option="charts.workloads.daemonsets" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="workloads.statefullsets" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+                <v-chart :option="charts.workloads.statefullsets" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="workloads.replicasets" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+                <v-chart :option="charts.workloads.replicasets" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="workloads.jobs" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+                <v-chart :option="charts.workloads.jobs" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
             <div class="graph">
-                <v-chart :option="workloads.cronjobs" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+                <v-chart :option="charts.workloads.cronjobs" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
             </div>
         </div>
     </div>
@@ -60,28 +60,31 @@
         data() {
             return {
                 initOptions: { renderer: "svg" },
-                clusterPods: null,
-                clusterDeployments: null,
-                clusterDaemonSets: null,
-                clusterStatefulSets: null,
-                clusterReplicaSets: null,
-                clusterJobs: null,
-                clusterCronJobs: null,
-                
-                isDark: isDark,
                 cluster:{
-                    performance: historic(),
-                    cpus: current('CPU'),
-                    memory: current('Memory')
+                    pods: null,
+                    deployments: null,
+                    daemonSets: null,
+                    statefulSets: null,
+                    replicaSets: null,
+                    jobs: null,
+                    cronJobs: null,
                 },
-                workloads:{
-                    pods: workload('Pods', 0, 0),
-                    deployments: workload('Deployments', 0, 0),
-                    daemonsets: workload('Daemon Sets', 0, 0),
-                    statefullsets: workload('Stateful Sets', 0, 0),
-                    replicasets: workload('Replica Sets', 0, 0),
-                    jobs: workload('Jobs', 0, 0),
-                    cronjobs: workload('Cron Jobs', 0, 0),
+                isDark: isDark,
+                charts:{
+                    cluster:{
+                        performance: historic(),
+                        cpus: current('CPU'),
+                        memory: current('Memory')
+                    },
+                    workloads:{
+                        pods: workload('Pods', 0, 0),
+                        deployments: workload('Deployments', 0, 0),
+                        daemonsets: workload('Daemon Sets', 0, 0),
+                        statefullsets: workload('Stateful Sets', 0, 0),
+                        replicasets: workload('Replica Sets', 0, 0),
+                        jobs: workload('Jobs', 0, 0),
+                        cronjobs: workload('Cron Jobs', 0, 0),
+                    }
                 }
             }
         },
@@ -94,58 +97,60 @@
             return filtered;
           },
           async updateClusterPods() {
-              let filtered = this.filterNamespace(this.clusterPods);
+              let filtered = this.filterNamespace(this.cluster.pods);
               let running = filtered?.filter(x => (x.status?.phase === "Running" && x.status?.containerStatuses.every(y => y.state.running)) 
                   || x.status?.phase === "Succeeded").length ?? 0;
               let pending = (filtered?.length ?? 0) - running;
-              this.workloads.pods = workload('Pods', running, pending);
+              this.charts.workloads.pods = workload('Pods', running, pending);
           },
           async updateClusterDeployments() {
-              let filtered = this.filterNamespace(this.clusterDeployments);
+              let filtered = this.filterNamespace(this.cluster.deployments);
               let running = filtered?.filter(x => x.status?.replicas === x.status?.readyReplicas).length ?? 0;
               let pending = (filtered?.length ?? 0) - running;
-              this.workloads.deployments = workload('Deployments', running, pending);
+              this.charts.workloads.deployments = workload('Deployments', running, pending);
           },
           async updateClusterJobs() {
-              let filtered = this.filterNamespace(this.clusterJobs);
+              let filtered = this.filterNamespace(this.cluster.jobs);
               let running = filtered?.filter(x => x.status?.succeeded).length ?? 0;
               let pending = (filtered?.length ?? 0) - running;
-              this.workloads.jobs = workload('Jobs', running, pending);                
+              this.charts.workloads.jobs = workload('Jobs', running, pending);                
           },
           async updateClusterCronJobs() {
-              let filtered = this.filterNamespace(this.clusterCronJobs);
+              let filtered = this.filterNamespace(this.cluster.cronJobs);
               let running = filtered?.filter(x => x.status?.lastSuccessfulTime).length ?? 0;
               let pending = (filtered?.length ?? 0) - running;
-              this.workloads.cronjobs = workload('Cron Jobs', running, pending);
+              this.charts.workloads.cronjobs = workload('Cron Jobs', running, pending);
           },
           async updateClusterStatefulSets() {
-              let filtered = this.filterNamespace(this.clusterStatefulSets);
+              let filtered = this.filterNamespace(this.cluster.statefulSets);
               let running = filtered?.filter(x => x.status?.replicas === x.status?.readyReplicas).length ?? 0;
               let pending = (filtered?.length ?? 0) - running;
-              this.workloads.statefullsets = workload('Stateful Sets', running, pending);
+              this.charts.workloads.statefullsets = workload('Stateful Sets', running, pending);
           },
           async updateClusterReplicaSets() {
-              let filtered = this.filterNamespace(this.clusterReplicaSets);
+              let filtered = this.filterNamespace(this.cluster.replicaSets);
               let running = filtered?.filter(x => x.status?.replicas === x.status?.readyReplicas).length ?? 0;
               let pending = (filtered?.length ?? 0) - running;
-              this.workloads.replicasets = workload('Replica Sets', running, pending);
+              this.charts.workloads.replicasets = workload('Replica Sets', running, pending);
           },
           async updateClusterDaemonSets() {
-              let filtered = this.filterNamespace(this.clusterDaemonSets);
+              let filtered = this.filterNamespace(this.cluster.daemonSets);
               let running = filtered?.filter(x => x.status.currentNumberScheduled === x.status.numberReady).length ?? 0;
               let pending = (filtered?.length ?? 0) - running;
-              this.workloads.daemonsets = workload('Daemon Sets', running, pending);
+              this.charts.workloads.daemonsets = workload('Daemon Sets', running, pending);
           },
-          async updateNodeGraphs() {
+          async updateHistory(){
+          },
+          async updateCpu() {
               
           },
-          async updatePodGraphs() {
+          async updateMemory() {
               
           },
         },
         
         watch: {
-            async namespaces() {
+            namespaces() {
                 this.updateClusterPods();
                 this.updateClusterDeployments();
                 this.updateClusterJobs();
@@ -153,26 +158,26 @@
                 this.updateClusterStatefulSets();
                 this.updateClusterReplicaSets();
                 this.updateClusterDaemonSets();
-            },
-            async clusterPods(){
+            },            
+            'cluster.pods':function () {
                 this.updateClusterPods();
             },
-            async clusterDeployments() {
+            'cluster.deployments': function () {
                 this.updateClusterDeployments();
             },
-            async clusterJobs() {
+            'cluster.jobs':function () {
                 this.updateClusterJobs();            
             },
-            async clusterCronJobs() {
+            'cluster.cronJobs':function () {
                 this.updateClusterCronJobs();
             },
-            async clusterStatefulSets() {
+            'cluster.statefulSets': function () {
                 this.updateClusterStatefulSets();
             },
-            async clusterReplicaSets() {
+            'cluster.replicaSets': function () {
                 this.updateClusterReplicaSets();
             },
-            async clusterDaemonSets() {
+            'cluster.daemonSets': function () {
                 this.updateClusterDaemonSets();
             }
         },
@@ -180,13 +185,14 @@
         async mounted() {
           var host = window.location.origin;
           
-          streamResults(host + '/k8s/api/v1/pods', j => this.clusterPods = j);
-          streamResults(host + '/k8s/apis/apps/v1/deployments', j => this.clusterDeployments = j)
-          streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => this.clusterDaemonSets = j)
-          streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => this.clusterStatefulSets = j)
-          streamResults(host + '/k8s/apis/apps/v1/replicasets', j => this.clusterReplicaSets = j)
-          streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => this.clusterCronJobs = j)
-          streamResults(host + '/k8s/apis/batch/v1/jobs', j => this.clusterJobs = j)          
+//          streamMetrics(host + 'prometheus/api/v1/query' + getMemoryUsageRequest(), j => this.memoryUsage = j);
+          streamResults(host + '/k8s/api/v1/pods', j => this.cluster.pods = j);
+          streamResults(host + '/k8s/apis/apps/v1/deployments', j => this.cluster.deployments = j)
+          streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => this.cluster.daemonSets = j)
+          streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => this.cluster.statefulSets = j)
+          streamResults(host + '/k8s/apis/apps/v1/replicasets', j => this.cluster.replicaSets = j)
+          streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => this.cluster.cronJobs = j)
+          streamResults(host + '/k8s/apis/batch/v1/jobs', j => this.cluster.jobs = j)          
         }
     };
     
