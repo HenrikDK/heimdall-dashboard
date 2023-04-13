@@ -69,6 +69,11 @@
                     jobs: null,
                     cronJobs: null,
                 },
+                metrics:{
+                    kubeMemory: null,
+                    containerMemory: null,
+                    nodeMemory: null
+                },
                 isDark: isDark,
                 charts:{
                     cluster:{
@@ -135,11 +140,12 @@
           },
           async updateClusterDaemonSets() {
               let filtered = this.filterNamespace(this.cluster.daemonSets);
-              let running = filtered?.filter(x => x.status.currentNumberScheduled === x.status.numberReady).length ?? 0;
+              let running = filtered?.filter(x => x.status?.currentNumberScheduled === x.status?.numberReady).length ?? 0;
               let pending = (filtered?.length ?? 0) - running;
               this.charts.workloads.daemonsets = workload('Daemon Sets', running, pending);
           },
-          async updateHistory(){
+          async updateHistory() {
+              
           },
           async updateCpu() {
               
@@ -185,7 +191,10 @@
         async mounted() {
           var host = window.location.origin;
           
-//          streamMetrics(host + 'prometheus/api/v1/query' + getMemoryUsageRequest(), j => this.memoryUsage = j);
+          streamMetrics(host + 'prometheus/api/v1' + getMetric('cluster', 'kube-memory-stats', { nodes: this.nodes }), j => this.metrics.kubeMemory = j);
+          streamMetrics(host + 'prometheus/api/v1' + getMetric('cluster', 'container-memory', { nodes: this.nodes }), j => this.metrics.containerMemory = j);
+          streamMetrics(host + 'prometheus/api/v1' + getMetric('cluster', 'node-memory-stats', { nodes: this.nodes }), j => this.metrics.nodeMemory = j);
+          
           streamResults(host + '/k8s/api/v1/pods', j => this.cluster.pods = j);
           streamResults(host + '/k8s/apis/apps/v1/deployments', j => this.cluster.deployments = j)
           streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => this.cluster.daemonSets = j)
