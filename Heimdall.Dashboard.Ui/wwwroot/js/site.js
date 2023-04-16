@@ -73,12 +73,10 @@ function getMetric(type, name, options = {}){
     let end = DT.now();
     let begin = end.minus({ hours: 1 });
     
-    let result = `query_range&start=${begin}&end=${end}&step=60s&query=`;
+    let result = `/query_range?start=${begin.toUTC().toISO()}&end=${end.toUTC().toISO()}&step=60s&query=`;
     result += getMetricQuery(type, name, options)
     return result;
 }
-
-
 
 function getMetricQuery(type = '', name = '', options = {}) {
     switch(type) {
@@ -87,7 +85,7 @@ function getMetricQuery(type = '', name = '', options = {}) {
                 case "node-memory-stats":
                     return `sum({__name__=~"node_memory_MemTotal_bytes|node_memory_MemFree_bytes|node_memory_Buffers_bytes|node_memory_Cached_bytes", kubernetes_node=~"${options.nodes}"}) by (__name__, component)`;
                 case "container-memory":
-                    return `sum(container_memory_working_set_bytes{container!="POD",container!="",node=~"${options.nodes}"}) by (component)`;
+                    return `sum(container_memory_working_set_bytes{container!="POD",container!="",instance=~"${options.nodes}"}) by (component)`;
                 case "kube-memory-stats":
                     return `sum({__name__=~"kube_pod_container_resource_requests|kube_pod_container_resource_limits|kube_node_status_capacity|kube_node_status_allocatable", node=~"${options.nodes}", resource="memory"}) by (__name__, component)`;
 
