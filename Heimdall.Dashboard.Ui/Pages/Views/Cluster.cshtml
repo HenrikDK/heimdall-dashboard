@@ -1,4 +1,4 @@
-﻿<template id="cluster">
+<template id="cluster">
     <div class="pl-2 pr-4 w-100">
 
         <div class="flex my-2 items-center">
@@ -150,6 +150,8 @@
               
           },
           async updateCpu() {
+              if (!this.metrics.nodeCpu || this.metrics.nodeCpu?.length === 0 || !this.metrics.kubeCpu || this.metrics.kubeCpu?.length === 0) return;
+              
               let capacity = getMetricLastPoints(this.metrics.kubeCpu, 'kube_node_status_capacity');
               let requestValue = getMetricLastPoints(this.metrics.kubeCpu, 'kube_pod_container_resource_requests');
               let requestPct = requestValue / capacity * 100;
@@ -169,6 +171,8 @@
               this.charts.cluster.cpus = current('CPU', 'vCores', usage, requests, limits);
           },
           async updateMemory() {
+              if (!this.metrics.kubeMemory || this.metrics.kubeMemory?.length === 0 || !this.metrics.nodeMemory || this.metrics.nodeMemory?.length === 0) return;
+              
               let capacity = getMetricLastPoints(this.metrics.kubeMemory, 'kube_node_status_capacity');
               let requestValue = getMetricLastPoints(this.metrics.kubeMemory, 'kube_pod_container_resource_requests');
               let requestPct = requestValue / capacity * 100;
