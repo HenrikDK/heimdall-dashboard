@@ -51,6 +51,10 @@ var prometheus = app.Configuration.GetValue("prometheus-url", "");
 app.UseWebSockets();
 app.UseStaticFiles();
 app.UseRouting();
+
+var user = app.Configuration.GetValue("prometheus-user", "");
+var pass = app.Configuration.GetValue("prometheus-password", "");
+var token = string.IsNullOrEmpty(user) ? "" : $"{user}:{pass}".ToBase64();
 app.UseProxies(proxies =>
 {
     proxies.Map("k8s/{**rest}",
@@ -85,11 +89,17 @@ app.UseProxies(proxies =>
     proxies.Map("prometheus/{**rest}",
         proxy => proxy.UseHttp((context, args) =>
         {
+            if (!string.IsNullOrEmpty(token))
+            {
+                context.Request.Headers.Add("Authorization", $"Basic {token}");
+            }
+
             var qs = context.Request.QueryString.Value;
             var url = context.Request.Path.ToString().Replace("/prometheus/", "/");
             return $"{prometheus}{url}{qs}";
         }));
 });
+
 app.UseAuthorization();
 app.UseEndpoints(x =>
 {
