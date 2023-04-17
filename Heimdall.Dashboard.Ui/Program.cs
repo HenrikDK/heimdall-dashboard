@@ -55,6 +55,8 @@ app.UseRouting();
 var user = app.Configuration.GetValue("prometheus-user", "");
 var pass = app.Configuration.GetValue("prometheus-password", "");
 var token = string.IsNullOrEmpty(user) ? "" : $"{user}:{pass}".ToBase64();
+var mimirOrg = app.Configuration.GetValue("mimir-org-id", "");
+
 app.UseProxies(proxies =>
 {
     proxies.Map("k8s/{**rest}",
