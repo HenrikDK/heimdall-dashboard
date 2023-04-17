@@ -5,7 +5,7 @@
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
         </div>
 
-        <vue-table :columns="columns" :initial-sort="sorting" :data="events" :namespaces="namespaces" :search="search"></vue-table>
+        <vue-table :columns="columns" :initial-sort="sorting" :data="events" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
         
     </div>
 </template>
@@ -45,13 +45,15 @@
         template: "#events",
         data() {
             return {
-                events: [{
+                events: [
+                    {
                     type: "Warning", message:"Some dangerous message", count: 23, lastTimestamp: "2011-10-05T14:48:00.000Z",
                     involvedObject: { namespace: "test", kind: "lobster", name: "thing" }
                 }],
                 sorting: [
                     { header:'Age', sort: 'desc' }
                 ],
+                loading: true,
                 columns: [
                     {header:"Type", name:"type", sorter:"text", classes:"w-32"},
                     {header:"Namespace", name:"involvedObject.namespace", formatter:formatNamespace, namespace: true, classes:"truncate 2xl:w-52 xl:w-44 lg:w-32"},
@@ -77,6 +79,7 @@
             }
             
             this.events = events;
+            this.loading = false;
           }
         },
         watch: {
