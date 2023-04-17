@@ -421,7 +421,7 @@ function workload(type = 'Unknown', running = 0, pending = 0){
     return graph
 }
 
-function historic(){
+function historic(memory = {}, compute = {}, time=[]){
     const colors = ['#5470C6', '#91CC75', '#EE6666'];
     option = {
         color: colors,
@@ -448,13 +448,14 @@ function historic(){
                 axisTick: {
                     alignWithLabel: true
                 },
-                data: ['18:30', '18:40', '18:50', '19:00', '19:10', '19:20', '19:30', '19:40', '19:50', '20:00', '20:10', '20:20'],
+                data: time,
             }
         ],
         yAxis: [
             {
+                max: memory.max,
                 type: 'value',
-                name: 'Memory GiB',
+                name: `Memory (${memory.unit ?? 'GiB'})`,
                 position: 'right',
                 alignTicks: true,
                 axisLine: {
@@ -468,8 +469,9 @@ function historic(){
                 }
             },
             {
+                max: compute.max,
                 type: 'value',
-                name: 'CPU (vCores)',
+                name: `CPU (${compute.unit ?? 'vCores'})`,
                 position: 'left',
                 alignTicks: true,
                 axisLine: {
@@ -489,15 +491,13 @@ function historic(){
                 type: 'line',
                 animationDuration: 300,
                 yAxisIndex: 1,
-                data: [2.0, 2.2, 3.3, 4.5, 6.3, 10.2, 20.3, 23.4, 23.0, 16.5, 12.0, 6.2]
+                data: compute.data
             },
             {
                 name: 'Memory',
                 type: 'line',
                 animationDuration: 300,
-                data: [
-                    2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 150.6, 170.0, 96.4, 83.3
-                ]
+                data: memory.data
             }
         ]
     };
