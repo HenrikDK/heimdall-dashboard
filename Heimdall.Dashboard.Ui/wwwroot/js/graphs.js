@@ -504,25 +504,34 @@ function historic(){
     return option;
 }
 
-function current(type = ''){
+function current(type = '', unit = '', usageValues= {}, requestsValues = {}, limitsValues = {}){
     let usage = []
     let requests = []
     let limits = []
 
-    usage = [
-        { value: 40, name: 'Usage', formatted: '15.5 vCores' },
-        { value: 60, name: '', emphasis :{disabled:true}, itemStyle: { color: 'lightgray', opacity:0.2 } },
-    ]
+    usage = []
+    let usageUnits = usageValues.units ?? 0;
+    let usagePct = usageValues.pct ?? 0; 
+    if (usagePct > 0){
+        usage.push({ value: usagePct, name: 'Usage', formatted: `${usageUnits} ${unit}` })
+    }
+    usage.push({ value: 100 - usagePct, name: '', emphasis :{disabled:true}, itemStyle: { color: 'lightgray', opacity:0.2 } })
+    
+    requests = []
+    let requestUnits = requestsValues.units ?? 0;
+    let requestPct = requestsValues.pct ?? 0;
+    if (requestPct > 0){
+        requests.push({ value: requestPct, name: 'Requests', formatted: `${requestUnits} ${unit}` })
+    }
+    requests.push({ value: 100 - requestPct, name: '', emphasis :{disabled:true}, itemStyle: { color: 'lightgray', opacity:0.2 } })
 
-    requests = [
-        { value: 64, name: 'Requests', formatted: '29 vCores' },
-        { value: 37, name: '', emphasis :{disabled:true}, itemStyle: { color: 'lightgray', opacity:0.2 } },
-    ]
-
-    limits = [
-        { value: 95, name: 'Limits', formatted: '55 vCores' },
-        { value: 5, name: '', emphasis :{disabled:true}, itemStyle: { color: 'lightgray', opacity:0.2 } }
-    ];
+    limits = [];
+    let limitsPct = limitsValues.pct ?? 0;
+    let limitsUnits = limitsValues.units ?? 0
+    if (limitsPct > 0){
+        limits.push({ value: limitsPct, name: 'Limits', formatted: `${limitsUnits} ${unit}`})
+    }
+    limits.push({ value: 100 - limitsPct, name: '', emphasis :{disabled:true}, itemStyle: { color: 'lightgray', opacity:0.2 } })
 
     let data = [...limits, ...requests, ...usage];
 
