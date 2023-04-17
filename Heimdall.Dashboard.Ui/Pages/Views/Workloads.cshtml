@@ -1,10 +1,10 @@
-<template id="workloads">
+﻿<template id="workloads">
     <div class="pl-2 pr-4 w-100">
         <div class="flex my-2 items-center">
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Workloads</span>
         </div>
         
-        <vue-table :columns="columns" :initial-sort="sorting" :data="workloads" :namespaces="namespaces" :search="search"></vue-table>
+        <vue-table :columns="columns" :initial-sort="sorting" :data="workloads" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
         
     </div>
 </template>
@@ -136,6 +136,7 @@
                     { header:"Age", name:"metadata.creationTimestamp", formatter:formatWorkloadAge, sorter:"text", classes:"w-40" },
                     { header:"Conditions", field:"status", formatter:formatConditions, conditions:true, canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-44" },                    
                 ],
+                loading: true,                
                 sorting: [],
                 clusterWorkloads: null,
                 clusterCronJobs: null,
@@ -168,6 +169,7 @@
                 }
                 
                 this.workloads = result;
+                this.loading = false;
             }
         },
         watch: {
