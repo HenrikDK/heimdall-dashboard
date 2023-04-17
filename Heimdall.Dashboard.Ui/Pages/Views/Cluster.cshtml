@@ -1,4 +1,4 @@
-<template id="cluster">
+﻿<template id="cluster">
     <div class="pl-2 pr-4 w-100">
 
         <div class="flex my-2 items-center">
@@ -195,6 +195,17 @@
               let usage = {pct: usagePct.toFixed(2), units: (usageValue / 1024 / 1024 / 1024).toFixed(2) };
               this.charts.cluster.memory = current('Memory', 'GiB', usage, requests, limits);
           },
+          async updateMetrics(){
+            if (this.nodes.length > 0)
+            {
+                var host = window.location.origin;
+                streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'kube-memory-stats', { nodes: this.nodes }), j => this.metrics.kubeMemory = j.data.result);
+                streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'container-memory', { nodes: this.nodes }), j => this.metrics.containerMemory = j.data.result);
+                streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'node-memory-stats', { nodes: this.nodes }), j => this.metrics.nodeMemory = j.data.result);
+                streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'kube-cpu-stats', { nodes: this.nodes }), j => this.metrics.kubeCpu = j.data.result);
+                streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'node-cpu-stats', { nodes: this.nodes }), j => this.metrics.nodeCpu = j.data.result);
+            }
+          }
         },
         watch: {
             'cluster.pods': function () { this.updateClusterPods(); },
@@ -218,20 +229,14 @@
                 this.updateClusterDaemonSets();
             },            
             nodes(){
-              if (this.nodes.length > 0)
-              {
-                  var host = window.location.origin;
-                  streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'kube-memory-stats', { nodes: this.nodes }), j => this.metrics.kubeMemory = j.data.result);
-                  streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'container-memory', { nodes: this.nodes }), j => this.metrics.containerMemory = j.data.result);
-                  streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'node-memory-stats', { nodes: this.nodes }), j => this.metrics.nodeMemory = j.data.result);
-                  streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'kube-cpu-stats', { nodes: this.nodes }), j => this.metrics.kubeCpu = j.data.result);
-                  streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'node-cpu-stats', { nodes: this.nodes }), j => this.metrics.nodeCpu = j.data.result);
-              }
+                this.updateMetrics();
             }
         },
         props: ['namespaces', 'nodes'],
         async mounted() {
           var host = window.location.origin;
+          
+          this.updateMetrics();
           
           streamResults(host + '/k8s/api/v1/pods', j => this.cluster.pods = j);
           streamResults(host + '/k8s/apis/apps/v1/deployments', j => this.cluster.deployments = j)
