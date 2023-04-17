@@ -150,14 +150,56 @@
               
           },
           async updateCpu() {
+              let capacity = getMetricLastPoints(this.metrics.kubeCpu, 'kube_node_status_capacity');
+              let requestValue = getMetricLastPoints(this.metrics.kubeCpu, 'kube_pod_container_resource_requests');
+              let requestPct = requestValue / capacity * 100;
+              let requests = {pct: requestPct.toFixed(2), units: requestValue.toFixed(2) };
               
+              let limitValue = getMetricLastPoints(this.metrics.kubeCpu, 'kube_pod_container_resource_limits');
+              let limitPct = limitValue / capacity * 100;
+              if (limitPct > 100){
+                  limitPct = 100;
+              }
+              let limits = {pct: limitPct.toFixed(2), units: limitValue.toFixed(2) };
+              
+              let usageValue = getMetricLastPoints(this.metrics.nodeCpu);
+              let usagePct = usageValue / capacity * 100;
+              let usage = {pct: usagePct.toFixed(2), units: usageValue.toFixed(2) };
+              
+              this.charts.cluster.cpus = current('CPU', 'vCores', usage, requests, limits);
           },
           async updateMemory() {
               
+              let capacity = getMetricLastPoints(this.metrics.kubeMemory, 'kube_node_status_capacity');
+              let requestValue = getMetricLastPoints(this.metrics.kubeMemory, 'kube_pod_container_resource_requests');
+              let requestPct = requestValue / capacity * 100;
+              let requests = {pct: requestPct.toFixed(2), units: (requestValue / 1024 / 1024 / 1024).toFixed(2) };
+              
+              let limitValue = getMetricLastPoints(this.metrics.kubeMemory, 'kube_pod_container_resource_limits');
+              let limitPct = limitValue / capacity * 100;
+              if (limitPct > 100){
+                  limitPct = 100;
+              }
+              let limits = {pct: limitPct.toFixed(2), units: (limitValue / 1024 / 1024 / 1024).toFixed(2) };              
+              
+              let usageValue = getMetricLastPoints(this.metrics.nodeMemory);
+              let usagePct = usageValue / capacity * 100;
+              let usage = {pct: usagePct.toFixed(2), units: (usageValue / 1024 / 1024 / 1024).toFixed(2) };
+              this.charts.cluster.memory = current('Memory', 'GiB', usage, requests, limits);
           },
         },
-        
         watch: {
+            'cluster.pods': function () { this.updateClusterPods(); },
+            'cluster.deployments': function () { this.updateClusterDeployments(); },
+            'cluster.jobs':function () { this.updateClusterJobs(); },
+            'cluster.cronJobs':function () { this.updateClusterCronJobs(); },
+            'cluster.statefulSets': function () { this.updateClusterStatefulSets(); },
+            'cluster.replicaSets': function () { this.updateClusterReplicaSets(); },
+            'cluster.daemonSets': function () { this.updateClusterDaemonSets(); },
+            'metrics.nodeCpu': function () {this.updateCpu(); },
+            'metrics.kubeCpu': function () {this.updateCpu(); },
+            'metrics.kubeMemory': function () {this.updateMemory(); },
+            'metrics.nodeMemory': function () {this.updateMemory(); },
             namespaces() {
                 this.updateClusterPods();
                 this.updateClusterDeployments();
@@ -167,27 +209,6 @@
                 this.updateClusterReplicaSets();
                 this.updateClusterDaemonSets();
             },            
-            'cluster.pods':function () {
-                this.updateClusterPods();
-            },
-            'cluster.deployments': function () {
-                this.updateClusterDeployments();
-            },
-            'cluster.jobs':function () {
-                this.updateClusterJobs();            
-            },
-            'cluster.cronJobs':function () {
-                this.updateClusterCronJobs();
-            },
-            'cluster.statefulSets': function () {
-                this.updateClusterStatefulSets();
-            },
-            'cluster.replicaSets': function () {
-                this.updateClusterReplicaSets();
-            },
-            'cluster.daemonSets': function () {
-                this.updateClusterDaemonSets();
-            },
             nodes(){
               if (this.nodes.length > 0)
               {
@@ -213,22 +234,6 @@
           streamResults(host + '/k8s/apis/batch/v1/jobs', j => this.cluster.jobs = j)          
         }
     };
-    
-/*
-export function getMetricLastPoints<Keys extends string>(metrics: Partial<Record<Keys, MetricData>>): Partial<Record<Keys, number>> {
-  return object.fromEntries(
-    object.entries(metrics)
-      .map(([metricName, metric]) => {
-        try {
-          return [metricName, +metric.data.result[0].values.slice(-1)[0][1]] as const;
-        } catch {
-          return undefined;
-        }
-      })
-      .filter(isDefined),
-  );
-}    
-*/
-    
+        
     routes.push({path:'/', name:'cluster',  component: components["cluster"]})
 </script>
