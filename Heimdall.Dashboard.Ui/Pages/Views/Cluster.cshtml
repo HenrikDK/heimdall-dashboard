@@ -152,7 +152,7 @@
               
               let memoryCapacity = getMetricLastPoints(this.metrics.kubeMemory, 'kube_node_status_capacity');
               let memoryUsage = getMetricSeries(this.metrics.nodeMemory);
-              // due to the different queries memory usage is 2 entries longer than compute, so we drop the first 2 (oldest) entries
+              // due to query differences, memory usage result is 2 entries longer than compute usage, so we drop the first 2 (oldest) entries
               memoryUsage.shift();
               memoryUsage.shift();
               let time = memoryUsage.map(x => luxon.DateTime.fromMillis(x[0] * 1000).toFormat('HH:mm'));
