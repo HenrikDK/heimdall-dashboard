@@ -1,10 +1,10 @@
-<template id="ingresses">
+﻿<template id="ingresses">
     <div class="pl-2 pr-4 w-100">
         <div class="flex my-2 items-center">
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Ingresses</span>
         </div>
     
-        <vue-table :columns="columns" :initial-sort="sorting" :data="ingresses" :namespaces="namespaces" :search="search"></vue-table>
+        <vue-table :columns="columns" :initial-sort="sorting" :data="ingresses" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
       
     </div>
 </template>
@@ -82,6 +82,7 @@
                      status:{ loadBalancer:{ingress:[{ip: "192.2.0.1" }]}}
                     },
                 ],
+                loading: true,
                 sorting:[
                     {header:'Name', sort:'desc'}
                 ],
@@ -108,6 +109,7 @@
                 }
                 
                 this.ingresses = result;
+                this.loading = false;
             }
         },
         watch: {
