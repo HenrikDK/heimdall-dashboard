@@ -222,7 +222,12 @@
             return {
                 initOptions: { renderer: "svg" },
                 pod: {},
-                metrics: [],
+                metrics: {
+                    cpuUsage: {},
+                    cpuLimits: {},
+                    memoryUsage: {},
+                    memoryLimits: {},
+                },
                 events: [],
                 clusterEvents: [],
                 isDark: isDark
@@ -279,6 +284,13 @@
             var host = window.location.origin;
             let name = this.$route.params.name;
             let namespace = this.$route.params.namespace;
+            let options = { pods: name, namespace: namespace };
+
+            streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'memory-usage', options), j => this.metrics.memoryUsage = j.data.result);
+            streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'memory-limits', options), j => this.metrics.memoryLimits = j.data.result);
+
+            streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-usage', options), j => this.metrics.cpuUsage = j.data.result);
+            streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-limits', options), j => this.metrics.cpuLimits = j.data.result);
             
             streamResult(host + `/k8s/api/v1/namespaces/${namespace}/pods`, name, j => this.pod = j);
             streamResults(host + `/k8s/api/v1/namespaces/${namespace}/events`, j => this.clusterEvents = j)
