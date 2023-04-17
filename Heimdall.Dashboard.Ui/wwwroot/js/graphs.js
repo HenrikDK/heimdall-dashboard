@@ -559,9 +559,9 @@ function current(type = '', unit = '', usageValues= {}, requestsValues = {}, lim
         legend: {
             top:'75%',
             data: [
-                'Requests',
-                'Limits',
                 'Usage',
+                'Requests',
+                'Limits'
             ],
             formatter: formatter = function (name) {
                 let value = data
