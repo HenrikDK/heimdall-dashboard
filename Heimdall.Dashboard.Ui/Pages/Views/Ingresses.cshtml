@@ -1,4 +1,4 @@
-﻿<template id="ingresses">
+<template id="ingresses">
     <div class="pl-2 pr-4 w-100">
         <div class="flex my-2 items-center">
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Ingresses</span>
@@ -36,18 +36,18 @@
     function formatHosts(row){
         if (!row.spec.rules) return {content: '', classes: ''} 
         
-        let content = '<div class="flex">';
+        let content = '<div class="flex flex-col">';
         let rules = row.spec.rules
         for (let i = 0; i < rules.length; i++) {
             let paths = rules[i].http.paths
             for (let j = 0; j < paths.length; j++) {
                 if (i === 0){
-                    content += `<div class="underline text-blue-500"><a target="_blank" href="https://${rules[i].host + paths[j].path}">https://${rules[i].host + paths[j].path}</a></div>`
+                    content += `<div class="flex"><div class="underline text-blue-500"><a target="_blank" href="https://${rules[i].host + paths[j].path}">https://${rules[i].host + paths[j].path}</a></div>`
                 } else {
                     content += `<div>${paths[j].path}</div>`;    
                 }
                 
-                content += `<div class="mx-2"> -> </div><div>${paths[j].backend.service.name + ':' + paths[j].backend.service.port.number}</div>`;
+                content += `<div class="mx-2"> -> </div><div>${paths[j].backend.service.name + ':' + paths[j].backend.service.port.number}</div></div>`;
             }
         }
         
