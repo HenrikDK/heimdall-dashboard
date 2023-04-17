@@ -125,3 +125,19 @@ function getMetricQuery(type = '', name = '', options = {}) {
     
     return ''
 }
+
+function getMetricLastPoints(data, metric= '') {
+    let metrics = data
+    if (metric.length > 0){
+        metrics = metrics.filter(x => x.metric["__name__"] === metric)
+    }
+    let result = metrics.map(x => {
+        try {
+            return x.values.slice(-1)[0][1];
+        } catch {
+            return undefined;
+        }
+    });
+
+    return parseFloat(result[0]);
+}
