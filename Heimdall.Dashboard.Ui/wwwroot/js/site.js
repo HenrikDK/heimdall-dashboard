@@ -1,4 +1,4 @@
-function toHuman(dur) {
+﻿function toHuman(dur) {
     let result = "";
     if (dur.values.years && Math.abs(dur.values.years) > 0)
     {
@@ -74,7 +74,7 @@ function getMetric(type, name, options = {}){
     let begin = end.minus({ hours: 1 });
     
     let result = `/query_range?start=${begin.toUTC().toISO()}&end=${end.toUTC().toISO()}&step=60s&query=`;
-    result += getMetricQuery(type, name, options)
+    result += encodeURIComponent(getMetricQuery(type, name, options))
     return result;
 }
 
