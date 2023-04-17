@@ -95,30 +95,26 @@ function getMetricQuery(type = '', name = '', options = {}) {
                     return `sum({__name__=~"kube_pod_container_resource_requests|kube_pod_container_resource_limits|kube_node_status_capacity|kube_node_status_allocatable", kubernetes_node=~"${options.nodes}", resource="cpu"}) by (__name__, component)`;
             }
             break;
-        case "pods":
+        case "pod":
             switch (name) {
-                case "cpuUsage":
-                    return `sum(rate(container_cpu_usage_seconds_total{container!="POD",container!="",pod=~"${options.pods}",namespace="${options.namespace}"}[1m])) by (${options.selector})`;
-                case "cpuRequests":
-                    return `sum(kube_pod_container_resource_requests{pod=~"${options.pods}",resource="cpu",namespace="${options.namespace}"}) by (${options.selector})`;
-                case "cpuLimits":
-                    return `sum(kube_pod_container_resource_limits{pod=~"${options.pods}",resource="cpu",namespace="${options.namespace}"}) by (${options.selector})`;
-                case "memoryUsage":
-                    return `sum(container_memory_working_set_bytes{container!="POD",container!="",pod=~"${options.pods}",namespace="${options.namespace}"}) by (${options.selector})`;
-                case "memoryRequests":
-                    return `sum(kube_pod_container_resource_requests{pod=~"${options.pods}",resource="memory",namespace="${options.namespace}"}) by (${options.selector})`;
-                case "memoryLimits":
-                    return `sum(kube_pod_container_resource_limits{pod=~"${options.pods}",resource="memory",namespace="${options.namespace}"}) by (${options.selector})`;
-                case "fsUsage":
-                    return `sum(container_fs_usage_bytes{container!="POD",container!="",pod=~"${options.pods}",namespace="${options.namespace}"}) by (${options.selector})`;
-                case "fsWrites":
-                    return `sum(rate(container_fs_writes_bytes_total{container!="", pod=~"${options.pods}", namespace="${options.namespace}"}[1m])) by (${options.selector})`;
-                case "fsReads":
-                    return `sum(rate(container_fs_reads_bytes_total{container!="", pod=~"${options.pods}", namespace="${options.namespace}"}[1m])) by (${options.selector})`;
-                case "networkReceive":
-                    return `sum(rate(container_network_receive_bytes_total{pod=~"${options.pods}",namespace="${options.namespace}"}[1m])) by (${options.selector})`;
-                case "networkTransmit":
-                    return `sum(rate(container_network_transmit_bytes_total{pod=~"${options.pods}",namespace="${options.namespace}"}[1m])) by (${options.selector})`;
+                case "cpu-usage":
+                    return `sum(rate(container_cpu_usage_seconds_total{container!="POD",container!="",pod=~"${options.pods}",namespace="${options.namespace}"}[3m])) by (pod)`;
+                case "cpu-limits":
+                    return `sum(kube_pod_container_resource_limits{pod=~"${options.pods}",resource="cpu",namespace="${options.namespace}"}) by (pod)`;
+                case "memory-usage":
+                    return `sum(container_memory_working_set_bytes{container!="POD",container!="",pod=~"${options.pods}",namespace="${options.namespace}"}) by (pod)`;
+                case "memory-limits":
+                    return `sum(kube_pod_container_resource_limits{pod=~"${options.pods}",resource="memory",namespace="${options.namespace}"}) by (pod)`;
+                case "fs-usage":
+                    return `sum(container_fs_usage_bytes{container!="POD",container!="",pod=~"${options.pods}",namespace="${options.namespace}"}) by (pod)`;
+                case "fs-writes":
+                    return `sum(rate(container_fs_writes_bytes_total{container!="", pod=~"${options.pods}", namespace="${options.namespace}"}[3m])) by (pod)`;
+                case "fs-reads":
+                    return `sum(rate(container_fs_reads_bytes_total{container!="", pod=~"${options.pods}", namespace="${options.namespace}"}[3m])) by (pod)`;
+                case "network-received":
+                    return `sum(rate(container_network_receive_bytes_total{pod=~"${options.pods}",namespace="${options.namespace}"}[3m])) by (pod)`;
+                case "network-sent":
+                    return `sum(rate(container_network_transmit_bytes_total{pod=~"${options.pods}",namespace="${options.namespace}"}[3m])) by (pod)`;
             }
             break;
     }
