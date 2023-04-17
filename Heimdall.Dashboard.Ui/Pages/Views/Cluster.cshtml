@@ -147,7 +147,28 @@
               this.charts.workloads.daemonsets = workload('Daemon Sets', running, pending);
           },
           async updateHistory() {
+              if (!this.metrics.kubeMemory || this.metrics.kubeMemory?.length === 0 || !this.metrics.nodeMemory || this.metrics.nodeMemory?.length === 0) return;
+              if (!this.metrics.nodeCpu || this.metrics.nodeCpu?.length === 0 || !this.metrics.kubeCpu || this.metrics.kubeCpu?.length === 0) return;
               
+              let memoryCapacity = getMetricLastPoints(this.metrics.kubeMemory, 'kube_node_status_capacity');
+              let memoryUsage = getMetricSeries(this.metrics.nodeMemory);
+              // due to the different queries memory usage is 2 entries longer than compute, so we drop the first 2 (oldest) entries
+              memoryUsage.shift();
+              memoryUsage.shift();
+              let time = memoryUsage.map(x => luxon.DateTime.fromMillis(x[0] * 1000).toFormat('HH:mm'));
+              let memory = {
+                  max: (memoryCapacity / 1024 / 1024 / 1024).toFixed(2),
+                  data: memoryUsage.map(x => (x[1] / 1024 / 1024 / 1024).toFixed(2))
+              }
+              
+              let computeCapacity = getMetricLastPoints(this.metrics.kubeCpu, 'kube_node_status_capacity');
+              let computeUsage = getMetricSeries(this.metrics.nodeCpu);
+              let compute = {
+                  max: computeCapacity.toFixed(2),
+                  data: computeUsage.map(x => parseFloat(x[1]).toFixed(2))
+              }
+              
+              this.charts.cluster.performance = historic(memory, compute, time)              
           },
           async updateCpu() {
               if (!this.metrics.nodeCpu || this.metrics.nodeCpu?.length === 0 || !this.metrics.kubeCpu || this.metrics.kubeCpu?.length === 0) return;
@@ -210,10 +231,22 @@
             'cluster.statefulSets': function () { this.updateClusterStatefulSets(); },
             'cluster.replicaSets': function () { this.updateClusterReplicaSets(); },
             'cluster.daemonSets': function () { this.updateClusterDaemonSets(); },
-            'metrics.nodeCpu': function () {this.updateCpu(); },
-            'metrics.kubeCpu': function () {this.updateCpu(); },
-            'metrics.kubeMemory': function () {this.updateMemory(); },
-            'metrics.nodeMemory': function () {this.updateMemory(); },
+            'metrics.nodeCpu': function () {
+                this.updateCpu(); 
+                this.updateHistory();
+                },
+            'metrics.kubeCpu': function () {
+                this.updateCpu();
+                this.updateHistory();
+                },
+            'metrics.kubeMemory': function () {
+                this.updateMemory();
+                this.updateHistory();
+                },
+            'metrics.nodeMemory': function () {
+                this.updateMemory();
+                this.updateHistory();
+                },
             namespaces() {
                 this.updateClusterPods();
                 this.updateClusterDeployments();
