@@ -94,6 +94,10 @@ app.UseProxies(proxies =>
                 context.Request.Headers.Add("Authorization", $"Basic {token}");
             }
 
+            if (!string.IsNullOrEmpty(mimirOrg))
+            {
+                context.Request.Headers.Add("X-Scope-OrgID", mimirOrg);
+            }
             var qs = context.Request.QueryString.Value;
             var url = context.Request.Path.ToString().Replace("/prometheus/", "/");
             return $"{prometheus}{url}{qs}";
