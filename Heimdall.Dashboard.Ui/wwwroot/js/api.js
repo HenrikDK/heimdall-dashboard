@@ -1,6 +1,6 @@
 ﻿function streamMetrics(url, cb) {
     let isApiRequestInProgress = false;
-    const handel = setInterval(getMetrics, 10000);
+    const handel = setInterval(getMetrics, 30000);
     getMetrics();
 
     async function getMetrics() {
