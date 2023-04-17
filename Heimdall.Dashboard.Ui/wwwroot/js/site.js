@@ -1,4 +1,4 @@
-﻿function toHuman(dur) {
+function toHuman(dur) {
     let result = "";
     if (dur.values.years && Math.abs(dur.values.years) > 0)
     {
@@ -83,7 +83,7 @@ function getMetricQuery(type = '', name = '', options = {}) {
         case "cluster":
             switch (name) {
                 case "node-memory-stats":
-                    return `sum({__name__=~"node_memory_MemTotal_bytes|node_memory_MemFree_bytes|node_memory_Buffers_bytes|node_memory_Cached_bytes", kubernetes_node=~"${options.nodes}"}) by (__name__, component)`;
+                    return `sum(node_memory_MemTotal_bytes{kubernetes_node=~"${options.nodes}"} - (node_memory_MemFree_bytes{kubernetes_node=~"${options.nodes}"} + node_memory_Buffers_bytes{kubernetes_node=~"${options.nodes}"} + node_memory_Cached_bytes{kubernetes_node=~"${options.nodes}"})) by (component)`;
                 case "container-memory":
                     return `sum(container_memory_working_set_bytes{container!="POD",container!="",instance=~"${options.nodes}"}) by (component)`;
                 case "kube-memory-stats":

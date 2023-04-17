@@ -185,12 +185,7 @@
               }
               let limits = {pct: limitPct.toFixed(2), units: (limitValue / 1024 / 1024 / 1024).toFixed(2) };              
               
-              let memTotal = getMetricLastPoints(this.metrics.nodeMemory, 'node_memory_MemTotal_bytes');
-              let memBuffers = getMetricLastPoints(this.metrics.nodeMemory, 'node_memory_Buffers_bytes');
-              let memCache = getMetricLastPoints(this.metrics.nodeMemory, 'node_memory_Cached_bytes');
-              let memFree = getMetricLastPoints(this.metrics.nodeMemory, 'node_memory_MemFree_bytes');
-              
-              let usageValue = memTotal - (memBuffers + memCache + memFree);
+              let usageValue = getMetricLastPoints(this.metrics.nodeMemory);              
               let usagePct = usageValue / capacity * 100;
               let usage = {pct: usagePct.toFixed(2), units: (usageValue / 1024 / 1024 / 1024).toFixed(2) };
               this.charts.cluster.memory = current('Memory', 'GiB', usage, requests, limits);
