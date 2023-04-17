@@ -4,7 +4,7 @@
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pods</span>
         </div>
         
-        <vue-table :columns="columns" :initial-sort="sorting" :data="pods" :namespaces="namespaces" :search="search"></vue-table>
+        <vue-table :columns="columns" :initial-sort="sorting" :data="pods" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
         
     </div>
 </template>
@@ -115,6 +115,7 @@
                      status: { phase: 'Running', 
                      containerStatuses: [{ restartCount: 3, state: {running: {}}}, { restartCount: 0, state: {terminated: {}}}] }}
                 ],
+                loading: true,                
                 columns:[
                     { header:"Name", name:"metadata.name", classes: "truncate grow shrink 2xl:w-[41rem] xl:w-[22rem] lg:w-[16rem]"},
                     { header:"Namespace", name:"metadata.namespace", formatter:formatNamespace, namespace: true, classes:"truncate 2xl:w-52 xl:w-44 lg:w-32" },
@@ -123,7 +124,7 @@
                     { header:"Age", name:"metadata.creationTimestamp", formatter:formatPodAge, classes:"w-40" },
                     { header:"Status", name:"status.phase", formatter:formatStatus, canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-40" },
                 ],
-                sorting: [{header:'Name', sort:'desc'}],
+                sorting: [{header:'Name', sort:'asc'}],
                 initOptions: { renderer: "svg" },
                 clusterPods: {},
                 isDark: isDark
@@ -143,6 +144,7 @@
                 }
                 
                 this.pods = result;
+                this.loading = false;
             }
         },
         watch: {
