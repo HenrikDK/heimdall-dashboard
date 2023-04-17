@@ -187,17 +187,22 @@
             },
             'cluster.daemonSets': function () {
                 this.updateClusterDaemonSets();
+            },
+            nodes(){
+              if (this.nodes.length > 0)
+              {
+                  var host = window.location.origin;
+                  streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'kube-memory-stats', { nodes: this.nodes }), j => this.metrics.kubeMemory = j.data.result);
+                  streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'container-memory', { nodes: this.nodes }), j => this.metrics.containerMemory = j.data.result);
+                  streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'node-memory-stats', { nodes: this.nodes }), j => this.metrics.nodeMemory = j.data.result);
+                  streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'kube-cpu-stats', { nodes: this.nodes }), j => this.metrics.kubeCpu = j.data.result);
+                  streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'node-cpu-stats', { nodes: this.nodes }), j => this.metrics.nodeCpu = j.data.result);
+              }
             }
         },
         props: ['namespaces', 'nodes'],
         async mounted() {
           var host = window.location.origin;
-          
-          streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'kube-memory-stats', { nodes: this.nodes }), j => this.metrics.kubeMemory = j);
-          streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'container-memory', { nodes: this.nodes }), j => this.metrics.containerMemory = j);
-          streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'node-memory-stats', { nodes: this.nodes }), j => this.metrics.nodeMemory = j);
-          streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'kube-cpu-stats', { nodes: this.nodes }), j => this.metrics.kubeCpu = j);
-          streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'node-cpu-stats', { nodes: this.nodes }), j => this.metrics.nodeCpu = j);
           
           streamResults(host + '/k8s/api/v1/pods', j => this.cluster.pods = j);
           streamResults(host + '/k8s/apis/apps/v1/deployments', j => this.cluster.deployments = j)
