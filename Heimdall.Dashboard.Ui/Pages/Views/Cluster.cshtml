@@ -136,7 +136,7 @@
           },
           async updateClusterReplicaSets() {
               let filtered = this.filterNamespace(this.cluster.replicaSets);
-              let running = filtered?.filter(x => x.status?.replicas === x.status?.readyReplicas).length ?? 0;
+              let running = filtered?.filter(x => x.status?.replicas === 0 || x.status?.replicas === x.status?.readyReplicas).length ?? 0;
               let pending = (filtered?.length ?? 0) - running;
               this.charts.workloads.replicasets = workload('Replica Sets', running, pending);
           },
