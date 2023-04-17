@@ -34,7 +34,7 @@
           </div>
       </div>
       <div class="overflow-y-scroll h-[82.5vh] text-sm text-gray-700 dark:text-gray-400 flex flex-col w-full dark:divide-zinc-700 dark:[color-scheme:dark]"> <!-- body -->
-        <template v-for="row in rows">
+        <template v-if="!loading" v-for="row in rows">
           <optional-link :row="row">
             <div v-if="!row?.filtered && !row?.nsFiltered"
                  class="flex w-full hover:bg-blue-100 dark:hover:bg-zinc-700">
@@ -90,6 +90,11 @@
               </template>
             </div>
           </optional-link>
+        </template>
+        <template v-else>
+          <div class="mt-8 flex justify-center">
+            <spinner></spinner>
+          </div>
         </template>
       </div>
     </div>
@@ -173,7 +178,7 @@
         this.updateTable();
       }
     },
-    props: ['data', 'columns', 'initialSort', 'namespaces', 'search'],
+    props: ['data', 'columns', 'initialSort', 'namespaces', 'loading', 'search'],
     mounted() {
       if (this.$props.initialSort !== undefined && this.$props.initialSort.length > 0){
         this.$data.sorting = [...this.$props.initialSort];
