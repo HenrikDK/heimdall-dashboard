@@ -1,4 +1,4 @@
-﻿<template id="workloads">
+<template id="workloads">
     <div class="pl-2 pr-4 w-100">
         <div class="flex my-2 items-center">
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Workloads</span>
@@ -159,7 +159,7 @@
                 if (!this.clusterJobs) return;
                 if (!this.clusterStatefulSets) return;
                 
-                let items = [this.clusterWorkloads, this.clusterDaemonSets, this.clusterCronJobs, this.clusterJobs, this.clusterStatefulSets];
+                let items = [this.clusterWorkloads, this.clusterDaemonSets.filter(x => x.status.desiredNumberScheduled > 0), this.clusterCronJobs, this.clusterJobs, this.clusterStatefulSets];
                 
                 let result = items.flat().filter(x => !!x);
                 
