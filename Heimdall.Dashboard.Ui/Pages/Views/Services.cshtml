@@ -4,7 +4,7 @@
             <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Services</span>
         </div>
         
-        <vue-table :columns="columns" :initial-sort="sorting" :data="services" :namespaces="namespaces" :search="search"></vue-table>
+        <vue-table :columns="columns" :initial-sort="sorting" :data="services" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
         
     </div>
 </template>
@@ -62,6 +62,7 @@
                     {header:"Kube-DNS", name:"kubeDNS", formatter:formatKubeDns, classes: 'truncate grow shrink'},
                     {header:"Age", name:"age", formatter:formatServiceAge, sorter:"text", classes:"w-40"},                    
                 ],
+                loading: true,                
                 sorting: [{header:'Name', sort:'desc'}],
                 clusterServices: null,
             }
@@ -76,6 +77,7 @@
             }
                         
             this.services = result;
+            this.loading = false;
           }
         },
         watch: {
