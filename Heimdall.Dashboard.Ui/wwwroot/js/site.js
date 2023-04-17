@@ -68,12 +68,12 @@ function toHumanValues(dur) {
     return result
 }
 
-function getMetric(type, name, options = {}){
+function getMetric(type, name, options = {}, step = '60s'){
     var DT = luxon.DateTime;
     let end = DT.now();
     let begin = end.minus({ hours: 1 });
     
-    let result = `/query_range?start=${begin.toUTC().toISO()}&end=${end.toUTC().toISO()}&step=60s&query=`;
+    let result = `/query_range?start=${begin.toUTC().toISO()}&end=${end.toUTC().toISO()}&step=${step}&query=`;
     result += encodeURIComponent(getMetricQuery(type, name, options))
     return result;
 }
@@ -140,4 +140,20 @@ function getMetricLastPoints(data, metric= '') {
     });
 
     return parseFloat(result[0]);
+}
+
+function getMetricSeries(data, metric= '') {
+    let metrics = data
+    if (metric.length > 0){
+        metrics = metrics.filter(x => x.metric["__name__"] === metric)
+    }
+    let result = metrics.map(x => {
+        try {
+            return x.values;
+        } catch {
+            return undefined;
+        }
+    });
+
+    return result[0];
 }
