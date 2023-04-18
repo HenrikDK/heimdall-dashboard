@@ -145,12 +145,17 @@
                 <div class="flex mb-2">
                     <div class="px-2 py-1 w-1/4">Last Status</div>
                     <div class="py-1 w-3/4">
-                        <div v-for="s in getContainerStatusObjects(c.name, pod)">
-                            <div>Terminated</div>
-                            <div>Reason: {{ s.lastState.terminated.reason }} - Exit code: {{ s.lastState.terminated.exitCode }}</div>
-                            <div>Started At: {{ toLocal(s.lastState.terminated.startedAt) }} ({{ toHuman(s.lastState.terminated.startedAt) }})</div>
-                            <div>Finished At: {{ toLocal(s.lastState.terminated.finishedAt) }} ({{ toHuman(s.lastState.terminated.finishedAt) }})</div>
-                        </div>
+                        <template v-for="s in getContainerStatusObjects(c.name, pod)">
+                            <div v-if="s.lastState.terminated">
+                                <div>Terminated</div>
+                                <div>Reason: {{ s.lastState?.terminated?.reason }} - Exit code: {{ s.lastState?.terminated?.exitCode }}</div>
+                                <div>Started At: {{ toLocal(s.lastState.terminated.startedAt) }} ({{ toHuman(s.lastState.terminated.startedAt) }})</div>
+                                <div>Finished At: {{ toLocal(s.lastState.terminated.finishedAt) }} ({{ toHuman(s.lastState.terminated.finishedAt) }})</div>
+                            </div>
+                            <div v-else-if="s.lastState.waiting">
+                                <div>Waiting</div>
+                            </div>
+                        </template>
                     </div>
                 </div>
                 <div v-if="c.resources?.requests?.cpu" class="flex mb-2">
