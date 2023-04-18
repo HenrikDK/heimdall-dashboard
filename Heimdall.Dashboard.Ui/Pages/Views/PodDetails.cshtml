@@ -9,11 +9,11 @@
     
     <div class="flex justify-around mb-4 mt-1">
         <div class="wide-details-graph">
-            <v-chart :option="podCpu" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+            <v-chart :option="charts.podCpu" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
         </div>
         
         <div class="wide-details-graph">
-             <v-chart :option="podMemory" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+             <v-chart :option="charts.podMemory" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
         </div>
     </div>
 
@@ -222,11 +222,15 @@
             return {
                 initOptions: { renderer: "svg" },
                 pod: {},
-                metrics: {
-                    cpuUsage: {},
-                    cpuLimits: {},
-                    memoryUsage: {},
-                    memoryLimits: {},
+                metrics:{
+                    cpuUsage: null,
+                    cpuLimits: null,
+                    memoryUsage: null,
+                    memoryLimits: null,
+                },
+                charts: {
+                    podCpu: historicCpu(),
+                    podMemory: historicMemory(),
                 },
                 events: [],
                 clusterEvents: [],
@@ -234,10 +238,6 @@
             }
         },
         props: ['namespaces', 'search', 'filters'],        
-        computed: {
-            podCpu: () => historicCpu(),
-            podMemory: () => historicMemory(),
-        },
         methods: {
             getContainerStatusObjects(name, pod){
                 let containers = pod?.status?.containerStatuses?.filter(x => x.name === name);
@@ -272,13 +272,41 @@
                     var newDatetime = DT.fromISO(String(value));
                     return toHumanValues(newDatetime.diff(date,  unit)).join(' ') + ' Ago';
                 }
+            },
+            updateCpu() {
+              if (!this.metrics.cpuUsage || this.metrics.cpuUsage?.length === 0 || !this.metrics.cpuLimits || this.metrics.cpuLimits?.length === 0) return;
+              
+              let capacitySeries = getMetricSeries(this.metrics.cpuLimits);
+              let usageSeries = getMetricSeries(this.metrics.cpuUsage);
+
+              let time = usageSeries.map(x => luxon.DateTime.fromMillis(x[0] * 1000).toFormat('HH:mm'));
+              let usage = usageSeries.map(x => parseFloat(x[1]));
+              let limits = capacitySeries.map(x => parseFloat(x[1]).toFixed(2))
+              
+              this.charts.podCpu = historicCpu(usage, limits, time)
+            },
+            updateMemory(){
+              if (!this.metrics.memoryUsage || this.metrics.memoryUsage?.length === 0 || !this.metrics.memoryLimits || this.metrics.memoryLimits?.length === 0) return;
+              
+              let capacitySeries = getMetricSeries(this.metrics.memoryLimits);
+              let usageSeries = getMetricSeries(this.metrics.memoryUsage);
+
+              let time = usageSeries.map(x => luxon.DateTime.fromMillis(x[0] * 1000).toFormat('HH:mm'));
+              let usage = usageSeries.map(x => parseFloat(x[1] / 1024 / 1024 / 1024));
+              let limits = capacitySeries.map(x => parseFloat(x[1] / 1024 / 1024 / 1024).toFixed(2))
+              
+              this.charts.podMemory = historicMemory(usage, limits, time)
             }
         },
         watch: {
             clusterEvents(){
                 let name = this.$route.params.name;
                 this.events = this.clusterEvents.filter(x => x?.involvedObject?.name === name);
-            }
+            },
+            'metrics.cpuUsage': function () {this.updateCpu();},
+            'metrics.cpuLimits': function () {this.updateCpu();},
+            'metrics.memoryUsage': function () {this.updateMemory();},
+            'metrics.memoryLimits': function () {this.updateMemory();},
         },
         async mounted() {
             var host = window.location.origin;
