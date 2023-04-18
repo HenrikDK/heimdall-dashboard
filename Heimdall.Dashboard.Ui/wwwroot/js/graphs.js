@@ -618,12 +618,12 @@ function current(type = '', unit = '', usageValues= {}, requestsValues = {}, lim
     return option;
 }
 
-function historicCpu(){
+function historicCpu(usage = [], limits = [], time = []){
     option = {
         xAxis: {
             type: 'category',
             boundaryGap: false,
-            data: ['18:30', '18:40', '18:50', '19:00', '19:10', '19:20', '19:30']
+            data: time
         },
         tooltip: {
             trigger: 'axis',
@@ -651,7 +651,7 @@ function historicCpu(){
                 name: 'Limit',
                 animationDuration: 300,
                 z: '-1',
-                data: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 2.5],
+                data: limits,
                 type: 'line',
                 color: 'lightgray',
                 emphasis :{
@@ -670,7 +670,7 @@ function historicCpu(){
                 name: 'CPU',
                 animationDuration: 300,
                 z: '10',
-                data: [0.82, 0.932, 0.901, 0.934, 1.290, 1.330, 1.320],
+                data: usage,
                 type: 'line',
                 opacity: 0.4,
                 areaStyle: {
@@ -682,12 +682,12 @@ function historicCpu(){
     return option;
 }
 
-function historicMemory(){
+function historicMemory(usage = [], limits = [], time = []){
     option = {
         xAxis: {
             type: 'category',
             boundaryGap: false,
-            data: ['18:30', '18:40', '18:50', '19:00', '19:10', '19:20', '19:30']
+            data: time
         },
         tooltip: {
             trigger: 'axis',
@@ -715,7 +715,7 @@ function historicMemory(){
                 name: 'Limit',
                 animationDuration: 300,
                 z: '-1',
-                data: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
+                data: limits,
                 type: 'line',
                 color: 'lightgray',
                 emphasis :{
@@ -740,7 +740,7 @@ function historicMemory(){
                 name: 'Memory',
                 animationDuration: 300,
                 z: '10',
-                data: [0.82, 0.932, 0.901, 0.934, 1.290, 1.130, 1.020],
+                data: usage,
                 type: 'line',
                 opacity: 0.4,
                 areaStyle: {
