@@ -139,14 +139,31 @@ const router = createRouter({
 router.beforeEach(beforeEach)
 
 const app = createApp({
-methods: {},
-data() {
-    return {
-        filters: [],
-        namespaces: [],
-        search: "",
+  methods: {
+    updateNodes(){
+      this.nodes = this.clusterNodes.map(x => x.metadata.name).join('|');
     }
-}})
+  },
+  data() {
+      return {
+          filters: [],
+          namespaces: [],
+          search: "",
+          nodes: "",
+          clusterNodes: null,
+      }
+    },
+  watch:{
+    clusterNodes(){
+      this.updateNodes();
+    }
+  },
+  async mounted() {
+      var host = window.location.origin;
+      
+      streamResults(host + '/k8s/api/v1/nodes', j => this.clusterNodes = j);
+  }
+})
 Object.entries(components).forEach(([k,v]) =>{
     app.component(k, v)
 });

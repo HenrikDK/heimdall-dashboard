@@ -1,6 +1,6 @@
 ﻿function streamMetrics(url, cb) {
     let isApiRequestInProgress = false;
-    const handel = setInterval(getMetrics, 10000);
+    const handel = setInterval(getMetrics, 30000);
     getMetrics();
 
     async function getMetrics() {
@@ -11,13 +11,13 @@
                     const metric = await request(url);
                     cb(metric.items || metric);
                 } catch (err) {
-                    log.error('Unable to send request', {err});
+                    console.error('Unable to send request', {err});
                 } finally {
                     isApiRequestInProgress = false;
                 }
             }
         } catch (err) {
-            log.error('No metrics', {err, url});
+            console.error('No metrics', {err, url});
         }
     }
 

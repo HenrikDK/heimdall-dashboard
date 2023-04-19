@@ -46,9 +46,17 @@ if (!app.Environment.IsDevelopment() || Debugger.IsAttached)
     app.UseHsts();
 }
 
+var prometheus = app.Configuration.GetValue("prometheus-url", "");
+
 app.UseWebSockets();
 app.UseStaticFiles();
 app.UseRouting();
+
+var user = app.Configuration.GetValue("prometheus-user", "");
+var pass = app.Configuration.GetValue("prometheus-password", "");
+var token = string.IsNullOrEmpty(user) ? "" : $"{user}:{pass}".ToBase64();
+var mimirOrg = app.Configuration.GetValue("mimir-org-id", "");
+
 app.UseProxies(proxies =>
 {
     proxies.Map("k8s/{**rest}",
@@ -80,7 +88,24 @@ app.UseProxies(proxies =>
                 return Task.CompletedTask;
             }).Build())
     );
+    proxies.Map("prometheus/{**rest}",
+        proxy => proxy.UseHttp((context, args) =>
+        {
+            if (!string.IsNullOrEmpty(token))
+            {
+                context.Request.Headers.Add("Authorization", $"Basic {token}");
+            }
+
+            if (!string.IsNullOrEmpty(mimirOrg))
+            {
+                context.Request.Headers.Add("X-Scope-OrgID", mimirOrg);
+            }
+            var qs = context.Request.QueryString.Value;
+            var url = context.Request.Path.ToString().Replace("/prometheus/", "/");
+            return $"{prometheus}{url}{qs}";
+        }));
 });
+
 app.UseAuthorization();
 app.UseEndpoints(x =>
 {

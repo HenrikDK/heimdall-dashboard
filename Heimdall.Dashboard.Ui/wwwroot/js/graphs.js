@@ -421,7 +421,7 @@ function workload(type = 'Unknown', running = 0, pending = 0){
     return graph
 }
 
-function historic(){
+function historic(memory = {}, compute = {}, time=[]){
     const colors = ['#5470C6', '#91CC75', '#EE6666'];
     option = {
         color: colors,
@@ -448,13 +448,14 @@ function historic(){
                 axisTick: {
                     alignWithLabel: true
                 },
-                data: ['18:30', '18:40', '18:50', '19:00', '19:10', '19:20', '19:30', '19:40', '19:50', '20:00', '20:10', '20:20'],
+                data: time,
             }
         ],
         yAxis: [
             {
+                max: memory.max,
                 type: 'value',
-                name: 'Memory GiB',
+                name: `Memory (${memory.unit ?? 'GiB'})`,
                 position: 'right',
                 alignTicks: true,
                 axisLine: {
@@ -468,8 +469,9 @@ function historic(){
                 }
             },
             {
+                max: compute.max,
                 type: 'value',
-                name: 'CPU (vCores)',
+                name: `CPU (${compute.unit ?? 'vCores'})`,
                 position: 'left',
                 alignTicks: true,
                 axisLine: {
@@ -489,40 +491,47 @@ function historic(){
                 type: 'line',
                 animationDuration: 300,
                 yAxisIndex: 1,
-                data: [2.0, 2.2, 3.3, 4.5, 6.3, 10.2, 20.3, 23.4, 23.0, 16.5, 12.0, 6.2]
+                data: compute.data
             },
             {
                 name: 'Memory',
                 type: 'line',
                 animationDuration: 300,
-                data: [
-                    2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 150.6, 170.0, 96.4, 83.3
-                ]
+                data: memory.data
             }
         ]
     };
     return option;
 }
 
-function current(type = ''){
+function current(type = '', unit = '', usageValues= {}, requestsValues = {}, limitsValues = {}){
     let usage = []
     let requests = []
     let limits = []
 
-    usage = [
-        { value: 40, name: 'Usage', formatted: '15.5 vCores' },
-        { value: 60, name: '', emphasis :{disabled:true}, itemStyle: { color: 'lightgray', opacity:0.2 } },
-    ]
+    usage = []
+    let usageUnits = usageValues.units ?? 0;
+    let usagePct = usageValues.pct ?? 0; 
+    if (usagePct > 0){
+        usage.push({ value: usagePct, name: 'Usage', formatted: `${usageUnits} ${unit}` })
+    }
+    usage.push({ value: 100 - usagePct, name: '', emphasis :{disabled:true}, itemStyle: { color: 'lightgray', opacity:0.2 } })
+    
+    requests = []
+    let requestUnits = requestsValues.units ?? 0;
+    let requestPct = requestsValues.pct ?? 0;
+    if (requestPct > 0){
+        requests.push({ value: requestPct, name: 'Requests', formatted: `${requestUnits} ${unit}` })
+    }
+    requests.push({ value: 100 - requestPct, name: '', emphasis :{disabled:true}, itemStyle: { color: 'lightgray', opacity:0.2 } })
 
-    requests = [
-        { value: 64, name: 'Requests', formatted: '29 vCores' },
-        { value: 37, name: '', emphasis :{disabled:true}, itemStyle: { color: 'lightgray', opacity:0.2 } },
-    ]
-
-    limits = [
-        { value: 95, name: 'Limits', formatted: '55 vCores' },
-        { value: 5, name: '', emphasis :{disabled:true}, itemStyle: { color: 'lightgray', opacity:0.2 } }
-    ];
+    limits = [];
+    let limitsPct = limitsValues.pct ?? 0;
+    let limitsUnits = limitsValues.units ?? 0
+    if (limitsPct > 0){
+        limits.push({ value: limitsPct, name: 'Limits', formatted: `${limitsUnits} ${unit}`})
+    }
+    limits.push({ value: 100 - limitsPct, name: '', emphasis :{disabled:true}, itemStyle: { color: 'lightgray', opacity:0.2 } })
 
     let data = [...limits, ...requests, ...usage];
 
@@ -550,9 +559,9 @@ function current(type = ''){
         legend: {
             top:'75%',
             data: [
-                'Requests',
-                'Limits',
                 'Usage',
+                'Requests',
+                'Limits'
             ],
             formatter: formatter = function (name) {
                 let value = data
@@ -609,12 +618,12 @@ function current(type = ''){
     return option;
 }
 
-function historicCpu(){
+function historicCpu(usage = [], limits = [], time = []){
     option = {
         xAxis: {
             type: 'category',
             boundaryGap: false,
-            data: ['18:30', '18:40', '18:50', '19:00', '19:10', '19:20', '19:30']
+            data: time
         },
         tooltip: {
             trigger: 'axis',
@@ -642,7 +651,7 @@ function historicCpu(){
                 name: 'Limit',
                 animationDuration: 300,
                 z: '-1',
-                data: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 2.5],
+                data: limits,
                 type: 'line',
                 color: 'lightgray',
                 emphasis :{
@@ -661,7 +670,7 @@ function historicCpu(){
                 name: 'CPU',
                 animationDuration: 300,
                 z: '10',
-                data: [0.82, 0.932, 0.901, 0.934, 1.290, 1.330, 1.320],
+                data: usage,
                 type: 'line',
                 opacity: 0.4,
                 areaStyle: {
@@ -673,12 +682,12 @@ function historicCpu(){
     return option;
 }
 
-function historicMemory(){
+function historicMemory(usage = [], limits = [], time = []){
     option = {
         xAxis: {
             type: 'category',
             boundaryGap: false,
-            data: ['18:30', '18:40', '18:50', '19:00', '19:10', '19:20', '19:30']
+            data: time
         },
         tooltip: {
             trigger: 'axis',
@@ -706,7 +715,7 @@ function historicMemory(){
                 name: 'Limit',
                 animationDuration: 300,
                 z: '-1',
-                data: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
+                data: limits,
                 type: 'line',
                 color: 'lightgray',
                 emphasis :{
@@ -731,7 +740,7 @@ function historicMemory(){
                 name: 'Memory',
                 animationDuration: 300,
                 z: '10',
-                data: [0.82, 0.932, 0.901, 0.934, 1.290, 1.130, 1.020],
+                data: usage,
                 type: 'line',
                 opacity: 0.4,
                 areaStyle: {
