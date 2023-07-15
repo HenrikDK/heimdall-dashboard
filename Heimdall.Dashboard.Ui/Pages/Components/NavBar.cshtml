@@ -48,57 +48,56 @@
 </template>
 
 <script type="module">
-    import {useDark, useToggle} from "vueuse";
-    
-    const isDark = useDark();
-    const toggleDark = useToggle(isDark);
+import {useDark, useToggle} from "vueuse";
+import {ref, onMounted, watch} from 'vue';
 
-    components["nav-bar"] = {
-      template: "#nav-bar",
-      emits: ['search', 'select-ns', 'filters'],
-      data() {
-        return {
-            filters: [],
-            cluster: [],
-            namespaces: [],
-            isDark: isDark,
-        }
-      },
-      methods: {
-        toggleDark: toggleDark,
-        async updateList() {
-          if (!this.cluster && this.cluster.length > 0) return;
-                    
-          let ns = this.cluster.map(x => { return x.metadata.name})
-          
-          if (this.filters && this.filters.length > 0){
-            ns = ns.filter(x => nsEndsWith(x, this.filters));
-            this.$emit('filters', this.namespaces);
-          }
-          
-          ns.sort();
-          
-          this.namespaces = ns;
-        },
-        nsEndsWith(ns, ends){
-          let value = false;
-          value = ends.some(element => {
-            return ns.endsWith(element);
-          });
-          return value;
-        }
-      },
-      watch: {
-        filters: function (){this.updateList()},
-        cluster: function (){this.updateList()},
-      },
-      async mounted() {
-        fetch("/?handler=filters")
-         .then(d => d.json())
-         .then(j => this.filters = j);
-        
-        var host = window.location.origin;
-        streamResults(host + '/k8s/api/v1/namespaces', j => this.cluster = j)
-      }
-    };
+let setup = (props, ctx) => {
+  const filters = ref([]);
+  const cluster = ref([]);
+  const namespaces = ref([]);
+  
+  const isDark = useDark();
+  const toggleDark = useToggle(isDark);
+  
+  let updateList = async () => {
+    if (!cluster.value && cluster.value.length > 0) return;
+              
+    let ns = cluster.value.map(x => { return x.metadata.name})
+    
+    if (filters.value && filters.value.length > 0){
+      ns = ns.filter(x => nsEndsWith(x, filters.value));
+      ctx.emit('filters', namespaces.value);
+    }
+    
+    ns.sort();
+    
+    namespaces.value = ns;
+  };
+  
+  let nsEndsWith = (ns, ends) => {
+    let value = false;
+    value = ends.some(element => {
+      return ns.endsWith(element);
+    });
+    return value;
+  };
+  
+  watch([filters, cluster], updateList);
+  
+  onMounted(async () => {
+    fetch("/?handler=filters")
+     .then(d => d.json())
+     .then(j => filters.value = j);
+    
+    var host = window.location.origin;
+    streamResults(host + '/k8s/api/v1/namespaces', j => this.cluster = j)
+  });
+  
+  return {
+    filters, cluster, namespaces, 
+    isDark, toggleDark, updateList, nsEndsWith
+  }
+}
+
+components["nav-bar"] = { template: "#nav-bar", emits: ['search', 'select-ns', 'filters'], setup };
 </script>
