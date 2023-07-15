@@ -2,7 +2,7 @@
   <div class="relative" aria-label="Select Environment">
     <button @@click="isOpen = !isOpen" type="button" @@focusout="handleFocusOut"
       class="h-9 w-full text-gray-200 items-center flex justify-end box-border cursor-pointer border border-white/[.4] outline-0 rounded 
-          bg-k8s dark:bg-zinc-800 text-white/[.6] leading-snug outline-none focus:border-white">
+          bg-brand dark:bg-zinc-800 text-white/[.6] leading-snug outline-none focus:border-white">
 
       <!-- Label -->
       <template v-if="values.length > 0 && selected.length > 0">
@@ -75,7 +75,7 @@
       </ul>
       
       <template v-if="values.length === 0" name="loading">
-        <div class="py-1 px-1 text-gray-300 bg-k8s dark:bg-zinc-800 text-left">
+        <div class="py-1 px-1 text-gray-300 bg-brand dark:bg-zinc-800 text-left">
           Loading...
         </div>
       </template>
