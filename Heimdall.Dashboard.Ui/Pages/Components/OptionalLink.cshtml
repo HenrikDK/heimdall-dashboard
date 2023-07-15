@@ -10,12 +10,12 @@
 </template>
 
 <script type="module">
-components["optional-link"] = {template: "#optional-link", props:['row'],
-   methods:{
-    hasLink(row){
+let setup = (props, ctx) => {
+  let hasLink = (row) => {
         return ['Deployment', 'DaemonSet', 'StatefulSet', 'Job', 'CronJob', 'Pod'].includes(row.kind);
-    },
-    getLink(row){
+  };
+  
+  let getLink = (row) => {
         if (['Deployment', 'DaemonSet', 'StatefulSet', 'Job', 'CronJob', ].includes(row.kind))
         {
             return { name: 'workload-details', params: { namespace: row.metadata.namespace, type: row.kind.toLowerCase(), name: row.metadata.name }}   
@@ -23,6 +23,9 @@ components["optional-link"] = {template: "#optional-link", props:['row'],
         
         return { name: 'pod-details', params: { namespace: row.metadata.namespace, name: row.metadata.name }}
     }
-  },  
-};
+  
+  return { hasLink, getLink }
+}
+
+components["optional-link"] = {template: "#optional-link", props:['row'], setup};
 </script>
