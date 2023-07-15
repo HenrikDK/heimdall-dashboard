@@ -1,8 +1,8 @@
 ﻿<template id="search">
   <div class="relative" aria-label="Select Environment">
     <div class="h-9 w-full text-gray-200 items-center flex justify-center box-border cursor-pointer border border-white/[.4] outline-0 rounded 
-                bg-k8s dark:bg-zinc-800 text-white/[.6] leading-snug outline-none 
-                data-[focus=true]:border-white data-[focus=true]:text-white data-[focus=true]:fill-white" tabindex="-1" :data-focus="hasFocus">
+        bg-k8s dark:bg-zinc-800 text-white/[.6] leading-snug outline-none 
+        data-[focus=true]:border-white data-[focus=true]:text-white data-[focus=true]:fill-white" tabindex="-1" :data-focus="hasFocus">
       
       <span aria-hidden="true" tabindex="0" role="button" @@click="search"
             class="left-0 pl-1.5 absolute z-50 text-white/[.6] transition duration-300 flex-shrink-0 flex-grow-0 flex">
@@ -13,9 +13,8 @@
         </span>
       </span>
 
-      <input id="search-input" v-model="query" name="search-box" type="text"
-             @@focus="hasFocus = true" @@blur="hasFocus = false" @@keydown="onKeydown"
-             class="h-full w-full px-8 border-none outline-0 bg-transparent text-white" />
+      <input id="search-input" v-model="query" name="search-box" type="text" @@focus="hasFocus = true" @@blur="hasFocus = false" @@keydown="onKeydown"
+           class="h-full w-full px-8 border-none outline-0 bg-transparent text-white" />
       
       <template v-if="query.length < 1" name="shortcut-icon">
         <span class="absolute right-0 mr-2 rounded shortcut h-6 w-5 bg-white/[.1] text-center" :title="'Press &quot;/&quot; to search'">/</span>
