@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 <html lang="en">
 <head>
@@ -75,6 +75,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import { registerTheme } from 'echarts/core'
 import { default as ECharts } from 'vue-echarts'
 import { useEventBus } from 'vueuse'
+
 eventBus = useEventBus('filter')
 
 registerTheme('dark', getDarkTheme());  
@@ -82,7 +83,7 @@ components['v-chart'] = ECharts;
 
 let scrollPositions = null;
 
-function beforeEach(to, from, next){
+let beforeEach = (to, from, next) => {
   if (scrollPositions === null){
     let stored = window.localStorage.getItem('scroll-state');
     if (stored){
@@ -102,7 +103,7 @@ function beforeEach(to, from, next){
   next();
 }
 
-function scrollBehavior(to, from, savedPosition) {
+let scrollBehavior = (to, from, savedPosition) => {
   if (to.fullPath === from.fullPath) {
     return;
   }
