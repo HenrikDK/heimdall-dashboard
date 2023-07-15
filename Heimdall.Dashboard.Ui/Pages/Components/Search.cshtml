@@ -13,15 +13,15 @@
         </span>
       </span>
 
-      <input id="search-input" v-model="value" name="search-box" type="text"
+      <input id="search-input" v-model="query" name="search-box" type="text"
              @@focus="hasFocus = true" @@blur="hasFocus = false" @@keydown="onKeydown"
              class="h-full w-full px-8 border-none outline-0 bg-transparent text-white" />
       
-      <template v-if="value.length < 1" name="shortcut-icon">
+      <template v-if="query.length < 1" name="shortcut-icon">
         <span class="absolute right-0 mr-2 rounded shortcut h-6 w-5 bg-white/[.1] text-center" :title="'Press &quot;/&quot; to search'">/</span>
       </template>
     
-      <template v-if="value.length > 0" name="clear-icon">
+      <template v-if="query.length > 0" name="clear-icon">
         <span aria-hidden="true" tabindex="0" role="button" aria-roledescription="❎" @@click="clear"
               class="mr-2 right-0 absolute z-50 opacity-40 stroke-white transition duration-300 flex-shrink-0 flex-grow-0 flex hover:opacity-80">
           <span class="w-6 h-6 py-px box-content inline-block">
@@ -35,53 +35,50 @@
   </div>
 </template>
 
-<v-search v-model="search" @@update:model-value="$emit('search', $event);"></v-search>
-
 <script type="module">
-  components["search"] = {
-    template: "#search",
-    data() {
-      return {
-        hasFocus: false,
-        value: '',
-      }
-    },
-    mounted() {
-      window.document.addEventListener('keydown', this.onDocumentKeydown);
-    },
-    watch: {
-      value(){
-         this.$emit('update:model-value', this.$data.value)
-      },
-    },
-    methods: {
-      search(){
-        this.$emit('update:model-value', this.$data.value)
-      },
-      clear(){
-        this.$data.value = ''
-      },
-      onKeydown(e){
-        if (e.key === 'Escape') {
-          this.$data.value = ''
-        }
-      },
-      onDocumentKeydown(e){
-        var control = document.getElementById("search-input")
-        if (e.key === '/' && e.target !== control.value &&
-          window.document.activeElement !== control.value &&
-          e.target instanceof HTMLInputElement === false &&
-          e.target instanceof HTMLSelectElement === false &&
-          e.target instanceof HTMLTextAreaElement === false)
-        {
-          e.preventDefault()
-           
-          control?.focus()
-          control?.select()
-        }
-      }
-    },
-    emits: ['update:model-value'],
-  };
+import { ref, watch, onMounted } from 'vue'
 
+let setup = (props, ctx) => {
+  const hasFocus = ref(false)
+  const query = ref('')
+  
+  let search = () =>{
+    ctx.emit('update:search', query.value)
+  }
+  
+  let clear = () =>{
+    query.value = ''
+  }
+  
+  let onKeydown = (e) =>{
+    if (e.key === 'Escape') {
+      query.value = ''
+    }
+  }
+
+  let onDocumentKeydown = (e) =>{
+    var control = document.getElementById("search-input")
+    if (e.key === '/' && e.target !== control.value &&
+      window.document.activeElement !== control.value &&
+      e.target instanceof HTMLInputElement === false)
+    {
+      e.preventDefault()
+       
+      control?.focus()
+      control?.select()
+    }
+  }
+      
+  watch(query, () => {
+    ctx.emit('update:search', query.value)
+  })
+  
+  onMounted(async () =>{
+    window.document.addEventListener('keydown', onDocumentKeydown);
+  })
+  
+  return {hasFocus, query, search, clear, onKeydown, onDocumentKeydown}
+}
+
+components["search"] = { template: "#search", emits: ['update:search'], setup };
 </script>
