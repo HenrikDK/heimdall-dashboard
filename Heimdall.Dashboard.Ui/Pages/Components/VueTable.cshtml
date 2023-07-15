@@ -208,25 +208,22 @@ function getRowValue(row, name){
     return result;
 }
 
-function getSortFn(sorter = 'auto'){
+function getSortFn(sorter = 'text'){
   if (typeof sorter === 'function'){
     return sorter
   }
   
-  let compare = basic;  
-  if (sorter === 'alphanumeric'){
+  let compare = text;
+  if (sorter === 'an'){
     compare = alphanumeric;
   }
-  if (sorter === 'alphanumericCaseSensitive'){
+  if (sorter === 'anCS'){
     compare = alphanumericCaseSensitive
   }
-  if (sorter === 'text'){
-    compare = text
-  }
-  if (sorter === 'textCaseSensitive'){
+  if (sorter === 'textCS'){
     compare = textCaseSensitive
   }
-  if (sorter === ''){
+  if (sorter === 'datetime'){
     compare = datetime
   }
   return compare;
@@ -324,12 +321,6 @@ function datetime(dateA, dateB){
   // Use > and < because == (and ===) doesn't work with
   // Date objects (would require calling getTime()).
   return a > b ? 1 : a < b ? -1 : 0
-}
-
-function basic(valA, valB){
-  const a = valA;
-  const b = valB;
-  return a === b ? 0 : a > b ? 1 : -1
 }
 
 function toString(a) {
