@@ -1,30 +1,28 @@
 ﻿<template id="optional-link">
-    <template v-if="hasLink(row)">
-        <router-link :to="getLink(row)" aria-label="Issue link">
-            <slot/>
-        </router-link>
-    </template>
-    <template v-else>
+  <template v-if="hasLink(row)">
+    <router-link :to="getLink(row)" aria-label="Issue link">
         <slot/>
-    </template>
+    </router-link>
+  </template>
+  <template v-else>
+    <slot/>
+  </template>
 </template>
 
 <script type="module">
-    components["optional-link"] = {
-      template: "#optional-link",
-       methods:{
-        hasLink(row){
-            return ['Deployment', 'DaemonSet', 'StatefulSet', 'Job', 'CronJob', 'Pod'].includes(row.kind);
-        },
-        getLink(row){
-            if (['Deployment', 'DaemonSet', 'StatefulSet', 'Job', 'CronJob', ].includes(row.kind))
-            {
-                return { name: 'workload-details', params: { namespace: row.metadata.namespace, type: row.kind.toLowerCase(), name: row.metadata.name }}   
-            }
-            
-            return { name: 'pod-details', params: { namespace: row.metadata.namespace, name: row.metadata.name }}
+components["optional-link"] = {template: "#optional-link", props:['row'],
+   methods:{
+    hasLink(row){
+        return ['Deployment', 'DaemonSet', 'StatefulSet', 'Job', 'CronJob', 'Pod'].includes(row.kind);
+    },
+    getLink(row){
+        if (['Deployment', 'DaemonSet', 'StatefulSet', 'Job', 'CronJob', ].includes(row.kind))
+        {
+            return { name: 'workload-details', params: { namespace: row.metadata.namespace, type: row.kind.toLowerCase(), name: row.metadata.name }}   
         }
-      },
-      props:['row']
-    };
+        
+        return { name: 'pod-details', params: { namespace: row.metadata.namespace, name: row.metadata.name }}
+    }
+  },  
+};
 </script>
