@@ -24,7 +24,7 @@
           </div>
           <div :class="$route.path == '/' || $route.path.endsWith('/logs') ? 'hidden' : ''"
                class="mr-3 w-60">
-            <search @@update:model-value="$emit('search', $event)"></search>
+            <search @@update:search="$emit('search', $event)"></search>
           </div>
 
           <div class="mx-3">
