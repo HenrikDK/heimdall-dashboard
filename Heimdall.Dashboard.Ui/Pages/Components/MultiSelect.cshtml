@@ -1,8 +1,8 @@
 ﻿<template id="multiselect">
   <div class="relative" aria-label="Select Environment">
     <button @@click="isOpen = !isOpen" type="button" @@focusout="handleFocusOut"
-            class="h-9 w-full text-gray-200 items-center flex justify-end box-border cursor-pointer border border-white/[.4] outline-0 rounded 
-                bg-k8s dark:bg-zinc-800 text-white/[.6] leading-snug outline-none focus:border-white">
+      class="h-9 w-full text-gray-200 items-center flex justify-end box-border cursor-pointer border border-white/[.4] outline-0 rounded 
+          bg-k8s dark:bg-zinc-800 text-white/[.6] leading-snug outline-none focus:border-white">
 
       <!-- Label -->
       <template v-if="values.length > 0 && selected.length > 0">
@@ -84,53 +84,55 @@
 </template>
 
 <script type="module">
-    components["multiselect"] = {
-      data() {
-        return {
-            noOptions: false,
-            isOpen: false,
-            selected: []
-        }
-      },
-      template: "#multiselect",
-      props: ['values'],
-      emits: ['update:modelValue'],
-      methods:{
-        setExclusive(e){
-          this.$data.selected = [e]
-          this.$emit('update:modelValue', this.$data.selected)
-        },
-        handleClear(e){
-          this.$data.selected = []
-          this.$data.isOpen = false;
-          this.$emit('update:modelValue', this.$data.selected)
-          e.stopPropagation();
-        },
-        handleFocusOut(e){
-          if (e.relatedTarget && e.relatedTarget.closest('[data-ns]')) {
-            return
-          }
-          
-          this.$data.isOpen = false;
-          this.$emit('update:modelValue', this.$data.selected)
-        },
-        handleOptionClick(option){
-          if (this.selected.includes(option)) {
-            this.selected = this.selected.filter(o => o !== option)
-            this.$emit('update:modelValue', this.$data.selected)
-            return
-          }
+import {ref, onMounted} from 'vue';
+
+let setup = (props, ctx) => {
+  
+  const noOptions = ref(false);
+  const isOpen = ref(false);
+  const selected = ref([]);
+  
+  let setExclusive = (e) => {
+    selected.value = [e]
+    ctx.emit('update:modelValue', selected.value)
+  }
+  let handleClear = (e) => {
+    selected.value = []
+    isOpen.value = false;
+    ctx.emit('update:modelValue', selected.value)
+    e.stopPropagation();
+  }
+  let handleFocusOut = (e) => {
+    if (e.relatedTarget && e.relatedTarget.closest('[data-ns]')) {
+      return
+    }
     
-          if (option) {
-            this.selected = [...this.selected, option];
-            this.$emit('update:modelValue', this.$data.selected)
-          }
-          
-          focus();                  
-        },
-      },
-      async mounted(){
-        eventBus.on(this.setExclusive);
-      }
-    };
+    isOpen.value = false;
+    ctx.emit('update:modelValue', selected.value)
+  }
+  
+  let handleOptionClick = (option) => {
+    if (selected.value.includes(option)) {
+      selected.value = selected.value.filter(o => o !== option)
+      ctx.emit('update:modelValue', selected.value)
+      return
+    }
+
+    if (option) {
+      selected.value = [...selected.value, option];
+      ctx.emit('update:modelValue', selected.value)
+    }
+    
+    focus();                  
+  }
+  
+  onMounted(async () => {
+    eventBus.on(setExclusive);
+  })
+  
+  return { noOptions, isOpen, selected,
+    setExclusive, handleClear, handleFocusOut}
+}
+
+components["multiselect"] = {template: "#multiselect", props: ['values'], emits: ['update:modelValue'], setup};
 </script>
