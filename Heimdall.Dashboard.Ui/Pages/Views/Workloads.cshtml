@@ -1,195 +1,185 @@
 ﻿<template id="workloads">
-    <div class="pl-2 pr-4 w-100">
-        <div class="flex my-2 items-center">
-            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Workloads</span>
-        </div>
-        
-        <vue-table :columns="columns" :initial-sort="sorting" :data="workloads" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
-        
+  <div class="pl-2 pr-4 w-100">
+    <div class="flex my-2 items-center">
+      <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Workloads</span>
     </div>
+        
+    <vue-table :columns="columns" :initial-sort="sorting" :data="workloads" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
+        
+  </div>
 </template>
 
 <script type="module">
-    function formatNamespace(row){
-        return { namespace: row.metadata.namespace, classes:"truncate 2xl:w-52 xl:w-44 lg:w-40", placement:"right" }
-    }
+import { ref, watch, onMounted } from 'vue'
 
-    function formatConditions(row){
-        if (!row.kind) return {conditions:[]};
+let setup = (props, ctx) => {  
+  const loading = ref(true);               
+  const sorting = ref([]);
+  const clusterWorkloads = ref([]);
+  const clusterCronJobs = ref([]);
+  const clusterDaemonSets = ref([]);
+  const clusterJobs = ref([]);
+  const clusterStatefulSets = ref([]);
+  
+  const workloads = ref([{
+    kind:"Deployment", pods: "",
+    metadata:{ name:"some-service-thingy", namespace: "service-ns", creationTimestamp: "2023-02-11T14:48:00.000Z" },
+    status:{ replicas: 2, readyReplicas: 1, conditions: [{type:'Available'}, {type:'Progressing'}] }
+  }]);
+  
+  let formatNamespace = (row) => {
+    return { namespace: row.metadata.namespace, classes:"truncate 2xl:w-52 xl:w-44 lg:w-40", placement:"right" }
+  };
 
-        if (["DaemonSet", "StatefulSet"].includes(row.kind))
-        {
-            return {conditions:[{content:'<div class="px-1 text-green-500">Running</div>'}]};
-        }
-        
-        if (row.kind === "Deployment")
-        {
-            let conditions = row.status.conditions;
-            let result = conditions.sort((a,b) => (a.type < b.type) ? -1 : 1).map(x => {
-              if (x.status === "False") return {};
+  let formatConditions = (row) => {
+    if (!row.kind) return {conditions:[]};
 
-              let color = x.type === "Available" ? "text-green-500" : "text-blue-500";
-              return {content: `<div class="px-1 ${color}">${x.type}</div>`, tooltip: true, tip: x.message }  
-            });
-            return {conditions:result};
-        }
-        
-        if (row.kind === "Job")
-        {
-            let conditions = row.status.conditions;
-            let result = conditions.map(x => { 
-                return {content: `<div class="px-1 text-green-500">${x.type}</div>`, tooltip: true, tip: x.message}
-            });
-            return {conditions:result };
-        }
-         
-        if (row.kind === "CronJob")
-        {
-            let active = row.status.active;
-            if (active){
-                return [{content:'<div class="px-1 text-green-500">Running</div>'}];
-            }else {
-                return [{content:'<div class="px-1 text-grey-300">Waiting</div>'}];
-            }
-        }
-        
-        return {conditions:[]};           
-    }
-
-    function formatWorkloadAge(row){
-        var DT = window.DateTime || luxon.DateTime;
-        var invalid = "";
-        const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
-        var date = DT.now();
-    
-        var newDatetime = DT.fromISO(String(row.metadata.creationTimestamp));
-        return { content:'' + toHuman(newDatetime.diff(date, unit)), classes: '' };
+    if (["DaemonSet", "StatefulSet"].includes(row.kind))
+    {
+        return {conditions:[{content:'<div class="px-1 text-green-500">Running</div>'}]};
     }
     
-    function formatPods(row){
-        if (!row.kind) return "";
-        let result = "";
-        let waiting = 0;
-        let ready = 0;
-        
-        if (row.kind === "DaemonSet")
-        {
-            let scheduled = row.status.currentNumberScheduled;
-            ready = row.status.numberReady;
-            
-            if (scheduled > ready){
-                waiting = scheduled - ready;
-            }
-        }
-        
-        if (row.kind === "StatefulSet")
-        {
-            let desired = row.status.replicas;
-            ready = row.status.currentReplicas;
-            if (desired > ready){
-                waiting = desired - ready;
-            }
-        }        
-        
-        if (row.kind === "Deployment")
-        {
-            let scheduled = row.status.replicas;
-            ready = row.status.readyReplicas;
-            if (scheduled > ready){
-                waiting = scheduled - ready;
-            }
-        }
-        
-        if (row.kind === "Job")
-        {
-            waiting = row.status.ready;
-            ready = row.status.succeeded;
-        }
-         
-        if (row.kind === "CronJob")
-        {
-            ready = row.status.active;
-        }
-        result += [...Array(waiting)].map(x => '<div class="h-4 w-4 mr-1 bg-gray-300 dark:bg-zinc-600 rounded-sm"></div>').join('');
-        result += [...Array(ready)].map(x => '<div class="h-4 w-4 mr-1 bg-green-500 dark:bg-green-500 rounded-sm"></div>').join('');
-         
-        return {content: '<div class="flex">' + result + '</div>', classes:'py-0.5'};
+    if (row.kind === "Deployment")
+    {
+        let conditions = row.status.conditions;
+        let result = conditions.sort((a,b) => (a.type < b.type) ? -1 : 1).map(x => {
+          if (x.status === "False") return {};
+
+          let color = x.type === "Available" ? "text-green-500" : "text-blue-500";
+          return {content: `<div class="px-1 ${color}">${x.type}</div>`, tooltip: true, tip: x.message }  
+        });
+        return {conditions:result};
     }
     
-    import {useDark} from "vueuse";
-    const isDark = useDark()
-
-    components["workloads"] = {
-        template: "#workloads",
-        data() {
-            return {
-                workloads: [{
-                    kind:"Deployment", pods: "",
-                    metadata:{ name:"some-service-thingy", namespace: "service-ns", creationTimestamp: "2023-02-11T14:48:00.000Z" },
-                    status:{ replicas: 2, readyReplicas: 1, conditions: [{type:'Available'}, {type:'Progressing'}] }
-                }],
-                columns:[
-                    { header:"Name", name:"metadata.name", classes:"grow shrink truncate 2xl:w-64 xl:w-52 lg:w-40" },
-                    { header:"Namespace", name:"metadata.namespace", formatter:formatNamespace, namespace:true, classes:"truncate 2xl:w-52 xl:w-44 lg:w-40" },
-                    { header:"Type", name:"kind", canSort:false, classes:"truncate 2xl:w-48 xl:w-40 lg:w-32" },
-                    { header:"Pods", name:"pods", formatter:formatPods, canSort:false, raw:true, canFilter:false, classes:"2xl:w-52 xl:w-44 lg:w-32" },
-                    { header:"Age", name:"metadata.creationTimestamp", formatter:formatWorkloadAge, sorter:"text", classes:"w-40" },
-                    { header:"Conditions", field:"status", formatter:formatConditions, conditions:true, canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-44" },                    
-                ],
-                loading: true,                
-                sorting: [],
-                clusterWorkloads: null,
-                clusterCronJobs: null,
-                clusterDaemonSets: null,
-                clusterJobs: null,
-                clusterStatefulSets: null,
-                initOptions: { renderer: "svg" },
-                isDark: isDark
-            }
-        },
-        props: ['namespaces', 'search', 'filters'],        
-        computed: {
-            workloadsAvailable: () => workloadsReady(),
-            podsAvailable: () => podReady(),
-        },
-        methods: {
-            updateWorkloads(){
-                if (!this.clusterWorkloads) return;
-                if (!this.clusterDaemonSets) return;
-                if (!this.clusterCronJobs) return;
-                if (!this.clusterJobs) return;
-                if (!this.clusterStatefulSets) return;
-                
-                let items = [this.clusterWorkloads, this.clusterDaemonSets.filter(x => x.status.desiredNumberScheduled > 0), this.clusterCronJobs, this.clusterJobs, this.clusterStatefulSets];
-                
-                let result = items.flat().filter(x => !!x);
-                
-                if (this.filters?.length){
-                    result = result.filter(x => filterName(x, this.filters))
-                }
-                
-                this.workloads = result;
-                this.loading = false;
-            }
-        },
-        watch: {
-            filters(){this.updateWorkloads()},
-            namespace(){this.updateWorkloads()},
-            clusterWorkloads(){this.updateWorkloads()},
-            clusterCronJobs(){this.updateWorkloads()},
-            clusterDaemonSets(){this.updateWorkloads()},
-            clusterJobs(){this.updateWorkloads()},
-            clusterStatefulSets(){this.updateWorkloads()},
-        },
-        async mounted() {
-          var host = window.location.origin;
-          streamResults(host + '/k8s/apis/apps/v1/deployments', j => this.clusterWorkloads = j)
-          streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => this.clusterDaemonSets = j)
-          streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => this.clusterStatefulSets = j)
-          streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => this.clusterCronJobs = j)
-          streamResults(host + '/k8s/apis/batch/v1/jobs', j => this.clusterJobs = j)
+    if (row.kind === "Job")
+    {
+        let conditions = row.status.conditions;
+        let result = conditions.map(x => { 
+            return {content: `<div class="px-1 text-green-500">${x.type}</div>`, tooltip: true, tip: x.message}
+        });
+        return {conditions:result };
+    }
+     
+    if (row.kind === "CronJob")
+    {
+        let active = row.status.active;
+        if (active){
+            return [{content:'<div class="px-1 text-green-500">Running</div>'}];
+        } else {
+            return [{content:'<div class="px-1 text-grey-300">Waiting</div>'}];
         }
-    };
+    }
+    
+    return {conditions:[]};
+  };
 
-    routes.push({path:'/workloads', name:'workloads', component: components["workloads"]})
+  let formatWorkloadAge = (row) => {
+      var DT = window.DateTime || luxon.DateTime;
+      var invalid = "";
+      const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
+      var date = DT.now();
+  
+      var newDatetime = DT.fromISO(String(row.metadata.creationTimestamp));
+      return { content:'' + toHuman(newDatetime.diff(date, unit)), classes: '' };
+  };
+    
+  let formatPods = (row) => {
+    if (!row.kind) return "";
+    let result = "";
+    let waiting = 0;
+    let ready = 0;
+    
+    if (row.kind === "DaemonSet")
+    {
+        let scheduled = row.status.currentNumberScheduled;
+        ready = row.status.numberReady;
+        
+        if (scheduled > ready){
+            waiting = scheduled - ready;
+        }
+    }
+    
+    if (row.kind === "StatefulSet")
+    {
+        let desired = row.status.replicas;
+        ready = row.status.currentReplicas;
+        if (desired > ready){
+            waiting = desired - ready;
+        }
+    }        
+    
+    if (row.kind === "Deployment")
+    {
+        let scheduled = row.status.replicas;
+        ready = row.status.readyReplicas;
+        if (scheduled > ready){
+            waiting = scheduled - ready;
+        }
+    }
+    
+    if (row.kind === "Job")
+    {
+        waiting = row.status.ready;
+        ready = row.status.succeeded;
+    }
+     
+    if (row.kind === "CronJob")
+    {
+        ready = row.status.active;
+    }
+    result += [...Array(waiting)].map(x => '<div class="h-4 w-4 mr-1 bg-gray-300 dark:bg-zinc-600 rounded-sm"></div>').join('');
+    result += [...Array(ready)].map(x => '<div class="h-4 w-4 mr-1 bg-green-500 dark:bg-green-500 rounded-sm"></div>').join('');
+     
+    return {content: '<div class="flex">' + result + '</div>', classes:'py-0.5'};
+  };
+  
+  const columns = ref([
+    { header:"Name", name:"metadata.name", classes:"grow shrink truncate 2xl:w-64 xl:w-52 lg:w-40" },
+    { header:"Namespace", name:"metadata.namespace", formatter:formatNamespace, namespace:true, classes:"truncate 2xl:w-52 xl:w-44 lg:w-40" },
+    { header:"Type", name:"kind", canSort:false, classes:"truncate 2xl:w-48 xl:w-40 lg:w-32" },
+    { header:"Pods", name:"pods", formatter:formatPods, canSort:false, raw:true, canFilter:false, classes:"2xl:w-52 xl:w-44 lg:w-32" },
+    { header:"Age", name:"metadata.creationTimestamp", formatter:formatWorkloadAge, sorter:"text", classes:"w-40" },
+    { header:"Conditions", field:"status", formatter:formatConditions, conditions:true, canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-44" },
+  ]);
+  
+  let updateWorkloads = () => {
+    if (!clusterWorkloads.value) return;
+    if (!clusterDaemonSets.value) return;
+    if (!clusterCronJobs.value) return;
+    if (!clusterJobs.value) return;
+    if (!clusterStatefulSets.value) return;
+    
+    let items = [clusterWorkloads.value, clusterDaemonSets.value.filter(x => x.status.desiredNumberScheduled > 0), clusterCronJobs.value, clusterJobs.value, clusterStatefulSets.value];
+    
+    let result = items.flat().filter(x => !!x);
+    
+    if (props.filters?.length){
+        result = result.filter(x => filterName(x, props.filters))
+    }
+    
+    workloads.value = result;
+    loading.value = false;
+  }
+  
+  watch([() => props.filters, () => props.namespaces, clusterWorkloads, clusterCronJobs, clusterDaemonSets, clusterJobs, clusterStatefulSets], updateWorkloads);
+  
+  onMounted(async () => {
+    var host = window.location.origin;
+    streamResults(host + '/k8s/apis/apps/v1/deployments', j => clusterWorkloads.value = j)
+    streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => clusterDaemonSets.value = j)
+    streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => clusterStatefulSets.value = j)
+    streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => clusterCronJobs.value = j)
+    streamResults(host + '/k8s/apis/batch/v1/jobs', j => clusterJobs.value = j)
+  });
+
+  return { 
+    loading, sorting, workloads, columns,
+    formatPods, formatConditions, formatWorkloadAge, formatNamespace,
+    clusterWorkloads, clusterCronJobs, clusterDaemonSets, clusterJobs, clusterStatefulSets,
+    updateWorkloads
+  }
+}
+
+components["workloads"] = { template: "#workloads", props: ['namespaces', 'search', 'filters'], setup };
+routes.push({path:'/workloads', name:'workloads', component: components["workloads"]})
 </script>
