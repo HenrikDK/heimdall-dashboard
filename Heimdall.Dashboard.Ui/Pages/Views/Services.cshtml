@@ -1,98 +1,100 @@
 ﻿<template id="services">
-    <div class="pl-2 pr-4 w-100">
-        <div class="flex my-2 items-center">
-            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Services</span>
-        </div>
-        
-        <vue-table :columns="columns" :initial-sort="sorting" :data="services" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
-        
+  <div class="pl-2 pr-4 w-100">
+    <div class="flex my-2 items-center">
+      <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Services</span>
     </div>
+  
+  <vue-table :columns="columns" :initial-sort="sorting" :data="services" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
+  
+  </div>
 </template>
 
 <script type="module">
-    function formatNamespace(row){
-        return { namespace: row.metadata.namespace, classes: "truncate 2xl:w-52 xl:w-44 lg:w-32", placement:"right" }
-    }
+import {useDark} from "vueuse";
+import { useRoute } from 'vue-router';
+import { ref, watch, onMounted } from 'vue'
 
-   function formatKubeDns(row){
-        let dns = row.metadata.name + '.' + row.metadata.namespace + ':' + row.spec.ports[0].port
-        return {content: dns, classes:''};
+let setup = (props, ctx) => {
+  const isDark = useDark();
+  const loading = ref(true);
+  const sorting = ref([{header:'Name', sort:'desc'}]);
+  const clusterServices = ref([]);
+  const services = ref([
+    {   
+      metadata:{name: "user-api", namespace:"petstore", creationTimestamp:'2023-02-11T14:48:00.000Z'},
+      spec:{type: "ClusterIP", ports: [{port:"8080"}]}
+    },
+    {
+      metadata:{name: "store-api", namespace:"petstore", creationTimestamp:'2023-02-13T15:48:00.000Z'},
+      spec:{type: "NodeIP", ports: [{port:"8080"}]}
+    },
+    {
+      metadata:{name: "order-api", namespace:"petstore", creationTimestamp:'2023-02-17T12:18:00.000Z'},
+      spec:{type: "LoadBalancer", ports: [{port:"8080"}]}
+    },
+    {
+      metadata:{name: "management-ui", namespace:"petstore", creationTimestamp:'2023-02-17T12:18:00.000Z'},
+      spec:{type: "ClusterIP", ports: [{port:"8080"}]}
+    },
+    {
+      metadata:{name: "pet-api", namespace:"petstore", creationTimestamp:'2023-02-17T10:18:00.000Z'},
+      spec:{type: "NodeIP", ports: [{port:"8080"}]}
     }
+  ]);
+  
+  let formatNamespace = (row) => {
+    return { namespace: row.metadata.namespace, classes: "truncate 2xl:w-52 xl:w-44 lg:w-32", placement:"right" }
+  }
+  
+  let formatKubeDns = (row) => {
+    let dns = row.metadata.name + '.' + row.metadata.namespace + ':' + row.spec.ports[0].port
+    return {content: dns, classes:''};
+  }
+  
+  let formatServiceAge = (row) => {
+    var DT = window.DateTime || luxon.DateTime;
+    var invalid = "";
+    const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
+    var date = DT.now();
 
-   function formatServiceAge(row){
-        var DT = window.DateTime || luxon.DateTime;
-        var invalid = "";
-        const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
-        var date = DT.now();
-    
-        var newDatetime = DT.fromISO(String(row.metadata.creationTimestamp));
-        return {content:'' + toHuman(newDatetime.diff(date, unit)), classes: ''};
+    var newDatetime = DT.fromISO(String(row.metadata.creationTimestamp));
+    return {content:'' + toHuman(newDatetime.diff(date, unit)), classes: ''};
+  }
+  
+  const columns = ref([
+    {header:"Type", name:"spec.type", canSort: false, classes:"truncate 2xl:w-48 xl:w-40 lg:w-32"},
+    {header:"Name", name:"metadata.name", classes:"truncate 2xl:w-64 xl:w-52 lg:w-40"},
+    {header:"Namespace", name:"metadata.namespace", formatter:formatNamespace, namespace:true, classes:"truncate 2xl:w-52 xl:w-44 lg:w-40"},
+    {header:"Kube-DNS", name:"kubeDNS", formatter:formatKubeDns, classes: 'truncate grow shrink'},
+    {header:"Age", name:"age", formatter:formatServiceAge, sorter:"text", classes:"w-40"},
+  ]);
+
+  let updateServices = async () => {
+    if (!clusterServices.value) return;
+      
+    let result = [...clusterServices.value];
+    if (props.filters?.length){
+      result = this.result.filter(x => filterName(x, props.filters))
     }
-    
-    components["services"] = {
-        template: "#services",
-        data() {
-            return {
-                services: [
-                    {   
-                        metadata:{name: "user-api", namespace:"petstore", creationTimestamp:'2023-02-11T14:48:00.000Z'},
-                        spec:{type: "ClusterIP", ports: [{port:"8080"}]}
-                    },
-                    {
-                        metadata:{name: "store-api", namespace:"petstore", creationTimestamp:'2023-02-13T15:48:00.000Z'},
-                        spec:{type: "NodeIP", ports: [{port:"8080"}]}
-                    },
-                    {
-                        metadata:{name: "order-api", namespace:"petstore", creationTimestamp:'2023-02-17T12:18:00.000Z'},
-                        spec:{type: "LoadBalancer", ports: [{port:"8080"}]}
-                    },
-                    {
-                        metadata:{name: "management-ui", namespace:"petstore", creationTimestamp:'2023-02-17T12:18:00.000Z'},
-                        spec:{type: "ClusterIP", ports: [{port:"8080"}]}
-                    },
-                    {
-                        metadata:{name: "pet-api", namespace:"petstore", creationTimestamp:'2023-02-17T10:18:00.000Z'},
-                        spec:{type: "NodeIP", ports: [{port:"8080"}]}
-                    },
-                ],
-                columns: [
-                    {header:"Type", name:"spec.type", canSort: false, classes:"truncate 2xl:w-48 xl:w-40 lg:w-32"},
-                    {header:"Name", name:"metadata.name", classes:"truncate 2xl:w-64 xl:w-52 lg:w-40"},
-                    {header:"Namespace", name:"metadata.namespace", formatter:formatNamespace, namespace:true, classes:"truncate 2xl:w-52 xl:w-44 lg:w-40"},
-                    {header:"Kube-DNS", name:"kubeDNS", formatter:formatKubeDns, classes: 'truncate grow shrink'},
-                    {header:"Age", name:"age", formatter:formatServiceAge, sorter:"text", classes:"w-40"},                    
-                ],
-                loading: true,                
-                sorting: [{header:'Name', sort:'desc'}],
-                clusterServices: null,
-            }
-        },
-        methods: {
-          async updateServices() {
-            if (!this.clusterServices) return;
-            
-            let result = [...this.clusterServices];
-            if (this.filters?.length){
-                result = this.result.filter(x => filterName(x, this.filters))
-            }
-                        
-            this.services = result;
-            this.loading = false;
-          }
-        },
-        watch: {
-          filters(){this.updateServices()},
-          clusterServices: function (){this.updateServices()},
-        },
-        props: ['namespaces', 'search', 'filters'],
-        mounted() {
-          var host = window.location.origin;
-          streamResults(host + '/k8s/api/v1/services', j => this.clusterServices = j)
-        },
-    };
-    
-    routes.push({path:'/services', name:'services', component: components["services"]})    
+      
+    services.value = result;
+    loading.value = false;
+  }
+  
+  watch([() => props.filters, clusterServices], updateServices);
+  
+  onMounted(() => {
+    var host = window.location.origin;
+    streamResults(host + '/k8s/api/v1/services', j => clusterServices.value = j)
+  });
+  
+  return {
+    isDark, loading, sorting, clusterServices, services,
+    formatNamespace, formatServiceAge, formatKubeDns,
+    updateServices
+  }
+}
+
+components["services"] = { template: "#services", props: ['namespaces', 'search', 'filters'], setup };
+routes.push({path:'/services', name:'services', component: components["services"]})    
 </script>
-
-<style>
-</style>
