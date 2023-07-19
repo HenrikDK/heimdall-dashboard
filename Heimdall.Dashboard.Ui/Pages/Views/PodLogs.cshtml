@@ -1,4 +1,4 @@
-﻿<template id="pod-logs">
+<template id="pod-logs">
   <div class="pl-2 pr-4 w-100">
     <div class="flex my-2 items-center">
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Logs</span>
@@ -10,12 +10,10 @@
 </template>
 
 <script type="module">
-import {useDark} from "vueuse";
 import { useRoute } from 'vue-router';
 import { ref, watch, onMounted } from 'vue'
 
 let setup = (props, ctx) => {
-  const isDark = useDark();
   const route = useRoute();
   const sort = ref('desc');
   const logs = ref([]);
@@ -42,7 +40,7 @@ let setup = (props, ctx) => {
   });
   
   return {
-    isDark, sort, logs, logEvents,
+    sort, logs, logEvents,
     updateLogs
   }
 }

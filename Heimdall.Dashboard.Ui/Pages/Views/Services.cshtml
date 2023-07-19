@@ -10,12 +10,9 @@
 </template>
 
 <script type="module">
-import {useDark} from "vueuse";
-import { useRoute } from 'vue-router';
 import { ref, watch, onMounted } from 'vue'
 
 let setup = (props, ctx) => {
-  const isDark = useDark();
   const loading = ref(true);
   const sorting = ref([{header:'Name', sort:'desc'}]);
   const clusterServices = ref([]);
@@ -89,7 +86,7 @@ let setup = (props, ctx) => {
   });
   
   return {
-    isDark, loading, sorting, clusterServices, services,
+    loading, sorting, clusterServices, services,
     formatNamespace, formatServiceAge, formatKubeDns,
     updateServices
   }

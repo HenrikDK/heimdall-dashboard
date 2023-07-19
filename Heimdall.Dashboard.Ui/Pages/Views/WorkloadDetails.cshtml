@@ -99,10 +99,8 @@
 <script type="module">
 import { ref, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router';
-import { useDark } from "vueuse";
 
 let setup = (props, ctx) => {
-  const isDark = useDark();
   const item = ref({});
   const route = useRoute();
   
@@ -141,7 +139,7 @@ let setup = (props, ctx) => {
   });
   
   return { 
-    isDark, item,
+    item,
     toLocal, toHuman 
   }
 }

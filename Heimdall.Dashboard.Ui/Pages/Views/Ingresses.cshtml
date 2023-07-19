@@ -10,11 +10,9 @@
 </template>
 
 <script type="module">
-import {useDark} from "vueuse";
 import { ref, watch, onMounted } from 'vue'
 
 let setup = (props, ctx) => {
-  const isDark = useDark();
   const loading = ref(true);
   const clusterIngresses = ref([]);  
   const sorting = ref([{ header:'Name', sort: 'desc' }]);
@@ -117,8 +115,8 @@ let setup = (props, ctx) => {
   });
           
   return {
-      isDark, loading, clusterIngresses, ingresses, sorting, columns, 
-      formatNamespace, formatLoadBalancer, formatIngressAge, formatHosts
+    loading, clusterIngresses, ingresses, sorting, columns, 
+    formatNamespace, formatLoadBalancer, formatIngressAge, formatHosts
   }
 }
 
