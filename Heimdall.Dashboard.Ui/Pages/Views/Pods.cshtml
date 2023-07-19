@@ -1,72 +1,108 @@
 ﻿<template id="pods">
-    <div class="pl-2 pr-4 w-100">
-        <div class="flex my-2 items-center">
-            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pods</span>
-        </div>
-        
-        <vue-table :columns="columns" :initial-sort="sorting" :data="pods" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
-        
+  <div class="pl-2 pr-4 w-100">
+    <div class="flex my-2 items-center">
+      <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pods</span>
     </div>
+        
+    <vue-table :columns="columns" :initial-sort="sorting" :data="pods" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
+        
+  </div>
 </template>
 
 <script type="module">
-    import {useDark} from "vueuse";
-    const isDark = useDark()
-    
-    function formatNamespace(row){
-        return { namespace: row.metadata.namespace, classes:"truncate 2xl:w-52 xl:w-44 lg:w-32", placement:"right" }
-    }
-    
-    function formatRestarts(row){
-        if (row.status.containerStatuses === undefined){
-              return {content:'', classes: ''}
-        }    
-        let con = row.status.containerStatuses.reduce((a, v) => a + v.restartCount, 0);
-        con += row.status.initContainerStatuses?.reduce((a, v) => a + v.restartCount, 0) ?? 0;
-        return { content:con, classes: '' };
-    }
+import {useDark} from "vueuse";
+import { useRoute } from 'vue-router';
+import { ref, watch, onMounted } from 'vue'
 
-    function formatSource(row){
-        let con = row.involvedObject.kind + ": " + row.involvedObject.name;
-        return { content:con, classes: 'text-blue-500 w-80' };
-    }
+let setup = (props, ctx) => {
+  const isDark = useDark();
+  const loading = ref(true);                
+  const sorting = ref([{header:'Name', sort:'asc'}]);
+  const initOptions = ref({ renderer: "svg" });
+  const clusterPods = ref([]);
+  const pods = ref([
+    {
+      metadata: { name: "flux-something", namespace: "monitoring", creationTimestamp: "2023-01-05T14:48:00.000Z" },
+      status: { phase: 'Running', 
+      containerStatuses: [{ restartCount: 2, state: {running: {}}}], 
+      initContainerStatuses: [{ restartCount: 0, state: {terminated: {}}}] }
+    },
+    {
+      metadata: { name: "flux-something", namespace: "flux-system", creationTimestamp: "2023-02-05T14:48:00.000Z" },
+      status: { phase: 'Running', 
+      containerStatuses: [{ restartCount: 0, state: {running: {}}}] }
+    },
+    {
+      metadata: { name: "kube-controller", namespace: "default", creationTimestamp: "2023-02-12T14:48:00.000Z"}, 
+      status: { phase: 'Running', 
+      containerStatuses: [{ restartCount: 3, state: {running: {}}}] }
+    },
+    {
+      metadata: { name: "cert-manager", namespace: "ingress", creationTimestamp: "2023-02-11T14:48:00.000Z"},
+      status: { phase: 'Running', 
+      containerStatuses: [{ restartCount: 0, state: {terminated: {}}}] }
+     },
+     { 
+       metadata: { name: "pod-manager", namespace: "kube-system", creationTimestamp: "2023-02-10T14:48:00.000Z"},
+       status: { phase: 'Running', 
+       containerStatuses: [{ restartCount: 3, state: {running: {}}}, { restartCount: 0, state: {terminated: {}}}] }
+     }
+  ]);
+  
+  let formatNamespace = (row) => {
+    return { namespace: row.metadata.namespace, classes:"truncate 2xl:w-52 xl:w-44 lg:w-32", placement:"right" }
+  };
     
-    function formatStatus(row){
-        let con = row.status.phase;
-        return { content:con, classes: 'text-green-500 w-65' };
-    }
+  let formatRestarts = (row) => {
+    if (row.status.containerStatuses === undefined) {
+          return {content:'', classes: ''}
+    }    
+    let con = row.status.containerStatuses.reduce((a, v) => a + v.restartCount, 0);
+    con += row.status.initContainerStatuses?.reduce((a, v) => a + v.restartCount, 0) ?? 0;
+    return { content:con, classes: '' };
+  }
+
+  let formatSource = (row) => {
+    let con = row.involvedObject.kind + ": " + row.involvedObject.name;
+    return { content:con, classes: 'text-blue-500 w-80' };
+  }
     
-    function formatContainers(row){
-        let containers = row.status.containerStatuses;
-        let initContainers = row.status.initContainerStatuses ?? [];
-        if (containers === undefined){
-            return {content:'', classes: ''}
-        }
-        let result = [...containers, ...initContainers].map(x => {
+  let formatStatus = (row) => {
+    let con = row.status.phase;
+    return { content:con, classes: 'text-green-500 w-65' };
+  }
+    
+  let formatContainers = (row) => {
+    let containers = row.status.containerStatuses;
+    let initContainers = row.status.initContainerStatuses ?? [];
+    if (containers === undefined){
+        return {content:'', classes: ''}
+    }
+    let result = [...containers, ...initContainers].map(x => {
+        if (x.state.running){
+            let status = x.ready ? 'ready' : ''
             if (x.state.running){
-                let status = x.ready ? 'ready' : ''
-                if (x.state.running){
-                    status += ', running'                
-                }
-                let tip = `<div><div class="flex text-xs"><div>${x.name}</div><div class="pl-2 text-gray-600 dark:text-gray-400">${status}</div></div>
+                status += ', running'                
+            }
+            let tip = `<div><div class="flex text-xs"><div>${x.name}</div><div class="pl-2 text-gray-600 dark:text-gray-400">${status}</div></div>
 <div class="flex text-xs"><div>StartedAt</div><div class="pl-2 text-gray-600 dark:text-gray-400">${x.state.running.startedAt}</div></div>
 </div>`
-                let content = '<div class="h-4 w-4 bg-green-500 dark:bg-green-500 rounded-sm"></div>';
-                return {content: content, tip:tip, tooltip:true}
-            }
-            if (x.state.waiting){
-                let status = 'waiting'
-                let tip = `<div><div class="flex text-xs justify-center"><div class="pr-2">${x.name}</div><div class="text-orange-600 dark:text-orange-400">${status}</div></div>
+            let content = '<div class="h-4 w-4 bg-green-500 dark:bg-green-500 rounded-sm"></div>';
+            return {content: content, tip:tip, tooltip:true}
+        }
+        if (x.state.waiting){
+            let status = 'waiting'
+            let tip = `<div><div class="flex text-xs justify-center"><div class="pr-2">${x.name}</div><div class="text-orange-600 dark:text-orange-400">${status}</div></div>
 <table class="border-separate border-spacing-1">
 <tr class="text-xs"><td>Reason</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">${x.state.waiting.reason}</td></tr>
 <tr class="text-xs"><td>Message</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">${x.state.waiting.message}</td></tr>
 </table></div>`
-                let content = '<div class="h-4 w-4 bg-orange-300 dark:bg-orange-500 rounded-sm"></div>';
-                return {content: content, tip: tip, tooltip: true}
-            }
-            if (x.state.terminated){
-                let status = 'terminated';
-                let tip = `<div><div class="flex text-xs justify-center"><div class="pr-2">${x.name}</div><div class="text-red-600 dark:text-red-400">${status}</div></div>
+            let content = '<div class="h-4 w-4 bg-orange-300 dark:bg-orange-500 rounded-sm"></div>';
+            return {content: content, tip: tip, tooltip: true}
+        }
+        if (x.state.terminated){
+            let status = 'terminated';
+            let tip = `<div><div class="flex text-xs justify-center"><div class="pr-2">${x.name}</div><div class="text-red-600 dark:text-red-400">${status}</div></div>
 <table class="border-separate border-spacing-1">
 <tr class="text-xs"><td>Reason</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">${x.state.terminated.reason}</td></tr>
 <tr class="text-xs"><td>Exit code</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">${x.state.terminated.exitCode}</td></tr>
@@ -75,90 +111,60 @@
 <tr class="text-xs"><td>Container ID</td><td class="text-gray-600 dark:text-gray-400 w-64 break-all">${x.state.terminated.containerID}</td></tr>
 </table>
 </div>`
-                let content = '<div class="h-4 w-4 bg-gray-300 dark:bg-zinc-600 rounded-sm"></div>';
-                return {content: content, tip: tip, tooltip: true}
-            }
-        });
-        
-        return { items:result, classes: 'flex py-0.5' };
-    }
+            let content = '<div class="h-4 w-4 bg-gray-300 dark:bg-zinc-600 rounded-sm"></div>';
+            return {content: content, tip: tip, tooltip: true}
+        }
+    });
+    
+    return { items:result, classes: 'flex py-0.5' };
+  };
 
-    function formatPodAge(row){
-        var DT = window.DateTime || luxon.DateTime;
-        var invalid = "";
-        const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
-        var date = DT.now();
+  let formatPodAge = (row) => {
+    var DT = window.DateTime || luxon.DateTime;
+    var invalid = "";
+    const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
+    var date = DT.now();
+
+    var newDatetime = DT.fromISO(String(row.metadata.creationTimestamp));
+    return {content:''+ toHuman(newDatetime.diff(date, unit)), classes: ''};
+  };
+  
+  const columns = ref([
+    { header:"Name", name:"metadata.name", classes: "truncate grow shrink 2xl:w-[41rem] xl:w-[22rem] lg:w-[16rem]"},
+    { header:"Namespace", name:"metadata.namespace", formatter:formatNamespace, namespace: true, classes:"truncate 2xl:w-52 xl:w-44 lg:w-32" },
+    { header:"Containers", name:"status.containerStatuses", formatter:formatContainers, canSort:false, lights:true, canFilter:false, classes:"2xl:w-52 xl:w-44 lg:w-32"},
+    { header:"Restarts", name:"status.containerStatuses", formatter:formatRestarts, classes:"w-40" },
+    { header:"Age", name:"metadata.creationTimestamp", formatter:formatPodAge, classes:"w-40" },
+    { header:"Status", name:"status.phase", formatter:formatStatus, canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-40" },
+  ]);
+  
+  let updatePods = () => {
+    if (!clusterPods.value) return;
     
-        var newDatetime = DT.fromISO(String(row.metadata.creationTimestamp));
-        return {content:''+ toHuman(newDatetime.diff(date, unit)), classes: ''};
+    let result = [...clusterPods.value];
+                    
+    if (props.filters?.length){
+        result = result.filter(x => filterName(x, props.filters))
     }
     
-    components["pods"] = {
-        template: "#pods",
-        data() {
-            return {
-                pods: [
-                    { metadata: { name: "flux-something", namespace: "monitoring", creationTimestamp: "2023-01-05T14:48:00.000Z" },
-                     status: { phase: 'Running', 
-                     containerStatuses: [{ restartCount: 2, state: {running: {}}}], 
-                     initContainerStatuses: [{ restartCount: 0, state: {terminated: {}}}] }},
-                    { metadata: { name: "flux-something", namespace: "flux-system", creationTimestamp: "2023-02-05T14:48:00.000Z" },
-                     status: { phase: 'Running', 
-                     containerStatuses: [{ restartCount: 0, state: {running: {}}}] }},
-                    { metadata: { name: "kube-controller", namespace: "default", creationTimestamp: "2023-02-12T14:48:00.000Z"}, 
-                     status: { phase: 'Running', 
-                     containerStatuses: [{ restartCount: 3, state: {running: {}}}] }},
-                    { metadata: { name: "cert-manager", namespace: "ingress", creationTimestamp: "2023-02-11T14:48:00.000Z"},
-                     status: { phase: 'Running', 
-                     containerStatuses: [{ restartCount: 0, state: {terminated: {}}}] }},
-                    { metadata: { name: "pod-manager", namespace: "kube-system", creationTimestamp: "2023-02-10T14:48:00.000Z"},
-                     status: { phase: 'Running', 
-                     containerStatuses: [{ restartCount: 3, state: {running: {}}}, { restartCount: 0, state: {terminated: {}}}] }}
-                ],
-                loading: true,                
-                columns:[
-                    { header:"Name", name:"metadata.name", classes: "truncate grow shrink 2xl:w-[41rem] xl:w-[22rem] lg:w-[16rem]"},
-                    { header:"Namespace", name:"metadata.namespace", formatter:formatNamespace, namespace: true, classes:"truncate 2xl:w-52 xl:w-44 lg:w-32" },
-                    { header:"Containers", name:"status.containerStatuses", formatter:formatContainers, canSort:false, lights:true, canFilter:false, classes:"2xl:w-52 xl:w-44 lg:w-32"},
-                    { header:"Restarts", name:"status.containerStatuses", formatter:formatRestarts, classes:"w-40" },
-                    { header:"Age", name:"metadata.creationTimestamp", formatter:formatPodAge, classes:"w-40" },
-                    { header:"Status", name:"status.phase", formatter:formatStatus, canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-40" },
-                ],
-                sorting: [{header:'Name', sort:'asc'}],
-                initOptions: { renderer: "svg" },
-                clusterPods: {},
-                isDark: isDark
-            }
-        },
-        props: ['namespaces', 'search', 'filters'],        
-        computed: {
-        },
-        methods: {
-            updatePods(){
-                if (!this.clusterPods) return;
-                
-                let result = [...this.clusterPods];
-                                
-                if (this.filters?.length){
-                    result = result.filter(x => filterName(x, this.filters))
-                }
-                
-                this.pods = result;
-                this.loading = false;
-            }
-        },
-        watch: {
-            filters(){this.updatePods()},
-            clusterPods(){this.updatePods()},
-        },
-        async mounted() {
-            var host = window.location.origin;
-            streamResults(host + '/k8s/api/v1/pods', j => this.clusterPods = j);
-        },
-    };
-    
-    routes.push({path:'/pods', name:'pods', component: components["pods"]})    
+    pods.value = result;
+    loading.value = false;
+  }
+  
+  watch([() => props.filters, clusterPods ], updatePods);
+  
+  onMounted(async () => {
+    var host = window.location.origin;
+    streamResults(host + '/k8s/api/v1/pods', j => clusterPods.value = j);
+  });
+  
+  return {
+      isDark, loading, sorting, initOptions, clusterPods, pods, columns,
+      formatSource, formatStatus, formatContainers, formatNamespace, formatPodAge, formatRestarts,
+      updatePods
+  }
+}
+
+components["pods"] = { template: "#pods", props: ['namespaces', 'search', 'filters'], setup};
+routes.push({path:'/pods', name:'pods', component: components["pods"]});
 </script>
-
-<style>
-</style>
