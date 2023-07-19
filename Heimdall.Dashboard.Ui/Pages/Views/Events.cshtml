@@ -16,7 +16,6 @@ import { ref, watch, onMounted } from 'vue'
 
 let setup = (props, ctx) => {
   const isDark = useDark();
-  const initOptions = ref({ renderer: "svg" });
   const loading = ref(true);
   const clusterEvents = ref([]);
   const sorting = ref([{ header:'Age', sort: 'desc' }]);
@@ -83,7 +82,7 @@ let setup = (props, ctx) => {
   });
   
   return {
-    isDark, loading, initOptions, clusterEvents, events, sorting, columns,  
+    isDark, loading, clusterEvents, events, sorting, columns,  
     formatNamespace, formatMessage, formatSource, formatEventAge,
     updateEvents
   }

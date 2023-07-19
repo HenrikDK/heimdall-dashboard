@@ -15,7 +15,6 @@ import { ref, watch, onMounted } from 'vue'
 
 let setup = (props, ctx) => {
   const isDark = useDark();
-  const initOptions = ref({ renderer: "svg" });
   const loading = ref(true);
   const clusterIngresses = ref([]);  
   const sorting = ref([{ header:'Name', sort: 'desc' }]);
@@ -118,7 +117,7 @@ let setup = (props, ctx) => {
   });
           
   return {
-      isDark, loading, initOptions, clusterIngresses, ingresses, sorting, columns, 
+      isDark, loading, clusterIngresses, ingresses, sorting, columns, 
       formatNamespace, formatLoadBalancer, formatIngressAge, formatHosts
   }
 }
