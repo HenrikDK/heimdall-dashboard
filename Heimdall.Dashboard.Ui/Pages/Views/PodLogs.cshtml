@@ -1,4 +1,4 @@
-<template id="pod-logs">
+﻿<template id="pod-logs">
   <div class="pl-2 pr-4 w-100">
     <div class="flex my-2 items-center">
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Logs</span>
@@ -36,7 +36,7 @@ let setup = (props, ctx) => {
     let container = route.params.container;
     
     const url = `/k8s/api/v1/namespaces/${namespace}/pods/${name}/log?container=${container}&previous=true&tailLines=1000&follow=true`;
-    streamLogs(host + url, j => this.logEvents = j);
+    streamLogs(host + url, j => logEvents.value = j);
   });
   
   return {
