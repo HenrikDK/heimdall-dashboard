@@ -68,7 +68,7 @@ let setup = (props, ctx) => {
   const columns = ref([
       { header:'Type', id:'type', sorter:'text', classes:'w-32',
         accessor: row => row.type },
-      { header:'Namespace', id:'namespace', namespace: true, classes:'truncate 2xl:w-52 xl:w-44 lg:w-32',
+      { header:'Namespace', id:'namespace', sorter:'text', namespace: true, classes:'truncate 2xl:w-52 xl:w-44 lg:w-32',
         accessor: row => row.involvedObject.namespace, formatter:formatNamespace},
       { header:'Message', id:'message', canSort:false, tooltip: true, classes:'2xl:w-[41rem] xl:w-[23rem] lg:w-[19rem] shrink',
         accessor: row => row.message, formatter:formatMessage},
