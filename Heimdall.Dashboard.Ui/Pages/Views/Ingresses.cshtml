@@ -119,7 +119,7 @@ let setup = (props, ctx) => {
     var host = window.location.origin;
     streamResults(host + '/k8s/apis/networking.k8s.io/v1/ingresses', j => clusterIngresses.value = j)
   });
-          
+  
   return {
     loading, clusterIngresses, ingresses, sorting, columns, 
     formatNamespace, formatLoadBalancer, formatIngressAge, formatHosts
