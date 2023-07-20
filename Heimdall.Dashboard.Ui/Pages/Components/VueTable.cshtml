@@ -33,81 +33,91 @@
           </div>
         </div>
       </div>
-      <div class="overflow-y-scroll h-[82.5vh] text-sm text-gray-700 dark:text-gray-400 flex flex-col w-full dark:divide-zinc-700 dark:[color-scheme:dark]"> <!-- body -->
-        <template v-if="!loading" v-for="row in rows">
-          <optional-link :row="row">
-            <div class="flex w-full hover:bg-blue-100 dark:hover:bg-zinc-700">
-              <template v-for="column in columns">
-                <template v-if="column.formatter == undefined">
-                  <div class="px-4 py-2" :key="column.update ? updateKey : 0" :class="column.classes">
-                    {{ column.accessor(row) }}
-                  </div>
-                </template>
-                <template v-else v-for="scope in [column.formatter(row)]">
-                  <template v-if="column.tooltip">
-                    <tooltip :placement="scope.tooltip.placement" :padding="scope.cell.padding">
-                      <template v-slot:cell>
-                        <template v-if="scope.cell.raw">
-                          <div v-html="scope.cell.content" :class="scope.cell.classes"></div>
-                        </template>
-                        <template v-else>
-                          <div :class="scope.cell.classes">{{ scope.cell.content }}</div>
-                        </template>
-                      </template>
-                      <template v-slot:tooltip>
-                        <template v-if="scope.tooltip.raw">
-                          <div v-html="scope.tooltip.content" :class="scope.tooltip.classes"></div>
-                        </template>
-                        <template v-else>
-                          <div :class="scope.tooltip.classes">{{ scope.tooltip.content }}</div>
-                        </template>
-                      </template>
-                    </tooltip>
-                  </template>
-                  <template v-else-if="column.namespace">
-                    <ns-column :namespace="scope.namespace" :classes="scope.classes" :placement="scope.placement"></ns-column>
-                  </template>
-                  <template v-else-if="column.conditions">
-                    <conditions-column :conditions="scope.conditions" :classes="column.classes" :placement="scope.placement"></conditions-column>
-                  </template>
-                  <template v-else-if="column.lights">
-                    <lights-column :items="scope.items" :classes="column.classes" :placement="scope.placement"></lights-column>
-                  </template>
-                  <template v-else-if="column.raw">
-                    <div class="px-4 py-2" :class="column.classes">
-                      <div v-html="scope.content" :key="column.update ? updateKey : 0" :class="scope.classes"></div>
+      <div v-bind="wrapperProps" class="overflow-y-scroll h-[82.5vh] text-sm text-gray-700 dark:text-gray-400 flex flex-col w-full dark:divide-zinc-700 dark:[color-scheme:dark]"> <!-- body -->
+        <div v-bind="containerProps">
+          <template v-if="!loading">
+            <optional-link v-for="row in list" :row="row.data" :key="row.index">
+              <div class="flex w-full hover:bg-blue-100 dark:hover:bg-zinc-700">
+                <template v-for="column in columns">
+                  <template v-if="column.formatter == undefined">
+                    <div class="px-4 py-2" :key="column.update ? updateKey : 0" :class="column.classes">
+                      {{ column.accessor(row.data) }}
                     </div>
                   </template>
-                    <template v-else>
-                    <div class="px-4 py-2" :class="column.classes">
-                      <div :class="scope.classes" :key="column.update ? updateKey : 0">
-                        {{ scope.content }}
+                  <template v-else v-for="scope in [column.formatter(row.data)]">
+                    <template v-if="column.tooltip">
+                      <tooltip :placement="scope.tooltip.placement" :padding="scope.cell.padding">
+                        <template v-slot:cell>
+                          <template v-if="scope.cell.raw">
+                            <div v-html="scope.cell.content" :class="scope.cell.classes"></div>
+                          </template>
+                          <template v-else>
+                            <div :class="scope.cell.classes">{{ scope.cell.content }}</div>
+                          </template>
+                        </template>
+                        <template v-slot:tooltip>
+                          <template v-if="scope.tooltip.raw">
+                            <div v-html="scope.tooltip.content" :class="scope.tooltip.classes"></div>
+                          </template>
+                          <template v-else>
+                            <div :class="scope.tooltip.classes">{{ scope.tooltip.content }}</div>
+                          </template>
+                        </template>
+                      </tooltip>
+                    </template>
+                    <template v-else-if="column.namespace">
+                      <ns-column :namespace="scope.namespace" :classes="scope.classes" :placement="scope.placement"></ns-column>
+                    </template>
+                    <template v-else-if="column.conditions">
+                      <conditions-column :conditions="scope.conditions" :classes="column.classes" :placement="scope.placement"></conditions-column>
+                    </template>
+                    <template v-else-if="column.lights">
+                      <lights-column :items="scope.items" :classes="column.classes" :placement="scope.placement"></lights-column>
+                    </template>
+                    <template v-else-if="column.raw">
+                      <div class="px-4 py-2" :class="column.classes">
+                        <div v-html="scope.content" :key="column.update ? updateKey : 0" :class="scope.classes"></div>
                       </div>
-                    </div>
+                    </template>
+                    <template v-else>
+                      <div class="px-4 py-2" :class="column.classes">
+                        <div :class="scope.classes" :key="column.update ? updateKey : 0">
+                          {{ scope.content }}
+                        </div>
+                      </div>
+                    </template>
                   </template>
                 </template>
-              </template>
+              </div>
+            </optional-link>
+          </template>
+          <template v-else>
+            <div class="mt-8 flex justify-center">
+              <spinner></spinner>
             </div>
-          </optional-link>
-        </template>
-        <template v-else>
-          <div class="mt-8 flex justify-center">
-            <spinner></spinner>
-          </div>
-        </template>
+          </template>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script type="module">
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useVirtualList } from 'vueuse'
 
 let setup = (props, ctx) => {
-  const rows = ref([]);
   const sorting = ref([]);
   const updateKey = ref(0);
   const timer = ref('');
+  
+  const rows = ref([]);
+  const { list, containerProps, wrapperProps } = useVirtualList(
+    rows,
+    {
+      itemHeight: 36,
+    },
+  );
   
   let cancelAutoUpdate = () => {
     clearInterval(timer.value);
@@ -152,8 +162,8 @@ let setup = (props, ctx) => {
     })
     
     filterRows(content, props.columns, props.namespaces, props.search)
-
-    rows.value = content.filter(row => !row.filtered && !row.nsFiltered);
+    
+    rows.value = content.filter(row => !row.filtered && !row.nsFiltered)
   }
   
   let reRender = () => {
@@ -176,7 +186,7 @@ let setup = (props, ctx) => {
   });
   
   return {
-    rows, sorting, timer, updateKey,
+    sorting, timer, updateKey, list, rows, containerProps, wrapperProps,
     cancelAutoUpdate, onSelectSort, updateTable, reRender
   }
 }
