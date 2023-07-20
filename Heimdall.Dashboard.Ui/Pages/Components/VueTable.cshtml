@@ -39,7 +39,7 @@
             <div class="flex w-full hover:bg-blue-100 dark:hover:bg-zinc-700">
               <template v-for="column in columns">
                 <template v-if="column.formatter == undefined">
-                  <div class="px-4 py-2" :class="column.classes">
+                  <div class="px-4 py-2" :key="column.update ? updateKey : 0" :class="column.classes">
                     {{ column.accessor(row) }}
                   </div>
                 </template>
@@ -75,12 +75,12 @@
                   </template>
                   <template v-else-if="column.raw">
                     <div class="px-4 py-2" :class="column.classes">
-                      <div v-html="scope.content" :class="scope.classes"></div>
+                      <div v-html="scope.content" :key="column.update ? updateKey : 0" :class="scope.classes"></div>
                     </div>
                   </template>
-                  <template v-else>
+                    <template v-else>
                     <div class="px-4 py-2" :class="column.classes">
-                      <div :class="scope.classes">
+                      <div :class="scope.classes" :key="column.update ? updateKey : 0">
                         {{ scope.content }}
                       </div>
                     </div>
@@ -106,6 +106,7 @@ import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 let setup = (props, ctx) => {
   const rows = ref([]);
   const sorting = ref([]);
+  const updateKey = ref(0);
   const timer = ref('');
   
   let cancelAutoUpdate = () => {
@@ -155,6 +156,10 @@ let setup = (props, ctx) => {
     rows.value = content.filter(row => !row.filtered && !row.nsFiltered);
   }
   
+  let reRender = () => {
+    updateKey.value += 1;
+  }
+  
   watch([() => props.columns,() => props.data,() => props.namespaces,() => props.search, sorting], updateTable);
   
   onMounted(() => {
@@ -171,8 +176,8 @@ let setup = (props, ctx) => {
   });
   
   return {
-    rows, sorting, timer,
-    cancelAutoUpdate, onSelectSort, updateTable
+    rows, sorting, timer, updateKey,
+    cancelAutoUpdate, onSelectSort, updateTable, reRender
   }
 }
 
@@ -180,10 +185,6 @@ components["vue-table"] = { template: "#vue-table", props: ['data', 'columns', '
 </script>
 
 <script>
-let reRender = () => {
- this.$forceUpdate();
-}
-
 function getSortFn(sorter = 'text'){
   if (typeof sorter === 'function'){
     return sorter
