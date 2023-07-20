@@ -76,7 +76,7 @@ let setup = (props, ctx) => {
         accessor: row => row.involvedObject.name, formatter:formatSource },
       { header:'Events', id:'events', sorter:'number', classes:'w-40', 
         accessor: row => row.count },
-      { header:'Age', id:'age', sorter:'text', classes:'w-32', 
+      { header:'Age', id:'age', sorter:'text', classes:'w-32', update: true, 
         accessor: row => row.lastTimestamp, formatter:formatEventAge },
   ]);
   
