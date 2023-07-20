@@ -68,16 +68,16 @@ let setup = (props, ctx) => {
     let content = '<div class="flex flex-col">';
     let rules = row.spec.rules
     for (let i = 0; i < rules.length; i++) {
-        let paths = rules[i].http.paths
-        for (let j = 0; j < paths.length; j++) {
-            if (i === 0){
-                content += `<div class="flex"><div class="underline text-blue-500"><a target="_blank" href="https://${rules[i].host + paths[j].path}">https://${rules[i].host + paths[j].path}</a></div>`
-            } else {
-                content += `<div>${paths[j].path}</div>`;    
-            }
-            
-            content += `<div class="mx-2"> -> </div><div>${paths[j].backend.service.name + ':' + paths[j].backend.service.port.number}</div></div>`;
+      let paths = rules[i].http.paths
+      for (let j = 0; j < paths.length; j++) {
+        if (i === 0){
+            content += `<div class="flex"><div class="underline text-blue-500"><a target="_blank" href="https://${rules[i].host + paths[j].path}">https://${rules[i].host + paths[j].path}</a></div>`
+        } else {
+            content += `<div>${paths[j].path}</div>`;    
         }
+        
+        content += `<div class="mx-2"> -> </div><div>${paths[j].backend.service.name + ':' + paths[j].backend.service.port.number}</div></div>`;
+      }
     }
     
     content += '</div>'
