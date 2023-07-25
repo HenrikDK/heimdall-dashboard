@@ -2,67 +2,70 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"]</title>
-    <link rel="icon" href="/favicon.svg">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>@ViewData["Title"]</title>
+  <link rel="icon" href="/favicon.svg">
     
-    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21"></script>
-    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.3"></script>
-    <script src="https://cdn.jsdelivr.net/npm/luxon@3.0.4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3.0.4"></script>
     
-    <script src="https://cdn.tailwindcss.com"></script> 
+  <script src="https://cdn.tailwindcss.com"></script> 
 
-    <script>
-        let components = {};
-        let routes = [];
-        let eventBus = {};
-    
-        tailwind.config = {
-        darkMode: 'class',
-          theme: {
-            extend: {
-              colors: {
-                k8s: '#326ce5',
-                dark: '#0f0f0f'
-              },
-            }
-          }
-        }
-    </script>
-    
-    <script type="importmap">
-    {
-        "imports": {
-            "vue": "https://cdn.jsdelivr.net/npm/vue@3.2.45/dist/vue.esm-browser.js",
-            "@@vue/devtools-api": "https://cdn.jsdelivr.net/npm/@@vue/devtools-api@6.5.0/lib/esm/index.min.js",
+  <script>
+  components = {};
+  routes = [];
+  eventBus = {};
 
-            "vueuse": "https://cdn.jsdelivr.net/npm/@@vueuse/core@9.12.0/index.mjs",
-            "@@vueuse/shared": "https://cdn.jsdelivr.net/npm/@@vueuse/shared@9.12.0/index.mjs",
+  process = {env: "production"}
 
-            "@@floating-ui/core": "https://cdn.jsdelivr.net/npm/@@floating-ui/core@1.2.4/dist/floating-ui.core.browser.min.mjs",
-            "floating-ui": "https://cdn.jsdelivr.net/npm/@@floating-ui/dom@1.2.4/dist/floating-ui.dom.browser.min.mjs",
-            
-            "vue-router": "https://cdn.jsdelivr.net/npm/vue-router@4.1.6/dist/vue-router.esm-browser.js",
-            
-            "vue-echarts": "https://cdn.jsdelivr.net/npm/vue-echarts@6.5.4/dist/index.esm.min.js",
-            "vue-demi": "https://cdn.jsdelivr.net/npm/vue-demi@0.13.11/lib/index.mjs",
-            "resize-detector": "https://cdn.jsdelivr.net/npm/resize-detector@0.3.0/esm/index.js",
-            "echarts/core": "https://cdn.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.esm.min.js"            
-        }
+  tailwind.config = {
+  darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          brand: '#326ce5',
+          dark: '#0f0f0f'
+        },
+      }
     }
-    </script>
+  }
+  </script>
     
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <script src="~/js/api.js" asp-append-version="true"></script>
-    <script src="~/js/graphs.js" asp-append-version="true"></script>
-    <script src="~/js/themes.js" asp-append-version="true"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "vue": "https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.esm-browser.js",
+      "@@vue/devtools-api": "https://cdn.jsdelivr.net/npm/@@vue/devtools-api@6.5.0/lib/esm/index.min.js",
+
+      "@@vueuse/shared": "https://cdn.jsdelivr.net/npm/@@vueuse/shared@10.2.1/index.mjs",
+      "vueuse": "https://cdn.jsdelivr.net/npm/@@vueuse/core@10.2.1/index.mjs",
+
+      "@@floating-ui/core": "https://cdn.jsdelivr.net/npm/@@floating-ui/core@1.2.4/dist/floating-ui.core.browser.min.mjs",
+      "@@floating-ui/dom": "https://cdn.jsdelivr.net/npm/@@floating-ui/dom@1.2.4/dist/floating-ui.dom.browser.min.mjs",
+      "floating-ui/vue": "https://cdn.jsdelivr.net/npm/@@floating-ui/vue@1.0.1/dist/floating-ui.vue.mjs",
+      
+      "vue-router": "https://cdn.jsdelivr.net/npm/vue-router@4.2.4/dist/vue-router.esm-browser.js",
+      
+      "vue-echarts": "https://cdn.jsdelivr.net/npm/vue-echarts@6.6.0/dist/index.esm.min.js",
+      "vue-demi": "https://cdn.jsdelivr.net/npm/vue-demi@0.14.5/lib/index.mjs",
+      "resize-detector": "https://cdn.jsdelivr.net/npm/resize-detector@0.3.0/esm/index.js",
+      "echarts/core": "https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.esm.min.js"            
+    }
+  }
+  </script>
+  
+  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+  <script src="~/js/api.js" asp-append-version="true"></script>
+  <script src="~/js/graphs.js" asp-append-version="true"></script>
+  <script src="~/js/themes.js" asp-append-version="true"></script>
+  <script src="~/js/site.js" asp-append-version="true"></script>
 </head>
 <body class="dark:bg-dark">
 
 <div id="app">
-    @RenderBody()
+  @RenderBody()
 </div>
 
 @RenderSection("VueComponents", required: false)
@@ -75,6 +78,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import { registerTheme } from 'echarts/core'
 import { default as ECharts } from 'vue-echarts'
 import { useEventBus } from 'vueuse'
+
 eventBus = useEventBus('filter')
 
 registerTheme('dark', getDarkTheme());  
@@ -82,7 +86,7 @@ components['v-chart'] = ECharts;
 
 let scrollPositions = null;
 
-function beforeEach(to, from, next){
+let beforeEach = (to, from, next) => {
   if (scrollPositions === null){
     let stored = window.localStorage.getItem('scroll-state');
     if (stored){
@@ -102,7 +106,7 @@ function beforeEach(to, from, next){
   next();
 }
 
-function scrollBehavior(to, from, savedPosition) {
+let scrollBehavior = (to, from, savedPosition) => {
   if (to.fullPath === from.fullPath) {
     return;
   }

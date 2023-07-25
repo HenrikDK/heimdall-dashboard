@@ -1,126 +1,131 @@
-﻿<template id="ingresses">
-    <div class="pl-2 pr-4 w-100">
-        <div class="flex my-2 items-center">
-            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Ingresses</span>
-        </div>
-    
-        <vue-table :columns="columns" :initial-sort="sorting" :data="ingresses" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
-      
+<template id="ingresses">
+  <div class="pl-2 pr-4 w-100">
+    <div class="flex my-2 items-center">
+      <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Ingresses</span>
     </div>
+
+    <vue-table :columns="columns" :initial-sort="sorting" :data="ingresses" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
+  
+  </div>
 </template>
 
 <script type="module">
-    function formatNamespace(row){
-        return { namespace: row.metadata.namespace, classes: "truncate 2xl:w-52 xl:w-44 lg:w-32", placement:"right" }
-    }
-    
-    function formatLoadBalancer(row){
-        let content = '';
-        if (row.status.loadBalancer.ingress){
-            let lb = row.status.loadBalancer.ingress[0];
-            content = lb.ip
-        }
-        return { content:content, classes: '' };
-    }
-    
-    function formatIngressAge(row){
-        var DT = window.DateTime || luxon.DateTime;
-        var invalid = "";
-        const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
-        var date = DT.now();
-    
-        var newDatetime = DT.fromISO(String(row.metadata.creationTimestamp));
-        return {content:''+ toHuman(newDatetime.diff(date, unit)), classes: ''};
-    }
-    
-    function formatHosts(row){
-        if (!row.spec.rules) return {content: '', classes: ''} 
-        
-        let content = '<div class="flex flex-col">';
-        let rules = row.spec.rules
-        for (let i = 0; i < rules.length; i++) {
-            let paths = rules[i].http.paths
-            for (let j = 0; j < paths.length; j++) {
-                if (i === 0){
-                    content += `<div class="flex"><div class="underline text-blue-500"><a target="_blank" href="https://${rules[i].host + paths[j].path}">https://${rules[i].host + paths[j].path}</a></div>`
-                } else {
-                    content += `<div>${paths[j].path}</div>`;    
-                }
-                
-                content += `<div class="mx-2"> -> </div><div>${paths[j].backend.service.name + ':' + paths[j].backend.service.port.number}</div></div>`;
-            }
-        }
-        
-        content += '</div>'
-        return { content:content, classes: 'grow shrink' };
-    }
-    
-    components["ingresses"] = {
-        template: "#ingresses",
-        data() {
-            return {
-                ingresses: [
-                    {metadata: {name: "user-api", namespace:"petstore", creationTimestamp: "2023-03-05T14:48:00.000Z" }, 
-                     spec:{ ingressClassName:"nginx", 
-                     rules:[{ host:"user-api.petstore.dk", 
-                     http:{ paths:[{ path:'/', backend:{service:{name:'petstore-user-api', port:{number:8080}}} }]}
-                     }]},
-                     status:{ loadBalancer:{ingress:[{ip: "192.1.0.1" }]}}
-                    },
-                    {metadata: {name: "store-api", namespace:"petstore", creationTimestamp: "2023-02-15T14:48:00.000Z" },
-                     spec:{ ingressClassName:"nginx",
-                     rules:[{ host:"store-api.petstore.dk", 
-                     http:{ paths:[{ path:'/', backend:{service:{name:'petstore-store-api', port:{number:8080}}} }]}
-                     }]},
-                     status:{ loadBalancer:{ingress:[{ip: "192.2.0.1" }]}}
-                    },
-                    {metadata: {name: "order-api", namespace:"petstore", creationTimestamp: "2023-02-05T14:48:00.000Z" },
-                     spec:{ ingressClassName:"nginx",
-                     rules:[{ host:"order-api.petstore.dk", 
-                     http:{ paths:[{ path:'/', backend:{service:{name:'petstore-order-api', port:{number:8080}}} }]}
-                     }]},
-                     status:{ loadBalancer:{ingress:[{ip: "192.2.0.1" }]}}
-                    },
-                ],
-                loading: true,
-                sorting:[
-                    {header:'Name', sort:'desc'}
-                ],
-                columns:[
-                    { header: 'Name', name: 'metadata.name', classes:'truncate 2xl:w-64 xl:w-44 lg:w-32' },
-                    { header: 'Namespace', name: 'metadata.namespace', formatter:formatNamespace, namespace:true, classes:'2xl:w-52 xl:w-44 lg:w-32'},
-                    { header: 'Type', name: 'spec.ingressClassName', canSort: false, classes:'2xl:w-40 xl:w-30 lg:w-24' },
-                    { header: 'LoadBalancers', name: 'status', formatter:formatLoadBalancer, classes:'truncate w-44' },
-                    { header: 'Host', name: 'spec.rules', formatter:formatHosts, raw:true, classes:'truncate grow shrink 2xl:w-64 xl:w-44 lg:w-32' },
-                    { header:"Age", name:"metadata.creationTimestamp", formatter:formatIngressAge, classes:"w-40" }
-                ],
-                clusterIngresses: null,
-            }
-        },
-        props: ['namespaces', 'search', 'filters'],
-        methods: {
-            updateIngresses(){
-                if (!this.clusterIngresses) return;
-                
-                let result = [...this.clusterIngresses];
-                                
-                if (this.filters?.length){
-                    result = result.filter(x => filterName(x, this.filters))
-                }
-                
-                this.ingresses = result;
-                this.loading = false;
-            }
-        },
-        watch: {
-            filters(){this.updateIngresses()},
-            clusterIngresses(){this.updateIngresses()},
-        },
-        mounted() {
-          var host = window.location.origin;
-          streamResults(host + '/k8s/apis/networking.k8s.io/v1/ingresses', j => this.clusterIngresses = j)
-        },
-    };
+import { ref, watch, onMounted } from 'vue'
 
-    routes.push({path:'/ingresses', name:'ingresses', component: components["ingresses"]})    
+let setup = (props, ctx) => {
+  const loading = ref(true);
+  const clusterIngresses = ref([]);
+  const ingresses = ref([
+    {metadata: {name: "user-api", namespace:"petstore", creationTimestamp: "2023-07-20T17:18:00.000Z" }, 
+      spec:{ ingressClassName:"nginx", 
+      rules:[{ host:"user-api.petstore.dk", 
+        http:{ paths:[{ path:'/', backend:{service:{name:'petstore-user-api', port:{number:8080}}} }]}
+      }]},
+      status:{ loadBalancer:{ingress:[{ip: "192.1.0.1" }]}}
+    },
+    {metadata: {name: "store-api", namespace:"petstore", creationTimestamp: "2023-02-15T14:48:00.000Z" },
+      spec:{ ingressClassName:"nginx",
+      rules:[{ host:"store-api.petstore.dk", 
+        http:{ paths:[{ path:'/', backend:{service:{name:'petstore-store-api', port:{number:8080}}} }]}
+      }]},
+      status:{ loadBalancer:{ingress:[{ip: "192.2.0.1" }]}}
+    },
+    {metadata: {name: "order-api", namespace:"petstore", creationTimestamp: "2023-02-05T14:48:00.000Z" },
+      spec:{ ingressClassName:"nginx",
+      rules:[{ host:"order-api.petstore.dk", 
+        http:{ paths:[{ path:'/', backend:{service:{name:'petstore-order-api', port:{number:8080}}} }]}
+      }]},
+      status:{ loadBalancer:{ingress:[{ip: "192.2.0.1" }]}}
+    }
+  ]);
+  
+  let formatNamespace = (row) => {
+    return { namespace: row.metadata.namespace, classes: "truncate 2xl:w-52 xl:w-44 lg:w-32", placement:"right" }
+  }
+    
+  let formatLoadBalancer = (row) => {
+    let content = '';
+    if (row.status.loadBalancer.ingress){
+        let lb = row.status.loadBalancer.ingress[0];
+        content = lb.ip
+    }
+    return { content:content, classes: '' };
+  }
+    
+  let formatIngressAge = (row) => {
+    var DT = window.DateTime || luxon.DateTime;
+    var invalid = "";
+    const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
+    var date = DT.now();
+
+    var newDatetime = DT.fromISO(String(row.metadata.creationTimestamp));
+    return {content:''+ toHuman(newDatetime.diff(date, unit)), classes: ''};
+  }
+    
+  let formatHosts = (row) => {
+    if (!row.spec.rules) return {content: '', classes: ''} 
+    
+    let content = '<div class="flex flex-col">';
+    let rules = row.spec.rules
+    for (let i = 0; i < rules.length; i++) {
+      let paths = rules[i].http.paths
+      for (let j = 0; j < paths.length; j++) {
+        if (i === 0){
+            content += `<div class="flex"><div class="underline text-blue-500"><a target="_blank" href="https://${rules[i].host + paths[j].path}">https://${rules[i].host + paths[j].path}</a></div>`
+        } else {
+            content += `<div>${paths[j].path}</div>`;    
+        }
+        
+        content += `<div class="mx-2"> -> </div><div>${paths[j].backend.service.name + ':' + paths[j].backend.service.port.number}</div></div>`;
+      }
+    }
+    
+    content += '</div>'
+    return { content:content, classes: 'grow shrink' };
+  }
+  
+  let updateIngresses = () => {
+     if (!clusterIngresses.value) return;
+      
+     let result = [...clusterIngresses.value];
+                      
+     if (props.filters?.length){
+          result = result.filter(x => filterName(x, props.filters))
+     }
+      
+     ingresses.value = result;
+     loading.value = false;
+  }
+
+  const sorting = ref([{ id:'name', sort: 'desc' }]);
+  const columns = ref([
+    { header: 'Name', id: 'name', sorter:'text', classes:'truncate 2xl:w-64 xl:w-44 lg:w-32',
+      accessor: row => row.metadata.name },
+    { header: 'Namespace', id: 'namespace', sorter:'text', namespace:true, classes:'2xl:w-52 xl:w-44 lg:w-32',
+      accessor: row => row.metadata.namespace, formatter:formatNamespace },
+    { header: 'Type', id: 'type', sorter:'text', classes:'2xl:w-40 xl:w-30 lg:w-24',
+      accessor: row => row.spec.ingressClassName },
+    { header: 'LoadBalancers', id: 'loadbalancers', sorter:'text', classes:'truncate w-44', 
+      accessor: row => row.status.loadBalancer?.ingress[0]?.ip ?? '', formatter:formatLoadBalancer },
+    { header: 'Host', id: 'host', raw:true, classes:'truncate grow shrink 2xl:w-64 xl:w-44 lg:w-32',
+      accessor: row => row.spec.rules, formatter:formatHosts },
+    { header: 'Age', id: 'age', sorter:'text', classes:'w-40', update: true,
+      accessor: row => row.metadata.creationTimestamp, formatter:formatIngressAge }
+  ]);
+  
+  watch([props.filters, clusterIngresses], updateIngresses);
+  
+  onMounted(() => {
+    var host = window.location.origin;
+    streamResults(host + '/k8s/apis/networking.k8s.io/v1/ingresses', j => clusterIngresses.value = j)
+  });
+  
+  return {
+    loading, clusterIngresses, ingresses, sorting, columns, 
+    formatNamespace, formatLoadBalancer, formatIngressAge, formatHosts
+  }
+}
+
+components["ingresses"] = { template: "#ingresses", props: ['namespaces', 'search', 'filters'], setup };
+routes.push({path:'/ingresses', name:'ingresses', component: components["ingresses"]})    
 </script>

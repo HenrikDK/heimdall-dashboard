@@ -1,96 +1,97 @@
 ﻿<template id="events">
-    <div class="pl-2 pr-4 w-100">
+  <div class="pl-2 pr-4 w-100">
 
-        <div class="flex my-2 items-center">
-            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
-        </div>
+  <div class="flex my-2 items-center">
+    <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
+  </div>
 
-        <vue-table :columns="columns" :initial-sort="sorting" :data="events" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
+  <vue-table :columns="columns" :initial-sort="sorting" :data="events" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
         
-    </div>
+  </div>
 </template>
 
 <script type="module">
-    import {useDark} from "vueuse";
-    const isDark = useDark();
-    
-    function formatNamespace(row){
-        return { namespace: row.involvedObject.namespace, classes:"truncate 2xl:w-52 xl:w-44 lg:w-32", placement:"right" }
-    }
-    
-    function formatMessage(row){
-         let cellClasses = "truncate 2xl:w-[40rem] xl:w-[22rem] lg:w-[18rem]";
-         cellClasses += row.type === "Warning" ? " text-red-500" : ''; 
-         let message = row.message.replace(/"/g, '\'');
-         let tooltipClasses = 'text-sm whitespace-no-wrap leading-none break-words w-80';
-         return { cell: {content: message, classes: cellClasses, padding: 'pl-4 py-2'}, tooltip:{ content:message, placement:"bottom", classes:tooltipClasses } }
-    }
+import { ref, watch, onMounted } from 'vue'
 
-    function formatSource(row){
-        let con = row.involvedObject.kind + ": " + row.involvedObject.name;
-        return { content:con, classes: 'truncate text-blue-500 2xl:w-80 xl:w-64 lg:w-64' };
-    }
+let setup = (props, ctx) => {
+  const loading = ref(true);
+  const clusterEvents = ref([]);
+  const events = ref([{
+    type: "Warning", message:"Some dangerous message", count: 23, lastTimestamp: "2022-10-05T14:48:00.000Z",
+    involvedObject: { namespace: "test", kind: "lobster", name: "thing" }
+  }]);
     
-    function formatEventAge(row){
-        var DT = window.DateTime || luxon.DateTime;
-        var invalid = "";
-        const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
-        var date = DT.now();
-    
-        var newDatetime = DT.fromISO(String(row.lastTimestamp));
-        return { content:'' + toHuman(newDatetime.diff(date, unit)), classes: '' };
-    }
+  let formatNamespace = (row) => {
+    return { namespace: row.involvedObject.namespace, classes:"truncate 2xl:w-52 xl:w-44 lg:w-32", placement:"right" }
+  }
+  
+  let formatMessage = (row) => {
+   let cellClasses = "truncate 2xl:w-[40rem] xl:w-[22rem] lg:w-[18rem]";
+   cellClasses += row.type === "Warning" ? " text-red-500" : ''; 
+   let message = row.message.replace(/"/g, '\'');
+   let tooltipClasses = 'text-sm whitespace-no-wrap leading-none break-words w-80';
+   return { cell: {content: message, classes: cellClasses, padding: 'pl-4 py-2'}, tooltip:{ content:message, placement:"bottom", classes:tooltipClasses } }
+  }
+  
+  let formatSource = (row) => {
+    let con = row.involvedObject.kind + ": " + row.involvedObject.name;
+    return { content:con, classes: 'truncate text-blue-500 2xl:w-80 xl:w-64 lg:w-64' };
+  }
+  
+  let formatEventAge = (row) => {
+    var DT = window.DateTime || luxon.DateTime;
+    var invalid = "";
+    const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
+    var date = DT.now();
 
-    components["events"] = {
-        template: "#events",
-        data() {
-            return {
-                events: [
-                    {
-                    type: "Warning", message:"Some dangerous message", count: 23, lastTimestamp: "2011-10-05T14:48:00.000Z",
-                    involvedObject: { namespace: "test", kind: "lobster", name: "thing" }
-                }],
-                sorting: [
-                    { header:'Age', sort: 'desc' }
-                ],
-                loading: true,
-                columns: [
-                    {header:"Type", name:"type", sorter:"text", classes:"w-32"},
-                    {header:"Namespace", name:"involvedObject.namespace", formatter:formatNamespace, namespace: true, classes:"truncate 2xl:w-52 xl:w-44 lg:w-32"},
-                    {header:"Message", name:"message", formatter:formatMessage, canSort:false, tooltip: true, classes:"2xl:w-[41rem] xl:w-[23rem] lg:w-[19rem] shrink"},
-                    {header:"Source", name:"involvedObject.name", formatter:formatSource, canSort:false, classes: "truncate 2xl:w-80 xl:w-64 lg:w-64"},
-                    {header:"Events", name:"count", sorter:"number", classes:"w-40"},
-                    {header:"Age", name:"lastTimestamp", formatter:formatEventAge, sorter:"text", classes:"w-32"},
-                ],
-                initOptions: { renderer: "svg" },
-                clusterEvents: null,
-                isDark: isDark,
-            }
-        },
-        methods: {
-          async updateEvents() {
-            if (!this.clusterEvents) return;
-            
-            const currentTime = new Date();
-            const before12Hours = new Date(currentTime.setHours(currentTime.getHours() - 12))
-            var events = this.clusterEvents.filter(x=>(new Date(x.lastTimestamp)) >= before12Hours)
-            if (events.length === 0){
-                events = this.clusterEvents.slice(0, 100);
-            }
-            
-            this.events = events;
-            this.loading = false;
-          }
-        },
-        watch: {
-          clusterEvents: function (){this.updateEvents()},
-        },
-        props: ['namespaces', 'search'],
-        async mounted() {
-          var host = window.location.origin;
-          streamResults(host + '/k8s/api/v1/events', j => this.clusterEvents = j);
-        }
-    };
+    var newDatetime = DT.fromISO(String(row.lastTimestamp));
+    return { content:'' + toHuman(newDatetime.diff(date, unit)), classes: '' };
+  }
+
+  let updateEvents = async () => {
+    if (!clusterEvents.value) return;
     
-    routes.push({path:'/events', name:'events',  component: components["events"]})
+    const currentTime = new Date();
+    const before12Hours = new Date(currentTime.setHours(currentTime.getHours() - 12));
+    let recent = clusterEvents.value.filter(x=>(new Date(x.lastTimestamp)) >= before12Hours)
+    if (recent.length === 0){
+        recent = clusterEvents.value.slice(0, 100);
+    }
+    
+    events.value = recent;
+    loading.value = false;
+  };
+  
+  watch(clusterEvents, updateEvents);
+  
+  const sorting = ref([{ id:'age', sort: 'desc' }]);
+  const columns = ref([
+      { header:'Type', id:'type', sorter:'text', classes:'w-32',
+        accessor: row => row.type },
+      { header:'Namespace', id:'namespace', sorter:'text', namespace: true, classes:'truncate 2xl:w-52 xl:w-44 lg:w-32',
+        accessor: row => row.involvedObject.namespace, formatter:formatNamespace},
+      { header:'Message', id:'message', canSort:false, tooltip: true, classes:'2xl:w-[41rem] xl:w-[23rem] lg:w-[19rem] shrink',
+        accessor: row => row.message, formatter:formatMessage},
+      { header:'Source', id:'source', canSort:false, classes: 'truncate 2xl:w-80 xl:w-64 lg:w-64', 
+        accessor: row => row.involvedObject.name, formatter:formatSource },
+      { header:'Events', id:'events', sorter:'number', classes:'w-40', 
+        accessor: row => row.count },
+      { header:'Age', id:'age', sorter:'text', classes:'w-32', update: true, 
+        accessor: row => row.lastTimestamp, formatter:formatEventAge },
+  ]);
+  
+  onMounted(async () => {
+    var host = window.location.origin;
+    streamResults(host + '/k8s/api/v1/events', j => clusterEvents.value = j);
+  });
+  
+  return {
+    loading, clusterEvents, events, sorting, columns,  
+    formatNamespace, formatMessage, formatSource, formatEventAge,
+    updateEvents
+  }
+}
+
+components["events"] = {template: "#events", props: ['namespaces', 'search'], setup};
+routes.push({path:'/events', name:'events',  component: components["events"]})
 </script>

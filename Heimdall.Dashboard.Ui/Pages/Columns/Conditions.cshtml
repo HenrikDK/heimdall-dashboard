@@ -20,15 +20,14 @@
 </template>
 
 <script type="module">
-  components["conditions-column"] = {
-    template: "#conditions-column",
-      props: {
-        classes: String,
-        conditions: Array,
-        placement: {
-          type: String,
-          default: 'bottom'
-        }
-      }
-  };
+components["conditions-column"] = { template: "#conditions-column",
+  props: {
+    classes: String,
+    conditions: Array,
+    placement: {
+      type: String,
+      default: 'bottom'
+    }
+  }
+};
 </script>

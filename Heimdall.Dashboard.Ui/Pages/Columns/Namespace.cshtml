@@ -13,24 +13,26 @@
 </template>
 
 <script type="module">
-  components["ns-column"] = {
-    template: "#ns-column",
-      methods:{
-        nsClick(event){
-          eventBus.emit(this.$props.namespace);
-          event.preventDefault();
-          event.stopPropagation();
-          event.stopImmediatePropagation();
-          return false
-        }
-      },
-      props: {
-        classes: String,
-        namespace: String,
-        placement: {
-          type: String,
-          default: 'bottom'
-        }
-      }
-  };
+let setup = (props, ctx) => {
+  let nsClick = (e) => {
+    eventBus.emit(props.namespace);
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    return false
+  }
+  
+  return { nsClick }
+}
+
+components["ns-column"] = { template: "#ns-column", setup,
+  props: {
+    classes: String,
+    namespace: String,
+    placement: {
+      type: String,
+      default: 'bottom'
+    }
+  },
+};
 </script>

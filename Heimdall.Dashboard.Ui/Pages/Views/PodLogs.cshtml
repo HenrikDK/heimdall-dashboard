@@ -1,57 +1,50 @@
 ﻿<template id="pod-logs">
-    <div class="pl-2 pr-4 w-100">
-        <div class="flex my-2 items-center">
-            <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Logs</span>
-        </div>
-        
-        <br/>
-        
+  <div class="pl-2 pr-4 w-100">
+    <div class="flex my-2 items-center">
+      <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Logs</span>
     </div>
+        
+    <br/>
+    
+  </div>
 </template>
 
 <script type="module">
-    import {useDark} from "vueuse";
-    const isDark = useDark()
-    
-    components["pod-logs"] = {
-        template: "#pod-logs",
-        data() {
-            return {
-                sort:'desc',
-                logs: [],
-                logEvents: [],
-                isDark: isDark
-            }
-        },
-        props: ['search', 'filters'],
-        methods: {
-            updateLogs(){
-                if (!this.logEvents) return;
-                
-                let result = [...this.logEvents];
-                
-                this.logs = result;
-            }
-        },
-        watch: {
-            logEvents(){this.updateLogs()},
-        },
-        async mounted() {
-            var host = window.location.origin;
-            
-/*
-            if (this.filters?.length){
-                result = result.filter(x => filterName(x, this.filters))
-            }
-*/
-            
-            const url = `/k8s/api/v1/namespaces/${namespace}/pods/${name}/log?container=${container}&previous=true&tailLines=1000&follow=true`;
-            streamLogs(host + url, j => this.logEvents = j);
-        },
-    };
-    
-    routes.push({path:'/namespace/{:namespace}/pods/{:name}/containers/{:container}/logs', name:'pod-logs', component: components["pod-logs"]})    
-</script>
+import { useRoute } from 'vue-router';
+import { ref, watch, onMounted } from 'vue'
 
-<style>
-</style>
+let setup = (props, ctx) => {
+  const route = useRoute();
+  const sort = ref('desc');
+  const logs = ref([]);
+  const logEvents = ref([]);
+
+  let updateLogs = () => {
+    if (!logEvents.value) return;
+    
+    let result = [...logEvents.value];
+    
+    logs.value = result;
+  }
+  
+  watch(logEvents, updateLogs);
+  
+  onMounted(async () => {
+    var host = window.location.origin;
+    let namespace = route.params.namespace;
+    let name = route.params.name;
+    let container = route.params.container;
+    
+    const url = `/k8s/api/v1/namespaces/${namespace}/pods/${name}/log?container=${container}&previous=true&tailLines=1000&follow=true`;
+    streamLogs(host + url, j => logEvents.value = j);
+  });
+  
+  return {
+    sort, logs, logEvents,
+    updateLogs
+  }
+}
+
+components["pod-logs"] = { template: "#pod-logs", props: ['search'], setup };
+routes.push({path:'/namespace/{:namespace}/pods/{:name}/containers/{:container}/logs', name:'pod-logs', component: components["pod-logs"]})    
+</script>

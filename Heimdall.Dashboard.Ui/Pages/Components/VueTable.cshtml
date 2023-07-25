@@ -2,94 +2,95 @@
   <div class="border overflow-hidden border-gray-200 shadow-md rounded-lg dark:border-zinc-700 mt-4"> <!-- table outer border -->
     <div class="w-full h-[85vh] text-left divide-y divide-gray-200 dark:divide-zinc-700"> <!-- table -->
       <div class="flex w-full sticky top-0 z-10 bg-gray-100 dark:bg-zinc-800"> <!-- header -->
-          <div v-for="column in columns"
-               class="text-left text-xs font-strong text-black uppercase dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-zinc-700"
-               :class="column.classes">
+        <div v-for="column in columns"
+             class="text-left text-xs font-strong text-black uppercase dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-zinc-700"
+             :class="column.classes">
             
-            <div class="flex">
-              <div class="px-4 py-2 grow shrink">
-                {{ column.header }}
-              </div>
-
-              <div v-if="column.canSort || column.canSort == undefined"
-                   class="px-2 py-2 float-right cursor-pointer select-none"
-                   @@click="onSelectSort($event, column.header)">
-                <template v-if="sorting.find(x => x.header === column.header) == undefined">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/>
-                  </svg>
-                </template>
-                <template v-if="sorting.find(x => x.header === column.header)?.sort === 'asc'">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/>
-                  </svg>
-                </template>
-                <template v-if="sorting.find(x => x.header === column.header)?.sort === 'desc'">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
-                  </svg>
-                </template>
-              </div>
+          <div class="flex">
+            <div class="px-4 py-2 grow shrink">
+              {{ column.header }}
             </div>
-          </div>
-      </div>
-      <div class="overflow-y-scroll h-[82.5vh] text-sm text-gray-700 dark:text-gray-400 flex flex-col w-full dark:divide-zinc-700 dark:[color-scheme:dark]"> <!-- body -->
-        <template v-if="!loading" v-for="row in rows">
-          <optional-link :row="row">
-            <div v-if="!row?.filtered && !row?.nsFiltered"
-                 class="flex w-full hover:bg-blue-100 dark:hover:bg-zinc-700">
-              <template v-for="column in columns">
-                <template v-if="column.formatter == undefined">
-                  <div class="px-4 py-2" :class="column.classes">
-                    {{ getRowValue(row, column.name) }}
-                  </div>
-                </template>
-                <template v-else v-for="scope in [column.formatter(row)]">
-                  <template v-if="column.tooltip">
-                    <tooltip :placement="scope.tooltip.placement" :padding="scope.cell.padding">
-                      <template v-slot:cell>
-                        <template v-if="scope.cell.raw">
-                          <div v-html="scope.cell.content" :class="scope.cell.classes"></div>
-                        </template>
-                        <template v-else>
-                          <div :class="scope.cell.classes">{{ scope.cell.content }}</div>
-                        </template>
-                      </template>
-                      <template v-slot:tooltip>
-                        <template v-if="scope.tooltip.raw">
-                          <div v-html="scope.tooltip.content" :class="scope.tooltip.classes"></div>
-                        </template>
-                        <template v-else>
-                          <div :class="scope.tooltip.classes">{{ scope.tooltip.content }}</div>
-                        </template>
-                      </template>
-                    </tooltip>
-                  </template>
-                  <template v-else-if="column.namespace">
-                    <ns-column :namespace="scope.namespace" :classes="scope.classes" :placement="scope.placement"></ns-column>
-                  </template>
-                  <template v-else-if="column.conditions">
-                    <conditions-column :conditions="scope.conditions" :classes="column.classes" :placement="scope.placement"></conditions-column>
-                  </template>
-                  <template v-else-if="column.lights">
-                    <lights-column :items="scope.items" :classes="column.classes" :placement="scope.placement"></lights-column>
-                  </template>
-                  <template v-else-if="column.raw">
-                    <div class="px-4 py-2" :class="column.classes">
-                      <div v-html="scope.content" :class="scope.classes"></div>
-                    </div>
-                  </template>
-                  <template v-else>
-                    <div class="px-4 py-2" :class="column.classes">
-                      <div :class="scope.classes">
-                        {{ scope.content }}
-                      </div>
-                    </div>
-                  </template>
-                </template>
+
+            <div v-if="column.canSort || column.canSort == undefined"
+                 class="px-2 py-2 float-right cursor-pointer select-none"
+                 @@click="onSelectSort($event, column.id)">
+              <template v-if="sorting.find(x => x.id === column.id) == undefined">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/>
+                </svg>
+              </template>
+              <template v-if="sorting.find(x => x.id === column.id)?.sort === 'asc'">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/>
+                </svg>
+              </template>
+              <template v-if="sorting.find(x => x.id === column.id)?.sort === 'desc'">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+                </svg>
               </template>
             </div>
-          </optional-link>
+          </div>
+        </div>
+      </div>
+      <div v-bind="containerProps" class="overflow-y-scroll h-[82.5vh] text-sm text-gray-700 dark:text-gray-400 flex flex-col w-full dark:divide-zinc-700 dark:[color-scheme:dark]"> <!-- body -->
+        <template v-if="!loading">
+          <div v-bind="wrapperProps">
+            <optional-link v-for="row in list" :row="row.data" :key="row.index">
+              <div class="flex w-full hover:bg-blue-100 dark:hover:bg-zinc-700">
+                <template v-for="column in columns">
+                  <template v-if="column.formatter == undefined">
+                    <div class="px-4 py-2" :key="column.update ? updateKey : 0" :class="column.classes">
+                      {{ column.accessor(row.data) }}
+                    </div>
+                  </template>
+                  <template v-else v-for="scope in [column.formatter(row.data)]">
+                    <template v-if="column.tooltip">
+                      <tooltip :placement="scope.tooltip.placement" :padding="scope.cell.padding">
+                        <template v-slot:cell>
+                          <template v-if="scope.cell.raw">
+                            <div v-html="scope.cell.content" :class="scope.cell.classes"></div>
+                          </template>
+                          <template v-else>
+                            <div :class="scope.cell.classes">{{ scope.cell.content }}</div>
+                          </template>
+                        </template>
+                        <template v-slot:tooltip>
+                          <template v-if="scope.tooltip.raw">
+                            <div v-html="scope.tooltip.content" :class="scope.tooltip.classes"></div>
+                          </template>
+                          <template v-else>
+                            <div :class="scope.tooltip.classes">{{ scope.tooltip.content }}</div>
+                          </template>
+                        </template>
+                      </tooltip>
+                    </template>
+                    <template v-else-if="column.namespace">
+                      <ns-column :namespace="scope.namespace" :classes="scope.classes" :placement="scope.placement"></ns-column>
+                    </template>
+                    <template v-else-if="column.conditions">
+                      <conditions-column :conditions="scope.conditions" :classes="column.classes" :placement="scope.placement"></conditions-column>
+                    </template>
+                    <template v-else-if="column.lights">
+                      <lights-column :items="scope.items" :classes="column.classes" :placement="scope.placement"></lights-column>
+                    </template>
+                    <template v-else-if="column.raw">
+                      <div class="px-4 py-2" :class="column.classes">
+                        <div v-html="scope.content" :key="column.update ? updateKey : 0" :class="scope.classes"></div>
+                      </div>
+                    </template>
+                    <template v-else>
+                      <div class="px-4 py-2" :class="column.classes">
+                        <div :class="scope.classes" :key="column.update ? updateKey : 0">
+                          {{ scope.content }}
+                        </div>
+                      </div>
+                    </template>
+                  </template>
+                </template>
+              </div>
+            </optional-link>
+          </div>
         </template>
         <template v-else>
           <div class="mt-8 flex justify-center">
@@ -102,131 +103,114 @@
 </template>
 
 <script type="module">
-  components["vue-table"] = {
-    template: "#vue-table",
-    data() {
-      return {
-          rows: [],
-          sorting: [],
-          timer: ''
-      }
+import { ref, watch, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useVirtualList } from 'vueuse'
+
+let setup = (props, ctx) => {
+  const sorting = ref([]);
+  const updateKey = ref(0);
+  const timer = ref('');
+  
+  const rows = ref([]);
+  const { list, containerProps, wrapperProps } = useVirtualList(
+    rows,
+    {
+      itemHeight: 36,
     },
-    methods:{
-      reRender(){
-        this.$forceUpdate();
-      },
-      cancelAutoUpdate () {
-        clearInterval(this.timer);
-      },
-      getRowValue(row, name){
-        return getRowValue(row, name)
-      },
-      onSelectSort(e, header){
-        var existing = this.$data.sorting.find(x => x.header === header);
-        if (!e.shiftKey){
-          this.$data.sorting = [];
-        }
-        if (existing === undefined){
-          let sort = {
-             header: header, sort: 'asc'
-          }
-          this.$data.sorting.push(sort)
-          this.$data.sorting = [...this.$data.sorting];
-          return;
-        }
-        
-        if (existing['sort'] === 'asc'){
-          existing['sort'] = 'desc'
-          if (this.$data.sorting.length === 0){
-            this.$data.sorting.push(existing) 
-          }
-          this.$data.sorting = [...this.$data.sorting];
-          return;
-        }
-        
-        if (existing['sort'] === 'desc'){
-          this.$data.sorting = this.$data.sorting.filter(x => x.header !== existing['header']);
-        }            
-      },
-      updateTable () {
-        if ((this.$props.columns?.length ?? 0) === 0) return
-        
-        this.$data.rows = sortRows(this.$data.sorting, this.$props.columns, this.$props.data)
-        
-        this.$data.rows.forEach(x => {
-          x.filtered = false;
-          x.nsFiltered = false;
-        })
-        
-        filterRows(this.$data.rows, this.$props.columns, this.$props.namespaces, this.$props.search)
-      }
-    },
-    watch:{
-      sorting(){
-        this.updateTable();
-      },
-      columns(){
-        this.updateTable();
-      },
-      data(){
-        this.updateTable();
-      },
-      namespaces(){
-        this.updateTable();
-      },
-      search(){
-        this.updateTable();
-      }
-    },
-    props: ['data', 'columns', 'initialSort', 'namespaces', 'loading', 'search'],
-    mounted() {
-      if (this.$props.initialSort !== undefined && this.$props.initialSort.length > 0){
-        this.$data.sorting = [...this.$props.initialSort];
-      }
-      
-      this.updateTable();
-      this.timer = setInterval(this.reRender, 5000);
-    },
-    beforeUnmount () {
-      this.cancelAutoUpdate();
-    }
+  );
+  
+  let cancelAutoUpdate = () => {
+    clearInterval(timer.value);
   };
+
+  let onSelectSort = (e, id) => {
+    var existing = sorting.value.find(x => x.id === id);
+    if (!e.shiftKey){
+      sorting.value = [];
+    }
+    if (existing === undefined){
+      let sort = {
+         id: id, sort: 'asc'
+      }
+      sorting.value.push(sort)
+      sorting.value = [...sorting.value];
+      return;
+    }
+    
+    if (existing.sort === 'asc'){
+      existing.sort = 'desc'
+      if (sorting.value.length === 0){
+        sorting.value.push(existing) 
+      }
+      sorting.value = [...sorting.value];
+      return;
+    }
+       
+    if (existing.sort === 'desc'){
+      sorting.value = sorting.value.filter(x => x.id !== existing.id);
+    }            
+  }
+  
+  let updateTable = () => {
+    if ((props.columns?.length ?? 0) === 0) return
+    
+    let content = sortRows(sorting.value, props.columns, props.data)
+    
+    content.forEach(x => {
+      x.filtered = false;
+      x.nsFiltered = false;
+    })
+    
+    filterRows(content, props.columns, props.namespaces, props.search)
+    
+    rows.value = content.filter(row => !row.filtered && !row.nsFiltered)
+  }
+  
+  let reRender = () => {
+    updateKey.value += 1;
+  }
+  
+  watch([() => props.columns,() => props.data,() => props.namespaces,() => props.search, sorting], updateTable);
+  
+  onMounted(() => {
+    if (props.initialSort !== undefined && props.initialSort.length > 0){
+      sorting.value = [...props.initialSort];
+    }
+        
+    updateTable();
+    timer.value = setInterval(reRender, 5000);
+  });
+  
+  onBeforeUnmount(() => {
+    cancelAutoUpdate();
+  });
+  
+  return {
+    sorting, timer, updateKey, list, rows, containerProps, wrapperProps,
+    cancelAutoUpdate, onSelectSort, updateTable, reRender
+  }
+}
+
+components["vue-table"] = { template: "#vue-table", props: ['data', 'columns', 'initialSort', 'namespaces', 'loading', 'search'], setup };
 </script>
 
 <script>
-function getRowValue(row, name){
-    if (!name.includes('.')){
-        return row[name]
-    }
-
-    let result = row;
-    var fields = name.split('.')
-    fields.forEach(f => {
-        result = result[f]
-    })
-
-    return result;
-}
-
-function getSortFn(sorter = 'auto'){
+function getSortFn(sorter = 'text'){
   if (typeof sorter === 'function'){
     return sorter
   }
   
-  let compare = basic;  
-  if (sorter === 'alphanumeric'){
+  let compare = text;
+  if (sorter === 'an'){
     compare = alphanumeric;
   }
-  if (sorter === 'alphanumericCaseSensitive'){
+  if (sorter === 'anCS'){
     compare = alphanumericCaseSensitive
   }
-  if (sorter === 'text'){
-    compare = text
-  }
-  if (sorter === 'textCaseSensitive'){
+  if (sorter === 'textCS'){
     compare = textCaseSensitive
   }
-  if (sorter === ''){
+  if (sorter === 'datetime'){
     compare = datetime
   }
   return compare;
@@ -240,7 +224,7 @@ function sortRows(sorting, columns, rows){
   // Filter out sortings that correspond to non existing columns
   const availableSorting = sorting.filter(s =>
     {
-      let column = columns.find(x => x.header === s.header);
+      let column = columns.find(x => x.id === s.id);
       if (!column) return false
       return column.canSort ?? true
     }
@@ -248,11 +232,11 @@ function sortRows(sorting, columns, rows){
 
   const columnInfos = {}
   availableSorting.forEach(s => {
-    const column = columns.find(x => x.header === s.header)
+    const column = columns.find(x => x.id === s.id)
     if(!column) return
 
-    columnInfos[s.header] = {
-      column: column.name,
+    columnInfos[s.id] = {
+      accessor: column.accessor,
       direction: s.sort,
       sorter: getSortFn(column.sorter),
     }
@@ -267,11 +251,11 @@ function sortData(rows, sorting, columnInfos){
   sortedData.sort((rowA, rowB) => {
     for (let i = 0; i < sorting.length; i += 1) {
       const sortEntry = sorting[i]
-      const columnInfo = columnInfos[sortEntry.header]
+      const columnInfo = columnInfos[sortEntry.id]
       const isDesc = columnInfo?.direction === 'desc' ?? false
 
-      let valA = getRowValue(rowA, columnInfo.column)
-      let valB = getRowValue(rowB, columnInfo.column)
+      let valA = columnInfo.accessor(rowA)
+      let valB = columnInfo.accessor(rowB)
       let sortInt = columnInfo.sorter(valA, valB)
 
       if (sortInt !== 0) {
@@ -324,12 +308,6 @@ function datetime(dateA, dateB){
   // Use > and < because == (and ===) doesn't work with
   // Date objects (would require calling getTime()).
   return a > b ? 1 : a < b ? -1 : 0
-}
-
-function basic(valA, valB){
-  const a = valA;
-  const b = valB;
-  return a === b ? 0 : a > b ? 1 : -1
 }
 
 function toString(a) {
@@ -402,8 +380,8 @@ function filterRows(rows, columns, namespaces, search){
   
   rows.forEach(row => {
     if (namespaces.length){
-      let val = getRowValue(row, nsColumn.name)
-      row.nsFiltered = !namespaces.includes(val)
+      let val = nsColumn.accessor(row);
+      row.nsFiltered = !namespaces.includes(val);
     }
     
     if (tokens.length){
@@ -413,7 +391,7 @@ function filterRows(rows, columns, namespaces, search){
            val = fc.formatter(row).content;
          } else 
          {
-           val = getRowValue(row, fc.name);
+           val = fc.accessor(row);
          }
          if (typeof val === 'object'){
            return JSON.stringify(val)
