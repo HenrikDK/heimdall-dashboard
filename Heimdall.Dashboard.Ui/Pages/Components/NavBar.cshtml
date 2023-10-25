@@ -90,7 +90,7 @@ let setup = (props, ctx) => {
      .then(j => filters.value = j);
     
     var host = window.location.origin;
-    streamResults(host + '/k8s/api/v1/namespaces', j => this.cluster = j)
+    streamResults(host + '/k8s/api/v1/namespaces', j => cluster.value = j)
   });
   
   return {
