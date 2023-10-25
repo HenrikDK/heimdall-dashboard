@@ -47,27 +47,25 @@ public class K8sClient
 
         var file = File.ReadAllText(location);
         var yamlObject = new Deserializer().Deserialize(new StringReader(file));
-        var json = JsonConvert.SerializeObject(yamlObject);
-        dynamic config = JsonConvert.DeserializeObject<ExpandoObject>(json);
-        var dict = (IDictionary<string, object>) config;
-        var currentContext = "" + dict["current-context"];
-
+        var json = JsonSerializer.Serialize(yamlObject);
+        var config = JsonSerializer.Deserialize<JsonNode>(json);
+        var currentContext = "" + config["current-context"].GetValue<string>();
+        
         var userName = "";
         var clusterName = "";
-        foreach (var entry in config.contexts)
+        foreach (var entry in config["contexts"].AsArray())
         {
-            if (entry.name != currentContext) continue;
-            clusterName = entry.context.cluster;
-            userName = entry.context.user;
+            if (entry["name"].GetValue<string>() != currentContext) continue;
+            clusterName = entry["context"]["cluster"].GetValue<string>();
+            userName = entry["context"]["user"].GetValue<string>();
             break;
         }
         
-        
         var server = "";
-        foreach (var entry in config.clusters)
+        foreach (var entry in config["clusters"].AsArray())
         {
-            if (entry.name != clusterName) continue;
-            server = entry.cluster.server;
+            if (entry["name"].GetValue<string>() != clusterName) continue;
+            server = entry["cluster"]["server"].GetValue<string>();
             break;
         }
 
@@ -77,12 +75,12 @@ public class K8sClient
         }
 
         var token = "";
-        foreach (var entry in config.users)
+        foreach (var entry in config["users"].AsArray())
         {
-            if (entry.name != userName) continue;
+            if (entry["name"].GetValue<string>() != userName) continue;
             try
             {
-                token = entry.user.token;
+                token = entry["user"]["token"].GetValue<string>();
             } catch (Exception e) { }
             break;
         }
