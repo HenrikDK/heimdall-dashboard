@@ -195,7 +195,7 @@ components["vue-table"] = { template: "#vue-table", props: ['data', 'columns', '
 </script>
 
 <script>
-function getSortFn(sorter = 'text'){
+function getSortFn(sorter = 'textCS'){
   if (typeof sorter === 'function'){
     return sorter
   }
@@ -212,6 +212,9 @@ function getSortFn(sorter = 'text'){
   }
   if (sorter === 'datetime'){
     compare = datetime
+  }
+  if (sorter === 'number'){
+    compare = number  
   }
   return compare;
 }
@@ -271,6 +274,10 @@ function sortData(rows, sorting, columnInfos){
   })
 
   return sortedData
+}
+
+function number(a, b) {
+  return a === b ? 0 : a > b ? 1 : -1
 }
 
 function alphanumeric(valA, valB){
