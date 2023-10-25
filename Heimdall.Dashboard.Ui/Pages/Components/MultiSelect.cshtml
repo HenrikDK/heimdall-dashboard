@@ -1,4 +1,4 @@
-<template id="multiselect">
+﻿<template id="multiselect">
   <div class="relative" aria-label="Select Environment">
     <button @@click="isOpen = !isOpen" type="button" @@focusout="handleFocusOut"
       class="h-9 w-full text-gray-200 items-center flex justify-end box-border cursor-pointer border border-white/[.4] outline-0 rounded 
@@ -131,7 +131,7 @@ let setup = (props, ctx) => {
   })
   
   return { noOptions, isOpen, selected,
-    setExclusive, handleClear, handleFocusOut}
+    setExclusive, handleClear, handleFocusOut, handleOptionClick}
 }
 
 components["multiselect"] = {template: "#multiselect", props: ['values'], emits: ['update:modelValue'], setup};
