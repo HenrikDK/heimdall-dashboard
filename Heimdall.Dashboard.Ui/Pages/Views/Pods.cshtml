@@ -48,13 +48,16 @@ let setup = (props, ctx) => {
   let formatNamespace = (row) => {
     return { namespace: row.metadata.namespace, classes:"truncate 2xl:w-52 xl:w-44 lg:w-32", placement:"right" }
   };
-    
-  let formatRestarts = (row) => {
-    if (row.status.containerStatuses === undefined) {
-          return {content:'', classes: ''}
-    }    
-    let con = row.status.containerStatuses.reduce((a, v) => a + v.restartCount, 0);
+  
+  let getRestarts = (row) => {
+    let con = 0;
+    con += row.status.containerStatuses?.reduce((a, v) => a + v.restartCount, 0);
     con += row.status.initContainerStatuses?.reduce((a, v) => a + v.restartCount, 0) ?? 0;
+    return con
+  }
+ 
+  let formatRestarts = (row) => {
+    let con = getRestarts(row);
     return { content:con, classes: '' };
   }
 
@@ -132,8 +135,8 @@ let setup = (props, ctx) => {
       accessor: row => row.metadata.namespace, formatter:formatNamespace },
     { header: 'Containers', id: 'containers', canSort: false, lights: true, canFilter: false, classes: '2xl:w-52 xl:w-44 lg:w-32', 
       accessor: row => row.status.containerStatuses, formatter:formatContainers },
-    { header: 'Restarts', id: 'restarts', classes: 'w-40', 
-      accessor: row => row.status.containerStatuses, formatter:formatRestarts },
+    { header: 'Restarts', id: 'restarts', classes: 'w-40', sorter: 'number',
+      accessor: getRestarts, formatter:formatRestarts },
     { header: 'Age', id: 'age', update:true, classes: 'w-40', 
       accessor: row => row.metadata.creationTimestamp, formatter:formatPodAge },
     { header: 'Status', id: 'status', canSort: false, classes: 'truncate 2xl:w-64 xl:w-52 lg:w-40',  
@@ -161,7 +164,7 @@ let setup = (props, ctx) => {
   });
   
   return {
-    loading, sorting, clusterPods, pods, columns,
+    loading, sorting, clusterPods, pods, columns, getRestarts,
     formatSource, formatStatus, formatContainers, formatNamespace, formatPodAge, formatRestarts,
     updatePods
   }
