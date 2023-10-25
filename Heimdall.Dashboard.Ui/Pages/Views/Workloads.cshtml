@@ -1,4 +1,4 @@
-<template id="workloads">
+﻿<template id="workloads">
   <div class="pl-2 pr-4 w-100">
     <div class="flex my-2 items-center">
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Workloads</span>
@@ -14,7 +14,6 @@ import { ref, watch, onMounted } from 'vue'
 
 let setup = (props, ctx) => {  
   const loading = ref(true);               
-  const sorting = ref([]);
   const clusterWorkloads = ref([]);
   const clusterCronJobs = ref([]);
   const clusterDaemonSets = ref([]);
@@ -132,13 +131,26 @@ let setup = (props, ctx) => {
     return {content: '<div class="flex">' + result + '</div>', classes:'py-0.5'};
   };
   
+  const sorting = ref([{ id:"name", sort: "asc" }, { id:"namespace", sort: "desc" }]);
   const columns = ref([
-    { header:"Name", name:"metadata.name", classes:"grow shrink truncate 2xl:w-64 xl:w-52 lg:w-40" },
-    { header:"Namespace", name:"metadata.namespace", formatter:formatNamespace, namespace:true, classes:"truncate 2xl:w-52 xl:w-44 lg:w-40" },
-    { header:"Type", name:"kind", canSort:false, classes:"truncate 2xl:w-48 xl:w-40 lg:w-32" },
-    { header:"Pods", name:"pods", formatter:formatPods, canSort:false, raw:true, canFilter:false, classes:"2xl:w-52 xl:w-44 lg:w-32" },
-    { header:"Age", name:"metadata.creationTimestamp", formatter:formatWorkloadAge, sorter:"text", classes:"w-40" },
-    { header:"Conditions", field:"status", formatter:formatConditions, conditions:true, canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-44" },
+    { header:"Name", id:"name", classes:"grow shrink truncate 2xl:w-64 xl:w-52 lg:w-40", 
+      accessor: row => row.metadata.name,
+    },
+    { header:"Namespace", id:"namespace", namespace:true, classes:"truncate 2xl:w-52 xl:w-44 lg:w-40", 
+      accessor: row => row.metadata.namespace, formatter:formatNamespace
+    },
+    { header:"Type", id:"kind", canSort:false, classes:"truncate 2xl:w-48 xl:w-40 lg:w-32", 
+      accessor: row => row.kind
+    },
+    { header:"Pods", id:"pods", canSort:false, raw:true, canFilter:false, classes:"2xl:w-52 xl:w-44 lg:w-32", 
+      accessor: row => row.status, formatter:formatPods
+    },
+    { header:"Age", id:"age", sorter:"text", classes:"w-40",
+      accessor: row => row.metadata.creationTimestamp, formatter:formatWorkloadAge
+    },
+    { header:"Conditions", id:"status", conditions:true, canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-44", 
+      accessor: row => row.status, formatter:formatConditions 
+    },
   ]);
   
   let updateWorkloads = () => {
