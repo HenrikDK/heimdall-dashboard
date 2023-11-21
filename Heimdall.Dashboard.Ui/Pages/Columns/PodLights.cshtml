@@ -1,4 +1,4 @@
-<template id="lights-column">
+<template id="pod-lights">
   <div class="px-4 pt-2 flex py-0.5">
     <template v-for="item in getContainerStatuses(row)">
       <div class="mr-2">
@@ -49,9 +49,9 @@ let setup = (props, ctx) => {
   return { getContainerStatuses }
 }
 
-components["lights-column"] = { template: "#lights-column", setup, 
+components["pod-lights"] = { template: "#pod-lights", setup, 
   props: {
-      row: {}
-    }
+    row: {}
+  }
 };
 </script>
