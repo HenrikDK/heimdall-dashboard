@@ -81,56 +81,6 @@ let setup = (props, ctx) => {
       return { content:'' + toHuman(newDatetime.diff(date, unit)), classes: '' };
   };
     
-  let formatPods = (row) => {
-    if (!row.kind) return "";
-    let result = "";
-    let waiting = 0;
-    let ready = 0;
-    
-    if (row.kind === "DaemonSet")
-    {
-        let scheduled = row.status.currentNumberScheduled;
-        ready = row.status.numberReady;
-        
-        if (scheduled > ready){
-            waiting = scheduled - ready;
-        }
-    }
-    
-    if (row.kind === "StatefulSet")
-    {
-        let desired = row.status.replicas;
-        ready = row.status.currentReplicas;
-        if (desired > ready){
-            waiting = desired - ready;
-        }
-    }        
-    
-    if (row.kind === "Deployment")
-    {
-        let scheduled = row.status.replicas;
-        ready = row.status.readyReplicas;
-        if (scheduled > ready){
-            waiting = scheduled - ready;
-        }
-    }
-    
-    if (row.kind === "Job")
-    {
-        waiting = row.status.ready;
-        ready = row.status.succeeded;
-    }
-     
-    if (row.kind === "CronJob")
-    {
-        ready = row.status.active;
-    }
-    result += [...Array(waiting)].map(x => '<div class="h-4 w-4 mr-1 bg-gray-300 dark:bg-zinc-600 rounded-sm"></div>').join('');
-    result += [...Array(ready)].map(x => '<div class="h-4 w-4 mr-1 bg-green-500 dark:bg-green-500 rounded-sm"></div>').join('');
-     
-    return {content: '<div class="flex">' + result + '</div>', classes:'py-0.5'};
-  };
-  
   const sorting = ref([{ id:"name", sort: "asc" }, { id:"namespace", sort: "desc" }]);
   const columns = ref([
     { header:"Name", id:"name", classes:"grow shrink truncate 2xl:w-64 xl:w-52 lg:w-40", 
@@ -142,8 +92,8 @@ let setup = (props, ctx) => {
     { header:"Type", id:"kind", canSort:false, classes:"truncate 2xl:w-48 xl:w-40 lg:w-32", 
       accessor: row => row.kind
     },
-    { header:"Pods", id:"pods", canSort:false, raw:true, canFilter:false, classes:"2xl:w-52 xl:w-44 lg:w-32", 
-      accessor: row => row.status, formatter:formatPods
+    { header:"Pods", id:"pods", canSort:false, deploymentLights: true, canFilter:false, classes:"2xl:w-52 xl:w-44 lg:w-32", 
+      accessor: row => row.status
     },
     { header:"Age", id:"age", sorter:"text", classes:"w-40",
       accessor: row => row.metadata.creationTimestamp, formatter:formatWorkloadAge

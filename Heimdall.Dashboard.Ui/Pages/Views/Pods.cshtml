@@ -70,53 +70,6 @@ let setup = (props, ctx) => {
     let con = row.status.phase;
     return { content:con, classes: 'text-green-500 w-65' };
   }
-    
-  let formatContainers = (row) => {
-    let containers = row.status.containerStatuses;
-    let initContainers = row.status.initContainerStatuses ?? [];
-    if (containers === undefined){
-        return {content:'', classes: ''}
-    }
-    let result = [...containers, ...initContainers].map(x => {
-        if (x.state.running){
-            let status = x.ready ? 'ready' : ''
-            if (x.state.running){
-                status += ', running'                
-            }
-            let tip = `<div><div class="flex text-xs"><div>${x.name}</div><div class="pl-2 text-gray-600 dark:text-gray-400">${status}</div></div>
-<div class="flex text-xs"><div>StartedAt</div><div class="pl-2 text-gray-600 dark:text-gray-400">${x.state.running.startedAt}</div></div>
-</div>`
-            let content = '<div class="h-4 w-4 bg-green-500 dark:bg-green-500 rounded-sm"></div>';
-            return {content: content, tip:tip, tooltip:true}
-        }
-        if (x.state.waiting){
-            let status = 'waiting'
-            let tip = `<div><div class="flex text-xs justify-center"><div class="pr-2">${x.name}</div><div class="text-orange-600 dark:text-orange-400">${status}</div></div>
-<table class="border-separate border-spacing-1">
-<tr class="text-xs"><td>Reason</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">${x.state.waiting.reason}</td></tr>
-<tr class="text-xs"><td>Message</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">${x.state.waiting.message}</td></tr>
-</table></div>`
-            let content = '<div class="h-4 w-4 bg-orange-300 dark:bg-orange-500 rounded-sm"></div>';
-            return {content: content, tip: tip, tooltip: true}
-        }
-        if (x.state.terminated){
-            let status = 'terminated';
-            let tip = `<div><div class="flex text-xs justify-center"><div class="pr-2">${x.name}</div><div class="text-red-600 dark:text-red-400">${status}</div></div>
-<table class="border-separate border-spacing-1">
-<tr class="text-xs"><td>Reason</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">${x.state.terminated.reason}</td></tr>
-<tr class="text-xs"><td>Exit code</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">${x.state.terminated.exitCode}</td></tr>
-<tr class="text-xs"><td>Started At</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">${x.state.terminated.startedAt}</td></tr>
-<tr class="text-xs"><td>Finished At</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">${x.state.terminated.finishedAt}</td></tr>
-<tr class="text-xs"><td>Container ID</td><td class="text-gray-600 dark:text-gray-400 w-64 break-all">${x.state.terminated.containerID}</td></tr>
-</table>
-</div>`
-            let content = '<div class="h-4 w-4 bg-gray-300 dark:bg-zinc-600 rounded-sm"></div>';
-            return {content: content, tip: tip, tooltip: true}
-        }
-    });
-    
-    return { items:result, classes: 'flex py-0.5' };
-  };
 
   let formatPodAge = (row) => {
     var DT = window.DateTime || luxon.DateTime;
@@ -133,8 +86,8 @@ let setup = (props, ctx) => {
       accessor: row => row.metadata.name },
     { header: 'Namespace', id: 'namespace', namespace: true, classes: 'truncate 2xl:w-52 xl:w-44 lg:w-32', 
       accessor: row => row.metadata.namespace, formatter:formatNamespace },
-    { header: 'Containers', id: 'containers', canSort: false, lights: true, canFilter: false, classes: '2xl:w-52 xl:w-44 lg:w-32', 
-      accessor: row => row.status.containerStatuses, formatter:formatContainers },
+    { header: 'Containers', id: 'containers', canSort: false, podLights: true, canFilter: false, classes: '2xl:w-52 xl:w-44 lg:w-32', 
+      accessor: row => row.status.containerStatuses },
     { header: 'Restarts', id: 'restarts', classes: 'w-40', sorter: 'number',
       accessor: getRestarts, formatter:formatRestarts },
     { header: 'Age', id: 'age', update:true, classes: 'w-40', 
