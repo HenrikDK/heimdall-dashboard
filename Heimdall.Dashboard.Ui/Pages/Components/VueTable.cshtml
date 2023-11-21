@@ -1,7 +1,7 @@
 <template id="vue-table">
   <div class="border overflow-hidden border-gray-200 shadow-md rounded-lg dark:border-zinc-700 mt-4"> <!-- table outer border -->
-    <div class="w-full h-[85vh] text-left divide-y divide-gray-200 dark:divide-zinc-700"> <!-- table -->
-      <div class="flex w-full sticky top-0 z-10 bg-gray-100 dark:bg-zinc-800"> <!-- header -->
+    <div class="w-full h-[85vh] text-left divide-y divide-gray-200 dark:divide-zinc-700 dark:bg-zinc-900"> <!-- table -->
+      <div class="flex w-full sticky top-0 z-10 bg-gray-100 dark:bg-zinc-900"> <!-- header -->
         <div v-for="column in columns"
              class="text-left text-xs font-strong text-black uppercase dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-zinc-700"
              :class="column.classes">
@@ -33,7 +33,7 @@
           </div>
         </div>
       </div>
-      <div v-bind="containerProps" class="overflow-y-scroll h-[82.5vh] text-sm text-gray-700 dark:text-gray-400 flex flex-col w-full dark:divide-zinc-700 dark:[color-scheme:dark]"> <!-- body -->
+      <div v-bind="containerProps" class="overflow-y-scroll h-[82.5vh] text-sm text-gray-700 dark:text-gray-300 flex flex-col w-full dark:divide-zinc-700 dark:[color-scheme:dark]"> <!-- body -->
         <template v-if="!loading">
           <div v-bind="wrapperProps">
             <optional-link v-for="row in list" :row="row.data" :key="row.index">
@@ -195,7 +195,7 @@ components["vue-table"] = { template: "#vue-table", props: ['data', 'columns', '
 </script>
 
 <script>
-function getSortFn(sorter = 'text'){
+function getSortFn(sorter = 'textCS'){
   if (typeof sorter === 'function'){
     return sorter
   }
@@ -212,6 +212,9 @@ function getSortFn(sorter = 'text'){
   }
   if (sorter === 'datetime'){
     compare = datetime
+  }
+  if (sorter === 'number'){
+    compare = number  
   }
   return compare;
 }
@@ -271,6 +274,10 @@ function sortData(rows, sorting, columnInfos){
   })
 
   return sortedData
+}
+
+function number(a, b) {
+  return a === b ? 0 : a > b ? 1 : -1
 }
 
 function alphanumeric(valA, valB){

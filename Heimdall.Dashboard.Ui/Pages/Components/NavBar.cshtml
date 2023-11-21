@@ -1,5 +1,5 @@
 <template id="nav-bar">
-  <header class="text-base z-10 h-14 sticky top-0 bg-brand dark:bg-zinc-800">
+  <header class="text-base z-10 h-14 sticky top-0 bg-brand dark:bg-dark">
     <nav>
       <div class="px-2 flex justify-between w-full">
         <div>
@@ -90,7 +90,7 @@ let setup = (props, ctx) => {
      .then(j => filters.value = j);
     
     var host = window.location.origin;
-    streamResults(host + '/k8s/api/v1/namespaces', j => this.cluster = j)
+    streamResults(host + '/k8s/api/v1/namespaces', j => cluster.value = j)
   });
   
   return {

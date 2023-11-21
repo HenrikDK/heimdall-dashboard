@@ -231,13 +231,13 @@ let setup = (props, ctx) => {
   }
   
   watch(() => [metrics.value.nodeCpu, metrics.value.kubeCpu], () => {
-    this.updateCpu(); 
-    this.updateHistory();    
+    updateCpu(); 
+    updateHistory();    
   });
   
   watch(() => [metrics.value.nodeMemory, metrics.value.kubeMemory], () => {
-    this.updateMemory();
-    this.updateHistory();    
+    updateMemory();
+    updateHistory();    
   })
   
   watch(() => props.namespaces, () => {
@@ -267,13 +267,13 @@ let setup = (props, ctx) => {
     
     updateMetrics();
     
-    streamResults(host + '/k8s/api/v1/pods', j => this.cluster.pods = j);
-    streamResults(host + '/k8s/apis/apps/v1/deployments', j => this.cluster.deployments = j);
-    streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => this.cluster.daemonSets = j);
-    streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => this.cluster.statefulSets = j);
-    streamResults(host + '/k8s/apis/apps/v1/replicasets', j => this.cluster.replicaSets = j);
-    streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => this.cluster.cronJobs = j);
-    streamResults(host + '/k8s/apis/batch/v1/jobs', j => this.cluster.jobs = j);          
+    streamResults(host + '/k8s/api/v1/pods', j => cluster.value.pods = j);
+    streamResults(host + '/k8s/apis/apps/v1/deployments', j => cluster.value.deployments = j);
+    streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => cluster.value.daemonSets = j);
+    streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => cluster.value.statefulSets = j);
+    streamResults(host + '/k8s/apis/apps/v1/replicasets', j => cluster.value.replicaSets = j);
+    streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => cluster.value.cronJobs = j);
+    streamResults(host + '/k8s/apis/batch/v1/jobs', j => cluster.value.jobs = j);          
   });
     
   return {
