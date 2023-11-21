@@ -71,8 +71,11 @@
                     <template v-else-if="column.conditions">
                       <conditions-column :conditions="scope.conditions" :classes="column.classes" :placement="scope.placement"></conditions-column>
                     </template>
-                    <template v-else-if="column.lights">
-                      <lights-column :items="scope.items"></lights-column>
+                    <template v-else-if="column.deploymentLights">
+                      <deployment-lights :row="row"></deployment-lights>
+                    </template>
+                    <template v-else-if="column.podLights">
+                      <pod-lights :row="row"></pod-lights>
                     </template>
                     <template v-else-if="column.raw">
                       <div class="px-4 py-2" :class="column.classes">
