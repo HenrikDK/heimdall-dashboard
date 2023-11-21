@@ -1,35 +1,57 @@
 <template id="lights-column">
-  <div class="px-4 pt-2 flex" :class="classes">
-    <template v-for="item in items">
+  <div class="px-4 pt-2 flex py-0.5">
+    <template v-for="item in getContainerStatuses(row)">
       <div class="mr-2">
-        <template v-if="item.tooltip">
-          <tooltip :placement="placement">
-            <template v-slot:cell>
-              <div v-html="item.content"></div>
-            </template>
+        <tooltip placement="bottom">
+          <template v-slot:cell>            
+            <div v-if="item.state.running" class="h-4 w-4 bg-green-500 dark:bg-green-500 rounded-sm"></div>
+            <div v-if="item.state.waiting" class="h-4 w-4 bg-orange-300 dark:bg-orange-500 rounded-sm"></div>
+            <div v-if="item.state.terminated" class="h-4 w-4 bg-gray-300 dark:bg-zinc-600 rounded-sm"></div>
+          </template>
 
-            <template v-slot:tooltip>
-              <div v-html="item.tip"></div>
-            </template>
-          </tooltip>
-        </template>
-        <template v-else>
-          <div v-html="item.content"></div>
-        </template>
+          <template v-slot:tooltip>
+            <div v-if="item.state.running">
+              <div class="flex text-xs"><div>{{ item.name }}</div><div class="pl-2 text-gray-600 dark:text-gray-400">{{ item.ready ? 'ready, running' : 'running' }}</div></div>
+              <div class="flex text-xs"><div>StartedAt</div><div class="pl-2 text-gray-600 dark:text-gray-400">{{ item.state.running.startedAt }}</div></div>
+            </div>
+            <div v-if="item.state.waiting">
+              <div class="flex text-xs justify-center"><div class="pr-2">{{ item.name }}</div><div class="text-orange-600 dark:text-orange-400">waiting</div></div>
+              <table class="border-separate border-spacing-1">
+                <tr class="text-xs"><td>Reason</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">{{ item.state.waiting.reason }}</td></tr>
+                <tr class="text-xs"><td>Message</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">{{ item.state.waiting.message }}</td></tr>
+              </table>
+            </div>
+            <div v-if="item.state.terminated">
+              <div class="flex text-xs justify-center"><div class="pr-2">{{ item.name }}</div><div class="text-red-600 dark:text-red-400">terminated</div></div>
+              <table class="border-separate border-spacing-1">
+                <tr class="text-xs"><td>Reason</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">{{ item.state.terminated.reason }}</td></tr>
+                <tr class="text-xs"><td>Exit code</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">{{ item.state.terminated.exitCode }}</td></tr>
+                <tr class="text-xs"><td>Started At</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">{{ item.state.terminated.startedAt }}</td></tr>
+                <tr class="text-xs"><td>Finished At</td><td class="text-gray-600 dark:text-gray-400 w-64 break-words">{{ item.state.terminated.finishedAt }}</td></tr>
+                <tr class="text-xs"><td>Container ID</td><td class="text-gray-600 dark:text-gray-400 w-64 break-all">{{ item.state.terminated.containerID }}</td></tr>
+              </table>
+            </div>
+          </template>
+        </tooltip>
       </div>
     </template>
   </div>
 </template>
 
 <script type="module">
-components["lights-column"] = { template: "#lights-column",
-  props: {
-    classes: String,
-    items: Array,
-    placement: {
-      type: String,
-      default: 'bottom'
-    }
+let setup = (props, ctx) => {
+  let getContainerStatuses = (row) => {
+    let containers = row.status.containerStatuses;
+    let initContainers = row.status.initContainerStatuses ?? [];
+    return [...containers, ...initContainers]
   }
+  
+  return { getContainerStatuses }
+}
+
+components["lights-column"] = { template: "#lights-column", setup, 
+  props: {
+      row: {}
+    }
 };
 </script>
