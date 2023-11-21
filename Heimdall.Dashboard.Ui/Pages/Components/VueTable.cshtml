@@ -72,7 +72,7 @@
                       <conditions-column :conditions="scope.conditions" :classes="column.classes" :placement="scope.placement"></conditions-column>
                     </template>
                     <template v-else-if="column.lights">
-                      <lights-column :items="scope.items" :classes="column.classes" :placement="scope.placement"></lights-column>
+                      <lights-column :items="scope.items"></lights-column>
                     </template>
                     <template v-else-if="column.raw">
                       <div class="px-4 py-2" :class="column.classes">
@@ -112,12 +112,7 @@ let setup = (props, ctx) => {
   const timer = ref('');
   
   const rows = ref([]);
-  const { list, containerProps, wrapperProps } = useVirtualList(
-    rows,
-    {
-      itemHeight: 36,
-    },
-  );
+  const { list, containerProps, wrapperProps } = useVirtualList(rows, { itemHeight: 36 });
   
   let cancelAutoUpdate = () => {
     clearInterval(timer.value);
