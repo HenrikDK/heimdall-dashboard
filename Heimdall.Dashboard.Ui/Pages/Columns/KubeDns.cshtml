@@ -10,7 +10,7 @@
 let setup = (props, ctx) => {
   
   let getServices = (row) => {
-    let lines = row.data.spec?.ports.map(x => row.data.metadata?.name + '.' + row.data.metadata?.namespace + ':' + x.port)
+    let lines = row.data.spec?.ports?.map(x => row.data.metadata?.name + '.' + row.data.metadata?.namespace + ':' + x.port)
     return lines
   }
   
