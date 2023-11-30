@@ -38,14 +38,10 @@ let setup = (props, ctx) => {
       spec:{type: "NodeIP", ports: [{port:"8080"}]}
     }
   ]);
-  
-  let formatNamespace = (row) => {
-    return { namespace: row.metadata.namespace, classes: "truncate 2xl:w-52 xl:w-44 lg:w-32", placement:"right" }
-  }
-  
-  let formatKubeDns = (row) => {
-    let dns = row.metadata.name + '.' + row.metadata.namespace + ':' + row.spec.ports[0].port
-    return {content: dns, classes:''};
+    
+  let getKubeDns = (row) => {
+    let lines = row.spec?.ports.map(x => row.metadata.name + '.' + row.metadata.namespace + ':' + x.port)
+    return lines.join("\r\n");
   }
   
   let formatServiceAge = (row) => {
@@ -63,10 +59,10 @@ let setup = (props, ctx) => {
       accessor: row => row.spec.type },
     { header:'Name', id: 'name', sorter: 'text', classes: 'truncate 2xl:w-64 xl:w-52 lg:w-40', 
       accessor: row => row.metadata.name },
-    { header:'Namespace', id: 'namespace', sorter: 'text', namespace:true, classes: 'truncate 2xl:w-52 xl:w-44 lg:w-40', 
-      accessor: row => row.metadata.namespace, formatter:formatNamespace },
+    { header:'Namespace', id: 'namespace', sorter: 'text', classes: 'truncate 2xl:w-52 xl:w-44 lg:w-40', 
+      accessor: row => row.metadata.namespace, formatter:'namespace' },
     { header:'Kube-DNS', id:'dns', sorter: 'text', classes: 'truncate grow shrink',
-      accessor: row => row.kubeDNS, formatter:formatKubeDns },
+      accessor: getKubeDns, formatter:'kube-dns' },
     { header:'Age', id:'age', sorter: 'text', update: true, classes:'w-40', 
       accessor: row => row.age, formatter:formatServiceAge }
   ]);
@@ -92,7 +88,7 @@ let setup = (props, ctx) => {
   
   return {
     loading, sorting, columns, clusterServices, services,
-    formatNamespace, formatServiceAge, formatKubeDns,
+    formatServiceAge, getKubeDns,
     updateServices
   }
 }
