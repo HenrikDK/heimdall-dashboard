@@ -1,5 +1,5 @@
 <template id="pod-lights">
-  <div class="px-4 pt-2 flex py-0.5">
+  <div class="px-4 pt-2 flex py-0.5" :class="classes">
     <template v-for="item in getContainerStatuses(row)">
       <div class="mr-2">
         <tooltip placement="bottom">
@@ -41,8 +41,8 @@
 <script type="module">
 let setup = (props, ctx) => {
   let getContainerStatuses = (row) => {
-    let containers = row.status.containerStatuses;
-    let initContainers = row.status.initContainerStatuses ?? [];
+    let containers = row.data.status.containerStatuses;
+    let initContainers = row.data.status.initContainerStatuses ?? [];
     return [...containers, ...initContainers]
   }
   
@@ -51,7 +51,8 @@ let setup = (props, ctx) => {
 
 components["pod-lights"] = { template: "#pod-lights", setup, 
   props: {
-    row: {}
+    row: {},
+    classes: '2xl:w-52 xl:w-44 lg:w-32'
   }
 };
 </script>
