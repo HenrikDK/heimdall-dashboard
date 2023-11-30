@@ -2,7 +2,7 @@
   <div :class="classes">
     <tooltip :placement="placement" padding="pl-4 py-2">
       <template v-slot:cell>
-        <div @@click="nsClick" class="truncate underline text-blue-500">{{ getNamespace(row) }}</div>
+        <div @@click="nsClick" class="truncate cursor-pointer underline text-blue-500">{{ getNamespace(row) }}</div>
       </template>
       
       <template v-slot:tooltip>
