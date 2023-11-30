@@ -50,6 +50,12 @@
                   <template v-else-if="column.formatter == 'kube-dns'">
                     <kube-dns :row="row" :classes="column.classes"></kube-dns>
                   </template>
+                  <template v-else-if="column.formatter == 'deployment-lights'">
+                    <deployment-lights :row="row"></deployment-lights>
+                  </template>
+                  <template v-else-if="column.formatter == 'pod-lights'">
+                    <pod-lights :row="row" :classes="column.classes" ></pod-lights>
+                  </template>
                   <template v-else v-for="scope in [column.formatter(row.data)]">
                     <template v-if="column.tooltip">
                       <tooltip :placement="scope.tooltip.placement" :padding="scope.cell.padding">
@@ -73,12 +79,6 @@
                     </template>
                     <template v-else-if="column.conditions">
                       <conditions-column :conditions="scope.conditions" :classes="column.classes" :placement="scope.placement"></conditions-column>
-                    </template>
-                    <template v-else-if="column.deploymentLights">
-                      <deployment-lights :row="row"></deployment-lights>
-                    </template>
-                    <template v-else-if="column.podLights">
-                      <pod-lights :row="row"></pod-lights>
                     </template>
                     <template v-else-if="column.raw">
                       <div class="px-4 py-2" :class="column.classes">
