@@ -44,6 +44,9 @@
                       {{ column.accessor(row.data) }}
                     </div>
                   </template>
+                  <template v-else-if="column.formatter == 'namespace'">
+                    <ns-column :row="row" :classes="column.classes"></ns-column>
+                  </template>
                   <template v-else v-for="scope in [column.formatter(row.data)]">
                     <template v-if="column.tooltip">
                       <tooltip :placement="scope.tooltip.placement" :padding="scope.cell.padding">
@@ -64,9 +67,6 @@
                           </template>
                         </template>
                       </tooltip>
-                    </template>
-                    <template v-else-if="column.namespace">
-                      <ns-column :namespace="scope.namespace" :classes="scope.classes" :placement="scope.placement"></ns-column>
                     </template>
                     <template v-else-if="column.conditions">
                       <conditions-column :conditions="scope.conditions" :classes="column.classes" :placement="scope.placement"></conditions-column>
