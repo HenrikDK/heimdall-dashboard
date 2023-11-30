@@ -47,6 +47,9 @@
                   <template v-else-if="column.formatter == 'namespace'">
                     <ns-column :row="row" :classes="column.classes"></ns-column>
                   </template>
+                  <template v-else-if="column.formatter == 'kube-dns'">
+                    <kube-dns :row="row" :classes="column.classes"></kube-dns>
+                  </template>
                   <template v-else v-for="scope in [column.formatter(row.data)]">
                     <template v-if="column.tooltip">
                       <tooltip :placement="scope.tooltip.placement" :padding="scope.cell.padding">
