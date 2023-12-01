@@ -1,12 +1,68 @@
 <template id="deployment-conditions">
-  <div class="" :class="classes">
+  <div :class="classes">
+    <div v-if="row.data?.kind == 'DaemonSet' || row.data?.kind == 'StatefulSet'" class="px-1 py-2 text-green-500">
+      Running
+    </div>
+    <div v-else-if="row.data?.kind == 'CronJob'" class="px-1 py-2" :class="row.data.status.active ? 'text-green-500' : 'text-grey-300'">
+      {{ row.data.status.active ? 'Running' : 'Waiting' }}
+    </div>
+    <div v-else-if="row.data?.kind == 'Deployment'">
+      <template v-for="d in getDeployments(row)">
+        <tooltip :placement="placement" padding="py-2">
+          <template v-slot:cell>
+            <div class="px-1" :class="d.type == 'Available' ? 'text-green-500' : 'text-blue-500'">
+              {{ d.type }}
+            </div>
+          </template>
+          
+          <template v-slot:tooltip>
+            <div class="text-sm whitespace-no-wrap leading-none break-words w-fit">
+              {{ d.message }}
+            </div>
+          </template>
+        </tooltip>
+      </template>
+    </div>
+    <div v-else-if="row.data?.kind == 'Job'">
+      <template v-for="d in row.data.status.conditions">
+        <tooltip :placement="placement" padding="py-2">
+          <template v-slot:cell>
+            <div class="px-1 text-green-500">
+              {{ d.type }}
+            </div>
+          </template>
+
+          <template v-slot:tooltip>
+            <div class="text-sm whitespace-no-wrap leading-none break-words w-fit">
+              {{ d.message }}
+            </div>
+          </template>
+        </tooltip>
+      </template>
+    </div>
   </div>
 </template>
 
 <script type="module">
-components["deployment-conditions"] = { template: "#deployment-conditions",
+let setup = (props, ctx) => {
+  let getDeployments = (row) => {
+    let conditions = row.data.status.conditions?.filter(y => y.status !== 'False') ?? [];
+    conditions.sort((a,b) => (a.type < b.type) ? -1 : 1)
+    return conditions;
+  }
+    
+  return { getDeployments }
+}
+
+
+components["deployment-conditions"] = { template: "#deployment-conditions", setup,
   props: {
+    row: {},
     classes: String,
+    placement: {
+      type: String,
+      default: 'bottom'
+    }
   }
 };
 </script>
