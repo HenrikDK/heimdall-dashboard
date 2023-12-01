@@ -60,7 +60,7 @@
                     <pod-lights :row="row" :classes="column.classes" ></pod-lights>
                   </template>
                   <template v-else-if="column.formatter == 'object-age'">
-                    <object-age :row="row" :classes="column.classes" ></object-age>
+                    <object-age :row="row" :classes="column.classes" :key="updateKey"></object-age>
                   </template>
                   <template v-else v-for="scope in [column.formatter(row.data)]">
                     <template v-if="column.tooltip">
