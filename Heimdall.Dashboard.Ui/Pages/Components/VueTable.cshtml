@@ -74,6 +74,9 @@
                   <template v-else-if="column.formatter == 'ingress-hosts'">
                     <ingress-hosts :row="row" :classes="column.classes"></ingress-hosts>
                   </template>
+                  <template v-else-if="column.formatter == 'ingress-load-balancers'">
+                    <ingress-load-balancers :row="row" :classes="column.classes"></ingress-load-balancers>
+                  </template>
                   <template v-else v-for="scope in [column.formatter(row.data)]">
                     <template v-if="column.tooltip">
                       <tooltip :placement="scope.tooltip.placement" :padding="scope.cell.padding">
