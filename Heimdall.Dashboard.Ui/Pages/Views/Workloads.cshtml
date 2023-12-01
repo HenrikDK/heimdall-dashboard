@@ -25,15 +25,6 @@ let setup = (props, ctx) => {
     metadata:{ name:"some-service-thingy", namespace: "service-ns", creationTimestamp: "2023-02-11T14:48:00.000Z" },
     status:{ replicas: 2, readyReplicas: 1, conditions: [{type:'Available'}, {type:'Progressing'}] }
   }]);
-
-  let formatWorkloadAge = (row) => {
-      var DT = window.DateTime || luxon.DateTime;
-      const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
-      var date = DT.now();
-  
-      var newDatetime = DT.fromISO(String(row.metadata.creationTimestamp));
-      return { content:'' + toHuman(newDatetime.diff(date, unit)), classes: '' };
-  };
     
   const sorting = ref([{ id:"name", sort: "asc" }, { id:"namespace", sort: "desc" }]);
   const columns = ref([
@@ -46,7 +37,7 @@ let setup = (props, ctx) => {
     { header:"Pods", id:"pods", canSort:false, canFilter:false, classes:"2xl:w-52 xl:w-44 lg:w-32", 
       accessor: row => row.status, formatter:'deployment-lights' },
     { header:"Age", id:"age", sorter:"text", classes:"w-40",
-      accessor: row => row.metadata.creationTimestamp, formatter:formatWorkloadAge },
+      accessor: row => row.metadata.creationTimestamp, formatter:'object-age' },
     { header:"Conditions", id:"status", canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-44", 
       accessor: row => row.status, formatter:'deployment-conditions' },
   ]);
@@ -82,7 +73,7 @@ let setup = (props, ctx) => {
   });
 
   return { 
-    loading, sorting, workloads, columns, formatWorkloadAge,
+    loading, sorting, workloads, columns,
     clusterWorkloads, clusterCronJobs, clusterDaemonSets, clusterJobs, clusterStatefulSets,
     updateWorkloads
   }
