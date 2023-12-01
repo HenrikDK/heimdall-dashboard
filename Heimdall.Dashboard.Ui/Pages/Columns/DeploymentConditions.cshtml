@@ -1,16 +1,16 @@
 <template id="deployment-conditions">
-  <div :class="classes">
-    <div v-if="row.data?.kind == 'DaemonSet' || row.data?.kind == 'StatefulSet'" class="px-1 py-2 text-green-500">
+  <div class="px-4 py-2" :class="classes">
+    <div v-if="row.data?.kind == 'DaemonSet' || row.data?.kind == 'StatefulSet'" class="text-green-500">
       Running
     </div>
-    <div v-else-if="row.data?.kind == 'CronJob'" class="px-1 py-2" :class="row.data.status.active ? 'text-green-500' : 'text-grey-300'">
+    <div v-else-if="row.data?.kind == 'CronJob'" :class="row.data.status.active ? 'text-green-500' : 'text-grey-300'">
       {{ row.data.status.active ? 'Running' : 'Waiting' }}
     </div>
     <div v-else-if="row.data?.kind == 'Deployment'">
       <template v-for="d in getDeployments(row)">
-        <tooltip :placement="placement" padding="py-2">
+        <tooltip :placement="placement">
           <template v-slot:cell>
-            <div class="px-1" :class="d.type == 'Available' ? 'text-green-500' : 'text-blue-500'">
+            <div class="pe-1" :class="d.type == 'Available' ? 'text-green-500' : 'text-blue-500'">
               {{ d.type }}
             </div>
           </template>
@@ -25,7 +25,7 @@
     </div>
     <div v-else-if="row.data?.kind == 'Job'">
       <template v-for="d in row.data.status.conditions">
-        <tooltip :placement="placement" padding="py-2">
+        <tooltip :placement="placement">
           <template v-slot:cell>
             <div class="px-1 text-green-500">
               {{ d.type }}
