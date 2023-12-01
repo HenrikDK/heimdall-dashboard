@@ -1,5 +1,5 @@
 <template id="deployment-lights">
-  <div class="px-4 pt-2 flex py-0.5">
+  <div class="px-4 pt-2 flex py-0.5 overflow-hidden" :class="classes">
     <template v-for="item in getPodStatuses(row)">
       <div class="mr-2">
           <div v-if="item" class="h-4 w-4 bg-green-500 dark:bg-green-500 rounded-sm"></div>
@@ -13,47 +13,47 @@
 
 let setup = (props, ctx) => {
   let getPodStatuses = (row) => {
-    if (!row.kind) return [];
+    if (!row.data.kind) return [];
     let waiting = 0;
     let ready = 0;
     
-    if (row.kind === "DaemonSet")
+    if (row.data.kind === "DaemonSet")
     {
-        let scheduled = row.status.currentNumberScheduled;
-        ready = row.status.numberReady;
+        let scheduled = row.data.status.currentNumberScheduled;
+        ready = row.data.status.numberReady;
         
         if (scheduled > ready){
             waiting = scheduled - ready;
         }
     }
     
-    if (row.kind === "StatefulSet")
+    if (row.data.kind === "StatefulSet")
     {
-        let desired = row.status.replicas;
-        ready = row.status.currentReplicas;
+        let desired = row.data.status.replicas;
+        ready = row.data.status.currentReplicas;
         if (desired > ready){
             waiting = desired - ready;
         }
     }        
     
-    if (row.kind === "Deployment")
+    if (row.data.kind === "Deployment")
     {
-        let scheduled = row.status.replicas;
-        ready = row.status.readyReplicas;
+        let scheduled = row.data.status.replicas;
+        ready = row.data.status.readyReplicas;
         if (scheduled > ready){
             waiting = scheduled - ready;
         }
     }
     
-    if (row.kind === "Job")
+    if (row.data.kind === "Job")
     {
-        waiting = row.status.ready;
-        ready = row.status.succeeded;
+        waiting = row.data.status.ready;
+        ready = row.data.status.succeeded;
     }
      
-    if (row.kind === "CronJob")
+    if (row.data.kind === "CronJob")
     {
-        ready = row.status.active;
+        ready = row.data.status.active;
     }
 
     let result = [];    
@@ -69,7 +69,8 @@ let setup = (props, ctx) => {
 
 components["deployment-lights"] = { template: "#deployment-lights", setup, 
   props: {
-    row: {}
+    row: {},
+    classes: ''
   }
 };
 </script>
