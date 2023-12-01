@@ -8,9 +8,9 @@
 let setup = (props, ctx) => {
   
   let formatAge = (row) => {
-    let age = row?.data?.metadata?.creationTimestamp;
+    let age = row?.data?.lastTimestamp;
     if (!age){
-      age = row?.data?.lastTimestamp;
+      age = row?.data?.metadata?.creationTimestamp;  
     }
     
     let DT = window.DateTime || luxon.DateTime;
