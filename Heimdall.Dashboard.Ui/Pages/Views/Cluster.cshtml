@@ -53,7 +53,7 @@
 
 <script type="module">
 import { ref, watch, onMounted } from 'vue'
-import { useDark } from "vueuse";
+import { useDark } from "@@vueuse/core";
 
 let setup = (props, ctx) => {
   const isDark = useDark();
