@@ -40,7 +40,7 @@
               <div class="flex w-full hover:bg-blue-100 dark:hover:bg-zinc-700">
                 <template v-for="column in columns">
                   <template v-if="column.formatter == undefined">
-                    <div class="px-4 py-2" :key="column.update ? updateKey : 0" :class="column.classes">
+                    <div class="px-4 py-2" :class="column.classes">
                       {{ column.accessor(row.data) }}
                     </div>
                   </template>
@@ -76,40 +76,6 @@
                   </template>
                   <template v-else-if="column.formatter == 'ingress-load-balancers'">
                     <ingress-load-balancers :row="row" :classes="column.classes"></ingress-load-balancers>
-                  </template>
-                  <template v-else v-for="scope in [column.formatter(row.data)]">
-                    <template v-if="column.tooltip">
-                      <tooltip :placement="scope.tooltip.placement" :padding="scope.cell.padding">
-                        <template v-slot:cell>
-                          <template v-if="scope.cell.raw">
-                            <div v-html="scope.cell.content" :class="scope.cell.classes"></div>
-                          </template>
-                          <template v-else>
-                            <div :class="scope.cell.classes">{{ scope.cell.content }}</div>
-                          </template>
-                        </template>
-                        <template v-slot:tooltip>
-                          <template v-if="scope.tooltip.raw">
-                            <div v-html="scope.tooltip.content" :class="scope.tooltip.classes"></div>
-                          </template>
-                          <template v-else>
-                            <div :class="scope.tooltip.classes">{{ scope.tooltip.content }}</div>
-                          </template>
-                        </template>
-                      </tooltip>
-                    </template>
-                    <template v-else-if="column.raw">
-                      <div class="px-4 py-2" :class="column.classes">
-                        <div v-html="scope.content" :key="column.update ? updateKey : 0" :class="scope.classes"></div>
-                      </div>
-                    </template>
-                    <template v-else>
-                      <div class="px-4 py-2" :class="column.classes">
-                        <div :class="scope.classes" :key="column.update ? updateKey : 0">
-                          {{ scope.content }}
-                        </div>
-                      </div>
-                    </template>
                   </template>
                 </template>
               </div>
