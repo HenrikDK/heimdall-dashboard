@@ -378,13 +378,8 @@ function filterRows(rows, columns, namespaces, search){
     
     if (tokens.length){
       let values = filterColumns.map(fc => {
-         let val = '';
-         if (fc.formatter && fc.raw){
-           val = fc.formatter(row).content;
-         } else 
-         {
-           val = fc.accessor(row);
-         }
+         let val = fc.accessor(row);
+         
          if (typeof val === 'object'){
            return JSON.stringify(val)
          }
