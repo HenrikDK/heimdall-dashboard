@@ -21,21 +21,6 @@ let setup = (props, ctx) => {
     involvedObject: { namespace: "test", kind: "lobster", name: "thing" }
   }]);
   
-  let formatSource = (row) => {
-    let con = row.involvedObject.kind + ": " + row.involvedObject.name;
-    return { content:con, classes: 'truncate text-blue-500 2xl:w-80 xl:w-64 lg:w-64' };
-  }
-  
-  let formatEventAge = (row) => {
-    var DT = window.DateTime || luxon.DateTime;
-    var invalid = "";
-    const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
-    var date = DT.now();
-
-    var newDatetime = DT.fromISO(String(row.lastTimestamp));
-    return { content:'' + toHuman(newDatetime.diff(date, unit)), classes: '' };
-  }
-
   let updateEvents = async () => {
     if (!clusterEvents.value) return;
     
@@ -61,10 +46,10 @@ let setup = (props, ctx) => {
       { header:'Message', id:'message', canSort:false, classes:'2xl:w-[41rem] xl:w-[23rem] lg:w-[19rem] shrink',
         accessor: row => row.message, formatter:'event-message'},
       { header:'Source', id:'source', canSort:false, classes: 'truncate 2xl:w-80 xl:w-64 lg:w-64', 
-        accessor: row => row.involvedObject.name, formatter:formatSource },
+        accessor: row => row.involvedObject.name, formatter:'event-source' },
       { header:'Events', id:'events', sorter:'number', classes:'w-40', 
         accessor: row => row.count },
-      { header:'Age', id:'age', sorter:'text', classes:'w-32', update: true, 
+      { header:'Age', id:'age', sorter:'text', classes:'w-32',
         accessor: row => row.lastTimestamp, formatter:'object-age' },
   ]);
   
@@ -73,11 +58,7 @@ let setup = (props, ctx) => {
     streamResults(host + '/k8s/api/v1/events', j => clusterEvents.value = j);
   });
   
-  return {
-    loading, clusterEvents, events, sorting, columns,  
-    formatSource, formatEventAge,
-    updateEvents
-  }
+  return { loading, clusterEvents, events, sorting, columns, updateEvents }
 }
 
 components["events"] = {template: "#events", props: ['namespaces', 'search'], setup};
