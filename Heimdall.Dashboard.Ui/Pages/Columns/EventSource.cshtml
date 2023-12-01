@@ -1,0 +1,18 @@
+<template id="event-source">
+  <div class="truncate text-blue-500 py-2 px-4" :class="classes">
+    {{ row.data.involvedObject?.kind }}: {{ row.data.involvedObject?.name }}
+  </div>
+</template>
+
+<script type="module">
+components["event-source"] = { template: "#event-source",
+  props: {
+    row: {},
+    classes: '2xl:w-80 xl:w-64 lg:w-64',
+    placement: {
+      type: String,
+      default: 'bottom'
+    }
+  },
+};
+</script>
