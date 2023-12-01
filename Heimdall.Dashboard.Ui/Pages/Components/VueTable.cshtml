@@ -53,6 +53,9 @@
                   <template v-else-if="column.formatter == 'deployment-lights'">
                     <deployment-lights :row="row" :classes="column.classes"></deployment-lights>
                   </template>
+                  <template v-else-if="column.formatter == 'deployment-conditions'">
+                    <deployment-conditions :row="row" :classes="column.classes"></deployment-conditions>
+                  </template>
                   <template v-else-if="column.formatter == 'pod-lights'">
                     <pod-lights :row="row" :classes="column.classes" ></pod-lights>
                   </template>
@@ -79,9 +82,6 @@
                           </template>
                         </template>
                       </tooltip>
-                    </template>
-                    <template v-else-if="column.conditions">
-                      <conditions-column :conditions="scope.conditions" :classes="column.classes" :placement="scope.placement"></conditions-column>
                     </template>
                     <template v-else-if="column.raw">
                       <div class="px-4 py-2" :class="column.classes">
