@@ -62,6 +62,9 @@
                   <template v-else-if="column.formatter == 'object-age'">
                     <object-age :row="row" :classes="column.classes" :key="updateKey"></object-age>
                   </template>
+                  <template v-else-if="column.formatter == 'event-message'">
+                    <event-message :row="row" :classes="column.classes"></event-message>
+                  </template>
                   <template v-else v-for="scope in [column.formatter(row.data)]">
                     <template v-if="column.tooltip">
                       <tooltip :placement="scope.tooltip.placement" :padding="scope.cell.padding">
