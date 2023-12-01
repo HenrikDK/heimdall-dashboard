@@ -59,6 +59,9 @@
                   <template v-else-if="column.formatter == 'pod-lights'">
                     <pod-lights :row="row" :classes="column.classes" ></pod-lights>
                   </template>
+                  <template v-else-if="column.formatter == 'pod-status'">
+                    <pod-status :row="row" :classes="column.classes" ></pod-status>
+                  </template>
                   <template v-else-if="column.formatter == 'object-age'">
                     <object-age :row="row" :classes="column.classes" :key="updateKey"></object-age>
                   </template>
