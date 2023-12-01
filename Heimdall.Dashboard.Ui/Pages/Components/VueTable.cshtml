@@ -71,6 +71,9 @@
                   <template v-else-if="column.formatter == 'event-source'">
                     <event-source :row="row" :classes="column.classes"></event-source>
                   </template>
+                  <template v-else-if="column.formatter == 'ingress-hosts'">
+                    <ingress-hosts :row="row" :classes="column.classes"></ingress-hosts>
+                  </template>
                   <template v-else v-for="scope in [column.formatter(row.data)]">
                     <template v-if="column.tooltip">
                       <tooltip :placement="scope.tooltip.placement" :padding="scope.cell.padding">
