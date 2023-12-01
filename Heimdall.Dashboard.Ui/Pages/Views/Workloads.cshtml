@@ -25,48 +25,6 @@ let setup = (props, ctx) => {
     metadata:{ name:"some-service-thingy", namespace: "service-ns", creationTimestamp: "2023-02-11T14:48:00.000Z" },
     status:{ replicas: 2, readyReplicas: 1, conditions: [{type:'Available'}, {type:'Progressing'}] }
   }]);
-  
-  let formatConditions = (row) => {
-    if (!row.kind) return {conditions:[]};
-
-    if (["DaemonSet", "StatefulSet"].includes(row.kind))
-    {
-        return {conditions:[{content:'<div class="px-1 text-green-500">Running</div>'}]};
-    }
-    
-    if (row.kind === "Deployment")
-    {
-        let conditions = row.status.conditions;
-        let result = conditions.sort((a,b) => (a.type < b.type) ? -1 : 1).map(x => {
-          if (x.status === "False") return {};
-
-          let color = x.type === "Available" ? "text-green-500" : "text-blue-500";
-          return {content: `<div class="px-1 ${color}">${x.type}</div>`, tooltip: true, tip: x.message }  
-        });
-        return {conditions:result};
-    }
-    
-    if (row.kind === "Job")
-    {
-        let conditions = row.status.conditions;
-        let result = conditions.map(x => { 
-            return {content: `<div class="px-1 text-green-500">${x.type}</div>`, tooltip: true, tip: x.message}
-        });
-        return {conditions:result };
-    }
-     
-    if (row.kind === "CronJob")
-    {
-        let active = row.status.active;
-        if (active){
-            return [{content:'<div class="px-1 text-green-500">Running</div>'}];
-        } else {
-            return [{content:'<div class="px-1 text-grey-300">Waiting</div>'}];
-        }
-    }
-    
-    return {conditions:[]};
-  };
 
   let formatWorkloadAge = (row) => {
       var DT = window.DateTime || luxon.DateTime;
@@ -89,8 +47,8 @@ let setup = (props, ctx) => {
       accessor: row => row.status, formatter:'deployment-lights' },
     { header:"Age", id:"age", sorter:"text", classes:"w-40",
       accessor: row => row.metadata.creationTimestamp, formatter:formatWorkloadAge },
-    { header:"Conditions", id:"status", conditions:true, canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-44", 
-      accessor: row => row.status, formatter:formatConditions },
+    { header:"Conditions", id:"status", canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-44", 
+      accessor: row => row.status, formatter:'deployment-conditions' },
   ]);
   
   let updateWorkloads = () => {
@@ -124,8 +82,7 @@ let setup = (props, ctx) => {
   });
 
   return { 
-    loading, sorting, workloads, columns,
-    formatConditions, formatWorkloadAge,
+    loading, sorting, workloads, columns, formatWorkloadAge,
     clusterWorkloads, clusterCronJobs, clusterDaemonSets, clusterJobs, clusterStatefulSets,
     updateWorkloads
   }
