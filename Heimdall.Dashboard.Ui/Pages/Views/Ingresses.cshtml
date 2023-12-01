@@ -48,16 +48,6 @@ let setup = (props, ctx) => {
     return { content:content, classes: '' };
   }
     
-  let formatIngressAge = (row) => {
-    var DT = window.DateTime || luxon.DateTime;
-    var invalid = "";
-    const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
-    var date = DT.now();
-
-    var newDatetime = DT.fromISO(String(row.metadata.creationTimestamp));
-    return {content:''+ toHuman(newDatetime.diff(date, unit)), classes: ''};
-  }
-    
   let formatHosts = (row) => {
     if (!row.spec.rules) return {content: '', classes: ''} 
     
@@ -103,10 +93,10 @@ let setup = (props, ctx) => {
       accessor: row => row.spec.ingressClassName },
     { header: 'LoadBalancers', id: 'loadbalancers', sorter:'text', classes:'truncate w-44', 
       accessor: row => row.status.loadBalancer?.ingress[0]?.ip ?? '', formatter:formatLoadBalancer },
-    { header: 'Host', id: 'host', raw:true, classes:'truncate grow shrink 2xl:w-64 xl:w-44 lg:w-32',
-      accessor: row => row.spec.rules, formatter:formatHosts },
-    { header: 'Age', id: 'age', sorter:'text', classes:'w-40', update: true,
-      accessor: row => row.metadata.creationTimestamp, formatter:formatIngressAge }
+    { header: 'Host', id: 'host', classes:'truncate grow shrink 2xl:w-64 xl:w-44 lg:w-32',
+      accessor: row => row.spec.rules, formatter:'ingress-hosts' },
+    { header: 'Age', id: 'age', sorter:'text', classes:'w-40',
+      accessor: row => row.metadata.creationTimestamp, formatter:'object-age' }
   ]);
   
   watch([props.filters, clusterIngresses], updateIngresses);
@@ -118,7 +108,7 @@ let setup = (props, ctx) => {
   
   return {
     loading, clusterIngresses, ingresses, sorting, columns, 
-    formatLoadBalancer, formatIngressAge, formatHosts
+    formatLoadBalancer, formatHosts
   }
 }
 
