@@ -1,12 +1,12 @@
 <template id="event-message">
-  <div class="truncate" :class="[row.data.type == 'Warning' ? 'text-red-500' : '', classes]">
+  <div class="truncate" :class="classes">
     <tooltip :placement="placement" padding="pl-4 py-2">
       <template v-slot:cell>
-        <div class="cursor-pointer underline text-blue-500">{{ formatMessage(row) }}</div>
+        <div class="cursor-pointer" :class="row.data.type == 'Warning' ? 'text-red-500' : ''">{{ formatMessage(row) }}</div>
       </template>
       
       <template v-slot:tooltip>
-        <div class="text-sm w-96 px-1">
+        <div class="text-sm w-fit px-1">
           <div class="flex">
             <div class="w-28">Reason</div><div>{{ row.data?.reason }}</div>
           </div>
