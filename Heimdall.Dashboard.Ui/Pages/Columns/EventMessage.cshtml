@@ -2,11 +2,30 @@
   <div class="truncate" :class="[row.data.type == 'Warning' ? 'text-red-500' : '', classes]">
     <tooltip :placement="placement" padding="pl-4 py-2">
       <template v-slot:cell>
-        <div @@click="nsClick" class="cursor-pointer underline text-blue-500">{{ formatMessage(row) }}</div>
+        <div class="cursor-pointer underline text-blue-500">{{ formatMessage(row) }}</div>
       </template>
       
       <template v-slot:tooltip>
-        <div class="text-sm leading-none break-all w-80">{{ formatMessage(row) }}</div>
+        <div class="text-sm w-96 px-1">
+          <div class="flex">
+            <div class="w-28">Reason</div><div>{{ row.data?.reason }}</div>
+          </div>
+          <div class="flex">
+            <div class="w-28">System</div><div>{{ row.data?.source?.component }}</div>
+          </div>
+          <div class="flex">
+            <div class="w-28">Source</div><div>{{ row.data?.involvedObject?.kind }}: {{ row.data?.involvedObject?.name }}</div>
+          </div>
+          <div class="flex">
+            <div class="w-28">First Seen</div><div>{{ row.data?.firstTimestamp }}</div>
+          </div>
+          <div class="flex">
+            <div class="w-28">Last Seen</div><div>{{ row.data?.lastTimestamp }}</div>
+          </div>
+          <div class="flex">
+            <div class="w-28">Count</div><div>{{ row.data?.count }}</div>
+          </div>
+        </div>
       </template>
     </tooltip>
   </div>
