@@ -51,31 +51,6 @@ let setup = (props, ctx) => {
     con += row.status.initContainerStatuses?.reduce((a, v) => a + v.restartCount, 0) ?? 0;
     return con
   }
- 
-  let formatRestarts = (row) => {
-    let con = getRestarts(row);
-    return { content:con, classes: '' };
-  }
-
-  let formatSource = (row) => {
-    let con = row.involvedObject.kind + ": " + row.involvedObject.name;
-    return { content:con, classes: 'text-blue-500 w-80' };
-  }
-    
-  let formatStatus = (row) => {
-    let con = row.status.phase;
-    return { content:con, classes: 'text-green-500 w-65' };
-  }
-
-  let formatPodAge = (row) => {
-    var DT = window.DateTime || luxon.DateTime;
-    var invalid = "";
-    const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
-    var date = DT.now();
-
-    var newDatetime = DT.fromISO(String(row.metadata.creationTimestamp));
-    return {content:''+ toHuman(newDatetime.diff(date, unit)), classes: ''};
-  };
   
   const columns = ref([
     { header: 'Name', id: 'name', classes: 'truncate grow shrink 2xl:w-[41rem] xl:w-[22rem] lg:w-[16rem]', 
@@ -85,11 +60,11 @@ let setup = (props, ctx) => {
     { header: 'Containers', id: 'containers', canSort: false, canFilter: false, classes: '2xl:w-52 xl:w-44 lg:w-32', 
       accessor: row => row.status.containerStatuses, formatter:'pod-lights' },
     { header: 'Restarts', id: 'restarts', classes: 'w-40', sorter: 'number',
-      accessor: getRestarts, formatter:formatRestarts },
-    { header: 'Age', id: 'age', update:true, classes: 'w-40', 
-      accessor: row => row.metadata.creationTimestamp, formatter:formatPodAge },
+      accessor: getRestarts },
+    { header: 'Age', id: 'age', classes: 'w-40', 
+      accessor: row => row.metadata.creationTimestamp, formatter:'object-age' },
     { header: 'Status', id: 'status', canSort: false, classes: 'truncate 2xl:w-64 xl:w-52 lg:w-40',  
-      accessor: row => row.status.phase, formatter:formatStatus }
+      accessor: row => row.status.phase, formatter:'pod-status' }
   ]);
   
   let updatePods = () => {
@@ -113,9 +88,7 @@ let setup = (props, ctx) => {
   });
   
   return {
-    loading, sorting, clusterPods, pods, columns, getRestarts,
-    formatSource, formatStatus, formatPodAge, formatRestarts,
-    updatePods
+    loading, sorting, clusterPods, pods, columns, getRestarts, updatePods
   }
 }
 
