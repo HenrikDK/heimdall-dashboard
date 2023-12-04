@@ -1,0 +1,18 @@
+﻿<template id="logs-btn">
+  <router-link :to="" :title="name + ' logs'">
+    <div class="flex px-2 rounded-lg items-center justify-center border cursor-pointer w-28	
+        border-gray-300 hover:border-gray-500 hover:bg-gray-100 fill-gray-300 hover:fill-gray-500
+        dark:border-white/[.4] dark:text-white/[.6] 
+        dark:hover:border-white dark:hover:text-white dark:hover:fill-white
+        dark:bg-zinc-900">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 me-2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"/>
+      </svg>
+      Logs
+    </div>
+  </router-link>
+</template>
+
+<script>
+components["logs-btn"] = { template: "#logs-btn", props:['namespace','name'] };
+</script>
