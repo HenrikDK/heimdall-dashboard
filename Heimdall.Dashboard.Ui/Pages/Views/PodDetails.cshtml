@@ -8,7 +8,7 @@
     <div class="flex text-xl">
       <restart-btn></restart-btn>
       <template v-if="pod?.spec?.containers.length == 1">
-        <logs-btn></logs-btn>
+        <logs-btn :container="pod.spec.containers[0].name" ></logs-btn>
       </template>
       <div v-else class="flex px-2 w-28"></div>
     </div>
@@ -117,7 +117,7 @@
           <div class="flex justify-between items-center grow">
             <div class="py-1">{{ c.name }}</div>
             <div class="me-4">
-              <logs-btn></logs-btn>  
+              <logs-btn :pod="pod.metadata.name" :namespace="pod.metadata.namespace" :container="c.name" ></logs-btn>  
             </div>
           </div>
         </div>
