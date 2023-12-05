@@ -26,6 +26,10 @@
                class="mr-3 w-60">
             <search @@update:search="$emit('search', $event)"></search>
           </div>
+          <div :class="logSearchVisible() ? '' : 'hidden'"
+               class="mr-3 w-96">
+            <log-search @@update:log-search="$emit('log-search', $event)"></log-search>
+          </div>
 
           <div class="mx-3">
             <button class="dark:hidden block hs-dark-mode group flex items-center text-gray-300 hover:text-blue-200 font-medium dark:text-gray-100 dark:hover:text-gray-200"
@@ -95,14 +99,19 @@ let setup = (props, ctx) => {
   
   let searchVisible = () => {
     let visible = true;
-    
     if (route.path === '/')
       visible = false;
     if (route.path.endsWith('/logs'))
       visible = false;    
     if (route.path.endsWith('/details'))
       visible = false;
-    
+    return visible
+  }
+  
+  let logSearchVisible = () => {
+    let visible = false;
+    if (route.path.endsWith('/logs'))
+      visible = true;
     return visible
   }
   
@@ -119,7 +128,7 @@ let setup = (props, ctx) => {
   
   return {
     filters, cluster, namespaces, 
-    nsVisible, searchVisible,
+    nsVisible, searchVisible, logSearchVisible, 
     isDark, toggleDark, updateList, nsEndsWith
   }
 }
