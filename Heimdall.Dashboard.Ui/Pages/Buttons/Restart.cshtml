@@ -1,5 +1,5 @@
 ﻿<template id="restart-btn">
-  <div class="flex px-2 rounded-lg items-center me-4 justify-center border cursor-pointer
+  <div @@click="restartPod" class="flex px-2 rounded-lg items-center me-4 justify-center border cursor-pointer
     border-gray-300 hover:border-gray-500 hover:bg-gray-100 fill-gray-300 hover:fill-gray-500
     dark:border-white/[.4] dark:text-white/[.6] 
     dark:hover:border-white dark:hover:text-white dark:hover:fill-white
@@ -11,6 +11,24 @@
   </div>
 </template>
 
-<script>
-components["restart-btn"] = { template: "#restart-btn" };
+<script type="module">
+import { useRouter,useRoute } from 'vue-router'
+
+let setup = (props, ctx) => {  
+  const router = useRouter()
+  const route = useRoute()
+  
+  let restartPod = (e) => {
+       if(confirm("Do you really want to restart the pod?")){
+    
+          fetch('/api/test/1', { method: 'DELETE' })
+            .catch(e => { console.log(e); })
+            .then(x => router.push({ name: 'pods', params: { namespace: route.params.namespace } }))          
+       }
+  }
+  
+  return { restartPod }
+}
+
+components["restart-btn"] = { template: "#restart-btn", setup };
 </script>
