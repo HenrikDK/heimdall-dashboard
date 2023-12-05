@@ -1,5 +1,5 @@
 ﻿<template id="logs-btn">
-  <router-link :to="" :title="name + ' logs'">
+  <router-link :to="{ name: 'pod-logs', params: { namespace: namespace, name: name, container: container }}" :title="name + '/' + container + ' logs'">
     <div class="flex px-2 rounded-lg items-center justify-center border cursor-pointer w-28	
         border-gray-300 hover:border-gray-500 hover:bg-gray-100 fill-gray-300 hover:fill-gray-500
         dark:border-white/[.4] dark:text-white/[.6] 
@@ -14,5 +14,5 @@
 </template>
 
 <script>
-components["logs-btn"] = { template: "#logs-btn", props:['namespace','name'] };
+components["logs-btn"] = { template: "#logs-btn", props:['container'] };
 </script>
