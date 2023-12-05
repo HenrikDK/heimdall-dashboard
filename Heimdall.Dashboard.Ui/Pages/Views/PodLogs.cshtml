@@ -46,5 +46,5 @@ let setup = (props, ctx) => {
 }
 
 components["pod-logs"] = { template: "#pod-logs", props: ['search'], setup };
-routes.push({path:'/namespace/{:namespace}/pods/{:name}/containers/{:container}/logs', name:'pod-logs', component: components["pod-logs"]})    
+routes.push({path:'/namespace/:namespace/pods/:name/containers/:container/logs', name:'pod-logs', component: components["pod-logs"]})    
 </script>
