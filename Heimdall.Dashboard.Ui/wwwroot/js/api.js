@@ -30,7 +30,8 @@
 
 async function streamLogs(url, cb) {
     const items = [];
-    const {cancel} = stream(url, transformer, {isJson: false, connectCb});
+    const watchUrl = url.replace('http', 'ws');
+    const {cancel} = stream(watchUrl, transformer, {isJson: false, connectCb});
     return cancel;
 
     function connectCb() {
