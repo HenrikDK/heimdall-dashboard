@@ -41,7 +41,7 @@ async function streamLogs(url, cb) {
     function transformer(item) {
         if (!item) return; // This api returns a lot of empty strings
 
-        const message = Base64.decode(item);
+        const message = atob(item);
         try {
             let item = JSON.parse(message)
             items.push(item)
@@ -249,7 +249,7 @@ async function request(path) {
             const json = await response.json();
             message += ` - ${json.message}`;
         } catch (err) {
-            console.error('Unable to parse error json', {err});
+            message += ` - Unable to parse error json ${err}`
         }
 
         const error = new Error(message);
