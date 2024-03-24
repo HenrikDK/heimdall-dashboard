@@ -29,26 +29,15 @@
 }
 
 async function streamLogs(url, cb) {
-    const items = [];
     const watchUrl = url.replace('http', 'ws');
-    const {cancel} = stream(watchUrl, transformer, {isJson: false, connectCb});
+    const {cancel} = stream(watchUrl, transformer, false);
     return cancel;
-
-    function connectCb() {
-        items.length = 0;
-    }
 
     function transformer(item) {
         if (!item) return; // This api returns a lot of empty strings
 
         const message = atob(item);
-        try {
-            let item = JSON.parse(message)
-            items.push(item)
-        } catch (e){
-            items.push(message);
-        }
-        cb(items);
+        cb(message);
     }
 }
 
@@ -74,7 +63,7 @@ async function streamResults(url, cb) {
             add(items, kind);
 
             const watchUrl = `${url}?watch=1&resourceVersion=${metadata.resourceVersion}`.replace('http', 'ws');
-            socket = stream(watchUrl, update, {isJson: true});
+            socket = stream(watchUrl, update, true);
         } catch (err) {
             console.error('Error in api request', {err, url});
         }
@@ -151,7 +140,7 @@ async function streamResult(url, name, cb) {
             const fieldSelector = encodeURIComponent(`metadata.name=${name}`);
             const watchUrl = `${url}?watch=1&fieldSelector=${fieldSelector}`.replace('http', 'ws');
 
-            socket = stream(watchUrl, x => debouncedCallback(x.object), {isJson: true});
+            socket = stream(watchUrl, x => debouncedCallback(x.object), true);
         } catch (err) {
             console.error('Error in api request', {err, url});
         }
@@ -165,13 +154,12 @@ async function streamResult(url, name, cb) {
     }
 }
 
-function stream(url, cb, args) {
+function stream(url, cb, isJson) {
     let connection = {
         close: () => {return null;},
         socket: {}
     };
     let isCancelled = false;
-    const {isJson, additionalProtocols, connectCb} = args;
 
     connect();
 
@@ -187,7 +175,6 @@ function stream(url, cb, args) {
     }
 
     function connect() {
-        if (connectCb) connectCb();
         connection = connectStream(url, cb, onFail, isJson);
     }
 
@@ -201,9 +188,11 @@ function stream(url, cb, args) {
 
 function connectStream(path, cb, onFail, isJson) {
     let isClosing = false;
-
-    const socket = new WebSocket(path, ['base64.binary.k8s.io']);
-    socket.binaryType = 'arraybuffer';
+    
+    const socket = isJson ? new WebSocket(path) : new WebSocket(path, ['base64.binary.k8s.io']);
+    if (!isJson){
+        socket.binaryType = 'arraybuffer';
+    }
     socket.addEventListener('message', onMessage);
     socket.addEventListener('close', onClose);
     socket.addEventListener('error', onError);
