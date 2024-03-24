@@ -165,9 +165,43 @@ async function streamResult(url, name, cb) {
     }
 }
 
+function stream(url, cb, args) {
+    let connection = {
+        close: () => {return null;},
+        socket: {}
+    };
+    let isCancelled = false;
+    const {isJson, additionalProtocols, connectCb} = args;
+
+    connect();
+
+    return {cancel, getSocket};
+
+    function getSocket() {
+        return connection.socket;
+    }
+
+    function cancel() {
+        if (connection) connection.close();
+        isCancelled = true;
+    }
+
+    function connect() {
+        if (connectCb) connectCb();
+        connection = connectStream(url, cb, onFail, isJson);
+    }
+
+    function onFail() {
+        if (isCancelled) return;
+
+        console.info('Reconnecting in 3 seconds', {url});
+        setTimeout(connect, 3000);
+    }
+}
+
 function connectStream(path, cb, onFail, isJson) {
     let isClosing = false;
-    
+
     const socket = new WebSocket(path, ['base64.binary.k8s.io']);
     socket.binaryType = 'arraybuffer';
     socket.addEventListener('message', onMessage);
@@ -202,40 +236,6 @@ function connectStream(path, cb, onFail, isJson) {
 
     function onError(err) {
         console.error('Error in api stream', {err, path});
-    }
-}
-
-function stream(url, cb, args) {
-    let connection = {
-        close: () => {return null;},
-        socket: {}
-    };
-    let isCancelled = false;
-    const {isJson, additionalProtocols, connectCb} = args;
-
-    connect();
-
-    return {cancel, getSocket};
-
-    function getSocket() {
-        return connection.socket;
-    }
-
-    function cancel() {
-        if (connection) connection.close();
-        isCancelled = true;
-    }
-
-    function connect() {
-        if (connectCb) connectCb();
-        connection = connectStream(url, cb, onFail, isJson);
-    }
-
-    function onFail() {
-        if (isCancelled) return;
-
-        console.info('Reconnecting in 3 seconds', {url});
-        setTimeout(connect, 3000);
     }
 }
 
