@@ -36,7 +36,7 @@ let setup = (props, ctx) => {
     let container = route.params.container;
     
     const url = `/k8s/api/v1/namespaces/${namespace}/pods/${name}/log?container=${container}&previous=false&tailLines=1000&follow=true`;
-    streamLogs(host + url, j => logEvents.value = j);
+    streamLogs(host + url, j => logEvents.value.push(j));
   });
   
   return {
