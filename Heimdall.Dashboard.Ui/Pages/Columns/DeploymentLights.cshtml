@@ -1,0 +1,76 @@
+<template id="deployment-lights">
+  <div class="px-4 pt-2 flex py-0.5 overflow-hidden" :class="classes">
+    <template v-for="item in getPodStatuses(row)">
+      <div class="mr-2">
+          <div v-if="item" class="h-4 w-4 bg-green-500 dark:bg-green-500 rounded-sm"></div>
+          <div v-else class="h-4 w-4 bg-gray-300 dark:bg-zinc-600 rounded-sm"></div>
+      </div>
+    </template>
+  </div>
+</template>
+
+<script type="module">
+
+let setup = (props, ctx) => {
+  let getPodStatuses = (row) => {
+    if (!row.data.kind) return [];
+    let waiting = 0;
+    let ready = 0;
+    
+    if (row.data.kind === "DaemonSet")
+    {
+        let scheduled = row.data.status.currentNumberScheduled;
+        ready = row.data.status.numberReady;
+        
+        if (scheduled > ready){
+            waiting = scheduled - ready;
+        }
+    }
+    
+    if (row.data.kind === "StatefulSet")
+    {
+        let desired = row.data.status.replicas;
+        ready = row.data.status.currentReplicas;
+        if (desired > ready){
+            waiting = desired - ready;
+        }
+    }        
+    
+    if (row.data.kind === "Deployment")
+    {
+        let scheduled = row.data.status.replicas;
+        ready = row.data.status.readyReplicas;
+        if (scheduled > ready){
+            waiting = scheduled - ready;
+        }
+    }
+    
+    if (row.data.kind === "Job")
+    {
+        waiting = row.data.status.ready;
+        ready = row.data.status.succeeded;
+    }
+     
+    if (row.data.kind === "CronJob")
+    {
+        ready = row.data.status.active;
+    }
+
+    let result = [];    
+
+    result += [...Array(waiting)].map(x => 0);
+    result += [...Array(ready)].map(x => 1);
+
+    return result
+  }
+  
+  return { getPodStatuses }
+}
+
+components["deployment-lights"] = { template: "#deployment-lights", setup, 
+  props: {
+    row: {},
+    classes: ''
+  }
+};
+</script>

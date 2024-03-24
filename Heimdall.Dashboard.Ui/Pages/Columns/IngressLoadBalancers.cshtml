@@ -1,0 +1,18 @@
+<template id="ingress-load-balancers">
+  <div class="px-4 py-2 flex flex-col" :class="classes">
+    <template v-if="row.data.status?.loadBalancer?.ingress">
+      <template v-for="i in row.data.status?.loadBalancer?.ingress">
+        <div class="flex">{{ i.ip }}</div>
+      </template>
+    </template>
+  </div>
+</template>
+
+<script type="module">
+components["ingress-load-balancers"] = { template: "#ingress-load-balancers", 
+  props: {
+    row: {},
+    classes: ''
+  }
+};
+</script>

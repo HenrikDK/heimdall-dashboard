@@ -1,5 +1,5 @@
-﻿<template id="search">
-  <div class="relative" aria-label="Search..">
+﻿<template id="log-search">
+  <div class="relative" aria-label="Search Log">
     <div class="h-9 w-full text-gray-200 items-center flex justify-center box-border cursor-pointer border border-white/[.4] outline-0 rounded 
         bg-brand dark:bg-zinc-900 text-white/[.6] leading-snug outline-none 
         data-[focus=true]:border-white data-[focus=true]:text-white data-[focus=true]:fill-white" tabindex="-1" :data-focus="hasFocus">
@@ -13,7 +13,7 @@
         </span>
       </span>
 
-      <input id="search-input" v-model="query" name="search-box" type="text" @@focus="hasFocus = true" @@blur="hasFocus = false" @@keydown="onKeydown"
+      <input id="log-search-input" v-model="query" name="search-box" type="text" @@focus="hasFocus = true" @@blur="hasFocus = false" @@keydown="onKeydown"
            class="h-full w-full px-8 border-none outline-0 bg-transparent autofill:bg-transparent text-white" />
       
       <template v-if="query.length < 1" name="shortcut-icon">
@@ -42,7 +42,7 @@ let setup = (props, ctx) => {
   const query = ref('')
   
   let search = () =>{
-    ctx.emit('update:search', query.value)
+    ctx.emit('update:log-search', query.value)
   }
   
   let clear = () =>{
@@ -56,7 +56,7 @@ let setup = (props, ctx) => {
   }
 
   let onDocumentKeydown = (e) =>{
-    var control = document.getElementById("search-input")
+    var control = document.getElementById("log-search-input")
     if (e.key === '/' && e.target !== control.value &&
       window.document.activeElement !== control.value &&
       e.target instanceof HTMLInputElement === false)
@@ -69,7 +69,7 @@ let setup = (props, ctx) => {
   }
       
   watch(query, () => {
-    ctx.emit('update:search', query.value)
+    ctx.emit('update:log-search', query.value)
   })
   
   onMounted(async () =>{
@@ -79,5 +79,5 @@ let setup = (props, ctx) => {
   return {hasFocus, query, search, clear, onKeydown, onDocumentKeydown}
 }
 
-components["search"] = { template: "#search", emits: ['update:search'], setup };
+components["log-search"] = { template: "#log-search", emits: ['update:log-search'], setup };
 </script>

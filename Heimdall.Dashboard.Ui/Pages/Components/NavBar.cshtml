@@ -18,13 +18,17 @@
         </div>
         <div class="flex justify-end items-center">
           
-          <div :class="$route.path.endsWith('/logs') ? 'hidden' : ''"
+          <div :class="nsVisible() ? '' : 'hidden'"
                class="mr-3 w-60">
             <multiselect :values="namespaces" @@update:model-value="$emit('select-ns', $event)"></multiselect>
           </div>
-          <div :class="$route.path == '/' || $route.path.endsWith('/logs') ? 'hidden' : ''"
+          <div :class="searchVisible() ? '' : 'hidden'"
                class="mr-3 w-60">
             <search @@update:search="$emit('search', $event)"></search>
+          </div>
+          <div :class="logSearchVisible() ? '' : 'hidden'"
+               class="mr-3 w-96">
+            <log-search @@update:log-search="$emit('log-search', $event)"></log-search>
           </div>
 
           <div class="mx-3">
@@ -48,13 +52,15 @@
 </template>
 
 <script type="module">
-import {useDark, useToggle} from "vueuse";
+import { useRoute } from 'vue-router'
+import {useDark, useToggle} from "@@vueuse/core";
 import {ref, onMounted, watch} from 'vue';
 
 let setup = (props, ctx) => {
   const filters = ref([]);
   const cluster = ref([]);
   const namespaces = ref([]);
+  const route = useRoute()
   
   const isDark = useDark();
   const toggleDark = useToggle(isDark);
@@ -82,6 +88,33 @@ let setup = (props, ctx) => {
     return value;
   };
   
+  let nsVisible = () => {
+    let visible = true;
+    if (route.path.endsWith('/logs'))
+      visible = false;
+    if (route.path.endsWith('/details'))
+      visible = false;
+    return visible
+  }
+  
+  let searchVisible = () => {
+    let visible = true;
+    if (route.path === '/')
+      visible = false;
+    if (route.path.endsWith('/logs'))
+      visible = false;    
+    if (route.path.endsWith('/details'))
+      visible = false;
+    return visible
+  }
+  
+  let logSearchVisible = () => {
+    let visible = false;
+    if (route.path.endsWith('/logs'))
+      visible = true;
+    return visible
+  }
+  
   watch([filters, cluster], updateList);
   
   onMounted(async () => {
@@ -95,6 +128,7 @@ let setup = (props, ctx) => {
   
   return {
     filters, cluster, namespaces, 
+    nsVisible, searchVisible, logSearchVisible, 
     isDark, toggleDark, updateList, nsEndsWith
   }
 }

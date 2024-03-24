@@ -2,11 +2,11 @@
   <div :class="classes">
     <tooltip :placement="placement" padding="pl-4 py-2">
       <template v-slot:cell>
-        <div @@click="nsClick" class="truncate underline text-blue-500">{{ namespace }}</div>
+        <div @@click="nsClick" class="truncate cursor-pointer underline text-blue-500">{{ getNamespace(row) }}</div>
       </template>
       
       <template v-slot:tooltip>
-        <div class="text-sm whitespace-no-wrap leading-none break-words w-fit">{{ 'Set global namespace filter to: ' + namespace }}</div>
+        <div class="text-sm whitespace-no-wrap leading-none break-words w-fit">{{ 'Filter: ' + getNamespace(row) }}</div>
       </template>
     </tooltip>
   </div>
@@ -14,24 +14,33 @@
 
 <script type="module">
 let setup = (props, ctx) => {
+  
+  let getNamespace = (row) => {
+    let ns = row?.data?.involvedObject?.namespace
+    if (!ns) {
+      ns = row?.data?.metadata?.namespace
+    }
+    return ns
+  };
+  
   let nsClick = (e) => {
-    eventBus.emit(props.namespace);
+    eventBus.emit(getNamespace(props.row));
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
     return false
   }
   
-  return { nsClick }
+  return { nsClick, getNamespace }
 }
 
 components["ns-column"] = { template: "#ns-column", setup,
   props: {
-    classes: String,
-    namespace: String,
+    row: {},
+    classes: 'truncate 2xl:w-52 xl:w-44 lg:w-32',
     placement: {
       type: String,
-      default: 'bottom'
+      default: 'right'
     }
   },
 };

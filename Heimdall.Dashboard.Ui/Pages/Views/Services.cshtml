@@ -38,37 +38,23 @@ let setup = (props, ctx) => {
       spec:{type: "NodeIP", ports: [{port:"8080"}]}
     }
   ]);
-  
-  let formatNamespace = (row) => {
-    return { namespace: row.metadata.namespace, classes: "truncate 2xl:w-52 xl:w-44 lg:w-32", placement:"right" }
+    
+  let getKubeDns = (row) => {
+    let lines = row.spec?.ports.map(x => row.metadata.name + '.' + row.metadata.namespace + ':' + x.port)
+    return lines.join("\r\n");
   }
-  
-  let formatKubeDns = (row) => {
-    let dns = row.metadata.name + '.' + row.metadata.namespace + ':' + row.spec.ports[0].port
-    return {content: dns, classes:''};
-  }
-  
-  let formatServiceAge = (row) => {
-    var DT = window.DateTime || luxon.DateTime;
-    var invalid = "";
-    const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
-    var date = DT.now();
-
-    var newDatetime = DT.fromISO(String(row.metadata.creationTimestamp));
-    return {content:'' + toHuman(newDatetime.diff(date, unit)), classes: ''};
-  }
-  
+    
   const columns = ref([
     { header:'Type', id: 'type', canSort: false, classes: 'truncate 2xl:w-48 xl:w-40 lg:w-32', 
       accessor: row => row.spec.type },
     { header:'Name', id: 'name', sorter: 'text', classes: 'truncate 2xl:w-64 xl:w-52 lg:w-40', 
       accessor: row => row.metadata.name },
-    { header:'Namespace', id: 'namespace', sorter: 'text', namespace:true, classes: 'truncate 2xl:w-52 xl:w-44 lg:w-40', 
-      accessor: row => row.metadata.namespace, formatter:formatNamespace },
+    { header:'Namespace', id: 'namespace', sorter: 'text', classes: 'truncate 2xl:w-52 xl:w-44 lg:w-40', 
+      accessor: row => row.metadata.namespace, formatter:'namespace' },
     { header:'Kube-DNS', id:'dns', sorter: 'text', classes: 'truncate grow shrink',
-      accessor: row => row.kubeDNS, formatter:formatKubeDns },
-    { header:'Age', id:'age', sorter: 'text', update: true, classes:'w-40', 
-      accessor: row => row.age, formatter:formatServiceAge }
+      accessor: getKubeDns, formatter:'kube-dns' },
+    { header:'Age', id:'age', sorter: 'text', classes:'w-40', 
+      accessor: row => row.age, formatter:'object-age' }
   ]);
 
   let updateServices = async () => {
@@ -90,11 +76,7 @@ let setup = (props, ctx) => {
     streamResults(host + '/k8s/api/v1/services', j => clusterServices.value = j)
   });
   
-  return {
-    loading, sorting, columns, clusterServices, services,
-    formatNamespace, formatServiceAge, formatKubeDns,
-    updateServices
-  }
+  return { loading, sorting, columns, clusterServices, services, getKubeDns, updateServices }
 }
 
 components["services"] = { template: "#services", props: ['namespaces', 'search', 'filters'], setup };

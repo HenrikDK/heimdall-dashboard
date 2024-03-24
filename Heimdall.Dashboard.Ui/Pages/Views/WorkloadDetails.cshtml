@@ -135,7 +135,7 @@ let setup = (props, ctx) => {
         url = `/k8s/apis/batch/v1/namespaces/${namespace}/${type}s`    
     }
     
-    streamResult(host + url, name, j => this.item = j);
+    streamResult(host + url, name, j => item.value = j);
   });
   
   return { 

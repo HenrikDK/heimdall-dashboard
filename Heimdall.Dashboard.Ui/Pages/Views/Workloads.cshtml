@@ -25,132 +25,21 @@ let setup = (props, ctx) => {
     metadata:{ name:"some-service-thingy", namespace: "service-ns", creationTimestamp: "2023-02-11T14:48:00.000Z" },
     status:{ replicas: 2, readyReplicas: 1, conditions: [{type:'Available'}, {type:'Progressing'}] }
   }]);
-  
-  let formatNamespace = (row) => {
-    return { namespace: row.metadata.namespace, classes:"truncate 2xl:w-52 xl:w-44 lg:w-40", placement:"right" }
-  };
-
-  let formatConditions = (row) => {
-    if (!row.kind) return {conditions:[]};
-
-    if (["DaemonSet", "StatefulSet"].includes(row.kind))
-    {
-        return {conditions:[{content:'<div class="px-1 text-green-500">Running</div>'}]};
-    }
     
-    if (row.kind === "Deployment")
-    {
-        let conditions = row.status.conditions;
-        let result = conditions.sort((a,b) => (a.type < b.type) ? -1 : 1).map(x => {
-          if (x.status === "False") return {};
-
-          let color = x.type === "Available" ? "text-green-500" : "text-blue-500";
-          return {content: `<div class="px-1 ${color}">${x.type}</div>`, tooltip: true, tip: x.message }  
-        });
-        return {conditions:result};
-    }
-    
-    if (row.kind === "Job")
-    {
-        let conditions = row.status.conditions;
-        let result = conditions.map(x => { 
-            return {content: `<div class="px-1 text-green-500">${x.type}</div>`, tooltip: true, tip: x.message}
-        });
-        return {conditions:result };
-    }
-     
-    if (row.kind === "CronJob")
-    {
-        let active = row.status.active;
-        if (active){
-            return [{content:'<div class="px-1 text-green-500">Running</div>'}];
-        } else {
-            return [{content:'<div class="px-1 text-grey-300">Waiting</div>'}];
-        }
-    }
-    
-    return {conditions:[]};
-  };
-
-  let formatWorkloadAge = (row) => {
-      var DT = window.DateTime || luxon.DateTime;
-      const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
-      var date = DT.now();
-  
-      var newDatetime = DT.fromISO(String(row.metadata.creationTimestamp));
-      return { content:'' + toHuman(newDatetime.diff(date, unit)), classes: '' };
-  };
-    
-  let formatPods = (row) => {
-    if (!row.kind) return "";
-    let result = "";
-    let waiting = 0;
-    let ready = 0;
-    
-    if (row.kind === "DaemonSet")
-    {
-        let scheduled = row.status.currentNumberScheduled;
-        ready = row.status.numberReady;
-        
-        if (scheduled > ready){
-            waiting = scheduled - ready;
-        }
-    }
-    
-    if (row.kind === "StatefulSet")
-    {
-        let desired = row.status.replicas;
-        ready = row.status.currentReplicas;
-        if (desired > ready){
-            waiting = desired - ready;
-        }
-    }        
-    
-    if (row.kind === "Deployment")
-    {
-        let scheduled = row.status.replicas;
-        ready = row.status.readyReplicas;
-        if (scheduled > ready){
-            waiting = scheduled - ready;
-        }
-    }
-    
-    if (row.kind === "Job")
-    {
-        waiting = row.status.ready;
-        ready = row.status.succeeded;
-    }
-     
-    if (row.kind === "CronJob")
-    {
-        ready = row.status.active;
-    }
-    result += [...Array(waiting)].map(x => '<div class="h-4 w-4 mr-1 bg-gray-300 dark:bg-zinc-600 rounded-sm"></div>').join('');
-    result += [...Array(ready)].map(x => '<div class="h-4 w-4 mr-1 bg-green-500 dark:bg-green-500 rounded-sm"></div>').join('');
-     
-    return {content: '<div class="flex">' + result + '</div>', classes:'py-0.5'};
-  };
-  
   const sorting = ref([{ id:"name", sort: "asc" }, { id:"namespace", sort: "desc" }]);
   const columns = ref([
     { header:"Name", id:"name", classes:"grow shrink truncate 2xl:w-64 xl:w-52 lg:w-40", 
-      accessor: row => row.metadata.name,
-    },
-    { header:"Namespace", id:"namespace", namespace:true, classes:"truncate 2xl:w-52 xl:w-44 lg:w-40", 
-      accessor: row => row.metadata.namespace, formatter:formatNamespace
-    },
+      accessor: row => row.metadata.name },
+    { header:"Namespace", id:"namespace", classes:"truncate 2xl:w-52 xl:w-44 lg:w-32", 
+      accessor: row => row.metadata.namespace, formatter:'namespace' },
     { header:"Type", id:"kind", canSort:false, classes:"truncate 2xl:w-48 xl:w-40 lg:w-32", 
-      accessor: row => row.kind
-    },
-    { header:"Pods", id:"pods", canSort:false, raw:true, canFilter:false, classes:"2xl:w-52 xl:w-44 lg:w-32", 
-      accessor: row => row.status, formatter:formatPods
-    },
+      accessor: row => row.kind },
+    { header:"Pods", id:"pods", canSort:false, canFilter:false, classes:"2xl:w-52 xl:w-44 lg:w-32", 
+      accessor: row => row.status, formatter:'deployment-lights' },
     { header:"Age", id:"age", sorter:"text", classes:"w-40",
-      accessor: row => row.metadata.creationTimestamp, formatter:formatWorkloadAge
-    },
-    { header:"Conditions", id:"status", conditions:true, canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-44", 
-      accessor: row => row.status, formatter:formatConditions 
-    },
+      accessor: row => row.metadata.creationTimestamp, formatter:'object-age' },
+    { header:"Conditions", id:"status", canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-44", 
+      accessor: row => row.status, formatter:'deployment-conditions' },
   ]);
   
   let updateWorkloads = () => {
@@ -185,7 +74,6 @@ let setup = (props, ctx) => {
 
   return { 
     loading, sorting, workloads, columns,
-    formatPods, formatConditions, formatWorkloadAge, formatNamespace,
     clusterWorkloads, clusterCronJobs, clusterDaemonSets, clusterJobs, clusterStatefulSets,
     updateWorkloads
   }

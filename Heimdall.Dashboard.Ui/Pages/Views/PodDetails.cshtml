@@ -3,11 +3,18 @@
     
   <br/>
 
-  <div class="flex my-2 items-center">
-    <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pod / {{pod?.metadata?.namespace }} / {{ pod?.metadata?.name }}</span>
+  <div class="flex mb-16 justify-between items-center text-gray-500 dark:text-gray-300 font-light sans">
+    <div class="text-md">Pod / {{pod?.metadata?.namespace }} / {{ pod?.metadata?.name }}</div>
+    <div class="flex text-xl">
+      <restart-btn></restart-btn>
+      <template v-if="pod?.spec?.containers.length == 1">
+        <logs-btn :container="pod.spec.containers[0].name" ></logs-btn>
+      </template>
+      <div v-else class="flex px-2 w-28"></div>
+    </div>
   </div>
     
-  <div class="flex justify-around mb-4 mt-1">
+  <div class="flex justify-around mb-4 mt-4">
     <div class="wide-details-graph">
       <v-chart :option="charts.podCpu" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
     </div>
@@ -102,12 +109,17 @@
     <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Containers</span>
   </div>
 
-  <div class="text-gray-500 dark:text-gray-300 text-md font-light sans rounded-lg shadow-lg border border-gray-200 dark:border-zinc-800">
-    <template v-for="c in pod?.spec?.containers">
-      <div class="my-2">
+  <div v-for="c in pod?.spec?.containers" 
+       class="text-gray-500 dark:text-gray-300 text-md font-light sans rounded-lg shadow-md border border-gray-200 dark:border-zinc-800 mb-4">
+    <div class="my-2">
         <div class="flex mb-2">
           <div class="px-2 py-1 w-1/4">Container</div>
-          <div class="py-1">{{ c.name }}</div>
+          <div class="flex justify-between items-center grow">
+            <div class="py-1">{{ c.name }}</div>
+            <div class="me-4">
+              <logs-btn :pod="pod.metadata.name" :namespace="pod.metadata.namespace" :container="c.name" ></logs-btn>  
+            </div>
+          </div>
         </div>
         <div class="flex mb-2">
           <div class="px-2 py-1 w-1/4">Status</div>
@@ -177,7 +189,6 @@
           <div class="py-1">{{ c.resources?.limits?.memory }}</div>
         </div>
       </div>
-    </template>
   </div>
 
   <br/>
@@ -219,7 +230,7 @@
 </template>
 
 <script type="module">
-import { useDark } from "vueuse";
+import { useDark } from "@@vueuse/core";
 import { useRoute } from 'vue-router'
 import { ref, watch, onMounted } from 'vue'
 

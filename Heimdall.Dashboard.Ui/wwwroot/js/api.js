@@ -29,25 +29,15 @@
 }
 
 async function streamLogs(url, cb) {
-    const items = [];
-    const {cancel} = stream(url, transformer, {isJson: false, connectCb});
+    const watchUrl = url.replace('http', 'ws');
+    const {cancel} = stream(watchUrl, transformer, false);
     return cancel;
-
-    function connectCb() {
-        items.length = 0;
-    }
 
     function transformer(item) {
         if (!item) return; // This api returns a lot of empty strings
 
-        const message = Base64.decode(item);
-        try {
-            let item = JSON.parse(message)
-            items.push(item)
-        } catch (e){
-            items.push(message);
-        }
-        cb(items);
+        const message = atob(item);
+        cb(message);
     }
 }
 
@@ -73,7 +63,7 @@ async function streamResults(url, cb) {
             add(items, kind);
 
             const watchUrl = `${url}?watch=1&resourceVersion=${metadata.resourceVersion}`.replace('http', 'ws');
-            socket = stream(watchUrl, update, {isJson: true});
+            socket = stream(watchUrl, update, true);
         } catch (err) {
             console.error('Error in api request', {err, url});
         }
@@ -150,7 +140,7 @@ async function streamResult(url, name, cb) {
             const fieldSelector = encodeURIComponent(`metadata.name=${name}`);
             const watchUrl = `${url}?watch=1&fieldSelector=${fieldSelector}`.replace('http', 'ws');
 
-            socket = stream(watchUrl, x => debouncedCallback(x.object), {isJson: true});
+            socket = stream(watchUrl, x => debouncedCallback(x.object), true);
         } catch (err) {
             console.error('Error in api request', {err, url});
         }
@@ -164,11 +154,45 @@ async function streamResult(url, name, cb) {
     }
 }
 
+function stream(url, cb, isJson) {
+    let connection = {
+        close: () => {return null;},
+        socket: {}
+    };
+    let isCancelled = false;
+
+    connect();
+
+    return {cancel, getSocket};
+
+    function getSocket() {
+        return connection.socket;
+    }
+
+    function cancel() {
+        if (connection) connection.close();
+        isCancelled = true;
+    }
+
+    function connect() {
+        connection = connectStream(url, cb, onFail, isJson);
+    }
+
+    function onFail() {
+        if (isCancelled) return;
+
+        console.info('Reconnecting in 3 seconds', {url});
+        setTimeout(connect, 3000);
+    }
+}
+
 function connectStream(path, cb, onFail, isJson) {
     let isClosing = false;
     
-    const socket = new WebSocket(path, ['base64.binary.k8s.io']);
-    socket.binaryType = 'arraybuffer';
+    const socket = isJson ? new WebSocket(path) : new WebSocket(path, ['base64.binary.k8s.io']);
+    if (!isJson){
+        socket.binaryType = 'arraybuffer';
+    }
     socket.addEventListener('message', onMessage);
     socket.addEventListener('close', onClose);
     socket.addEventListener('error', onError);
@@ -204,40 +228,6 @@ function connectStream(path, cb, onFail, isJson) {
     }
 }
 
-function stream(url, cb, args) {
-    let connection = {
-        close: () => {return null;},
-        socket: {}
-    };
-    let isCancelled = false;
-    const {isJson, additionalProtocols, connectCb} = args;
-
-    connect();
-
-    return {cancel, getSocket};
-
-    function getSocket() {
-        return connection.socket;
-    }
-
-    function cancel() {
-        if (connection) connection.close();
-        isCancelled = true;
-    }
-
-    function connect() {
-        if (connectCb) connectCb();
-        connection = connectStream(url, cb, onFail, isJson);
-    }
-
-    function onFail() {
-        if (isCancelled) return;
-
-        console.info('Reconnecting in 3 seconds', {url});
-        setTimeout(connect, 3000);
-    }
-}
-
 async function request(path) {
     const response = await fetch(path);
 
@@ -248,7 +238,7 @@ async function request(path) {
             const json = await response.json();
             message += ` - ${json.message}`;
         } catch (err) {
-            console.error('Unable to parse error json', {err});
+            message += ` - Unable to parse error json ${err}`
         }
 
         const error = new Error(message);

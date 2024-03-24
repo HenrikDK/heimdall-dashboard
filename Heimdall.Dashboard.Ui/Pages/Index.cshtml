@@ -11,13 +11,24 @@
     <partial name="Buttons/Deployments"/>
     <partial name="Buttons/Events"/>
     <partial name="Buttons/Ingress"/>
+    <partial name="Buttons/Logs"/>
     <partial name="Buttons/Pods"/>
+    <partial name="Buttons/Restart"/>
     <partial name="Buttons/Services"/>
 
-    <partial name="Columns/Conditions" />
-    <partial name="Columns/Lights"/>
+    <partial name="Columns/DeploymentConditions"/>
+    <partial name="Columns/DeploymentLights"/>
+    <partial name="Columns/EventMessage"/>
+    <partial name="Columns/EventSource"/>
+    <partial name="Columns/IngressHosts"/>
+    <partial name="Columns/IngressLoadBalancers"/>
+    <partial name="Columns/KubeDns"/>
     <partial name="Columns/Namespace"/>
-    
+    <partial name="Columns/ObjectAge"/>
+    <partial name="Columns/PodLights"/>
+    <partial name="Columns/PodStatus"/>
+
+    <partial name="Components/LogSearch"/>
     <partial name="Components/MainMenu"/>
     <partial name="Components/MultiSelect"/>
     <partial name="Components/NavBar"/>
@@ -42,12 +53,12 @@
 {
 }
 
-<nav-bar @@select-ns="(n) => namespaces = n" @@filters="(f) => filters = f" @@search="(s) => search = s"></nav-bar>
+<nav-bar @@select-ns="(n) => namespaces = n" @@filters="(f) => filters = f" @@search="(s) => search = s" @@log-search="(s) => logSearch = s"></nav-bar>
 
 <div class="grid grid-cols-[85px_1fr] gap-2 h-screen fixed w-full">
     <main-menu></main-menu>
     
     <main id="content" class="overflow-auto dark:[color-scheme:dark]">
-        <router-view :namespaces="namespaces" :search="search" :nodes="nodes" :filters="filters"></router-view>
+        <router-view :namespaces="namespaces" :search="search" :log-search="logSearch" :nodes="nodes" :filters="filters"></router-view>
     </main>
 </div>
