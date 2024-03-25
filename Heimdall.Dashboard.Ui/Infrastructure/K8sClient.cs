@@ -3,16 +3,29 @@ namespace Heimdall.Dashboard.Ui.Infrastructure;
 public class K8sClient
 {
     private const string _tokenPath = "/var/run/secrets/kubernetes.io/serviceaccount/token";
+    private static DateTime? lastRead = null;
+    private static string _token = "";
     
     private static Lazy<bool> _inCluster = new(() => IsInCluster());
     private static Lazy<(string host, string token)> _fileConfig = new(() => LoadFromConfig());
     private static Lazy<string> _clusterHost = new(() => GetClusterHost() );
     
-    public static string AccessToken => _inCluster.Value ? File.ReadAllText(_tokenPath) : _fileConfig.Value.token;
-
     public static string Server => _inCluster.Value ? _clusterHost.Value : _fileConfig.Value.host;
     
     public static bool InCluster => _inCluster.Value;
+    
+    public static string AccessToken
+    {
+        get
+        {
+            if (!lastRead.HasValue || lastRead < DateTime.UtcNow.AddMinutes(15))
+            {
+                _token = _inCluster.Value ? File.ReadAllText(_tokenPath) : _fileConfig.Value.token;
+            }
+
+            return _token;
+        }
+    }
     
     private static bool IsInCluster()
     {
