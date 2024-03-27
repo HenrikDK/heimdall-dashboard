@@ -1,5 +1,5 @@
 <template id="ns-column">
-  <div :class="classes">
+  <div :class="classes" v-once>
     <tooltip :placement="placement" padding="pl-4 py-2">
       <template v-slot:cell>
         <div @@click="nsClick" class="truncate cursor-pointer underline text-blue-500">{{ getNamespace(row) }}</div>

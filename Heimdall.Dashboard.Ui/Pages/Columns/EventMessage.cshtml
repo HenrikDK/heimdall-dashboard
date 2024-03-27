@@ -1,5 +1,5 @@
 <template id="event-message">
-  <div class="truncate" :class="classes">
+  <div class="truncate" :class="classes" v-once>
     <tooltip :placement="placement" padding="pl-4 py-2">
       <template v-slot:cell>
         <div class="cursor-pointer" :class="row.data.type == 'Warning' ? 'text-red-500' : ''">{{ formatMessage(row) }}</div>
