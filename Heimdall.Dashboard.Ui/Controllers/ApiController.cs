@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Flurl;
+using Flurl.Http;
+using Heimdall.Dashboard.Ui.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Heimdall.Dashboard.Ui.Controllers;
 
@@ -16,20 +19,24 @@ public class ApiController : ControllerBase
     }
 
     [HttpDelete("api/namespaces/{nameSpace}/pods/{name}")]
-    public ActionResult DeletePod(string nameSpace, string name)
+    public async Task<ActionResult> DeletePod(string nameSpace, string name)
     {
         if (!_canRestartPod.Value)
         {
             return BadRequest("Operation not allowed");
         }
         
-        // TODO: Send Request
+        var server = K8sClient.Server;
+        var result = await server.AppendPathSegment($"/api/v1/namespaces/{nameSpace}/pods/{name}")
+            .WithOAuthBearerToken(K8sClient.AccessToken)
+            .DeleteAsync()
+            .ReceiveString();
         
-        return Ok();
+        return Ok(result);
     }
 
     [HttpPut("api/namespaces/{nameSpace}/replicaset/{name}/scale/{count:int}")]
-    public ActionResult ScalePod(string nameSpace, string name, int count)
+    public async Task<ActionResult> ScalePod(string nameSpace, string name, int count)
     {
         if (!_canScalePods.Value)
         {
@@ -40,14 +47,14 @@ public class ApiController : ControllerBase
         {
             return BadRequest("Operation not allowed, count too high!");
         }
-
-        // PATCH /apis/apps/v1/namespaces/{namespace}/replicasets/{name}/scale
-        // https://kubebyexample.com/learning-paths/operator-framework/kubernetes-api-fundamentals/scaling-and-advanced-api-operations
-        //A ReplicaSet can be easily scaled up or down by simply updating the .spec.replicas field. 
         
-        // TODO: Send Request
+        var server = K8sClient.Server;
+        var result = await server.AppendPathSegment($"/api/v1/namespaces/{nameSpace}/replicasets/{name}/scale")
+            .WithOAuthBearerToken(K8sClient.AccessToken)
+            .PatchJsonAsync(new { spec = new { replicas = count } })
+            .ReceiveString();
         
-        return Ok();
+        return Ok(result);
     }
 
     [HttpGet("api/features")]
