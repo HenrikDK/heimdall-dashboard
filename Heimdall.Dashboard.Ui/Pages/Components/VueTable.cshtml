@@ -33,7 +33,7 @@
           </div>
         </div>
       </div>
-      <div v-bind="containerProps" class="overflow-y-scroll h-[82.5vh] text-sm text-gray-700 dark:text-gray-300 flex flex-col w-full dark:divide-zinc-700 dark:[color-scheme:dark]"> <!-- body -->
+      <div v-bind="containerProps" class="overflow-y-scroll h-[82.5vh] text-sm text-gray-700 dark:text-gray-300 w-full dark:divide-zinc-700 dark:[color-scheme:dark]"> <!-- body -->
         <template v-if="!loading">
           <div v-bind="wrapperProps">
             <optional-link v-for="row in list" :row="row.data" :key="row.index">
