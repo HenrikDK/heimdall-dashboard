@@ -30,14 +30,31 @@
 
 async function streamLogs(url, cb) {
     const watchUrl = url.replace('http', 'ws');
+    let ending = ''
     const {cancel} = stream(watchUrl, transformer, false);
     return cancel;
 
     function transformer(item) {
         if (!item) return; // This api returns a lot of empty strings
 
-        const message = atob(item);
-        cb(message);
+        let message = atob(item);
+        if (ending.length > 0){
+            message = ending + message;
+        }
+        
+        let lines = message.split('\n');
+        if (!message.endsWith('\n')){
+            ending = lines[lines.length - 1];
+            lines = lines.slice(0, -1);
+        } else{
+            ending = '';
+        }
+        
+        if (lines[lines.length - 1].length === 0){
+            lines = lines.slice(0, -1);
+        }
+        
+        cb(lines);
     }
 }
 
