@@ -40,7 +40,10 @@ let setup = (props, ctx) => {
   ]);
     
   let getKubeDns = (row) => {
-    let lines = row.spec?.ports.map(x => row.metadata.name + '.' + row.metadata.namespace + ':' + x.port)
+    let lines = [];
+    if (row.spec?.ports){
+      lines = row.spec?.ports?.map(x => row.metadata.name + '.' + row.metadata.namespace + ':' + x.port);
+    }
     return lines.join("\r\n");
   }
     
