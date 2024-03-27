@@ -1,10 +1,36 @@
 ﻿<template id="pod-logs">
   <div class="pl-2 pr-4 w-100">
-    <div class="flex my-2 items-center">
-      <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Logs</span>
+    <div class="flex my-2 items-center justify-between">
+      <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pod Logs / {{ $route.params.namespace }} / {{ $route.params.name }}</span>
+      
+      <div id="controls" class="me-2">
+        <div @@click="downloadLog" class="flex px-2 rounded-lg items-center justify-center border cursor-pointer
+            border-gray-300 hover:border-gray-500 hover:bg-gray-100 fill-gray-300 hover:fill-gray-500
+            dark:border-white/[.4] dark:text-white/[.6] 
+            dark:hover:border-white dark:hover:text-white dark:hover:fill-white
+            dark:bg-zinc-900">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mx-2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+          </svg>
+        </div>
+      </div>
     </div>
         
     <br/>
+    
+    <div id="content">
+      <div class="pl-2 border cursor-text font-mono text-sm rounded-md h-[85vh]
+            border-gray-300
+            dark:border-zinc dark:bg-black dark:border-white/[.4] dark:text-white/[.9]">
+        <div v-if="logEvents.length == 0" 
+             class="justify-center w-full flex py-2">
+          <spinner></spinner>
+        </div>
+        <div v-else>
+          <pre v-for="e in logEvents">{{ e }}</pre>
+        </div>
+      </div>
+    </div>
     
   </div>
 </template>
@@ -19,16 +45,16 @@ let setup = (props, ctx) => {
   const logs = ref([]);
   const logEvents = ref([]);
 
-  let updateLogs = () => {
-    if (!logEvents.value) return;
+  let updateLogs = (j) => {
+    let result = logEvents.value.concat(j)
     
-    let result = [...logEvents.value];
+    if (result.length > 1000){
+      result = result.slice(-1000)
+    }
     
-    logs.value = result;
+    logEvents.value = result
   }
-  
-  watch(logEvents, updateLogs);
-  
+    
   onMounted(async () => {
     var host = window.location.origin;
     let namespace = route.params.namespace;
@@ -36,7 +62,7 @@ let setup = (props, ctx) => {
     let container = route.params.container;
     
     const url = `/k8s/api/v1/namespaces/${namespace}/pods/${name}/log?container=${container}&previous=false&tailLines=1000&follow=true`;
-    streamLogs(host + url, j => logEvents.value.push(j));
+    streamLogs(host + url, updateLogs);
   });
   
   return {
