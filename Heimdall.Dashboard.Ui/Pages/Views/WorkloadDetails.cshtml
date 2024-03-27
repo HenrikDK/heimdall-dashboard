@@ -41,14 +41,17 @@
       </div>
       <div v-if="item?.status?.replicas" class="flex mb-2">
         <div class="px-2 py-1 w-1/4">Replicas</div>
-        <div class="py-1 flex">
-          <div v-if="item?.status?.replicas !== undefined">{{ item?.status?.replicas }} desired</div>
-          <div v-if="item?.status?.updatedReplicas !== undefined">, {{ item?.status?.updatedReplicas }} updated</div>
-          <div v-if="item?.status?.readyReplicas !== undefined">, {{ item?.status?.readyReplicas }} total</div>
-          <div v-if="item?.status?.availableReplicas !== undefined">, {{ item?.status?.availableReplicas }} available</div>
-          <div v-if="item?.status?.availableReplicas !== undefined && item?.status?.readyReplicas !== undefined">
-            , {{ item?.status?.readyReplicas - item?.status?.availableReplicas }} unavailable
+        <div class="flex w-3/4">
+          <div class="py-1 flex">
+            <div v-if="item?.status?.replicas !== undefined">{{ item?.status?.replicas }} desired</div>
+            <div v-if="item?.status?.updatedReplicas !== undefined">, {{ item?.status?.updatedReplicas }} updated</div>
+            <div v-if="item?.status?.readyReplicas !== undefined">, {{ item?.status?.readyReplicas }} total</div>
+            <div v-if="item?.status?.availableReplicas !== undefined">, {{ item?.status?.availableReplicas }} available</div>
+            <div v-if="item?.status?.availableReplicas !== undefined && item?.status?.readyReplicas !== undefined">
+              , {{ item?.status?.readyReplicas - item?.status?.availableReplicas }} unavailable
+            </div>
           </div>
+          <scale-btn></scale-btn>
         </div>
       </div>
       <div v-if="item?.spec?.selector" class="flex mb-2">
