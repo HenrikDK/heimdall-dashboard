@@ -1,5 +1,5 @@
 <template id="tooltip">
-  <div ref="anchor" class="inline-block" :class="padding" @@mouseenter="show" @@mouseleave="hide">
+  <div ref="anchor" :class="padding" @@mouseenter="show" @@mouseleave="hide">
     <slot name="cell"/>
   </div>
   <div v-if="visible" ref="floating" :style="floatingStyles" role="tooltip" 
