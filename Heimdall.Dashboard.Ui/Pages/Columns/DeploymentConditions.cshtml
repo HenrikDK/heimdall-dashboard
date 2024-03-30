@@ -8,7 +8,7 @@
     </div>
     <div v-else-if="row.data?.kind == 'Deployment'">
       <template v-for="d in getDeployments(row)">
-        <tooltip :placement="placement">
+        <tooltip :placement="placement" padding="inline-block">
           <template v-slot:cell>
             <div class="pe-1" :class="d.type == 'Available' ? 'text-green-500' : 'text-blue-500'">
               {{ d.type }}
@@ -25,7 +25,7 @@
     </div>
     <div v-else-if="row.data?.kind == 'Job'">
       <template v-for="d in row.data.status.conditions">
-        <tooltip :placement="placement">
+        <tooltip :placement="placement" padding="inline-block">
           <template v-slot:cell>
             <div class="px-1 text-green-500">
               {{ d.type }}
