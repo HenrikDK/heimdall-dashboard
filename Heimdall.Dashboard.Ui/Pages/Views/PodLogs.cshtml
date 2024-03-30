@@ -3,26 +3,10 @@
     <div class="flex my-2 items-center justify-between">
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pod Logs / {{ $route.params.namespace }} / {{ $route.params.name }}</span>
       
-      <div id="controls" class="me-2 flex">
-        <scroll-direction-btn></scroll-direction-btn>
-
-        <download-btn></download-btn>
-      </div>
+      <log-controls></log-controls>
     </div>
     
-    <div id="content">
-      <div class="pl-2 border cursor-text font-mono text-xs rounded-md h-[85vh]
-            border-gray-300
-            dark:border-zinc dark:bg-black dark:border-white/[.4] dark:text-white/[.9]">
-        <div v-if="logEvents.length == 0" 
-             class="justify-center w-full flex py-2">
-          <spinner></spinner>
-        </div>
-        <div v-else>
-          <pre v-for="e in logEvents">{{ e }}</pre>
-        </div>
-      </div>
-    </div>
+    <log-viewer :events="logEvents"></log-viewer>
     
   </div>
 </template>
@@ -33,9 +17,6 @@ import { ref, watch, onMounted } from 'vue'
 
 let setup = (props, ctx) => {
   const route = useRoute();
-  const sort = ref('desc');
-  const logs = ref([]);
-  const direction = ref('down')
   const logEvents = ref([]);
 
   let updateLogs = (j) => {
@@ -47,7 +28,7 @@ let setup = (props, ctx) => {
     
     logEvents.value = result
   }
-    
+  
   onMounted(async () => {
     var host = window.location.origin;
     let namespace = route.params.namespace;
@@ -59,8 +40,7 @@ let setup = (props, ctx) => {
   });
   
   return {
-    sort, logs, logEvents, direction,
-    updateLogs
+    logEvents, updateLogs
   }
 }
 
