@@ -10,6 +10,17 @@
   </div>
 </template>
 
-<script>
-components["download-btn"] = { template: "#download-btn", props:[] };
+<script type="module">
+import { ref, watch } from 'vue'
+
+let setup = (props, ctx) => {
+
+  let downloadLog = () => {
+    return
+  }
+    
+  return {downloadLog}
+}
+
+components["download-btn"] = { template: "#download-btn", props:[], setup};
 </script>
