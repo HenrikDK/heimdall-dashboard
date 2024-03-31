@@ -10,10 +10,11 @@
 </template>
 
 <script type="module">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 
 let setup = (props, ctx) => {  
-  const loading = ref(true);               
+  const loading = ref(true);
+  const connections = ref([]);        
   const clusterWorkloads = ref([]);
   const clusterCronJobs = ref([]);
   const clusterDaemonSets = ref([]);
@@ -65,15 +66,19 @@ let setup = (props, ctx) => {
   
   onMounted(async () => {
     var host = window.location.origin;
-    streamResults(host + '/k8s/apis/apps/v1/deployments', j => clusterWorkloads.value = j)
-    streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => clusterDaemonSets.value = j)
-    streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => clusterStatefulSets.value = j)
-    streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => clusterCronJobs.value = j)
-    streamResults(host + '/k8s/apis/batch/v1/jobs', j => clusterJobs.value = j)
+    streamResults(host + '/k8s/apis/apps/v1/deployments', j => clusterWorkloads.value = j, connections.value)
+    streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => clusterDaemonSets.value = j, connections.value)
+    streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => clusterStatefulSets.value = j, connections.value)
+    streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => clusterCronJobs.value = j, connections.value)
+    streamResults(host + '/k8s/apis/batch/v1/jobs', j => clusterJobs.value = j, connections.value)
+  });
+
+  onUnmounted(async () => {
+    closeConnections(connections.value);
   });
 
   return { 
-    loading, sorting, workloads, columns,
+    loading, sorting, workloads, columns, connections,
     clusterWorkloads, clusterCronJobs, clusterDaemonSets, clusterJobs, clusterStatefulSets,
     updateWorkloads
   }
