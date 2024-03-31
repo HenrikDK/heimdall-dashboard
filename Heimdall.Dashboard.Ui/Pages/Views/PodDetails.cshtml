@@ -5,7 +5,7 @@
 
   <div class="flex mb-8 text-2xl justify-between items-center text-gray-500 dark:text-gray-300 font-light sans">
     <div class="text-md">Pod / {{pod?.metadata?.namespace }} / {{ pod?.metadata?.name }}</div>
-    <div class="flex text-xl">
+    <div class="flex">
       <restart-btn></restart-btn>
       <template v-if="pod?.spec?.containers.length == 1">
         <logs-btn :container="pod.spec.containers[0].name" ></logs-btn>
