@@ -44,7 +44,7 @@ let setup = (props, ctx) => {
 
   onUnmounted(async () => {
     closeConnections(connections.value);
-  })
+  });
   
   return {
     logEvents, updateLogs, direction, wrap, connections

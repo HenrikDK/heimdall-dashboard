@@ -345,7 +345,7 @@ let setup = (props, ctx) => {
 
   onUnmounted(async () => {
     closeConnections(connections.value);
-  })
+  });
   
   return {
       isDark, events, clusterEvents, initOptions, pod, metrics, charts, connections,
