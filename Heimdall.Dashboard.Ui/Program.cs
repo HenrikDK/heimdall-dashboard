@@ -1,3 +1,4 @@
+using Flurl.Http;
 using Heimdall.Dashboard.Ui.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -45,6 +46,9 @@ if (!app.Environment.IsDevelopment() || Debugger.IsAttached)
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
+
+FlurlHttp.ConfigureClientForUrl(K8sClient.Server)
+    .ConfigureInnerHandler(x => x.ServerCertificateCustomValidationCallback = (_, _, _, _) => true);
 
 var prometheus = app.Configuration.GetValue("prometheus-url", "");
 
@@ -128,11 +132,8 @@ app.UseProxies(proxies =>
 });
 
 app.UseAuthorization();
-app.UseEndpoints(x =>
-{
-    x.MapRazorPages();
-    x.MapMetrics();
-    x.MapControllers();
-});
+app.MapControllers();
+app.MapRazorPages();
+app.MapMetrics();
 
 app.Run();

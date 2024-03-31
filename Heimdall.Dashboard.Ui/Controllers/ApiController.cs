@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace Heimdall.Dashboard.Ui.Controllers;
 
 [ApiController]
-[Authorize]
+//[Authorize]
 public class ApiController : ControllerBase
 {
     private readonly Lazy<bool> _canRestartPod;
@@ -25,14 +25,20 @@ public class ApiController : ControllerBase
         {
             return BadRequest("Operation not allowed");
         }
-        
-        var server = K8sClient.Server;
-        var result = await server.AppendPathSegment($"/api/v1/namespaces/{nameSpace}/pods/{name}")
-            .WithOAuthBearerToken(K8sClient.AccessToken)
-            .DeleteAsync()
-            .ReceiveString();
-        
-        return Ok(result);
+
+        try
+        {
+            var server = K8sClient.Server;
+            var result = await server.AppendPathSegment($"/api/v1/namespaces/{nameSpace}/pods/{name}")
+                .WithOAuthBearerToken(K8sClient.AccessToken)
+                .DeleteAsync()
+                .ReceiveString();
+            return Ok(result);
+        }
+        catch (Exception e)
+        {
+            return Ok(e.Message);
+        }
     }
 
     [HttpPut("api/namespaces/{nameSpace}/replicaset/{name}/scale/{count:int}")]
