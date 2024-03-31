@@ -9,11 +9,13 @@ namespace Heimdall.Dashboard.Ui.Controllers;
 //[Authorize]
 public class ApiController : ControllerBase
 {
+    private readonly ILogger<ApiController> _logger;
     private readonly Lazy<bool> _canRestartPod;
     private readonly Lazy<bool> _canScalePods;
 
-    public ApiController(IConfiguration configuration)
+    public ApiController(IConfiguration configuration, ILogger<ApiController> logger)
     {
+        _logger = logger;
         _canRestartPod = new Lazy<bool>(() => configuration.GetValue("can-restart-pod", false));
         _canScalePods = new Lazy<bool>(() => configuration.GetValue("can-scale-pods", false));
     }
@@ -29,15 +31,22 @@ public class ApiController : ControllerBase
         try
         {
             var server = K8sClient.Server;
+            var user = "unknown";
+            
             var result = await server.AppendPathSegment($"/api/v1/namespaces/{nameSpace}/pods/{name}")
                 .WithOAuthBearerToken(K8sClient.AccessToken)
                 .DeleteAsync()
                 .ReceiveString();
+
+            _logger.LogWarning($"User {user} deleted pod {name} in namespace {nameSpace}");
+            
             return Ok(result);
         }
         catch (Exception e)
         {
-            return Ok(e.Message);
+            _logger.LogError(e, "Exception restarting pod");
+            
+            return StatusCode(502, e.Message);
         }
     }
 
@@ -53,14 +62,27 @@ public class ApiController : ControllerBase
         {
             return BadRequest("Operation not allowed, count too high!");
         }
-        
-        var server = K8sClient.Server;
-        var result = await server.AppendPathSegment($"/api/v1/namespaces/{nameSpace}/replicasets/{name}/scale")
-            .WithOAuthBearerToken(K8sClient.AccessToken)
-            .PatchJsonAsync(new { spec = new { replicas = count } })
-            .ReceiveString();
-        
-        return Ok(result);
+
+        try
+        {
+            var server = K8sClient.Server;
+            var user = "unknown";
+            
+            var result = await server.AppendPathSegment($"/api/v1/namespaces/{nameSpace}/replicasets/{name}/scale")
+                .WithOAuthBearerToken(K8sClient.AccessToken)
+                .PatchJsonAsync(new { spec = new { replicas = count } })
+                .ReceiveString();
+            
+            _logger.LogWarning($"User {user} scaled replicate set {name} in namespace {nameSpace} to {count}");
+            
+            return Ok(result);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Exception restarting pod");
+            
+            return StatusCode(502, e.Message);
+        }
     }
 
     [HttpGet("api/features")]
