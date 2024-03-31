@@ -22,7 +22,7 @@ let setup = (props, ctx) => {
   let restartPod = (e) => {
        if(confirm("Do you really want to restart the pod?")){
     
-          fetch('/api/test/1', { method: 'DELETE' })
+          fetch(`/api/namespaces/${route.params.namespace}/pods/${route.params.name}`, { method: 'DELETE' })
             .catch(e => { console.log(e); })
             .then(x => router.push({ name: 'pods', params: { namespace: route.params.namespace } }))          
        }
