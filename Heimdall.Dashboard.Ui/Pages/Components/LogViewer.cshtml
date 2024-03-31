@@ -5,12 +5,11 @@
           dark:border-zinc dark:bg-black dark:border-white/[.4] dark:text-white/[.9]">
     <div>
 
-      <div v-if="events.length == 0" 
-            class="justify-center w-full flex py-2">
+      <div v-if="events.length == 0" class="justify-center w-full flex py-2">
         <spinner></spinner>
       </div>
 
-      <div v-else class="">
+      <div v-else :class="[wrap ? '': 'w-max']">
         <div v-for="e in events" class="px-2 break-words break-all leading-5 dark:hover:bg-zinc-900 hover:bg-gray-100" >
           <span>{{ e }}</pre>
         </div>
@@ -95,7 +94,9 @@ let setup = (props, ctx) => {
 
 components["log-viewer"] = { template: "#log-viewer", emits: [], setup, 
   props: {
-    events: Array
+    events: Array,
+    wrap: Boolean,
+    direction: String
   }
 };
 </script>

@@ -6,8 +6,7 @@
       <log-controls :direction="direction" :wrap="wrap" @@direction="(d) => direction = d" @@wrap="(w) => wrap = w"></log-controls>
     </div>
     
-    <log-viewer :events="logEvents"></log-viewer>
-    
+    <log-viewer :events="logEvents" :wrap="wrap" :direction="direction"></log-viewer>
   </div>
 </template>
 
