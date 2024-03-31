@@ -3,7 +3,7 @@
     <div class="flex my-2 items-center justify-between">
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pod Logs / {{ $route.params.namespace }} / {{ $route.params.name }}</span>
       
-      <log-controls></log-controls>
+      <log-controls :direction="direction" :wrap="wrap"></log-controls>
     </div>
     
     <log-viewer :events="logEvents"></log-viewer>
@@ -17,6 +17,9 @@ import { ref, watch, onMounted } from 'vue'
 
 let setup = (props, ctx) => {
   const route = useRoute();
+  const direction = ref('up');
+  const wrap = ref(true);
+
   const logEvents = ref([]);
 
   let updateLogs = (j) => {
@@ -40,7 +43,7 @@ let setup = (props, ctx) => {
   });
   
   return {
-    logEvents, updateLogs
+    logEvents, updateLogs, direction, wrap
   }
 }
 
