@@ -1,4 +1,14 @@
-﻿function streamMetrics(url, cb) {
+﻿function closeConnections(connections){
+    connections.forEach(x => {
+        try {
+            x();
+        } catch (err) {
+            console.error('Unable to close connection', {err});
+        }
+    });
+}
+
+function streamMetrics(url, cb, connections = null) {
     let isApiRequestInProgress = false;
     const handel = setInterval(getMetrics, 30000);
     getMetrics();
@@ -20,6 +30,9 @@
             console.error('No metrics', {err, url});
         }
     }
+    if (connections){
+        connections.push(cancel)
+    }
 
     return cancel;
 
@@ -28,10 +41,13 @@
     }
 }
 
-async function streamLogs(url, cb) {
+async function streamLogs(url, cb, connections = null) {
     const watchUrl = url.replace('http', 'ws');
     let ending = ''
     const {cancel} = stream(watchUrl, transformer, false);
+    if (connections){
+        connections.push(cancel)
+    }
     return cancel;
 
     function transformer(item) {
@@ -58,7 +74,7 @@ async function streamLogs(url, cb) {
     }
 }
 
-async function streamResults(url, cb) {
+async function streamResults(url, cb, connections = null) {
     let isCancelled = false;
     let socket = {};
     const results = {};
@@ -70,6 +86,9 @@ async function streamResults(url, cb) {
 
     run();
 
+    if (connections){
+        connections.push(cancel)
+    }
     return cancel;
 
     async function run() {
