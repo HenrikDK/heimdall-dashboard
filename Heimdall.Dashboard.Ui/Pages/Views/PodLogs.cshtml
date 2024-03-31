@@ -3,7 +3,9 @@
     <div class="flex my-2 items-center justify-between">
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pod Logs / {{ $route.params.namespace }} / {{ $route.params.name }}</span>
       
-      <log-controls :direction="direction" :wrap="wrap" @@direction="(d) => direction = d" @@wrap="(w) => wrap = w"></log-controls>
+      <log-controls :events="logEvents" :wrap="wrap" :direction="direction" :json="json" 
+        @@wrap="(w) => wrap = w" @@direction="(d) => direction = d">
+      </log-controls>
     </div>
     
     <log-viewer :events="logEvents" :wrap="wrap" :direction="direction"></log-viewer>
@@ -17,6 +19,7 @@ import { ref, watch, onMounted, onUnmounted } from 'vue'
 let setup = (props, ctx) => {
   const route = useRoute();
   const connections = ref([]);
+  const json = ref(false);
   const direction = ref('up');
   const wrap = ref(true);
 
@@ -40,6 +43,11 @@ let setup = (props, ctx) => {
     
     const url = `/k8s/api/v1/namespaces/${namespace}/pods/${name}/log?container=${container}&previous=false&tailLines=1000&follow=true`;
     streamLogs(host + url, updateLogs, connections.value);
+
+    setTimeout(() => {
+      let event = logEvents.value[logEvents.value.length - 1];
+      json.value = event.startsWith('{')
+    }, 300);
   });
 
   onUnmounted(async () => {
@@ -47,7 +55,7 @@ let setup = (props, ctx) => {
   });
   
   return {
-    logEvents, updateLogs, direction, wrap, connections
+    logEvents, updateLogs, direction, wrap, connections, json
   }
 }
 
