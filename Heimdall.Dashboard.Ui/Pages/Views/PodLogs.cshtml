@@ -12,10 +12,11 @@
 
 <script type="module">
 import { useRoute } from 'vue-router';
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 
 let setup = (props, ctx) => {
   const route = useRoute();
+  const connections = ref([]);
   const direction = ref('up');
   const wrap = ref(true);
 
@@ -38,11 +39,15 @@ let setup = (props, ctx) => {
     let container = route.params.container;
     
     const url = `/k8s/api/v1/namespaces/${namespace}/pods/${name}/log?container=${container}&previous=false&tailLines=1000&follow=true`;
-    streamLogs(host + url, updateLogs);
+    streamLogs(host + url, updateLogs, connections.value);
   });
+
+  onUnmounted(async () => {
+    closeConnections(connections.value);
+  })
   
   return {
-    logEvents, updateLogs, direction, wrap
+    logEvents, updateLogs, direction, wrap, connections
   }
 }
 
