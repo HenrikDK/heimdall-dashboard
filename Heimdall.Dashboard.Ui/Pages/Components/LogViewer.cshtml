@@ -32,6 +32,7 @@ import { useVirtualizer } from '@@tanstack/vue-virtual'
 let setup = (props, ctx) => {
   const parentRef = ref(null);
   const updateId = ref(0);
+  const loaded = ref(false)
   const logEvents = toRef(props, 'events')
 
   let virtualizerOptions = computed(() => {
@@ -57,8 +58,14 @@ let setup = (props, ctx) => {
   };
 
   watch(logEvents, () => {
+    if (!loaded.value) return;
     updateId.value += 1;
-    virtualRows = virtualizer.value.getVirtualItems();
+  })
+
+  onMounted(() => {
+    setTimeout(() => {
+      loaded.value = true;
+    }, 500);
   })
 
   /* 
@@ -80,7 +87,7 @@ let setup = (props, ctx) => {
   }, [model.searchStore.activeOverlayIndex])
   */
 
-  return {virtualizer, logEvents, virtualizerOptions, measureElement, virtualRows, widthStyle, parentRef, updateId}
+  return {virtualizer, logEvents, virtualizerOptions, measureElement, virtualRows, widthStyle, parentRef, loaded, updateId}
 }
 
 components["log-viewer"] = { template: "#log-viewer", emits: [], setup, 
