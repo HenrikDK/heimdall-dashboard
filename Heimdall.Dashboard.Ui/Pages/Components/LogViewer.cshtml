@@ -17,7 +17,7 @@
           :style="{ position: 'absolute', top: 0, left: 0, width: widthStyle, transform: `translateY(${virtualRow.start}px)` }"
           >
 
-          <span>{{ logEvents[virtualRow.index] }}</pre>
+          <span>{{ logEvents[virtualRow.index] }}</span>
         </div>
 
         <div class="sticky top-5 flex justify-end">
@@ -130,7 +130,7 @@ let setup = (props, ctx) => {
   })
 
   watch(() => props.direction, () => {
-    if (props.direction == 'up'){
+    if (props.direction === 'up'){
       logEvents.value = [...props.events];
       toBottom();
     }else{
@@ -151,7 +151,7 @@ let setup = (props, ctx) => {
       if (props.direction === 'up' && logEvents.value.length > 0){
         virtualizer.value.scrollToIndex(logEvents.value.length - 1, { align: 'end', smoothScroll: false });  
       }
-    }, 300);
+    }, 500);
   })
 
   /* 
