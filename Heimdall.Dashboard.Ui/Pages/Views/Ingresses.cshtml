@@ -10,10 +10,11 @@
 </template>
 
 <script type="module">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 
 let setup = (props, ctx) => {
   const loading = ref(true);
+  const connections = ref([]);
   const clusterIngresses = ref([]);
   const ingresses = ref([
     {metadata: {name: "user-api", namespace:"petstore", creationTimestamp: "2023-07-20T17:18:00.000Z" }, 
@@ -80,10 +81,14 @@ let setup = (props, ctx) => {
   
   onMounted(() => {
     var host = window.location.origin;
-    streamResults(host + '/k8s/apis/networking.k8s.io/v1/ingresses', j => clusterIngresses.value = j)
+    streamResults(host + '/k8s/apis/networking.k8s.io/v1/ingresses', j => clusterIngresses.value = j, connections.value)
+  });
+
+  onUnmounted(async () => {
+    closeConnections(connections.value);
   });
   
-  return { loading, clusterIngresses, ingresses, sorting, columns, getLoadBalancers }
+  return { loading, clusterIngresses, ingresses, sorting, columns, getLoadBalancers, connections }
 }
 
 components["ingresses"] = { template: "#ingresses", props: ['namespaces', 'search', 'filters'], setup };
