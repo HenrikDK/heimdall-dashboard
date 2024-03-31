@@ -10,10 +10,11 @@
 </template>
 
 <script type="module">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 
 let setup = (props, ctx) => {
-  const loading = ref(true);                
+  const loading = ref(true);          
+  const connections = ref([]);
   const sorting = ref([{header:'Name', sort:'asc'}]);
   const clusterPods = ref([]);
   const pods = ref([
@@ -84,11 +85,15 @@ let setup = (props, ctx) => {
   
   onMounted(async () => {
     var host = window.location.origin;
-    streamResults(host + '/k8s/api/v1/pods', j => clusterPods.value = j);
+    streamResults(host + '/k8s/api/v1/pods', j => clusterPods.value = j, connections.value);
+  });
+
+  onUnmounted(async () => {
+    closeConnections(connections.value);
   });
   
   return {
-    loading, sorting, clusterPods, pods, columns, getRestarts, updatePods
+    loading, sorting, clusterPods, pods, columns, getRestarts, updatePods, connections
   }
 }
 
