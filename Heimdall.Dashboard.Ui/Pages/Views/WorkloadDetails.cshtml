@@ -100,11 +100,12 @@
 </template>
 
 <script type="module">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router';
 
 let setup = (props, ctx) => {
   const item = ref({});
+  const connections = ref([]);
   const route = useRoute();
   
   let toLocal = (value) => {
@@ -138,11 +139,15 @@ let setup = (props, ctx) => {
         url = `/k8s/apis/batch/v1/namespaces/${namespace}/${type}s`    
     }
     
-    streamResult(host + url, name, j => item.value = j);
+    streamResult(host + url, name, j => item.value = j, connections.value);
   });
   
+  onUnmounted(async () => {
+    closeConnections(connections.value);
+  });
+
   return { 
-    item,
+    item, connections,
     toLocal, toHuman 
   }
 }
