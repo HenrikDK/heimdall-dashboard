@@ -21,7 +21,7 @@
         </div>
 
         <div class="sticky top-5 flex justify-end">
-          <div v-if="direction == 'up' && !isBottom" title="To bottom" alt="To bottom"
+          <div v-if="direction == 'up' && !isBottom" title="To bottom" alt="To bottom" @@click="toBottom"
               class="flex px-4 py-2 me-8 rounded-lg items-center justify-center border cursor-pointer
                 border-gray-300 bg-white fill-gray-300
                 hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
@@ -33,7 +33,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
             </svg>
           </div>
-          <div v-if="direction == 'down' && !isTop" title="To top" alt="To top"
+          <div v-if="direction == 'down' && !isTop" title="To top" alt="To top" @@click="toTop"
               class="flex px-4 py-2 me-8 rounded-lg items-center justify-center border cursor-pointer
                 border-gray-300 bg-white fill-gray-300
                 hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
@@ -106,6 +106,18 @@ let setup = (props, ctx) => {
     return true;
   });
 
+  let toBottom = () => {
+    if (logEvents.value.length > 0){
+      virtualizer.value.scrollToIndex(logEvents.value.length - 1, { align: 'end', smoothScroll: false });  
+    }
+  }
+
+  let toTop = () => {
+    if (logEvents.value.length > 0){
+      virtualizer.value.scrollToIndex(0, { align: 'end', smoothScroll: false });  
+    }
+  }
+
   watch(logEvents, () => {
     if (!loaded.value) return;
     updateId.value += 1;
@@ -135,7 +147,7 @@ let setup = (props, ctx) => {
   }, [model.searchStore.activeOverlayIndex])
   */
 
-  return {virtualizer, logEvents, virtualizerOptions, measureElement, widthStyle, parentRef, loaded, updateId, isBottom, isTop}
+  return {virtualizer, logEvents, virtualizerOptions, measureElement, widthStyle, parentRef, loaded, updateId, isBottom, isTop, toBottom, toTop}
 }
 
 components["log-viewer"] = { template: "#log-viewer", emits: [], setup, 
