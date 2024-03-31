@@ -232,12 +232,12 @@
 <script type="module">
 import { useDark } from "@@vueuse/core";
 import { useRoute } from 'vue-router'
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 
 let setup = (props, ctx) => {
   const isDark = useDark();
   const route = useRoute();
-  
+  const connections = ref([]);
   const events = ref([]);
   const clusterEvents = ref([]);  
   const initOptions = ref({ renderer: "svg" });
@@ -333,18 +333,22 @@ let setup = (props, ctx) => {
     let namespace = route.params.namespace;
     let options = { pods: name, namespace: namespace };
 
-    streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'memory-usage', options), j => metrics.value.memoryUsage = j.data.result);
-    streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'memory-limits', options), j => metrics.value.memoryLimits = j.data.result);
+    streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'memory-usage', options), j => metrics.value.memoryUsage = j.data.result, connections.value);
+    streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'memory-limits', options), j => metrics.value.memoryLimits = j.data.result, connections.value);
 
-    streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-usage', options), j => metrics.value.cpuUsage = j.data.result);
-    streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-limits', options), j => metrics.value.cpuLimits = j.data.result);
+    streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-usage', options), j => metrics.value.cpuUsage = j.data.result, connections.value);
+    streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-limits', options), j => metrics.value.cpuLimits = j.data.result, connections.value);
       
-    streamResult(host + `/k8s/api/v1/namespaces/${namespace}/pods`, name, j => pod.value = j);
-    streamResults(host + `/k8s/api/v1/namespaces/${namespace}/events`, j => clusterEvents.value = j)
+    streamResult(host + `/k8s/api/v1/namespaces/${namespace}/pods`, name, j => pod.value = j, connections.value);
+    streamResults(host + `/k8s/api/v1/namespaces/${namespace}/events`, j => clusterEvents.value = j, connections.value)
   });
+
+  onUnmounted(async () => {
+    closeConnections(connections.value);
+  })
   
   return {
-      isDark, events, clusterEvents, initOptions, pod, metrics, charts,
+      isDark, events, clusterEvents, initOptions, pod, metrics, charts, connections,
       getContainerStatusObjects, getContainerStatus, toLocal, toHuman,
       updateCpu, updateMemory
   }
