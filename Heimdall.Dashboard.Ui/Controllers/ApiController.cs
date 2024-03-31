@@ -1,7 +1,6 @@
 ﻿using Flurl;
 using Flurl.Http;
 using Heimdall.Dashboard.Ui.Infrastructure;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Heimdall.Dashboard.Ui.Controllers;
 
@@ -12,12 +11,14 @@ public class ApiController : ControllerBase
     private readonly ILogger<ApiController> _logger;
     private readonly Lazy<bool> _canRestartPod;
     private readonly Lazy<bool> _canScalePods;
+    private readonly Lazy<string> _filters;
 
     public ApiController(IConfiguration configuration, ILogger<ApiController> logger)
     {
         _logger = logger;
         _canRestartPod = new Lazy<bool>(() => configuration.GetValue("can-restart-pod", false));
         _canScalePods = new Lazy<bool>(() => configuration.GetValue("can-scale-pods", false));
+        _filters = new Lazy<string>(() => configuration.GetValue("filters", ""));
     }
 
     [HttpDelete("api/namespaces/{nameSpace}/pods/{name}")]
@@ -90,7 +91,8 @@ public class ApiController : ControllerBase
     {
         return Ok(new {
             CanRestartPod = _canRestartPod.Value,
-            CanScalePods = _canScalePods.Value
+            CanScalePods = _canScalePods.Value,
+            Filters = _filters.Value
         });
     }
 }
