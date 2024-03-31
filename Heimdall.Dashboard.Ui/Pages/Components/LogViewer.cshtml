@@ -115,16 +115,15 @@ let setup = (props, ctx) => {
     setTimeout(() => {
       loaded.value = true;
     }, 500);
+
+    setTimeout(() => {
+      if (props.direction === 'up' && logEvents.value.length > 0){
+        virtualizer.value.scrollToIndex(logEvents.value.length - 1, { align: 'end', smoothScroll: false });  
+      }
+    }, 300);
   })
 
   /* 
-  // Initial scroll to bottom
-  useEffect(() => {
-    setTimeout(() => {
-      rowVirtualizer.scrollToIndex(visibleLogs.get().length - 1, { align: 'end', smoothScroll: false });
-    }, 200)
-  }, [model.logTabData.get()?.selectedPodId])
-
   // To bottom
   useEffect(() => {
     rowVirtualizer.scrollToIndex(visibleLogs.get().length - 1, { align: 'end', smoothScroll: false });
