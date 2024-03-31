@@ -60,7 +60,7 @@ let setup = (props, ctx) => {
   const parentRef = ref(null);
   const updateId = ref(0);
   const loaded = ref(false)
-  const logEvents = toRef(props, 'events')
+  const logEvents = ref([])
 
   let virtualizerOptions = computed(() => {
     return {
@@ -118,7 +118,26 @@ let setup = (props, ctx) => {
     }
   }
 
-  watch(logEvents, () => {
+  watch(() => props.events, () => {
+    if (props.direction == 'up'){
+      logEvents.value = [...props.events];
+    }else{
+      logEvents.value = [...props.events].reverse();
+    }
+    
+    if (!loaded.value) return;
+    updateId.value += 1;
+  })
+
+  watch(() => props.direction, () => {
+    if (props.direction == 'up'){
+      logEvents.value = [...props.events];
+      toBottom();
+    }else{
+      logEvents.value = [...props.events].reverse();
+      toTop();
+    }
+    
     if (!loaded.value) return;
     updateId.value += 1;
   })
@@ -136,11 +155,6 @@ let setup = (props, ctx) => {
   })
 
   /* 
-  // To bottom
-  useEffect(() => {
-    rowVirtualizer.scrollToIndex(visibleLogs.get().length - 1, { align: 'end', smoothScroll: false });
-  }, [model.logTabData.get()]);
-
   // scroll to search
    useEffect(() => {
     rowVirtualizer.scrollToIndex(model.searchStore.occurrences[model.searchStore.activeOverlayIndex], { align: 'end', smoothScroll: false });
