@@ -50,16 +50,16 @@ import { ref, watch } from 'vue'
 
 let setup = (props, ctx) => {
   let toggleDirection = () => {
-    if (direction.value === 'up'){
-      ctx.emit('update:direction', 'down')
+    if (props.direction === 'up'){
+      ctx.emit('direction', 'down')
       return
     }
     
-    ctx.emit('update:direction', 'up')
+    ctx.emit('direction', 'up')
   }
 
   let toggleWrap = () => {
-    ctx.emit('update:wrap', !props.wrap)
+    ctx.emit('wrap', !props.wrap)
   }
 
   let downloadLog = () => {
@@ -69,5 +69,5 @@ let setup = (props, ctx) => {
   return {downloadLog, toggleDirection, toggleWrap}
 }
 
-components["log-controls"] = { template: "#log-controls", emits: [], props: ['direction', 'wrap'], setup };
+components["log-controls"] = { template: "#log-controls", emits: ['direction', 'wrap'], props: ['direction', 'wrap'], setup };
 </script>

@@ -3,7 +3,7 @@
     <div class="flex my-2 items-center justify-between">
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pod Logs / {{ $route.params.namespace }} / {{ $route.params.name }}</span>
       
-      <log-controls :direction="direction" :wrap="wrap"></log-controls>
+      <log-controls :direction="direction" :wrap="wrap" @@direction="(d) => direction = d" @@wrap="(w) => wrap = w"></log-controls>
     </div>
     
     <log-viewer :events="logEvents"></log-viewer>
