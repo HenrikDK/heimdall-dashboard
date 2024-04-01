@@ -7,7 +7,7 @@
     <div class="text-md">Pod / {{pod?.metadata?.namespace }} / {{ pod?.metadata?.name }}</div>
     <div class="flex">
       <template v-if="config.canRestartPod && pod">
-        <restart-btn></restart-btn>  
+        <restart-pod :pod="pod"></restart-pod>  
       </template>
       <template v-if="pod?.spec?.containers.length == 1">
         <logs-btn :container="pod.spec.containers[0].name"></logs-btn>
