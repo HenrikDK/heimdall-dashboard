@@ -45,12 +45,20 @@
         </div>
 
         <div v-for="row in virtualizer.getVirtualItems()" 
-            :key="row.key + '-' + updateKey"
+            :key="row.key"
             :data-index="row.index"
             :ref="measureElement"
             :style="{ position: 'absolute', top: `${row.start}px`,  width: '100%' }" >
 
-            <vue-table-row :row="rows[row.index]" :vrow="row" :columns="columns"></vue-table-row>
+            <router-link v-if="$route.name === 'pods'" :to="getLink(rows[row.index])">
+              <vue-table-row :row="rows[row.index]" :vrow="row" :updateKey="updateKey" :columns="columns"></vue-table-row>          
+            </router-link>
+            <router-link v-if="$route.name === 'workloads'" :to="getLink(rows[row.index])">
+              <vue-table-row :row="rows[row.index]" :vrow="row" :updateKey="updateKey" :columns="columns"></vue-table-row>          
+            </router-link>
+            <template v-else>
+              <vue-table-row :row="rows[row.index]" :vrow="row" :updateKey="updateKey" :columns="columns"></vue-table-row>          
+            </template>
         </div>
       </div>
     </div>
@@ -140,6 +148,15 @@ let setup = (props, ctx) => {
     updateKey.value += 1;
   }
   
+  let getLink = (row) => {
+    if (['Deployment', 'DaemonSet', 'StatefulSet', 'Job', 'CronJob', ].includes(row.kind))
+    {
+        return { name: 'workload-details', params: { namespace: row.metadata.namespace, type: row.kind.toLowerCase(), name: row.metadata.name }}   
+    }
+    
+    return { name: 'pod-details', params: { namespace: row.metadata.namespace, name: row.metadata.name }}
+  };
+  
   watch([() => props.columns,() => props.data,() => props.namespaces,() => props.search, sorting], updateTable);
   
   onMounted(() => {
@@ -157,7 +174,7 @@ let setup = (props, ctx) => {
   
   return {
     sorting, timer, updateKey, rows, virtualizerOptions, virtualizer, measureElement, parentRef,
-    cancelAutoUpdate, onSelectSort, updateTable, reRender
+    getLink, cancelAutoUpdate, onSelectSort, updateTable, reRender
   }
 }
 
