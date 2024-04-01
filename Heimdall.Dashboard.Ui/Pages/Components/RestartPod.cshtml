@@ -1,4 +1,4 @@
-﻿<template id="restart-btn">
+﻿<template id="restarter">
   <div @@click="restartPod" class="flex px-2 rounded-lg items-center me-4 justify-center border cursor-pointer
     border-gray-300 bg-white fill-gray-300
     hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
@@ -31,5 +31,5 @@ let setup = (props, ctx) => {
   return { restartPod }
 }
 
-components["restart-btn"] = { template: "#restart-btn", setup };
+components["restarter"] = { template: "#restarter", setup };
 </script>
