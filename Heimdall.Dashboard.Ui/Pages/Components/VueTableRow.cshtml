@@ -1,5 +1,5 @@
 <template id="vue-table-row">
-  <optional-link :row="row" :key="vrow.index">
+  <optional-link :row="row">
     <div class="flex w-full hover:bg-sky-100 dark:hover:bg-zinc-700">
       <template v-for="column in columns">
         <template v-if="column.formatter == undefined">
