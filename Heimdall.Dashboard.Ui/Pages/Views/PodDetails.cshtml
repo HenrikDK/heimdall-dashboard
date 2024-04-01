@@ -1,4 +1,4 @@
-﻿<template id="pod-details">
+<template id="pod-details">
   <div class="pl-2 pr-4 max-w-5xl mx-auto">
     
   <br/>
@@ -6,9 +6,11 @@
   <div class="flex mb-8 text-2xl justify-between items-center text-gray-500 dark:text-gray-300 font-light sans">
     <div class="text-md">Pod / {{pod?.metadata?.namespace }} / {{ pod?.metadata?.name }}</div>
     <div class="flex">
-      <restart-btn></restart-btn>
+      <template v-if="config.canRestartPod && pod">
+        <restart-btn></restart-btn>  
+      </template>
       <template v-if="pod?.spec?.containers.length == 1">
-        <logs-btn :container="pod.spec.containers[0].name" ></logs-btn>
+        <logs-btn :container="pod.spec.containers[0].name"></logs-btn>
       </template>
       <div v-else class="flex px-2 w-28"></div>
     </div>
@@ -285,7 +287,6 @@ let setup = (props, ctx) => {
     if (!value) return ''
     
     var DT = window.DateTime || luxon.DateTime;
-    var invalid = "";
     const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
     var date = DT.now();
 
@@ -354,6 +355,6 @@ let setup = (props, ctx) => {
   }
 }
 
-components["pod-details"] = {template: "#pod-details", props: ['namespaces', 'filters'], setup};
+components["pod-details"] = {template: "#pod-details", props: ['config', 'namespaces', 'filters'], setup};
 routes.push({path:'/namespaces/:namespace/pods/:name/details', name:'pod-details', component: components["pod-details"]})
 </script>
