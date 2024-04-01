@@ -16,9 +16,9 @@
 let setup = (props, ctx) => {
   
   let getNamespace = (row) => {
-    let ns = row?.data?.involvedObject?.namespace
+    let ns = row?.involvedObject?.namespace
     if (!ns) {
-      ns = row?.data?.metadata?.namespace
+      ns = row?.metadata?.namespace
     }
     return ns
   };

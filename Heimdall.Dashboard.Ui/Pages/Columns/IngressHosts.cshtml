@@ -1,7 +1,7 @@
 <template id="ingress-hosts">
   <div class="px-4 py-2 flex flex-col" :class="classes">
-    <template v-if="row.data.spec?.rules">
-      <template v-for="r in row.data.spec?.rules">
+    <template v-if="row.spec?.rules">
+      <template v-for="r in row.spec?.rules">
         <template v-for="p in r.http.paths">
           <div class="flex">
             <div class="underline text-blue-500">

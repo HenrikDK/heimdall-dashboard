@@ -13,47 +13,47 @@
 
 let setup = (props, ctx) => {
   let getPodStatuses = (row) => {
-    if (!row.data.kind) return [];
+    if (!row.kind) return [];
     let waiting = 0;
     let ready = 0;
     
-    if (row.data.kind === "DaemonSet")
+    if (row.kind === "DaemonSet")
     {
-        let scheduled = row.data.status.currentNumberScheduled;
-        ready = row.data.status.numberReady;
+        let scheduled = row.status.currentNumberScheduled;
+        ready = row.status.numberReady;
         
         if (scheduled > ready){
             waiting = scheduled - ready;
         }
     }
     
-    if (row.data.kind === "StatefulSet")
+    if (row.kind === "StatefulSet")
     {
-        let desired = row.data.status.replicas;
-        ready = row.data.status.currentReplicas;
+        let desired = row.status.replicas;
+        ready = row.status.currentReplicas;
         if (desired > ready){
             waiting = desired - ready;
         }
     }        
     
-    if (row.data.kind === "Deployment")
+    if (row.kind === "Deployment")
     {
-        let scheduled = row.data.status.replicas;
-        ready = row.data.status.readyReplicas;
+        let scheduled = row.status.replicas;
+        ready = row.status.readyReplicas;
         if (scheduled > ready){
             waiting = scheduled - ready;
         }
     }
     
-    if (row.data.kind === "Job")
+    if (row.kind === "Job")
     {
-        waiting = row.data.status.ready;
-        ready = row.data.status.succeeded;
+        waiting = row.status.ready;
+        ready = row.status.succeeded;
     }
      
-    if (row.data.kind === "CronJob")
+    if (row.kind === "CronJob")
     {
-        ready = row.data.status.active;
+        ready = row.status.active;
     }
 
     let result = [];    
