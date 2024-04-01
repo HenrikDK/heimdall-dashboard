@@ -1,5 +1,5 @@
-﻿<template id="scaler">
-  <div @@click="openModel" class="flex px-2 ms-4 rounded-lg items-center justify-center border cursor-pointer
+﻿<template id="scale-pods">
+  <div @@click="openModal" class="flex px-2 ms-4 rounded-lg items-center justify-center border cursor-pointer
       border-gray-300 bg-white fill-gray-300
       hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
       dark:border-white/[.4] dark:text-white/[.6] 
@@ -66,7 +66,7 @@ let setup = (props, ctx) => {
     isOpen.value = false;
   }
   
-  let openModel = () => {
+  let openModal = () => {
     desired.value = props.item.status?.readyReplicas ?? 1;
     isOpen.value = true;
   }
@@ -76,7 +76,7 @@ let setup = (props, ctx) => {
     //here you do whatever
   }
   
-  return {isOpen, desired, updateValue, closeModal, openModel, submitHandler}
+  return {isOpen, desired, updateValue, closeModal, openModal, submitHandler}
 }
-components["scaler"] = { template: "#scaler", props:['item'], setup };
+components["scale-pods"] = { template: "#scale-pods", props:['item'], setup };
 </script>
