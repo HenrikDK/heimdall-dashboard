@@ -1,108 +1,93 @@
 <template id="vue-table">
-  <div class="border overflow-hidden border-gray-200 shadow-md rounded-lg dark:border-zinc-700 mt-4"> <!-- table outer border -->
-    <div class="w-full h-[85vh] text-left divide-y divide-gray-200 dark:divide-zinc-700 dark:bg-zinc-900"> <!-- table -->
-      <div class="flex w-full sticky top-0 z-10 bg-gray-100 dark:bg-zinc-900"> <!-- header -->
-        <div v-for="column in columns"
-             class="text-left text-xs font-strong text-black uppercase dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-zinc-700"
-             :class="column.classes">
-            
-          <div class="flex">
-            <div class="px-4 py-2 grow shrink">
-              {{ column.header }}
-            </div>
 
-            <div v-if="column.canSort || column.canSort == undefined"
-                 class="px-2 py-2 float-right cursor-pointer select-none"
-                 @@click="onSelectSort($event, column.id)">
-              <template v-if="sorting.find(x => x.id === column.id) == undefined">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/>
-                </svg>
-              </template>
-              <template v-if="sorting.find(x => x.id === column.id)?.sort === 'asc'">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/>
-                </svg>
-              </template>
-              <template v-if="sorting.find(x => x.id === column.id)?.sort === 'desc'">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
-                </svg>
-              </template>
-            </div>
+  <div class="border border-gray-200 rounded-lg dark:border-zinc-700 mt-4"> <!-- table outer border -->
+    <div class="flex top-0 w-full z-10 bg-gray-100 dark:bg-zinc-900"> <!-- header -->
+      <div v-for="column in columns"
+            class="text-left text-xs font-strong text-black uppercase dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-zinc-700"
+            :class="column.classes">
+          
+        <div class="flex">
+          <div class="px-4 py-2 grow shrink">
+            {{ column.header }}
+          </div>
+
+          <div v-if="column.canSort || column.canSort == undefined"
+                class="px-2 py-2 float-right cursor-pointer select-none"
+                @@click="onSelectSort($event, column.id)">
+            <template v-if="sorting.find(x => x.id === column.id) == undefined">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/>
+              </svg>
+            </template>
+            <template v-if="sorting.find(x => x.id === column.id)?.sort === 'asc'">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/>
+              </svg>
+            </template>
+            <template v-if="sorting.find(x => x.id === column.id)?.sort === 'desc'">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+              </svg>
+            </template>
           </div>
         </div>
       </div>
-      <div v-bind="containerProps" class="overflow-y-scroll h-[82.5vh] text-sm text-gray-700 dark:text-gray-300 w-full dark:divide-zinc-700 dark:[color-scheme:dark]"> <!-- body -->
-        <template v-if="!loading">
-          <div v-bind="wrapperProps">
-            <optional-link v-for="row in list" :row="row.data" :key="row.index">
-              <div class="flex w-full hover:bg-blue-100 dark:hover:bg-zinc-700">
-                <template v-for="column in columns">
-                  <template v-if="column.formatter == undefined">
-                    <div class="px-4 py-2" :class="column.classes">
-                      {{ column.accessor(row.data) }}
-                    </div>
-                  </template>
-                  <template v-else-if="column.formatter == 'namespace'">
-                    <ns-column :row="row" :classes="column.classes"></ns-column>
-                  </template>
-                  <template v-else-if="column.formatter == 'kube-dns'">
-                    <kube-dns :row="row" :classes="column.classes"></kube-dns>
-                  </template>
-                  <template v-else-if="column.formatter == 'deployment-lights'">
-                    <deployment-lights :row="row" :classes="column.classes"></deployment-lights>
-                  </template>
-                  <template v-else-if="column.formatter == 'deployment-conditions'">
-                    <deployment-conditions :row="row" :classes="column.classes"></deployment-conditions>
-                  </template>
-                  <template v-else-if="column.formatter == 'pod-lights'">
-                    <pod-lights :row="row" :classes="column.classes" ></pod-lights>
-                  </template>
-                  <template v-else-if="column.formatter == 'pod-status'">
-                    <pod-status :row="row" :classes="column.classes" ></pod-status>
-                  </template>
-                  <template v-else-if="column.formatter == 'object-age'">
-                    <object-age :row="row" :classes="column.classes" :key="updateKey"></object-age>
-                  </template>
-                  <template v-else-if="column.formatter == 'event-message'">
-                    <event-message :row="row" :classes="column.classes"></event-message>
-                  </template>
-                  <template v-else-if="column.formatter == 'event-source'">
-                    <event-source :row="row" :classes="column.classes"></event-source>
-                  </template>
-                  <template v-else-if="column.formatter == 'ingress-hosts'">
-                    <ingress-hosts :row="row" :classes="column.classes"></ingress-hosts>
-                  </template>
-                  <template v-else-if="column.formatter == 'ingress-load-balancers'">
-                    <ingress-load-balancers :row="row" :classes="column.classes"></ingress-load-balancers>
-                  </template>
-                </template>
-              </div>
-            </optional-link>
-          </div>
-        </template>
-        <template v-else>
-          <div class="mt-8 flex justify-center">
-            <spinner></spinner>
-          </div>
-        </template>
+    </div>
+
+    <div ref="parentRef" :style="{contain: 'strict', overflow: 'auto', width: '100%', height: '85vh'}"
+      class="text-left divide-y divide-gray-200 dark:divide-zinc-700 dark:bg-zinc-900"> <!-- table -->
+
+      <div :style="{ height: `${virtualizer.getTotalSize()}px`, position: 'relative', width: '100%' }"
+        class="text-sm text-gray-700 dark:text-gray-300 dark:divide-zinc-700"> <!-- body -->
+      
+        <div v-if="!loading && rows.length == 0" class="justify-center w-full flex py-2">
+          <spinner></spinner>
+        </div>
+
+        <div v-for="row in virtualizer.getVirtualItems()" 
+            :key="row.key + '-' + updateKey"
+            :data-index="row.index"
+            :ref="measureElement"
+            :style="{ position: 'absolute', top: `${row.start}px`,  width: '100%' }" >
+
+            <vue-table-row :row="rows[row.index]" :vrow="row" :columns="columns"></vue-table-row>
+        </div>
       </div>
     </div>
+
   </div>
+
 </template>
 
 <script type="module">
-import { ref, watch, computed, onMounted, onBeforeUnmount } from 'vue'
-import { useVirtualList } from '@@vueuse/core'
+import { ref, watch, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { useVirtualizer } from '@@tanstack/vue-virtual'
 
 let setup = (props, ctx) => {
+  const parentRef = ref(null);
   const sorting = ref([]);
   const updateKey = ref(0);
   const timer = ref('');
   
   const rows = ref([]);
-  const { list, containerProps, wrapperProps } = useVirtualList(rows, { itemHeight: 36 });
+
+  let virtualizerOptions = computed(() => {
+    return {
+      count: rows.value.length,
+      estimateSize: () => 40,
+      overscan: 20,
+      getScrollElement: () => parentRef.value,
+    }
+  })
+
+  let virtualizer = useVirtualizer(virtualizerOptions);
+
+  const measureElement = (el) => {
+    nextTick(() => {
+      if (!el) return;
+      virtualizer.value.measureElement(el);
+    });
+  };
   
   let cancelAutoUpdate = () => {
     clearInterval(timer.value);
@@ -171,7 +156,7 @@ let setup = (props, ctx) => {
   });
   
   return {
-    sorting, timer, updateKey, list, rows, containerProps, wrapperProps,
+    sorting, timer, updateKey, rows, virtualizerOptions, virtualizer, measureElement, parentRef,
     cancelAutoUpdate, onSelectSort, updateTable, reRender
   }
 }
@@ -180,30 +165,6 @@ components["vue-table"] = { template: "#vue-table", props: ['data', 'columns', '
 </script>
 
 <script>
-function getSortFn(sorter = 'textCS'){
-  if (typeof sorter === 'function'){
-    return sorter
-  }
-  
-  let compare = text;
-  if (sorter === 'an'){
-    compare = alphanumeric;
-  }
-  if (sorter === 'anCS'){
-    compare = alphanumericCaseSensitive
-  }
-  if (sorter === 'textCS'){
-    compare = textCaseSensitive
-  }
-  if (sorter === 'datetime'){
-    compare = datetime
-  }
-  if (sorter === 'number'){
-    compare = number  
-  }
-  return compare;
-}
-
 function sortRows(sorting, columns, rows){  
   if (!rows.length || !sorting?.length) {
     return rows
@@ -233,6 +194,37 @@ function sortRows(sorting, columns, rows){
   return sortData(rows, availableSorting, columnInfos)
 }
 
+function filterRows(rows, columns, namespaces, search){
+  if ((search === undefined || search?.length === 0) && (namespaces === undefined || namespaces?.length === 0)) return;
+  
+  const filterColumns = columns.filter(x => (x.canFilter ?? true))
+  let nsColumn = columns.filter(x => x.header === 'Namespace')[0]
+  let tokens = [];
+  if (search?.length > 0){
+    tokens = search.trim().split(' ')
+  }
+  
+  rows.forEach(row => {
+    if (namespaces.length){
+      let val = nsColumn.accessor(row);
+      row.nsFiltered = !namespaces.includes(val);
+    }
+    
+    if (tokens.length){
+      let values = filterColumns.map(fc => {
+         let val = fc.accessor(row);
+         
+         if (typeof val === 'object'){
+           return JSON.stringify(val)
+         }
+         return '' + val
+      })
+      
+      row.filtered = !values.some(x => tokens.every(y => x.includes(y)))
+    }
+  });
+}
+
 function sortData(rows, sorting, columnInfos){
   const sortedData = [...rows]
 
@@ -259,6 +251,30 @@ function sortData(rows, sorting, columnInfos){
   })
 
   return sortedData
+}
+
+function getSortFn(sorter = 'textCS'){
+  if (typeof sorter === 'function'){
+    return sorter
+  }
+  
+  let compare = text;
+  if (sorter === 'an'){
+    compare = alphanumeric;
+  }
+  if (sorter === 'anCS'){
+    compare = alphanumericCaseSensitive
+  }
+  if (sorter === 'textCS'){
+    compare = textCaseSensitive
+  }
+  if (sorter === 'datetime'){
+    compare = datetime
+  }
+  if (sorter === 'number'){
+    compare = number  
+  }
+  return compare;
 }
 
 function number(a, b) {
@@ -358,36 +374,5 @@ function compareAlphanumeric(aStr, bStr) {
   }
 
   return a.length - b.length
-}
-
-function filterRows(rows, columns, namespaces, search){
-  if ((search === undefined || search?.length === 0) && (namespaces === undefined || namespaces?.length === 0)) return;
-  
-  const filterColumns = columns.filter(x => (x.canFilter ?? true))
-  let nsColumn = columns.filter(x => x.header === 'Namespace')[0]
-  let tokens = [];
-  if (search?.length > 0){
-    tokens = search.trim().split(' ')
-  }
-  
-  rows.forEach(row => {
-    if (namespaces.length){
-      let val = nsColumn.accessor(row);
-      row.nsFiltered = !namespaces.includes(val);
-    }
-    
-    if (tokens.length){
-      let values = filterColumns.map(fc => {
-         let val = fc.accessor(row);
-         
-         if (typeof val === 'object'){
-           return JSON.stringify(val)
-         }
-         return '' + val
-      })
-      
-      row.filtered = !values.some(x => tokens.every(y => x.includes(y)))
-    }
-  });
 }
 </script>
