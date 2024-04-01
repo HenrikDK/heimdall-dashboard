@@ -1,5 +1,5 @@
-﻿<template id="scale-btn">
-  <div class="flex px-2 ms-4 rounded-lg items-center justify-center border cursor-pointer
+﻿<template id="scaler">
+  <div @@click="isOpen = true" class="flex px-2 ms-4 rounded-lg items-center justify-center border cursor-pointer
       border-gray-300 bg-white fill-gray-300
       hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
       dark:border-white/[.4] dark:text-white/[.6] 
@@ -10,8 +10,24 @@
     </svg>
     Scale
   </div>
+  <modal :open="isOpen" @@modal-close="isOpen = false" @@submit="submitHandler" name="Scale workload">
+    <template #header><div class="">Scale replica set<div></template>
+    <template #content>Custom content</template>
+    <template #footer>Custom content</template>
+  </modal>
 </template>
 
-<script>
-components["scale-btn"] = { template: "#scale-btn", props:[] };
+<script type="module">
+import { ref } from 'vue'
+
+let setup = (props, ctx) => {
+  const isOpen = ref(false);
+  
+  const submitHandler = ()=> {
+    //here you do whatever
+  }
+  
+  return {isOpen, submitHandler}
+}
+components["scaler"] = { template: "#scaler", props:['item'], setup };
 </script>
