@@ -51,7 +51,9 @@
               , {{ item?.status?.readyReplicas - item?.status?.availableReplicas }} unavailable
             </div>
           </div>
-          <scale-btn></scale-btn>
+          <template v-if="config.canScalePods">
+            <scale-btn></scale-btn>
+          </template>
         </div>
       </div>
       <div v-if="item?.spec?.selector" class="flex mb-2">
@@ -152,6 +154,6 @@ let setup = (props, ctx) => {
   }
 }
 
-components["workload-details"] = { template: "#workload-details", props: ['namespaces', 'search', 'filters'], setup };    
+components["workload-details"] = { template: "#workload-details", props: ['config', 'namespaces', 'search', 'filters'], setup };    
 routes.push({path:'/namespaces/:namespace/workloads/:name/:type', name:'workload-details', component: components["workload-details"]})    
 </script>
