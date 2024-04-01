@@ -1,13 +1,13 @@
 ﻿<template id="cluster">
   <div class="pl-2 pr-4 w-100">
 
-    <div class="flex my-2 items-center">
+    <div v-if="config.metrics" class="flex my-2 items-center">
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Cluster</span>
     </div>
 
     <br/>
         
-    <div class="flex justify-between mb-4 mt-1">
+    <div v-if="config.metrics" class="flex justify-between mb-4 mt-1">
       <div class="wide-graph">
         <v-chart :option="charts.cluster.performance" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
       </div>
@@ -220,7 +220,7 @@ let setup = (props, ctx) => {
   };
   
   let updateMetrics = async () => {
-    if (props.nodes.length > 0)
+    if (props.nodes.length > 0 && config.metrics)
     {
       var host = window.location.origin;
       streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'kube-memory-stats', { nodes: props.nodes }), j => metrics.value.kubeMemory = j.data.result, connections.value);
@@ -291,6 +291,6 @@ let setup = (props, ctx) => {
   }
 }
 
-components["cluster"] = {template: "#cluster", props: ['namespaces', 'nodes'], setup};
+components["cluster"] = {template: "#cluster", props: ['config', 'namespaces', 'nodes'], setup};
 routes.push({path:'/', name:'cluster',  component: components["cluster"]})
 </script>

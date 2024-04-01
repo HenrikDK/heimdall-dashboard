@@ -12,6 +12,7 @@ public class ApiController : ControllerBase
     private readonly Lazy<bool> _canRestartPod;
     private readonly Lazy<bool> _canScalePods;
     private readonly Lazy<string> _filters;
+    private readonly Lazy<bool> _metrics;
 
     public ApiController(IConfiguration configuration, ILogger<ApiController> logger)
     {
@@ -19,6 +20,7 @@ public class ApiController : ControllerBase
         _canRestartPod = new Lazy<bool>(() => configuration.GetValue("can-restart-pod", false));
         _canScalePods = new Lazy<bool>(() => configuration.GetValue("can-scale-pods", false));
         _filters = new Lazy<string>(() => configuration.GetValue("filters", ""));
+        _metrics = new Lazy<bool>(() => configuration.GetValue("metrics", true));
     }
 
     [HttpDelete("api/namespaces/{nameSpace}/pods/{name}")]
@@ -92,7 +94,8 @@ public class ApiController : ControllerBase
         return Ok(new {
             CanRestartPod = _canRestartPod.Value,
             CanScalePods = _canScalePods.Value,
-            Filters = _filters.Value
+            Filters = _filters.Value,
+            Metrics = _metrics.Value
         });
     }
 }

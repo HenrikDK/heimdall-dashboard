@@ -1,4 +1,4 @@
-<template id="pod-details">
+﻿<template id="pod-details">
   <div class="pl-2 pr-4 max-w-5xl mx-auto">
     
   <br/>
@@ -16,7 +16,7 @@
     </div>
   </div>
     
-  <div class="flex justify-around mb-4 mt-4">
+  <div v-if="metrics.config" class="flex justify-around mb-4 mt-4">
     <div class="wide-details-graph">
       <v-chart :option="charts.podCpu" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
     </div>
@@ -334,11 +334,13 @@ let setup = (props, ctx) => {
     let namespace = route.params.namespace;
     let options = { pods: name, namespace: namespace };
 
-    streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'memory-usage', options), j => metrics.value.memoryUsage = j.data.result, connections.value);
-    streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'memory-limits', options), j => metrics.value.memoryLimits = j.data.result, connections.value);
+    if (props.config.metrics){
+      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'memory-usage', options), j => metrics.value.memoryUsage = j.data.result, connections.value);
+      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'memory-limits', options), j => metrics.value.memoryLimits = j.data.result, connections.value);
 
-    streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-usage', options), j => metrics.value.cpuUsage = j.data.result, connections.value);
-    streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-limits', options), j => metrics.value.cpuLimits = j.data.result, connections.value);
+      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-usage', options), j => metrics.value.cpuUsage = j.data.result, connections.value);
+      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-limits', options), j => metrics.value.cpuLimits = j.data.result, connections.value);
+    }
       
     streamResult(host + `/k8s/api/v1/namespaces/${namespace}/pods`, name, j => pod.value = j, connections.value);
     streamResults(host + `/k8s/api/v1/namespaces/${namespace}/events`, j => clusterEvents.value = j, connections.value)
