@@ -14,7 +14,7 @@
           :key="virtualRow.key + '-' + updateId"
           :data-index="virtualRow.index"
           :ref="measureElement"
-          :style="{ position: 'absolute', top: 0, left: 0, width: widthStyle, transform: `translateY(${virtualRow.start}px)` }"
+          :style="{ position: 'absolute', top: `${virtualRow.start}px`, left: 0, width: widthStyle }"
           >
 
           <span>{{ logEvents[virtualRow.index] }}</span>
@@ -49,7 +49,6 @@
 
     </div>
   </div>
-
 </template>
 
 <script type="module">
