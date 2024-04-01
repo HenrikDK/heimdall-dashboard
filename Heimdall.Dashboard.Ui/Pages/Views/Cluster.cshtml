@@ -220,7 +220,7 @@ let setup = (props, ctx) => {
   };
   
   let updateMetrics = async () => {
-    if (props.nodes.length > 0 && config.metrics)
+    if (props.nodes.length > 0 && props.config.metrics)
     {
       var host = window.location.origin;
       streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'kube-memory-stats', { nodes: props.nodes }), j => metrics.value.kubeMemory = j.data.result, connections.value);
