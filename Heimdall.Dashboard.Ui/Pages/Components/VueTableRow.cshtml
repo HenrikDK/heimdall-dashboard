@@ -25,7 +25,7 @@
         <pod-status :row="row" :classes="column.classes" ></pod-status>
       </template>
       <template v-else-if="column.formatter == 'object-age'">
-        <object-age :row="row" :classes="column.classes" :key="updateKey"></object-age>
+        <object-age :row="row" :classes="column.classes" :key="updateId"></object-age>
       </template>
       <template v-else-if="column.formatter == 'event-message'">
         <event-message :row="row" :classes="column.classes"></event-message>
@@ -44,5 +44,13 @@
 </template>
 
 <script type="module">
-components["vue-table-row"] = { template: "#vue-table-row", props: ['row', 'columns', 'updateKey', 'vrow']};
+import { inject } from 'vue'
+
+let setup = (props, ctx) => {
+  const updateId = inject('updateKey');
+
+  return { updateId }
+}
+
+components["vue-table-row"] = { template: "#vue-table-row", props: ['row', 'columns', 'vrow'], setup};
 </script>
