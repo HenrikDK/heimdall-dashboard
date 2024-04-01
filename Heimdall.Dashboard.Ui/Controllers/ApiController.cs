@@ -1,6 +1,7 @@
 ﻿using Flurl;
 using Flurl.Http;
 using Heimdall.Dashboard.Ui.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Heimdall.Dashboard.Ui.Controllers;
 
@@ -88,6 +89,7 @@ public class ApiController : ControllerBase
         }
     }
 
+    [AllowAnonymous]
     [HttpGet("api/features")]
     public ActionResult GetFeatures()
     {
