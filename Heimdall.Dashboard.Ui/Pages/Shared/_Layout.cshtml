@@ -156,6 +156,7 @@ const app = createApp({
       return {
           filters: [],
           namespaces: [],
+          config: {},
           search: "",
           logSearch: "",
           nodes: "",
@@ -169,6 +170,10 @@ const app = createApp({
   },
   async mounted() {
       var host = window.location.origin;
+      
+      fetch('api/features')
+        .then(r => r.json())
+        .then(j => this.config = j);
       
       streamResults(host + '/k8s/api/v1/nodes', j => this.clusterNodes = j);
   }
