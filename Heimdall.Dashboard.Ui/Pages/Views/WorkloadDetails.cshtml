@@ -52,7 +52,7 @@
             </div>
           </div>
           <template v-if="config.canScalePods">
-            <scale-btn></scale-btn>
+            <scaler :item="item"></scaler>
           </template>
         </div>
       </div>
@@ -122,7 +122,6 @@ let setup = (props, ctx) => {
     if (!value) return '';
     
     var DT = window.DateTime || luxon.DateTime;
-    var invalid = "";
     const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
     var date = DT.now();
 
