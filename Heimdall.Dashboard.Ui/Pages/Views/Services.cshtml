@@ -17,28 +17,7 @@ let setup = (props, ctx) => {
   const connections = ref([]);
   const sorting = ref([{header:'Name', sort:'desc'}]);
   const clusterServices = ref([]);
-  const services = ref([
-    {   
-      metadata:{name: "user-api", namespace:"petstore", creationTimestamp:'2023-02-11T14:48:00.000Z'},
-      spec:{type: "ClusterIP", ports: [{port:"8080"}]}
-    },
-    {
-      metadata:{name: "store-api", namespace:"petstore", creationTimestamp:'2023-02-13T15:48:00.000Z'},
-      spec:{type: "NodeIP", ports: [{port:"8080"}]}
-    },
-    {
-      metadata:{name: "order-api", namespace:"petstore", creationTimestamp:'2023-02-17T12:18:00.000Z'},
-      spec:{type: "LoadBalancer", ports: [{port:"8080"}]}
-    },
-    {
-      metadata:{name: "management-ui", namespace:"petstore", creationTimestamp:'2023-02-17T12:18:00.000Z'},
-      spec:{type: "ClusterIP", ports: [{port:"8080"}]}
-    },
-    {
-      metadata:{name: "pet-api", namespace:"petstore", creationTimestamp:'2023-02-17T10:18:00.000Z'},
-      spec:{type: "NodeIP", ports: [{port:"8080"}]}
-    }
-  ]);
+  const services = ref([]);
     
   let getKubeDns = (row) => {
     let lines = [];

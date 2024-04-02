@@ -17,10 +17,7 @@ let setup = (props, ctx) => {
   const loading = ref(true);
   const connections = ref([]);
   const clusterEvents = ref([]);
-  const events = ref([{
-    type: "Warning", message:"Some dangerous message", count: 23, lastTimestamp: "2022-10-05T14:48:00.000Z",
-    involvedObject: { namespace: "test", kind: "lobster", name: "thing" }
-  }]);
+  const events = ref([]);
   
   let updateEvents = async () => {
     if (!clusterEvents.value) return;

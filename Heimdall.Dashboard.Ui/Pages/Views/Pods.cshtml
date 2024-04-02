@@ -17,34 +17,7 @@ let setup = (props, ctx) => {
   const connections = ref([]);
   const sorting = ref([{header:'Name', sort:'asc'}]);
   const clusterPods = ref([]);
-  const pods = ref([
-    {
-      metadata: { name: "flux-something", namespace: "monitoring", creationTimestamp: "2023-01-05T14:48:00.000Z" },
-      status: { phase: 'Running', 
-      containerStatuses: [{ restartCount: 2, state: {running: {}}}], 
-      initContainerStatuses: [{ restartCount: 0, state: {terminated: {}}}] }
-    },
-    {
-      metadata: { name: "flux-something", namespace: "flux-system", creationTimestamp: "2023-02-05T14:48:00.000Z" },
-      status: { phase: 'Running', 
-      containerStatuses: [{ restartCount: 0, state: {running: {}}}] }
-    },
-    {
-      metadata: { name: "kube-controller", namespace: "default", creationTimestamp: "2023-02-12T14:48:00.000Z"}, 
-      status: { phase: 'Running', 
-      containerStatuses: [{ restartCount: 3, state: {running: {}}}] }
-    },
-    {
-      metadata: { name: "cert-manager", namespace: "ingress", creationTimestamp: "2023-02-11T14:48:00.000Z"},
-      status: { phase: 'Running', 
-      containerStatuses: [{ restartCount: 0, state: {terminated: {}}}] }
-     },
-     { 
-       metadata: { name: "pod-manager", namespace: "kube-system", creationTimestamp: "2023-02-10T14:48:00.000Z"},
-       status: { phase: 'Running', 
-       containerStatuses: [{ restartCount: 3, state: {running: {}}}, { restartCount: 0, state: {terminated: {}}}] }
-     }
-  ]);
+  const pods = ref([]);
     
   let getRestarts = (row) => {
     let con = 0;

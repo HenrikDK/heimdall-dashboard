@@ -21,11 +21,7 @@ let setup = (props, ctx) => {
   const clusterJobs = ref([]);
   const clusterStatefulSets = ref([]);
   
-  const workloads = ref([{
-    kind:"Deployment", pods: "",
-    metadata:{ name:"some-service-thingy", namespace: "service-ns", creationTimestamp: "2023-02-11T14:48:00.000Z" },
-    status:{ replicas: 2, readyReplicas: 1, conditions: [{type:'Available'}, {type:'Progressing'}] }
-  }]);
+  const workloads = ref([]);
     
   const sorting = ref([{ id:"name", sort: "asc" }, { id:"namespace", sort: "desc" }]);
   const columns = ref([
