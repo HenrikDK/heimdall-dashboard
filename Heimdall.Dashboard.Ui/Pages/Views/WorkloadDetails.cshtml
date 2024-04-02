@@ -85,12 +85,15 @@
         <div class="px-2 py-1 w-1/4">Conditions</div>
         <div class="flex w-3/4 flex-wrap truncate">
           <template v-for="s in item?.status?.conditions">
-            <div v-if="s.status === 'True'"
-                 class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden"
-            >{{s.type}}</div>
-            <div v-else
-                 class="text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-zinc-900 rounded py-1 px-2 mr-2 mb-2 overflow-hidden"
-            >{{s.type}}</div>
+            <div v-if="s.status === 'True'" 
+              class="rounded py-1 px-2 mr-2 mb-2 overflow-hidden"
+              :class="s.type === 'Available' ? 'border border-green-500 text-green-500' : 'border border-blue-500 text-blue-500'"
+              >
+              {{s.type}}
+            </div>
+            <div v-else class="text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-zinc-900 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">
+              {{s.type}}
+            </div>
           </template>
         </div>
       </div>
