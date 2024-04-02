@@ -1,20 +1,29 @@
 ﻿<template id="multiselect">
-  <div class="relative" aria-label="Select Environment">
-    <button @@click="isOpen = !isOpen" type="button" @@focusout="handleFocusOut"
+  <div ref="target"  class="relative" aria-label="Select Environment">
+    <button @@click="isOpen = !isOpen" type="button"
       class="h-9 w-full text-gray-200 items-center flex justify-end box-border cursor-pointer border border-white/[.4] outline-0 rounded 
           bg-brand dark:bg-zinc-900 text-white/[.6] leading-snug outline-none focus:border-white">
-
-      <!-- Label -->
+      
+      <template v-if="values.length > 0">
+        <input type="text" ref="input" v-model="search" @@keyUp="handleKeypress"
+               class="bg-transparent w-full h-8 ml-3 outline-none text-gray-200 placeholder-white/[.6]"
+               :placeholder="placeholder"
+          :aria-expanded="isOpen"
+          role="combobox"
+        />
+      </template>
+      
+      <!-- Label 
       <template v-if="values.length > 0 && selected.length > 0">
         <div class="flex items-center h-9 absolute left-0 top-0 bg-transparent leading-snug pl-3.5">
-          Selected ({{selected.length}})
+          {{selected.length}} Selected 
         </div>
       </template>
       <template v-if="values.length > 0 && selected.length === 0">
         <div class="flex items-center h-9 absolute left-0 top-0 bg-transparent leading-snug pl-3.5">
           Select namespaces
         </div>
-      </template>
+      </template> -->
       
       <!-- Spinner -->
       <template v-if="values.length === 0">
@@ -30,7 +39,7 @@
       <!-- Clear -->
       <template v-if="values.length > 0 && selected.length > 0">
         <span aria-hidden="true" tabindex="0" role="button" data-clear aria-roledescription="❎" @@click="handleClear"
-              class="pr-4 relative z-10 opacity-40 text-white transition duration-300 flex-shrink-0 flex-grow-0 flex hover:opacity-80">
+              class="mr-1 relative z-10 opacity-40 text-white transition duration-300 flex-shrink-0 flex-grow-0 flex hover:opacity-80">
           <span class="w-6 h-6 py-px box-content inline-block">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -57,8 +66,8 @@
        bg-white flex flex-col rounded, dark:bg-zinc-900">
       
       <ul class="flex flex-col p-0 m-0 list-none" role="listbox">
-        <template v-if="values.length > 0">
-          <li v-for="v in values" @@click="handleOptionClick(v)" role="option" :aria-selected="selected.includes(v)" :data-ns="v"
+        <template v-if="items.length > 0">
+          <li v-for="v in items" @@click="handleOptionClick(v)" role="option" :aria-selected="selected.includes(v)" :data-ns="v"
               class="py-1 px-1 flex aria-selected:font-medium aria-selected:text-black dark:aria-selected:text-white
                 bg-white text-gray-600 hover:bg-blue-200 hover:text-blue-600
                 dark:bg-zinc-900 dark:text-gray-400 dark:hover:text-white dark:hover:bg-zinc-700/[.9]">
@@ -84,13 +93,24 @@
 </template>
 
 <script type="module">
-import {ref, onMounted} from 'vue';
+import {ref, onMounted, computed} from 'vue';
+import { onClickOutside } from '@@vueuse/core'
 
 let setup = (props, ctx) => {
-  
   const noOptions = ref(false);
   const isOpen = ref(false);
   const selected = ref([]);
+  const search = ref('');
+  const target = ref(null)
+  
+  let items = computed(() => {
+    if (search.value.length > 0){
+      return props.values.filter(x => x.includes(search.value));
+    }
+    return props.values;
+  })
+  
+  let placeholder = computed(() => selected.value.length > 0 ? `${selected.value.length} Selected` : 'Select namespaces')
   
   let setExclusive = (e) => {
     selected.value = [e]
@@ -99,16 +119,24 @@ let setup = (props, ctx) => {
   let handleClear = (e) => {
     selected.value = []
     isOpen.value = false;
+    search.value = '';
     ctx.emit('update:modelValue', selected.value)
     e.stopPropagation();
   }
-  let handleFocusOut = (e) => {
-    if (e.relatedTarget && e.relatedTarget.closest('[data-ns]')) {
-      return
-    }
+  
+  let focusOut = () => {
+    if (!isOpen.value && search.value.length === 0) return;
     
     isOpen.value = false;
-    ctx.emit('update:modelValue', selected.value)
+    search.value = '';
+  }
+  
+  onClickOutside(target, focusOut)
+  
+  let handleKeypress = (e) => {
+    if(e.key === 'Escape'){
+      search.value = '';
+    }
   }
   
   let handleOptionClick = (option) => {
@@ -130,8 +158,8 @@ let setup = (props, ctx) => {
     eventBus.on(setExclusive);
   })
   
-  return { noOptions, isOpen, selected,
-    setExclusive, handleClear, handleFocusOut, handleOptionClick}
+  return { noOptions, isOpen, selected, search, placeholder, target, items, 
+    setExclusive, handleClear, handleOptionClick, handleKeypress}
 }
 
 components["multiselect"] = {template: "#multiselect", props: ['values'], emits: ['update:modelValue'], setup};
