@@ -54,8 +54,8 @@ public class ApiController : ControllerBase
         }
     }
 
-    [HttpPut("api/namespaces/{nameSpace}/replicaset/{name}/scale/{count:int}")]
-    public async Task<ActionResult> ScalePod(string nameSpace, string name, int count)
+    [HttpPut("api/namespaces/{nameSpace}/deployments/{name}/scale/{count:int}")]
+    public async Task<ActionResult> ScaleDeploymentPods(string nameSpace, string name, int count)
     {
         if (!_canScalePods.Value)
         {
@@ -72,22 +72,60 @@ public class ApiController : ControllerBase
             var server = K8sClient.Server;
             var user = "unknown";
             
-            var result = await server.AppendPathSegment($"/api/v1/namespaces/{nameSpace}/replicasets/{name}/scale")
+            var result = await server.AppendPathSegment($"/apis/apps/v1/namespaces/{nameSpace}/deployments/{name}/scale")
                 .WithOAuthBearerToken(K8sClient.AccessToken)
+                .WithHeader("Content-type", "application/merge-patch+json")
                 .PatchJsonAsync(new { spec = new { replicas = count } })
                 .ReceiveString();
             
-            _logger.LogWarning($"User {user} scaled replicate set {name} in namespace {nameSpace} to {count}");
+            _logger.LogWarning($"User {user} scaled deployment {name} in namespace {nameSpace} to {count}");
             
             return Ok(result);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Exception restarting pod");
+            _logger.LogError(e, "Exception scaling deployment");
             
             return StatusCode(502, e.Message);
         }
     }
+    
+    [HttpPut("api/namespaces/{nameSpace}/statefulsets/{name}/scale/{count:int}")]
+    public async Task<ActionResult> ScaleStatefulSetPods(string nameSpace, string name, int count)
+    {
+        if (!_canScalePods.Value)
+        {
+            return BadRequest("Operation not allowed");
+        }
+
+        if (count > 10)
+        {
+            return BadRequest("Operation not allowed, count too high!");
+        }
+
+        try
+        {
+            var server = K8sClient.Server;
+            var user = "unknown";
+
+            var result = await server.AppendPathSegment($"/apis/apps/v1/namespaces/{nameSpace}/statefulsets/{name}/scale")
+                .WithOAuthBearerToken(K8sClient.AccessToken)
+                .WithHeader("Content-type", "application/merge-patch+json")
+                .PatchJsonAsync(new { spec = new { replicas = count } })
+                .ReceiveString();
+            
+            _logger.LogWarning($"User {user} scaled stateful set {name} in namespace {nameSpace} to {count}");
+            
+            return Ok(result);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Exception scaling stateful set");
+            
+            return StatusCode(502, e.Message);
+        }
+    }
+    
 
     [AllowAnonymous]
     [HttpGet("api/features")]
