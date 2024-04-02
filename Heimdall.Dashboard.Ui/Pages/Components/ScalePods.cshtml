@@ -10,8 +10,12 @@
     </svg>
     Scale
   </div>
-  <modal :open="isOpen" classes="w-1/3 p-8" @@close="isOpen = false" name="Scale workload">
-    <template #content>
+  <div v-if="isOpen" class="fixed z-[9998] top-0 left-0 w-full h-full bg-white/[0.4] dark:bg-black/[0.4] backdrop-blur-[2px]">
+    <div class="shadow-lg rounded-lg mt-[150px] mx-auto w-1/3 p-8
+         bg-white 
+         dark:bg-zinc-800 dark:border-white/[.4] dark:text-white/[.6]" 
+         ref="target">
+  
       <div class="flex text-xl justify-center pb-8">
         <div>Scale {{item.kind}}</div>
         <div class="ps-2 font-bold">{{item.metadata.name}}</div>
@@ -22,41 +26,48 @@
       </div>
       <div class="flex">
         <div class="w-1/3">Desired replicas:</div>
-        <div class="w-2/3"><input :value="desired" @@input="updateValue($event.target.value)" max="10" class="w-12 px-1 rounded border" type="number"/></div>
+        <div class="w-2/3"><input v-model="desired" min="0" max="10" class="w-12 px-1 rounded border" type="number"/></div>
+      </div>
+      <div class="flex font-bold text-red-400 h-6">
+        <div v-if="desired > 10 || desired < 0">Valid interval is between 0 and 10</div>
       </div>
       <div class="flex pt-8">
         <div class="w-2/3"></div>
         <div class="w-1/3 flex">
-          <div @@click="closeModal" 
+          <button @@click="closeModal"
                class="flex px-2 py-2 rounded-lg items-center me-4 justify-center border cursor-pointer
-                border-gray-300 bg-white fill-gray-300
+                bg-white border-gray-300 fill-gray-300
                 hover:border-gray-500 hover:bg-gray-100 hover:fill-gray-500
                 dark:border-white/[.4] dark:text-white/[.6] 
                 dark:hover:border-white dark:hover:text-white dark:hover:fill-white
                 dark:bg-zinc-900">
             Close
-          </div>
-          <div @@click="submitHandler"
-               class="flex px-2 py-2 rounded-lg items-center me-4 justify-center border cursor-pointer
+          </button>
+          <button @@click="submitHandler" :disabled="desired < 0 || desired > 10 || desired === item.status?.readyReplicas"
+                  class="flex px-2 py-2 rounded-lg items-center me-4 justify-center border enabled:cursor-pointer
                 border-gray-300 bg-white fill-gray-300
                 hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
+                disabled:hover:border-gray-300 disabled:hover:bg-white disabled:hover:fill-gray-300
                 dark:border-white/[.4] dark:text-white/[.6] 
                 dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:fill-blue-400
+                disabled:dark:hover:border-white/[.4] disabled:dark:hover:bg-zinc-900 disabled:dark:hover:text-white/[.6]
                 dark:bg-zinc-900">
             Scale
-          </div>
+          </button>
         </div>
       </div>
-    </template>
-  </modal>
+    </div>
+  </div>
 </template>
 
 <script type="module">
 import { ref } from 'vue'
+import { onClickOutside, onKeyStroke } from '@@vueuse/core'
 
 let setup = (props, ctx) => {
   let isOpen = ref(false);
   let desired = ref(0);
+  const target = ref(null);
   
   let updateValue = (v) => {
     desired.value = v;
@@ -75,8 +86,11 @@ let setup = (props, ctx) => {
     isOpen.value = false;
     //here you do whatever
   }
-  
-  return {isOpen, desired, updateValue, closeModal, openModal, submitHandler}
+
+  onKeyStroke('Escape', closeModal);
+  onClickOutside(target, closeModal);
+
+  return {isOpen, desired, target, updateValue, closeModal, openModal, submitHandler}
 }
 components["scale-pods"] = { template: "#scale-pods", props:['item'], setup };
 </script>
