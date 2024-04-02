@@ -80,13 +80,21 @@ let setup = (props, ctx) => {
   }
   
   let openModal = () => {
-    desired.value = props.item.status?.readyReplicas ?? 1;
+    desired.value = props.item.status?.replicas ?? 1;
     isOpen.value = true;
   }
   
-  let submitHandler = () => {
+  let submitHandler = async () => {
     isOpen.value = false;
-    //here you do whatever
+    if (props.item.kind === 'Deployment'){
+      fetch(`/api/namespaces/${props.item.metadata.namespace}/deployments/${props.item.metadata.name}/scale/${desired.value}`, { method: 'PUT' })
+        .catch(e => { console.log(e); });
+    }
+    
+    if (props.item.kind === 'StatefulSet'){
+      fetch(`/api/namespaces/${props.item.metadata.namespace}/statefulsets/${props.item.metadata.name}/scale/${desired.value}`, { method: 'PUT' })
+        .catch(e => { console.log(e); });
+    }
   }
 
   onKeyStroke('Escape', closeModal);
