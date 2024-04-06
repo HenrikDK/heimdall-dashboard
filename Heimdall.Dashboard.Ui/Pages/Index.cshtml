@@ -13,7 +13,6 @@
     <partial name="Buttons/Ingress"/>
     <partial name="Buttons/Logs"/>
     <partial name="Buttons/Pods"/>
-    <partial name="Buttons/Restart"/>
     <partial name="Buttons/Services"/>
 
     <partial name="Columns/DeploymentConditions"/>
@@ -29,14 +28,18 @@
     <partial name="Columns/PodStatus"/>
 
     <partial name="Components/LogSearch"/>
+    <partial name="Components/LogControls"/>
+    <partial name="Components/LogViewer"/>
     <partial name="Components/MainMenu"/>
     <partial name="Components/MultiSelect"/>
     <partial name="Components/NavBar"/>
-    <partial name="Components/OptionalLink"/>
+    <partial name="Components/RestartPod"/>
+    <partial name="Components/ScalePods"/>
     <partial name="Components/Search"/>
     <partial name="Components/Spinner"/>
     <partial name="Components/Tooltip"/>
     <partial name="Components/VueTable"/>
+    <partial name="Components/VueTableRow"/>
     
     <partial name="Views/Cluster"/>
     <partial name="Views/Events"/>
@@ -59,6 +62,6 @@
     <main-menu></main-menu>
     
     <main id="content" class="overflow-auto dark:[color-scheme:dark]">
-        <router-view :namespaces="namespaces" :search="search" :log-search="logSearch" :nodes="nodes" :filters="filters"></router-view>
+        <router-view :namespaces="namespaces" :config="config" :search="search" :log-search="logSearch" :nodes="nodes" :filters="filters"></router-view>
     </main>
 </div>

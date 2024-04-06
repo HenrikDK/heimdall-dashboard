@@ -1,4 +1,14 @@
-﻿function streamMetrics(url, cb) {
+﻿function closeConnections(connections){
+    connections.forEach(x => {
+        try {
+            x();
+        } catch (err) {
+            console.error('Unable to close connection', {err});
+        }
+    });
+}
+
+function streamMetrics(url, cb, connections = null) {
     let isApiRequestInProgress = false;
     const handel = setInterval(getMetrics, 30000);
     getMetrics();
@@ -20,6 +30,9 @@
             console.error('No metrics', {err, url});
         }
     }
+    if (connections){
+        connections.push(cancel)
+    }
 
     return cancel;
 
@@ -28,20 +41,40 @@
     }
 }
 
-async function streamLogs(url, cb) {
+async function streamLogs(url, cb, connections = null) {
     const watchUrl = url.replace('http', 'ws');
+    let ending = ''
     const {cancel} = stream(watchUrl, transformer, false);
+    if (connections){
+        connections.push(cancel)
+    }
     return cancel;
 
     function transformer(item) {
         if (!item) return; // This api returns a lot of empty strings
 
-        const message = atob(item);
-        cb(message);
+        let message = atob(item);
+        if (ending.length > 0){
+            message = ending + message;
+        }
+        
+        let lines = message.split('\n');
+        if (!message.endsWith('\n')){
+            ending = lines[lines.length - 1];
+            lines = lines.slice(0, -1);
+        } else{
+            ending = '';
+        }
+        
+        if (lines[lines.length - 1].length === 0){
+            lines = lines.slice(0, -1);
+        }
+        
+        cb(lines);
     }
 }
 
-async function streamResults(url, cb) {
+async function streamResults(url, cb, connections = null) {
     let isCancelled = false;
     let socket = {};
     const results = {};
@@ -53,6 +86,9 @@ async function streamResults(url, cb) {
 
     run();
 
+    if (connections){
+        connections.push(cancel)
+    }
     return cancel;
 
     async function run() {

@@ -1,29 +1,29 @@
 <template id="event-message">
-  <div class="truncate" :class="classes">
+  <div class="truncate" :class="classes" v-once>
     <tooltip :placement="placement" padding="pl-4 py-2">
       <template v-slot:cell>
-        <div class="cursor-pointer" :class="row.data.type == 'Warning' ? 'text-red-500' : ''">{{ formatMessage(row) }}</div>
+        <div class="cursor-pointer" :class="row.type == 'Warning' ? 'text-red-500' : ''">{{ formatMessage(row) }}</div>
       </template>
       
       <template v-slot:tooltip>
         <div class="text-sm w-fit px-1">
           <div class="flex">
-            <div class="w-28">Reason</div><div>{{ row.data?.reason }}</div>
+            <div class="w-28">Reason</div><div>{{ row?.reason }}</div>
           </div>
           <div class="flex">
-            <div class="w-28">System</div><div>{{ row.data?.source?.component }}</div>
+            <div class="w-28">System</div><div>{{ row?.source?.component }}</div>
           </div>
           <div class="flex">
-            <div class="w-28">Source</div><div>{{ row.data?.involvedObject?.kind }}: {{ row.data?.involvedObject?.name }}</div>
+            <div class="w-28">Source</div><div>{{ row?.involvedObject?.kind }}: {{ row?.involvedObject?.name }}</div>
           </div>
           <div class="flex">
-            <div class="w-28">First Seen</div><div>{{ row.data?.firstTimestamp }}</div>
+            <div class="w-28">First Seen</div><div>{{ row?.firstTimestamp }}</div>
           </div>
           <div class="flex">
-            <div class="w-28">Last Seen</div><div>{{ row.data?.lastTimestamp }}</div>
+            <div class="w-28">Last Seen</div><div>{{ row?.lastTimestamp }}</div>
           </div>
           <div class="flex">
-            <div class="w-28">Count</div><div>{{ row.data?.count }}</div>
+            <div class="w-28">Count</div><div>{{ row?.count }}</div>
           </div>
         </div>
       </template>
@@ -35,7 +35,7 @@
 let setup = (props, ctx) => {
   
   let formatMessage = (row) => {
-    let message = row.data.message.replace(/"/g, '\''); 
+    let message = row.message.replace(/"/g, '\''); 
     
     return message;
   }

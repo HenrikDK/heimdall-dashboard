@@ -1,3 +1,4 @@
+using Flurl.Http;
 using Heimdall.Dashboard.Ui.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,6 +47,9 @@ if (!app.Environment.IsDevelopment() || Debugger.IsAttached)
     app.UseHsts();
 }
 
+FlurlHttp.ConfigureClientForUrl(K8sClient.Server)
+    .ConfigureInnerHandler(x => x.ServerCertificateCustomValidationCallback = (_, _, _, _) => true);
+
 var prometheus = app.Configuration.GetValue("prometheus-url", "");
 
 app.UseWebSockets();
@@ -54,7 +58,7 @@ app.UseRouting();
 
 var user = app.Configuration.GetValue("prometheus-user", "");
 var pass = app.Configuration.GetValue("prometheus-password", "");
-var token = string.IsNullOrEmpty(user) ? "" : $"{user}:{pass}".ToBase64();
+var prometheusToken = string.IsNullOrEmpty(user) ? "" : $"{user}:{pass}".ToBase64();
 var mimirOrg = app.Configuration.GetValue("mimir-org-id", "");
 
 app.UseProxies(proxies =>
@@ -67,7 +71,17 @@ app.UseProxies(proxies =>
             var url = context.Request.Path.ToString().Replace("/k8s/", "/");
             var server = K8sClient.Server;
             return $"{server}{url}{qs}";
-        }, builder => builder.WithHttpClientName("K8sClient"))
+        }, options => options.WithHttpClientName("K8sClient")
+            .WithIntercept(async context =>
+            {
+                if (context.Request.Method == "GET")
+                {
+                    return false;
+                }
+                context.Response.StatusCode = 400;
+                await context.Response.WriteAsync("Only reads are proxied!");
+                return true;
+            }))
         .UseWs((context, args) => 
         {
             context.Request.Headers.Add("Authorization", $"Bearer {K8sClient.AccessToken}");
@@ -75,7 +89,18 @@ app.UseProxies(proxies =>
             var url = context.Request.Path.ToString().Replace("/k8s/", "/");
             var server = K8sClient.Server.Replace("https://", "wss://");
             return $"{server}{url}{qs}";
-        }, options => options.WithBeforeConnect((context, wso) =>
+        }, options => options
+            .WithIntercept(async context =>
+            {
+                if (context.Request.Method == "GET")
+                {
+                    return false;
+                }
+                context.Response.StatusCode = 400;
+                await context.Response.WriteAsync("Only reads are proxied!");
+                return true;
+            })
+            .WithBeforeConnect((context, wso) =>
             {
                 context.Request.Headers.Remove("Origin");
                 wso.RemoteCertificateValidationCallback = (sender, certificate, chain, errors) => true; 
@@ -91,9 +116,9 @@ app.UseProxies(proxies =>
     proxies.Map("prometheus/{**rest}",
         proxy => proxy.UseHttp((context, args) =>
         {
-            if (!string.IsNullOrEmpty(token))
+            if (!string.IsNullOrEmpty(prometheusToken))
             {
-                context.Request.Headers.Add("Authorization", $"Basic {token}");
+                context.Request.Headers.Add("Authorization", $"Basic {prometheusToken}");
             }
 
             if (!string.IsNullOrEmpty(mimirOrg))
@@ -107,11 +132,8 @@ app.UseProxies(proxies =>
 });
 
 app.UseAuthorization();
-app.UseEndpoints(x =>
-{
-    x.MapRazorPages();
-    x.MapMetrics();
-    x.MapControllers();
-});
+app.MapControllers();
+app.MapRazorPages();
+app.MapMetrics();
 
 app.Run();

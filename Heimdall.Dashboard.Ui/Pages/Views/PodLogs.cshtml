@@ -1,33 +1,39 @@
 ﻿<template id="pod-logs">
   <div class="pl-2 pr-4 w-100">
-    <div class="flex my-2 items-center">
-      <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Logs</span>
+    <div class="flex my-2 items-center justify-between">
+      <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pod Logs / {{ $route.params.namespace }} / {{ $route.params.name }}</span>
+      
+      <log-controls :events="logEvents" :wrap="wrap" :direction="direction" :json="json" 
+        @@wrap="(w) => wrap = w" @@direction="(d) => direction = d">
+      </log-controls>
     </div>
-        
-    <br/>
     
+    <log-viewer :events="logEvents" :wrap="wrap" :direction="direction"></log-viewer>
   </div>
 </template>
 
 <script type="module">
 import { useRoute } from 'vue-router';
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 
 let setup = (props, ctx) => {
   const route = useRoute();
-  const sort = ref('desc');
-  const logs = ref([]);
+  const connections = ref([]);
+  const json = ref(false);
+  const direction = ref('up');
+  const wrap = ref(true);
+
   const logEvents = ref([]);
 
-  let updateLogs = () => {
-    if (!logEvents.value) return;
+  let updateLogs = (j) => {
+    let result = logEvents.value.concat(j)
     
-    let result = [...logEvents.value];
+    if (result.length > 1000){
+      result = result.slice(-1000)
+    }
     
-    logs.value = result;
+    logEvents.value = result
   }
-  
-  watch(logEvents, updateLogs);
   
   onMounted(async () => {
     var host = window.location.origin;
@@ -36,12 +42,20 @@ let setup = (props, ctx) => {
     let container = route.params.container;
     
     const url = `/k8s/api/v1/namespaces/${namespace}/pods/${name}/log?container=${container}&previous=false&tailLines=1000&follow=true`;
-    streamLogs(host + url, j => logEvents.value.push(j));
+    streamLogs(host + url, updateLogs, connections.value);
+
+    setTimeout(() => {
+      let event = logEvents.value[logEvents.value.length - 1];
+      json.value = event.startsWith('{')
+    }, 300);
+  });
+
+  onUnmounted(async () => {
+    closeConnections(connections.value);
   });
   
   return {
-    sort, logs, logEvents,
-    updateLogs
+    logEvents, updateLogs, direction, wrap, connections, json
   }
 }
 

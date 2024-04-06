@@ -41,14 +41,19 @@
       </div>
       <div v-if="item?.status?.replicas" class="flex mb-2">
         <div class="px-2 py-1 w-1/4">Replicas</div>
-        <div class="py-1 flex">
-          <div v-if="item?.status?.replicas !== undefined">{{ item?.status?.replicas }} desired</div>
-          <div v-if="item?.status?.updatedReplicas !== undefined">, {{ item?.status?.updatedReplicas }} updated</div>
-          <div v-if="item?.status?.readyReplicas !== undefined">, {{ item?.status?.readyReplicas }} total</div>
-          <div v-if="item?.status?.availableReplicas !== undefined">, {{ item?.status?.availableReplicas }} available</div>
-          <div v-if="item?.status?.availableReplicas !== undefined && item?.status?.readyReplicas !== undefined">
-            , {{ item?.status?.readyReplicas - item?.status?.availableReplicas }} unavailable
+        <div class="flex w-3/4">
+          <div class="py-1 flex">
+            <div v-if="item?.status?.replicas !== undefined">{{ item?.status?.replicas }} desired</div>
+            <div v-if="item?.status?.updatedReplicas !== undefined">, {{ item?.status?.updatedReplicas }} updated</div>
+            <div v-if="item?.status?.readyReplicas !== undefined">, {{ item?.status?.readyReplicas }} total</div>
+            <div v-if="item?.status?.availableReplicas !== undefined">, {{ item?.status?.availableReplicas }} available</div>
+            <div v-if="item?.status?.availableReplicas !== undefined && item?.status?.readyReplicas !== undefined">
+              , {{ item?.status?.readyReplicas - item?.status?.availableReplicas }} unavailable
+            </div>
           </div>
+          <template v-if="config.canScalePods">
+            <scale-pods :item="item"></scale-pods>
+          </template>
         </div>
       </div>
       <div v-if="item?.spec?.selector" class="flex mb-2">
@@ -80,12 +85,15 @@
         <div class="px-2 py-1 w-1/4">Conditions</div>
         <div class="flex w-3/4 flex-wrap truncate">
           <template v-for="s in item?.status?.conditions">
-            <div v-if="s.status === 'True'"
-                 class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden"
-            >{{s.type}}</div>
-            <div v-else
-                 class="text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-zinc-900 rounded py-1 px-2 mr-2 mb-2 overflow-hidden"
-            >{{s.type}}</div>
+            <div v-if="s.status === 'True'" 
+              class="rounded py-1 px-2 mr-2 mb-2 overflow-hidden"
+              :class="s.type === 'Available' ? 'border border-green-500 text-green-500' : 'border border-blue-500 text-blue-500'"
+              >
+              {{s.type}}
+            </div>
+            <div v-else class="text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-zinc-900 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">
+              {{s.type}}
+            </div>
           </template>
         </div>
       </div>
@@ -97,11 +105,12 @@
 </template>
 
 <script type="module">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router';
 
 let setup = (props, ctx) => {
   const item = ref({});
+  const connections = ref([]);
   const route = useRoute();
   
   let toLocal = (value) => {
@@ -116,7 +125,6 @@ let setup = (props, ctx) => {
     if (!value) return '';
     
     var DT = window.DateTime || luxon.DateTime;
-    var invalid = "";
     const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
     var date = DT.now();
 
@@ -135,15 +143,19 @@ let setup = (props, ctx) => {
         url = `/k8s/apis/batch/v1/namespaces/${namespace}/${type}s`    
     }
     
-    streamResult(host + url, name, j => item.value = j);
+    streamResult(host + url, name, j => item.value = j, connections.value);
   });
   
+  onUnmounted(async () => {
+    closeConnections(connections.value);
+  });
+
   return { 
-    item,
+    item, connections,
     toLocal, toHuman 
   }
 }
 
-components["workload-details"] = { template: "#workload-details", props: ['namespaces', 'search', 'filters'], setup };    
+components["workload-details"] = { template: "#workload-details", props: ['config', 'namespaces', 'search', 'filters'], setup };    
 routes.push({path:'/namespaces/:namespace/workloads/:name/:type', name:'workload-details', component: components["workload-details"]})    
 </script>

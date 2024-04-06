@@ -1,6 +1,6 @@
 <template id="event-source">
-  <div class="truncate text-blue-500 py-2 px-4" :class="classes">
-    {{ row.data.involvedObject?.kind }}: {{ row.data.involvedObject?.name }}
+  <div class="truncate text-blue-500 py-2 px-4" :class="classes" v-once>
+    {{ row.involvedObject?.kind }}: {{ row.involvedObject?.name }}
   </div>
 </template>
 

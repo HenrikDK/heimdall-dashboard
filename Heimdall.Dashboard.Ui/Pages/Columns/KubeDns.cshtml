@@ -1,5 +1,5 @@
 <template id="kube-dns">
-  <div class="py-2" :class="classes">
+  <div class="py-2" :class="classes" v-once>
     <div v-for="dns in getServices(row)">
       {{ dns }}
     </div>
@@ -10,7 +10,7 @@
 let setup = (props, ctx) => {
   
   let getServices = (row) => {
-    let lines = row.data.spec?.ports?.map(x => row.data.metadata?.name + '.' + row.data.metadata?.namespace + ':' + x.port)
+    let lines = row.spec?.ports?.map(x => row.metadata?.name + '.' + row.metadata?.namespace + ':' + x.port)
     return lines
   }
   

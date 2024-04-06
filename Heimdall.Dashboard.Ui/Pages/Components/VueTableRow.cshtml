@@ -1,0 +1,56 @@
+<template id="vue-table-row">
+  <div class="flex w-full hover:bg-sky-100 dark:hover:bg-zinc-700">
+    <template v-for="column in columns">
+      <template v-if="column.formatter == undefined">
+        <div class="px-4 py-2" :class="column.classes">
+          {{ column.accessor(row) }}
+        </div>
+      </template>
+      <template v-else-if="column.formatter == 'namespace'">
+        <ns-column :row="row" :classes="column.classes"></ns-column>
+      </template>
+      <template v-else-if="column.formatter == 'kube-dns'">
+        <kube-dns :row="row" :classes="column.classes"></kube-dns>
+      </template>
+      <template v-else-if="column.formatter == 'deployment-lights'">
+        <deployment-lights :row="row" :classes="column.classes"></deployment-lights>
+      </template>
+      <template v-else-if="column.formatter == 'deployment-conditions'">
+        <deployment-conditions :row="row" :classes="column.classes"></deployment-conditions>
+      </template>
+      <template v-else-if="column.formatter == 'pod-lights'">
+        <pod-lights :row="row" :classes="column.classes" ></pod-lights>
+      </template>
+      <template v-else-if="column.formatter == 'pod-status'">
+        <pod-status :row="row" :classes="column.classes" ></pod-status>
+      </template>
+      <template v-else-if="column.formatter == 'object-age'">
+        <object-age :row="row" :classes="column.classes" :key="updateId"></object-age>
+      </template>
+      <template v-else-if="column.formatter == 'event-message'">
+        <event-message :row="row" :classes="column.classes"></event-message>
+      </template>
+      <template v-else-if="column.formatter == 'event-source'">
+        <event-source :row="row" :classes="column.classes"></event-source>
+      </template>
+      <template v-else-if="column.formatter == 'ingress-hosts'">
+        <ingress-hosts :row="row" :classes="column.classes"></ingress-hosts>
+      </template>
+      <template v-else-if="column.formatter == 'ingress-load-balancers'">
+        <ingress-load-balancers :row="row" :classes="column.classes"></ingress-load-balancers>
+      </template>
+    </template>
+  </div>
+</template>
+
+<script type="module">
+import { inject } from 'vue'
+
+let setup = (props, ctx) => {
+  const updateId = inject('updateKey');
+
+  return { updateId }
+}
+
+components["vue-table-row"] = { template: "#vue-table-row", props: ['row', 'columns', 'vrow'], setup};
+</script>

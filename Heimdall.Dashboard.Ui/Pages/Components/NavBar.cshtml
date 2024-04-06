@@ -18,15 +18,15 @@
         </div>
         <div class="flex justify-end items-center">
           
-          <div :class="nsVisible() ? '' : 'hidden'"
+          <div :class="nsVisible ? '' : 'hidden'"
                class="mr-3 w-60">
             <multiselect :values="namespaces" @@update:model-value="$emit('select-ns', $event)"></multiselect>
           </div>
-          <div :class="searchVisible() ? '' : 'hidden'"
+          <div :class="searchVisible ? '' : 'hidden'"
                class="mr-3 w-60">
             <search @@update:search="$emit('search', $event)"></search>
           </div>
-          <div :class="logSearchVisible() ? '' : 'hidden'"
+          <div :class="logSearchVisible ? '' : 'hidden'"
                class="mr-3 w-96">
             <log-search @@update:log-search="$emit('log-search', $event)"></log-search>
           </div>
@@ -54,13 +54,13 @@
 <script type="module">
 import { useRoute } from 'vue-router'
 import {useDark, useToggle} from "@@vueuse/core";
-import {ref, onMounted, watch} from 'vue';
+import {ref, onMounted, watch, computed} from 'vue';
 
 let setup = (props, ctx) => {
   const filters = ref([]);
   const cluster = ref([]);
   const namespaces = ref([]);
-  const route = useRoute()
+  const route = useRoute();
   
   const isDark = useDark();
   const toggleDark = useToggle(isDark);
@@ -88,16 +88,16 @@ let setup = (props, ctx) => {
     return value;
   };
   
-  let nsVisible = () => {
+  const nsVisible = computed(() => {
     let visible = true;
     if (route.path.endsWith('/logs'))
       visible = false;
     if (route.path.endsWith('/details'))
       visible = false;
     return visible
-  }
+  })
   
-  let searchVisible = () => {
+  const searchVisible = computed(() => {
     let visible = true;
     if (route.path === '/')
       visible = false;
@@ -106,14 +106,14 @@ let setup = (props, ctx) => {
     if (route.path.endsWith('/details'))
       visible = false;
     return visible
-  }
+  })
   
-  let logSearchVisible = () => {
+  const logSearchVisible = computed(() => {
     let visible = false;
     if (route.path.endsWith('/logs'))
       visible = true;
     return visible
-  }
+  })
   
   watch([filters, cluster], updateList);
   

@@ -1,13 +1,13 @@
 ﻿<template id="cluster">
   <div class="pl-2 pr-4 w-100">
 
-    <div class="flex my-2 items-center">
+    <div v-if="config.metrics" class="flex my-2 items-center">
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Cluster</span>
     </div>
 
     <br/>
         
-    <div class="flex justify-between mb-4 mt-1">
+    <div v-if="config.metrics" class="flex justify-between mb-4 mt-1">
       <div class="wide-graph">
         <v-chart :option="charts.cluster.performance" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
       </div>
@@ -52,12 +52,13 @@
 </template>
 
 <script type="module">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useDark } from "@@vueuse/core";
 
 let setup = (props, ctx) => {
   const isDark = useDark();
   const initOptions = ref({ renderer: "svg" });
+  const connections = ref([]);
   const cluster = ref({
     pods: null,
     deployments: null,
@@ -219,14 +220,14 @@ let setup = (props, ctx) => {
   };
   
   let updateMetrics = async () => {
-    if (props.nodes.length > 0)
+    if (props.nodes.length > 0 && props.config.metrics)
     {
       var host = window.location.origin;
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'kube-memory-stats', { nodes: props.nodes }), j => metrics.value.kubeMemory = j.data.result);
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'container-memory', { nodes: props.nodes }), j => metrics.value.containerMemory = j.data.result);
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'node-memory-stats', { nodes: props.nodes }), j => metrics.value.nodeMemory = j.data.result);
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'kube-cpu-stats', { nodes: props.nodes }), j => metrics.value.kubeCpu = j.data.result);
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'node-cpu-stats', { nodes: props.nodes }), j => metrics.value.nodeCpu = j.data.result);
+      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'kube-memory-stats', { nodes: props.nodes }), j => metrics.value.kubeMemory = j.data.result, connections.value);
+      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'container-memory', { nodes: props.nodes }), j => metrics.value.containerMemory = j.data.result, connections.value);
+      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'node-memory-stats', { nodes: props.nodes }), j => metrics.value.nodeMemory = j.data.result, connections.value);
+      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'kube-cpu-stats', { nodes: props.nodes }), j => metrics.value.kubeCpu = j.data.result, connections.value);
+      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'node-cpu-stats', { nodes: props.nodes }), j => metrics.value.nodeCpu = j.data.result, connections.value);
     }
   }
   
@@ -267,17 +268,21 @@ let setup = (props, ctx) => {
     
     updateMetrics();
     
-    streamResults(host + '/k8s/api/v1/pods', j => cluster.value.pods = j);
-    streamResults(host + '/k8s/apis/apps/v1/deployments', j => cluster.value.deployments = j);
-    streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => cluster.value.daemonSets = j);
-    streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => cluster.value.statefulSets = j);
-    streamResults(host + '/k8s/apis/apps/v1/replicasets', j => cluster.value.replicaSets = j);
-    streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => cluster.value.cronJobs = j);
-    streamResults(host + '/k8s/apis/batch/v1/jobs', j => cluster.value.jobs = j);          
+    streamResults(host + '/k8s/api/v1/pods', j => cluster.value.pods = j, connections.value);
+    streamResults(host + '/k8s/apis/apps/v1/deployments', j => cluster.value.deployments = j, connections.value);
+    streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => cluster.value.daemonSets = j, connections.value);
+    streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => cluster.value.statefulSets = j, connections.value);
+    streamResults(host + '/k8s/apis/apps/v1/replicasets', j => cluster.value.replicaSets = j, connections.value);
+    streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => cluster.value.cronJobs = j, connections.value);
+    streamResults(host + '/k8s/apis/batch/v1/jobs', j => cluster.value.jobs = j, connections.value);
+  });
+
+  onUnmounted(async () => {
+    closeConnections(connections.value);
   });
     
   return {
-    isDark, initOptions, cluster, metrics, charts,
+    isDark, initOptions, cluster, metrics, charts, connections,
     filterNamespace, 
     updateClusterPods, updateClusterDeployments, updateClusterJobs, updateClusterCronJobs, 
     updateClusterStatefulSets, updateClusterReplicaSets, updateClusterDaemonSets,
@@ -286,6 +291,6 @@ let setup = (props, ctx) => {
   }
 }
 
-components["cluster"] = {template: "#cluster", props: ['namespaces', 'nodes'], setup};
+components["cluster"] = {template: "#cluster", props: ['config', 'namespaces', 'nodes'], setup};
 routes.push({path:'/', name:'cluster',  component: components["cluster"]})
 </script>

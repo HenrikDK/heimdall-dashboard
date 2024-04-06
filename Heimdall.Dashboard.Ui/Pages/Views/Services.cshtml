@@ -10,37 +10,20 @@
 </template>
 
 <script type="module">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 
 let setup = (props, ctx) => {
   const loading = ref(true);
+  const connections = ref([]);
   const sorting = ref([{header:'Name', sort:'desc'}]);
   const clusterServices = ref([]);
-  const services = ref([
-    {   
-      metadata:{name: "user-api", namespace:"petstore", creationTimestamp:'2023-02-11T14:48:00.000Z'},
-      spec:{type: "ClusterIP", ports: [{port:"8080"}]}
-    },
-    {
-      metadata:{name: "store-api", namespace:"petstore", creationTimestamp:'2023-02-13T15:48:00.000Z'},
-      spec:{type: "NodeIP", ports: [{port:"8080"}]}
-    },
-    {
-      metadata:{name: "order-api", namespace:"petstore", creationTimestamp:'2023-02-17T12:18:00.000Z'},
-      spec:{type: "LoadBalancer", ports: [{port:"8080"}]}
-    },
-    {
-      metadata:{name: "management-ui", namespace:"petstore", creationTimestamp:'2023-02-17T12:18:00.000Z'},
-      spec:{type: "ClusterIP", ports: [{port:"8080"}]}
-    },
-    {
-      metadata:{name: "pet-api", namespace:"petstore", creationTimestamp:'2023-02-17T10:18:00.000Z'},
-      spec:{type: "NodeIP", ports: [{port:"8080"}]}
-    }
-  ]);
+  const services = ref([]);
     
   let getKubeDns = (row) => {
-    let lines = row.spec?.ports.map(x => row.metadata.name + '.' + row.metadata.namespace + ':' + x.port)
+    let lines = [];
+    if (row.spec?.ports){
+      lines = row.spec?.ports?.map(x => row.metadata.name + '.' + row.metadata.namespace + ':' + x.port);
+    }
     return lines.join("\r\n");
   }
     
@@ -73,7 +56,11 @@ let setup = (props, ctx) => {
   
   onMounted(() => {
     var host = window.location.origin;
-    streamResults(host + '/k8s/api/v1/services', j => clusterServices.value = j)
+    streamResults(host + '/k8s/api/v1/services', j => clusterServices.value = j, connections.value)
+  });
+
+  onUnmounted(async () => {
+    closeConnections(connections.value);
   });
   
   return { loading, sorting, columns, clusterServices, services, getKubeDns, updateServices }

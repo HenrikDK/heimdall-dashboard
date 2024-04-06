@@ -3,18 +3,20 @@
     
   <br/>
 
-  <div class="flex mb-16 justify-between items-center text-gray-500 dark:text-gray-300 font-light sans">
+  <div class="flex mb-8 text-2xl justify-between items-center text-gray-500 dark:text-gray-300 font-light sans">
     <div class="text-md">Pod / {{pod?.metadata?.namespace }} / {{ pod?.metadata?.name }}</div>
-    <div class="flex text-xl">
-      <restart-btn></restart-btn>
+    <div class="flex">
+      <template v-if="config.canRestartPod && pod">
+        <restart-pod :pod="pod"></restart-pod>  
+      </template>
       <template v-if="pod?.spec?.containers.length == 1">
-        <logs-btn :container="pod.spec.containers[0].name" ></logs-btn>
+        <logs-btn :container="pod.spec.containers[0].name"></logs-btn>
       </template>
       <div v-else class="flex px-2 w-28"></div>
     </div>
   </div>
     
-  <div class="flex justify-around mb-4 mt-4">
+  <div v-if="metrics.config" class="flex justify-around mb-4 mt-4">
     <div class="wide-details-graph">
       <v-chart :option="charts.podCpu" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
     </div>
@@ -232,12 +234,12 @@
 <script type="module">
 import { useDark } from "@@vueuse/core";
 import { useRoute } from 'vue-router'
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 
 let setup = (props, ctx) => {
   const isDark = useDark();
   const route = useRoute();
-  
+  const connections = ref([]);
   const events = ref([]);
   const clusterEvents = ref([]);  
   const initOptions = ref({ renderer: "svg" });
@@ -285,7 +287,6 @@ let setup = (props, ctx) => {
     if (!value) return ''
     
     var DT = window.DateTime || luxon.DateTime;
-    var invalid = "";
     const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
     var date = DT.now();
 
@@ -333,23 +334,29 @@ let setup = (props, ctx) => {
     let namespace = route.params.namespace;
     let options = { pods: name, namespace: namespace };
 
-    streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'memory-usage', options), j => metrics.value.memoryUsage = j.data.result);
-    streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'memory-limits', options), j => metrics.value.memoryLimits = j.data.result);
+    if (props.config.metrics){
+      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'memory-usage', options), j => metrics.value.memoryUsage = j.data.result, connections.value);
+      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'memory-limits', options), j => metrics.value.memoryLimits = j.data.result, connections.value);
 
-    streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-usage', options), j => metrics.value.cpuUsage = j.data.result);
-    streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-limits', options), j => metrics.value.cpuLimits = j.data.result);
+      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-usage', options), j => metrics.value.cpuUsage = j.data.result, connections.value);
+      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-limits', options), j => metrics.value.cpuLimits = j.data.result, connections.value);
+    }
       
-    streamResult(host + `/k8s/api/v1/namespaces/${namespace}/pods`, name, j => pod.value = j);
-    streamResults(host + `/k8s/api/v1/namespaces/${namespace}/events`, j => clusterEvents.value = j)
+    streamResult(host + `/k8s/api/v1/namespaces/${namespace}/pods`, name, j => pod.value = j, connections.value);
+    streamResults(host + `/k8s/api/v1/namespaces/${namespace}/events`, j => clusterEvents.value = j, connections.value)
+  });
+
+  onUnmounted(async () => {
+    closeConnections(connections.value);
   });
   
   return {
-      isDark, events, clusterEvents, initOptions, pod, metrics, charts,
+      isDark, events, clusterEvents, initOptions, pod, metrics, charts, connections,
       getContainerStatusObjects, getContainerStatus, toLocal, toHuman,
       updateCpu, updateMemory
   }
 }
 
-components["pod-details"] = {template: "#pod-details", props: ['namespaces', 'filters'], setup};
+components["pod-details"] = {template: "#pod-details", props: ['config', 'namespaces', 'filters'], setup};
 routes.push({path:'/namespaces/:namespace/pods/:name/details', name:'pod-details', component: components["pod-details"]})
 </script>

@@ -10,34 +10,13 @@
 </template>
 
 <script type="module">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 
 let setup = (props, ctx) => {
   const loading = ref(true);
+  const connections = ref([]);
   const clusterIngresses = ref([]);
-  const ingresses = ref([
-    {metadata: {name: "user-api", namespace:"petstore", creationTimestamp: "2023-07-20T17:18:00.000Z" }, 
-      spec:{ ingressClassName:"nginx", 
-      rules:[{ host:"user-api.petstore.dk", 
-        http:{ paths:[{ path:'/', backend:{service:{name:'petstore-user-api', port:{number:8080}}} }]}
-      }]},
-      status:{ loadBalancer:{ingress:[{ip: "192.1.0.1" }]}}
-    },
-    {metadata: {name: "store-api", namespace:"petstore", creationTimestamp: "2023-02-15T14:48:00.000Z" },
-      spec:{ ingressClassName:"nginx",
-      rules:[{ host:"store-api.petstore.dk", 
-        http:{ paths:[{ path:'/', backend:{service:{name:'petstore-store-api', port:{number:8080}}} }]}
-      }]},
-      status:{ loadBalancer:{ingress:[{ip: "192.2.0.1" }]}}
-    },
-    {metadata: {name: "order-api", namespace:"petstore", creationTimestamp: "2023-02-05T14:48:00.000Z" },
-      spec:{ ingressClassName:"nginx",
-      rules:[{ host:"order-api.petstore.dk", 
-        http:{ paths:[{ path:'/', backend:{service:{name:'petstore-order-api', port:{number:8080}}} }]}
-      }]},
-      status:{ loadBalancer:{ingress:[{ip: "192.2.0.1" }]}}
-    }
-  ]);
+  const ingresses = ref([]);
   
   let getLoadBalancers = (row) => {
     if (!row.status?.loadBalancer?.ingress) return '';
@@ -80,10 +59,14 @@ let setup = (props, ctx) => {
   
   onMounted(() => {
     var host = window.location.origin;
-    streamResults(host + '/k8s/apis/networking.k8s.io/v1/ingresses', j => clusterIngresses.value = j)
+    streamResults(host + '/k8s/apis/networking.k8s.io/v1/ingresses', j => clusterIngresses.value = j, connections.value)
+  });
+
+  onUnmounted(async () => {
+    closeConnections(connections.value);
   });
   
-  return { loading, clusterIngresses, ingresses, sorting, columns, getLoadBalancers }
+  return { loading, clusterIngresses, ingresses, sorting, columns, getLoadBalancers, connections }
 }
 
 components["ingresses"] = { template: "#ingresses", props: ['namespaces', 'search', 'filters'], setup };
