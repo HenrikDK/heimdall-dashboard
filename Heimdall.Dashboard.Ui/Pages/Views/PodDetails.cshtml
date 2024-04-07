@@ -16,12 +16,51 @@
     </div>
   </div>
     
-  <div v-if="metrics.config" class="flex justify-around mb-4 mt-4">
-    <div class="wide-details-graph">
-      <v-chart :option="charts.podCpu" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+  <div class="justify-center my-4">
+    <div class="flex">
+      <div class="w-1/4"></div>
+      <div class="flex">
+        <div class="flex px-4 py-1 me-2 rounded-lg items-center justify-center border cursor-pointer 
+        border-gray-300 bg-white fill-gray-300
+        hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
+        dark:border-white/[.4] dark:text-white/[.6] 
+        dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:fill-blue-400
+        dark:bg-zinc-900">
+          CPU
+        </div>
+        <div class="flex px-4 py-1 me-2 rounded-lg items-center justify-center border cursor-pointer 
+        border-gray-300 bg-white fill-gray-300
+        hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
+        dark:border-white/[.4] dark:text-white/[.6] 
+        dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:fill-blue-400
+        dark:bg-zinc-900">
+          Memory
+        </div>
+        <div class="flex px-4 py-1 me-2 rounded-lg items-center justify-center border cursor-pointer 
+        border-gray-300 bg-white fill-gray-300
+        hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
+        dark:border-white/[.4] dark:text-white/[.6] 
+        dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:fill-blue-400
+        dark:bg-zinc-900">
+          Network
+        </div>
+        <div class="flex px-4 py-1 me-2 rounded-lg items-center justify-center border cursor-pointer 
+        border-gray-300 bg-white fill-gray-300
+        hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
+        dark:border-white/[.4] dark:text-white/[.6] 
+        dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:fill-blue-400
+        dark:bg-zinc-900">
+          Filesystem
+        </div>
+      </div>
     </div>
     
+
     <div class="wide-details-graph">
+      <v-chart :option="chartCpu" :theme="isDark ? 'dark' : ''" :init-options="initOptions" :updateOptions="updateOptions"></v-chart>
+    </div>
+    
+    <div v-if="metrics.type == 'mem'" class="wide-details-graph">
       <v-chart :option="charts.podMemory" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
     </div>
   </div>
@@ -242,16 +281,20 @@ let setup = (props, ctx) => {
   const connections = ref([]);
   const events = ref([]);
   const clusterEvents = ref([]);  
+  const updateOptions = ref({replaceMerge: ['xAxis', 'yAxis', 'series']});
   const initOptions = ref({ renderer: "svg" });
   const pod = ref({});
   
   const metrics = ref({
     cpuUsage: null,
-    cpuLimits: null,
-    memoryUsage: null,
-    memoryLimits: null,
+    memUsage: null,
+    fsReads: null,
+    fsWrites: null,
+    netRecv: null,
+    netSent: null
   });
   
+  const chartCpu = ref(historicCpu());
   const charts = ref({
     podCpu: historicCpu(),
     podMemory: historicMemory(),
@@ -295,16 +338,19 @@ let setup = (props, ctx) => {
   }
   
   let updateCpu = () => {
-    if (!metrics.value.cpuUsage || metrics.value.cpuUsage?.length === 0 || !metrics.value.cpuLimits || metrics.value.cpuLimits?.length === 0) return;
-      
-    let capacitySeries = getMetricSeries(metrics.value.cpuLimits);
+    if (!metrics.value.cpuUsage || metrics.value.cpuUsage?.length === 0 ) return;
+    
     let usageSeries = getMetricSeries(metrics.value.cpuUsage);
 
     let time = usageSeries.map(x => luxon.DateTime.fromMillis(x[0] * 1000).toFormat('HH:mm'));
     let usage = usageSeries.map(x => parseFloat(x[1]));
-    let limits = capacitySeries.map(x => parseFloat(x[1]).toFixed(2))
-      
-    charts.value.podCpu = historicCpu(usage, limits, time)
+    
+//    let series = chartCpu.value.series[1]
+//    series.data = usage;
+//    chartCpu.value.series = [chartCpu.value.series[0], series]
+//    chartCpu.value.xAxis.data = time;
+    chartCpu.value = historicCpu(usage, [], time);
+    //charts.value.podCpu = historicCpu(usage, [], time)
   };
   
   let updateMemory = () => {
@@ -325,8 +371,8 @@ let setup = (props, ctx) => {
     events.value = clusterEvents.value.filter(x => x?.involvedObject?.name === name);
   });
   
-  watch(() => [metrics.value.cpuUsage, metrics.value.cpuLimits], updateCpu);
-  watch(() => [metrics.value.memoryUsage, metrics.value.memoryLimits], updateMemory);
+  watch(() => [metrics.value.cpuUsage], updateCpu);
+  watch(() => [metrics.value.memoryUsage], updateMemory);
     
   onMounted(async () => {
     let host = window.location.origin;
@@ -335,13 +381,17 @@ let setup = (props, ctx) => {
     let options = { pods: name, namespace: namespace };
 
     if (props.config.metrics){
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'memory-usage', options), j => metrics.value.memoryUsage = j.data.result, connections.value);
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'memory-limits', options), j => metrics.value.memoryLimits = j.data.result, connections.value);
+      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'fs-reads', options), j => metrics.value.fsReads = j.data.result, connections.value);
+      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'fs-writes', options), j => metrics.value.fsWrites = j.data.result, connections.value);
 
+      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'net-recv', options), j => metrics.value.netRecv = j.data.result, connections.value);
+      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'net-sent', options), j => metrics.value.netSent = j.data.result, connections.value);
+
+      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'mem-usage', options), j => metrics.value.memoryUsage = j.data.result, connections.value);
       streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-usage', options), j => metrics.value.cpuUsage = j.data.result, connections.value);
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-limits', options), j => metrics.value.cpuLimits = j.data.result, connections.value);
     }
-      
+    streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-usage', options), j => metrics.value.cpuUsage = j.data.result, connections.value);
+
     streamResult(host + `/k8s/api/v1/namespaces/${namespace}/pods`, name, j => pod.value = j, connections.value);
     streamResults(host + `/k8s/api/v1/namespaces/${namespace}/events`, j => clusterEvents.value = j, connections.value)
   });
@@ -351,8 +401,8 @@ let setup = (props, ctx) => {
   });
   
   return {
-      isDark, events, clusterEvents, initOptions, pod, metrics, charts, connections,
-      getContainerStatusObjects, getContainerStatus, toLocal, toHuman,
+      isDark, events, clusterEvents, initOptions, pod, metrics, charts, connections, chartCpu, 
+      getContainerStatusObjects, getContainerStatus, toLocal, toHuman, updateOptions,
       updateCpu, updateMemory
   }
 }
