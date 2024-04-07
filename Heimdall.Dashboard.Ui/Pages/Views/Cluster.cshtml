@@ -191,6 +191,7 @@ let setup = (props, ctx) => {
     let usageValue = getMetricLastPoints(metrics.value.nodeMemory);              
     let usagePct = usageValue / capacity * 100;
     let usage = {pct: usagePct.toFixed(2), units: (usageValue / 1024 / 1024 / 1024).toFixed(2) };
+    // todo calculate unit
     charts.value.cluster.memory = current('Memory', 'GiB', usage, requests, limits);
   };
 
