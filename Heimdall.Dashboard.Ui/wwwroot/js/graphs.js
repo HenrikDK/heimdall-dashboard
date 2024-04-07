@@ -752,3 +752,41 @@ function historicMemory(usage = [], limits = [], time = []){
     
     return option;
 }
+
+let renderSortedStackedBarChart = (params, api) => {
+    var start = api.coord([api.value(0), api.value(1 + params.seriesIndex)]);
+    var size = api.size([1, api.value(1)]);
+    var style = api.style();
+    height = size[1];
+    if (params.seriesIndex > 0){
+        height = api.value(1) ? size[1] - size2[1] : size[1];
+    }
+
+    return {
+        type: 'group',
+        children: [
+            {
+                type: 'rect',
+                shape: {
+                    x: start[0] - size[0] * 0.5,
+                    y: start[1],
+                    width: size[0],
+                    height: size[1]
+                },
+                style: {...style,
+                    opacity: 0.2
+                }
+            },
+            {
+                type: 'rect',
+                shape: {
+                    x: start[0] - size[0] * 0.5,
+                    y: start[1],
+                    width: size[0],
+                    height: 3,
+                },
+                style: style,
+            }
+        ]
+    };
+};
