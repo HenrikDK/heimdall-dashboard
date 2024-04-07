@@ -1,366 +1,4 @@
-﻿function nodeMemory(used = 0, available = 1){
-    var nodes_ram = {
-        title: {
-            text: 'NODE RAM USE',
-            subtext: 'Used vs Available',
-            bottom:'5%',
-            textStyle: {
-                fontSize: '16'
-            },
-            subtextStyle: {
-                fontSize: '16',
-            },
-            left: 'center',
-        },
-        tooltip: {
-            show: false,
-            trigger: 'none'
-        },
-        backgroundColor: '',
-        legend: {
-            show: false,
-        },
-        series: [
-            {
-                name: 'Nodes',
-                type: 'pie',
-                top: '-5%',
-                height: '85%',
-                radius: ['55%', '85%'],
-                animationDuration: 300,
-                avoidLabelOverlap: false,
-                label: {
-                    show: true,
-                    position: 'center',
-                    fontSize: '16',
-                    fontWeight: 'bold',
-                    formatter: (s) => { return used + ' / ' + available + '\nGB'}
-                },
-                emphasis: {
-                    show: false,
-                },
-                data: [
-                    { value: used, name: 'Used' },
-                    { value: available, name: 'Available' },
-                ]
-            }
-        ]
-    };
-    
-    return nodes_ram;
-}
-
-function nodeCpu(used = 0, available = 1){
-    var nodes_cpu = {
-        title: {
-            text: 'NODE CPU USE',
-            subtext: 'Used vs Available',
-            bottom:'5%',
-            textStyle: {
-                fontSize: '16'
-            },
-            subtextStyle: {
-                fontSize: '16',
-            },
-            left: 'center',
-        },
-        tooltip: {
-            show: false,
-            trigger: 'none'
-        },
-        backgroundColor: '',
-        legend: {
-            show: false,
-        },
-        series: [
-            {
-                name: 'Nodes',
-                type: 'pie',
-                top: '-5%',
-                height: '85%',
-                radius: ['55%', '85%'],
-                animationDuration: 300,
-                avoidLabelOverlap: false,
-                label: {
-                    show: true,
-                    position: 'center',
-                    fontSize: '16',
-                    fontWeight: 'bold',
-                    formatter: (s) => { return used + ' / ' + available + '\nCores'}
-                },
-                emphasis: {
-                    show: false,
-                },
-                data: [
-                    { value: used, name: 'Used' },
-                    { value: available, name: 'Available' },
-                ]
-            }
-        ]
-    };
-    return nodes_cpu;
-}
-
-function nodeReady(ready = 0, waiting = 1){
-    var nodes_ready = {
-        title: {
-            text: 'NODES',
-            subtext: 'Ready vs All',
-            bottom:'5%',
-            textStyle: {
-                fontSize: '16'
-            },
-            subtextStyle: {
-                fontSize: '16',
-            },
-            left: 'center',
-        },
-        tooltip: {
-            show: false,
-            trigger: 'none'
-        },
-        backgroundColor: '',
-        legend: {
-            show: false,
-        },
-        series: [
-            {
-                name: 'Nodes',
-                type: 'pie',
-                top: '-5%',
-                height: '85%',
-                radius: ['55%', '85%'],
-                animationDuration: 300,
-                avoidLabelOverlap: false,
-                label: {
-                    show: true,
-                    position: 'center',
-                    fontSize: '16',
-                    fontWeight: 'bold',
-                    formatter: (s) => { return  ready + ' / ' + (ready + waiting) + '\nNodes' }
-                },
-                emphasis: {
-                    show: false,
-                },
-                data: [
-                    { value: ready, name: 'Ready' },
-                    { value: 0, name: 'Loading'},
-                    { value: waiting, name: 'Waiting' },
-                ]
-            }
-        ]
-    };
-    return nodes_ready;
-}
-
-function podReady(ready = 0, requested = 1){
-    var pods_ready = {
-        title: {
-            text: 'PODS',
-            subtext: 'Ready vs Requested',
-            bottom:'5%',
-            textStyle: {
-                fontSize: '16'
-            },
-            subtextStyle: {
-                fontSize: '16',
-            },
-            left: 'center',
-        },
-        tooltip: {
-            show: false,
-            trigger: 'none'
-        },
-        backgroundColor: '',
-        legend: {
-            show: false,
-        },
-        series: [
-            {
-                name: 'Nodes',
-                type: 'pie',
-                top: '-5%',
-                height: '85%',
-                radius: ['55%', '85%'],
-                animationDuration: 300,
-                avoidLabelOverlap: false,
-                label: {
-                    show: true,
-                    position: 'center',
-                    fontSize: '16',
-                    fontWeight: 'bold',
-                    formatter: (s) => { return ready + ' / ' + (ready + requested)}
-                },
-                emphasis: {
-                    show: false,
-                },
-                data: [
-                    { value: ready, name: 'Ready' },
-                    { value: 0, name: '' },
-                    { value: requested, name: 'Requested' },
-                ]
-            }
-        ]
-    };
-    return pods_ready;
-}
-
-function podMemory(reserved = 0, available = 1){
-    var pod_memory = {
-        title: {
-            text: 'POD RAM USE',
-            subtext: 'Actual vs Reserved',
-            bottom:'5%',
-            textStyle: {
-                fontSize: '16'
-            },
-            subtextStyle: {
-                fontSize: '16',
-            },
-            left: 'center',
-        },
-        tooltip: {
-            show: false,
-            trigger: 'none'
-        },
-        backgroundColor: '',
-        legend: {
-            show: false,
-        },
-        series: [
-            {
-                name: 'Nodes',
-                type: 'pie',
-                top: '-5%',
-                height: '85%',
-                radius: ['55%', '85%'],
-                animationDuration: 300,
-                avoidLabelOverlap: false,
-                label: {
-                    show: true,
-                    position: 'center',
-                    fontSize: '16',
-                    fontWeight: 'bold',
-                    formatter: (s) => { return reserved + ' / '+ (available + reserved) + '\nGB'}
-                },
-                emphasis: {
-                    show: false,
-                },
-                data: [
-                    { value: reserved, name: 'Reserved' },
-                    { value: available, name: 'Available' },
-                ]
-            }
-        ]
-    };
-    return pod_memory;
-}
-
-function podCpu(used = 0, available = 1){
-    var pod_cpu = {
-        title: {
-            text: 'POD CPU USE',
-            subtext: 'Actual vs Reserved',
-            bottom:'5%',
-            textStyle: {
-                fontSize: '16'
-            },
-            subtextStyle: {
-                fontSize: '16',
-            },
-            left: 'center',
-        },
-        tooltip: {
-            show: false,
-            trigger: 'none'
-        },
-        backgroundColor: '',
-        legend: {
-            show: false,
-        },
-        series: [
-            {
-                name: 'Nodes',
-                type: 'pie',
-                top: '-5%',
-                height: '85%',
-                radius: ['55%', '85%'],
-                animationDuration: 300,
-                avoidLabelOverlap: false,
-                label: {
-                    show: true,
-                    position: 'center',
-                    fontSize: '16',
-                    fontWeight: 'bold',
-                    formatter: (s) => { return used + ' / ' + (available + used) + '\nCores'}
-                },
-                emphasis: {
-                    show: false,
-                },
-                data: [
-                    { value: used, name: 'Used' },
-                    { value: available, name: 'Available' },
-                ]
-            }
-        ]
-    };
-    
-    return pod_cpu
-}
-
-function workloadsReady(ready = 0, waiting = 1){
-    var workloads_ready = {
-        title: {
-            text: 'WORKLOADS',
-            subtext: 'Ready vs Requested',
-            bottom:'5%',
-            textStyle: {
-                fontSize: '16'
-            },
-            subtextStyle: {
-                fontSize: '16',
-            },
-            left: 'center',
-        },
-        tooltip: {
-            show: false,
-            trigger: 'none'
-        },
-        backgroundColor: '',
-        legend: {
-            show: false,
-        },
-        series: [
-            {
-                name: 'Workloads',
-                type: 'pie',
-                top: '-5%',
-                height: '85%',
-                radius: ['55%', '85%'],
-                animationDuration: 300,
-                avoidLabelOverlap: false,
-                label: {
-                    show: true,
-                    position: 'center',
-                    fontSize: '16',
-                    fontWeight: 'bold',
-                    formatter: (s) => { return ready + ' / ' + (ready + waiting) + '\nNodes' }
-                },
-                emphasis: {
-                    show: false,
-                },
-                data: [
-                    { value: ready, name: 'Ready' },
-                    { value: 0, name: 'Loading'},
-                    { value: waiting, name: 'Waiting' },
-                ]
-            }
-        ]
-    };
-    return workloads_ready;
-}
-
-function workload(type = 'Unknown', running = 0, pending = 0){
+﻿function workload(type = 'Unknown', running = 0, pending = 0){
     let data = [];
     let active = false;
     
@@ -753,7 +391,7 @@ function historicMemory(usage = [], limits = [], time = []){
     return option;
 }
 
-let renderSortedStackedBarChart = (params, api) => {
+function renderSortedStackedBarChart(params, api){
     var start = api.coord([api.value(0), api.value(1 + params.seriesIndex)]);
     var size = api.size([1, api.value(1)]);
     var style = api.style();
@@ -790,3 +428,107 @@ let renderSortedStackedBarChart = (params, api) => {
         ]
     };
 };
+
+function getSimpleChart(){
+    let option = {
+        animation: false,
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { 
+            type: 'shadow',
+            shadowStyle:{
+                color: '#a9a9a9',
+                opacity: 0.07
+            }
+            }
+        },
+        xAxis: {
+            type: 'category'
+        },
+        legend: {
+            show: true,
+            selectedMode: false
+        },
+        yAxis: {
+            type: 'value',
+            position: 'left',
+        },
+        grid: {
+            left: '7%',
+            right: '10%',
+            top: '10%',
+            bottom: '7%',
+        },
+        series: []
+    };
+
+    return option;
+}
+
+function updateSimpleChart(options, data = [], series = 1, unit = '', limit = 0, max = 0){
+    options.yAxis['axisLabel'] = {
+        formatter: unit !== '' ? '{value} ' + unit : '{value}'
+    }
+
+    if (max > 0){
+        options.yAxis['max'] = max
+    }
+
+    let first = getSimpleSeries(1, data);
+
+    if (limit > 0){
+        let line = getLimitMarkLine(limit);
+        first['markLine'] = line;
+    }
+    options.series.push(first);
+
+    if (series < 2) return option;
+
+    let second = getSimpleSeries(2, data);
+    options.series.push(second);
+
+    return options;
+}
+
+function getLimitMarkLine(limit){
+    let line = {
+        symbol: 'none',
+        data: [
+        {
+            yAxis: limit,
+            lineStyle:{
+                color: 'lightgray',
+                width: 2,
+                type:'solid'
+            
+            },
+            emphasis: {disabled: true},
+            label: {
+                position: 'end',
+                formatter: 'Limit'
+            },
+
+        }]
+    }
+
+    return line;
+}
+
+function getSimpleSeries(index, data){
+    let series = {
+        type: 'custom',
+        name: 'recieved',
+        emphasis: {disabled: true},
+        stack: 'yes',
+        renderItem: renderSortedStackedBarChart,
+        label: { show: false },
+        dimensions: ['time', 'value'],
+        encode: {
+            x: 0,
+            y: index
+        },
+        data: data
+    }
+
+    return series;
+}
