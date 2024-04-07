@@ -15,7 +15,7 @@ import { ref, watch, onMounted, onUnmounted } from 'vue'
 let setup = (props, ctx) => {
   const loading = ref(true);
   const connections = ref([]);
-  const sorting = ref([{header:'Name', sort:'desc'}]);
+  const sorting = ref([{id:'name', sort:'asc'}]);
   const clusterServices = ref([]);
   const services = ref([]);
     
