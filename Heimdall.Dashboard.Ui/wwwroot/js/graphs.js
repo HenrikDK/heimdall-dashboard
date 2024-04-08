@@ -392,42 +392,43 @@ function historicMemory(usage = [], limits = [], time = []){
 }
 
 function renderSortedStackedBarChart(params, api){
-    var start = api.coord([api.value(0), api.value(1 + params.seriesIndex)]);
-    var size = api.size([1, api.value(1)]);
-    var style = api.style();
+    let start = api.coord([api.value(0), api.value(1 + params.seriesIndex)]);
+    let size = api.size([1, api.value(1 + params.seriesIndex)]);
+    let style = api.style();
     height = size[1];
     if (params.seriesIndex > 0){
-        height = api.value(1) ? size[1] - size2[1] : size[1];
+      let size2 = api.size([1, api.value(1)]);
+      height = api.value(1) ? size[1] - size2[1] : size[1];
     }
-
+    
     return {
-        type: 'group',
-        children: [
-            {
-                type: 'rect',
-                shape: {
-                    x: start[0] - size[0] * 0.5,
-                    y: start[1],
-                    width: size[0],
-                    height: size[1]
-                },
-                style: {...style,
-                    opacity: 0.2
-                }
-            },
-            {
-                type: 'rect',
-                shape: {
-                    x: start[0] - size[0] * 0.5,
-                    y: start[1],
-                    width: size[0],
-                    height: 3,
-                },
-                style: style,
-            }
-        ]
+      type: 'group',
+      children: [
+        {
+      type: 'rect',
+      shape: {
+        x: start[0] - size[0] * 0.5,
+        y: start[1],
+        width: size[0],
+        height: height
+      },
+      style: {...style,
+          opacity: 0.2
+        }
+      },
+      {
+        type: 'rect',
+        shape: {
+          x: start[0] - size[0] * 0.5,
+          y: start[1],
+          width: size[0],
+          height: 3,
+        },
+        style: style,
+      }
+      ]
     };
-};
+  };
 
 function getSimpleChart(){
     let option = {
