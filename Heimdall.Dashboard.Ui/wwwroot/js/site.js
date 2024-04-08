@@ -68,20 +68,18 @@ function toHumanValues(dur) {
     return result
 }
 
-function getMetric(type, name, options = {}, step = '60s'){
-    var DT = luxon.DateTime;
-    let end = DT.now();
-    let begin = end.minus({ hours: 1 });
-    
-    let result = `/query_range?start=${begin.toUTC().toISO()}&end=${end.toUTC().toISO()}&step=${step}&query=`;
-    result += encodeURIComponent(getMetricQuery(type, name, options))
+function getMetricUrl(options, begin, end, step = '60s'){
+    let host = window.location.origin;
+    let query = getMetricQuery(options)
+    let result = `${host}/prometheus/api/v1/query_range?start=${begin.toUTC().toISO()}&end=${end.toUTC().toISO()}&step=${step}&query=`;
+    result += encodeURIComponent(query)
     return result;
 }
 
-function getMetricQuery(type = '', name = '', options = {}) {
-    switch(type) {
+function getMetricQuery(options) {
+    switch(options.type) {
         case "cluster":
-            switch (name) {
+            switch (options.name) {
                 case "node-memory-stats":
                     return `sum(node_memory_MemTotal_bytes{kubernetes_node=~"${options.nodes}"} - (node_memory_MemFree_bytes{kubernetes_node=~"${options.nodes}"} + node_memory_Buffers_bytes{kubernetes_node=~"${options.nodes}"} + node_memory_Cached_bytes{kubernetes_node=~"${options.nodes}"})) by (component)`;
                 case "container-memory":
@@ -96,7 +94,7 @@ function getMetricQuery(type = '', name = '', options = {}) {
             }
             break;
         case "pod":
-            switch (name) {
+            switch (options.name) {
                 case "cpu-usage":
                     return `sum(rate(container_cpu_usage_seconds_total{container!="POD",container!="",pod=~"${options.pods}",namespace="${options.namespace}"}[3m])) by (pod)`;
                 case "memory-usage":
