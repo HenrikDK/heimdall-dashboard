@@ -1,4 +1,4 @@
-using AspNetCore.Proxy.Options;
+﻿using AspNetCore.Proxy.Options;
 using Heimdall.Dashboard.Ui.Infrastructure;
 
 namespace Heimdall.Dashboard.Ui.Controllers;
@@ -36,12 +36,12 @@ public class ProxyController : ControllerBase
         })
         .WithShouldAddForwardedHeaders(false)
         .Build();
-    
+
     private WsProxyOptions _wsOptions = WsProxyOptionsBuilder.Instance
         .WithBeforeConnect((context, wso) =>
         {
             context.Request.Headers.Remove("Origin");
-            wso.RemoteCertificateValidationCallback = (_, _, _, _) => true; 
+            wso.RemoteCertificateValidationCallback = (_, _, _, _) => true;
             return Task.CompletedTask;
         })
         .WithHandleFailure((ctx, e) =>
@@ -84,7 +84,7 @@ public class ProxyController : ControllerBase
             {
                 HttpContext.Request.Headers.Append("Authorization", $"Bearer {K8sClient.AccessToken}");
             }
-        
+
             _metricsHeaders.Value.ForEach(x =>
             {
                 var header = x.Split(":");
@@ -93,17 +93,17 @@ public class ProxyController : ControllerBase
 
             var qs = HttpContext.Request.QueryString.Value;
             var url = HttpContext.Request.Path.ToString().Replace("/prometheus/", "/");
-            
+
             return this.HttpProxyAsync($"{_metricsServer.Value}{url}{qs}", _prometheusHttpOptions);
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Exception proxying prometheus request");
-            
+
             return Task.FromResult(StatusCode(502, e.Message));
         }
     }
-    
+
     [HttpGet("/k8s/{**rest}")]
     public Task ProxyKubernetes()
     {
@@ -131,7 +131,7 @@ public class ProxyController : ControllerBase
         var service = _configuration.GetValue("cluster-metrics-service", "");
         var port = _configuration.GetValue("cluster-metrics-port", "");
         var externalHost = _configuration.GetValue("external-metrics-url", "");
-        
+
         if (type == "cluster" && K8sClient.InCluster)
         {
             return $"http://{service}.{nameSpace}:{port}";
@@ -141,7 +141,7 @@ public class ProxyController : ControllerBase
         {
             return $"{K8sClient.Server}/api/v1/namespaces/{nameSpace}/services/{service}:{port}/proxy";
         }
-        
+
         if (type == "external")
         {
             return externalHost;
@@ -154,10 +154,10 @@ public class ProxyController : ControllerBase
     {
         var type = _configuration.GetValue("metrics-type", "cluster");
         if (type == "cluster") return "";
-        
+
         var user = _configuration.GetValue("metrics-user", "");
         var pass = _configuration.GetValue("metrics-password", "");
-        
+
         var token = string.IsNullOrEmpty(user) ? "" : $"{user}:{pass}".ToBase64();
 
         return token;
