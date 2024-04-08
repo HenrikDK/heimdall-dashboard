@@ -27,7 +27,7 @@ function streamMetrics(options, cb, connections = null) {
                     await Promise.all(options.map(async (x) => {
                         let url = getMetricUrl(x, begin, end);
                         const metrics = await request(url);
-                        x['metrics'] = metrics.items || metrics;
+                        x['metrics'] = metrics?.data?.result[0] ?? metrics;
                     }));
                     
                     cb(options);
