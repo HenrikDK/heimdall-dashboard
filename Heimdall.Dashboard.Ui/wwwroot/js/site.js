@@ -99,16 +99,9 @@ function getMetricQuery(type = '', name = '', options = {}) {
             switch (name) {
                 case "cpu-usage":
                     return `sum(rate(container_cpu_usage_seconds_total{container!="POD",container!="",pod=~"${options.pods}",namespace="${options.namespace}"}[3m])) by (pod)`;
-                case "cpu-limits":
-                    return `sum(kube_pod_container_resource_limits{pod=~"${options.pods}",resource="cpu",namespace="${options.namespace}"}) by (pod)`;
-
                 case "memory-usage":
                     return `sum(container_memory_working_set_bytes{container!="POD",container!="",pod=~"${options.pods}",namespace="${options.namespace}"}) by (pod)`;
-                case "memory-limits":
-                    return `sum(kube_pod_container_resource_limits{pod=~"${options.pods}",resource="memory",namespace="${options.namespace}"}) by (pod)`;
 
-                case "fs-usage":
-                    return `sum(container_fs_usage_bytes{container!="POD",container!="",pod=~"${options.pods}",namespace="${options.namespace}"}) by (pod)`;
                 case "fs-writes":
                     return `sum(rate(container_fs_writes_bytes_total{container!="", pod=~"${options.pods}", namespace="${options.namespace}"}[3m])) by (pod)`;
                 case "fs-reads":
