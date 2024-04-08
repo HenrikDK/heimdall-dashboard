@@ -55,8 +55,7 @@ let setup = (props, ctx) => {
   watch([() => props.filters, clusterServices], updateServices);
   
   onMounted(() => {
-    var host = window.location.origin;
-    streamResults(host + '/k8s/api/v1/services', j => clusterServices.value = j, connections.value)
+    streamResults('/k8s/api/v1/services', j => clusterServices.value = j, connections.value)
   });
 
   onUnmounted(async () => {

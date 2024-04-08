@@ -52,8 +52,7 @@ let setup = (props, ctx) => {
   ]);
   
   onMounted(async () => {
-    var host = window.location.origin;
-    streamResults(host + '/k8s/api/v1/events', j => clusterEvents.value = j, connections.value);
+    streamResults('/k8s/api/v1/events', j => clusterEvents.value = j, connections.value);
   });
   
   onUnmounted(async () => {

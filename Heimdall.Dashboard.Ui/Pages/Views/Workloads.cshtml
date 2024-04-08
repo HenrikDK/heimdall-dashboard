@@ -61,12 +61,11 @@ let setup = (props, ctx) => {
   watch([() => props.filters, () => props.namespaces, clusterWorkloads, clusterCronJobs, clusterDaemonSets, clusterJobs, clusterStatefulSets], updateWorkloads);
   
   onMounted(async () => {
-    var host = window.location.origin;
-    streamResults(host + '/k8s/apis/apps/v1/deployments', j => clusterWorkloads.value = j, connections.value)
-    streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => clusterDaemonSets.value = j, connections.value)
-    streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => clusterStatefulSets.value = j, connections.value)
-    streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => clusterCronJobs.value = j, connections.value)
-    streamResults(host + '/k8s/apis/batch/v1/jobs', j => clusterJobs.value = j, connections.value)
+    streamResults('/k8s/apis/apps/v1/deployments', j => clusterWorkloads.value = j, connections.value)
+    streamResults('/k8s/apis/apps/v1/daemonsets', j => clusterDaemonSets.value = j, connections.value)
+    streamResults('/k8s/apis/apps/v1/statefulsets', j => clusterStatefulSets.value = j, connections.value)
+    streamResults('/k8s/apis/batch/v1/cronjobs', j => clusterCronJobs.value = j, connections.value)
+    streamResults('/k8s/apis/batch/v1/jobs', j => clusterJobs.value = j, connections.value)
   });
 
   onUnmounted(async () => {
