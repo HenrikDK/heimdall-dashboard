@@ -1,4 +1,4 @@
-<template id="cluster">
+﻿<template id="cluster">
   <div class="pl-2 pr-4 w-100">
 
     <div v-if="config.metrics" class="flex my-2 items-center">
@@ -68,7 +68,17 @@ let setup = (props, ctx) => {
     jobs: null,
     cronJobs: null,
   });
+
   const metrics = ref({
+      memory: [
+        {type: 'cluster', name: 'kube-memory-stats', nodes: props.nodes, metrics: [], data: []},
+        {type: 'cluster', name: 'container-memory', nodes: props.nodes, metrics: [], data: []},
+        {type: 'cluster', name: 'node-memory-stats', nodes: props.nodes, metrics: [], data: []},
+      ],
+      cpu: [
+        {type: 'cluster', name: 'kube-cpu-stats', nodes: props.nodes, metrics: [], data: []}, 
+        {type: 'cluster', name: 'node-cpu-stats', nodes: props.nodes, metrics: [], data: []}
+      ],
       kubeMemory: null,
       containerMemory: null,
       nodeMemory: null,
@@ -223,12 +233,8 @@ let setup = (props, ctx) => {
   let updateMetrics = async () => {
     if (props.nodes.length > 0 && props.config.metrics)
     {
-      var host = window.location.origin;
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'kube-memory-stats', { nodes: props.nodes }), j => metrics.value.kubeMemory = j.data.result, connections.value);
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'container-memory', { nodes: props.nodes }), j => metrics.value.containerMemory = j.data.result, connections.value);
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'node-memory-stats', { nodes: props.nodes }), j => metrics.value.nodeMemory = j.data.result, connections.value);
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'kube-cpu-stats', { nodes: props.nodes }), j => metrics.value.kubeCpu = j.data.result, connections.value);
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'node-cpu-stats', { nodes: props.nodes }), j => metrics.value.nodeCpu = j.data.result, connections.value);
+      streamMetrics(metrics.value.memory, updateMemory, connections.value);
+      streamMetrics(metrics.value.cpu, updateCpu, connections.value);
     }
   }
   
