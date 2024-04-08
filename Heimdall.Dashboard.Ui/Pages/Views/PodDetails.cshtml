@@ -251,6 +251,9 @@ let setup = (props, ctx) => {
   const route = useRoute();
   const connections = ref([]);
   const events = ref([]);
+  const chart = ref();
+  const chartState = ref('cpu');
+  const limitState = ref(false);
   const clusterEvents = ref([]);  
   const updateOptions = ref({replaceMerge: ['xAxis', 'yAxis', 'series']});
   const initOptions = ref({ renderer: "svg" });
@@ -265,7 +268,7 @@ let setup = (props, ctx) => {
     netSent: null
   });
   
-  const chartCpu = ref(historicCpu());
+  const chartOptions = ref(getSimpleChart());
   const charts = ref({
     podCpu: historicCpu(),
     podMemory: historicMemory(),
@@ -375,7 +378,7 @@ let setup = (props, ctx) => {
   });
   
   return {
-      isDark, events, clusterEvents, initOptions, pod, metrics, charts, connections, chartCpu, 
+      isDark, events, clusterEvents, initOptions, pod, metrics, chart, chartOptions, chartState, limitState, connections,
       getContainerStatusObjects, getContainerStatus, toLocal, toHuman, updateOptions,
       updateCpu, updateMemory
   }
