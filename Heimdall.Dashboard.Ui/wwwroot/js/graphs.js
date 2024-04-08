@@ -468,7 +468,7 @@ function getSimpleChart(){
     return option;
 }
 
-function updateSimpleChart(options, data = [], series = 1, unit = '', limit = 0, max = 0){
+function updateSimpleChart(options, data = [], series = [], unit = '', limit = 0, max = 0){
     options.yAxis['axisLabel'] = {
         formatter: unit !== '' ? '{value} ' + unit : '{value}'
     }
@@ -477,17 +477,18 @@ function updateSimpleChart(options, data = [], series = 1, unit = '', limit = 0,
         options.yAxis['max'] = max
     }
 
-    let first = getSimpleSeries(1, data);
+    let first = getSimpleSeries(series[0], data);
 
     if (limit > 0){
         let line = getLimitMarkLine(limit);
         first['markLine'] = line;
     }
+    options.series.splice(0, options.series.length);
     options.series.push(first);
 
-    if (series < 2) return option;
+    if (series.length < 2) return options;
 
-    let second = getSimpleSeries(2, data);
+    let second = getSimpleSeries(series[1], data);
     options.series.push(second);
 
     return options;
