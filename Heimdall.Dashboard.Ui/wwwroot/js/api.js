@@ -8,8 +8,10 @@
     });
 }
 
-function streamMetrics(url, cb, connections = null) {
+function streamMetrics(options, cb, connections = null) {
+    var DT = luxon.DateTime;
     let isApiRequestInProgress = false;
+
     const handel = setInterval(getMetrics, 30000);
     getMetrics();
 
@@ -17,9 +19,18 @@ function streamMetrics(url, cb, connections = null) {
         try {
             if (!isApiRequestInProgress) {
                 isApiRequestInProgress = true;
+
+                let end = DT.now();
+                let begin = end.minus({ hours: 1 });
+
                 try {
-                    const metric = await request(url);
-                    cb(metric.items || metric);
+                    await Promise.all(options.map(async (x) => {
+                        let url = getMetricUrl(x, begin, end);
+                        const metrics = await request(url);
+                        x['metrics'] = metrics.items || metrics;
+                    }));
+                    
+                    cb(options);
                 } catch (err) {
                     console.error('Unable to send request', {err});
                 } finally {
@@ -41,7 +52,9 @@ function streamMetrics(url, cb, connections = null) {
     }
 }
 
-async function streamLogs(url, cb, connections = null) {
+async function streamLogs(path, cb, connections = null) {
+    var host = window.location.origin;
+    let url = host + path;
     const watchUrl = url.replace('http', 'ws');
     let ending = ''
     const {cancel} = stream(watchUrl, transformer, false);
@@ -74,7 +87,9 @@ async function streamLogs(url, cb, connections = null) {
     }
 }
 
-async function streamResults(url, cb, connections = null) {
+async function streamResults(path, cb, connections = null) {
+    var host = window.location.origin;
+    let url = host + path;
     let isCancelled = false;
     let socket = {};
     const results = {};
@@ -158,7 +173,9 @@ async function streamResults(url, cb, connections = null) {
     }
 }
 
-async function streamResult(url, name, cb) {
+async function streamResult(path, name, cb) {
+    var host = window.location.origin;
+    let url = host + path;
     let isCancelled = false;
     let socket= {};
     run();
