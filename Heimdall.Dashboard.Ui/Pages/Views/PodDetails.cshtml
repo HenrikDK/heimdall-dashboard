@@ -1,4 +1,4 @@
-<template id="pod-details">
+﻿<template id="pod-details">
   <div class="pl-2 pr-4 max-w-5xl mx-auto">
     
   <br/>
@@ -367,6 +367,7 @@ let setup = (props, ctx) => {
       streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'mem-usage', options), j => metrics.value.memoryUsage = j.data.result, connections.value);
       streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-usage', options), j => metrics.value.cpuUsage = j.data.result, connections.value);
     }
+    
     streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-usage', options), j => metrics.value.cpuUsage = j.data.result, connections.value);
 
     streamResult(host + `/k8s/api/v1/namespaces/${namespace}/pods`, name, j => pod.value = j, connections.value);
