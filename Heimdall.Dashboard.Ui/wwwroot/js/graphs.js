@@ -1,4 +1,4 @@
-﻿function workload(type = 'Unknown', running = 0, pending = 0){
+function workload(type = 'Unknown', running = 0, pending = 0){
     let data = [];
     let active = false;
     
@@ -433,6 +433,7 @@ function renderSortedStackedBarChart(params, api){
 function getSimpleChart(){
     let option = {
         animation: false,
+        backgroundColor: '',
         tooltip: {
             trigger: 'axis',
             axisPointer: { 
@@ -448,17 +449,18 @@ function getSimpleChart(){
         },
         legend: {
             show: true,
-            selectedMode: false
+            selectedMode: false,
+            top: 'bottom'
         },
         yAxis: {
             type: 'value',
-            position: 'left',
+            position: 'right',
         },
         grid: {
-            left: '7%',
+            left: '2%',
             right: '10%',
-            top: '10%',
-            bottom: '7%',
+            top: '5%',
+            bottom: '14%',
         },
         series: []
     };
