@@ -32,11 +32,7 @@
     </div>
     
     <div class="wide-details-graph">
-      <v-chart :option="charts.podCpu" :theme="isDark ? 'dark' : ''" :init-options="initOptions" :updateOptions="updateOptions"></v-chart>
-    </div>
-    
-    <div v-if="metrics.type == 'mem'" class="wide-details-graph">
-      <v-chart :option="charts.podMemory" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+      <v-chart ref="chart" :option="chartOptions" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
     </div>
   </div>
 
