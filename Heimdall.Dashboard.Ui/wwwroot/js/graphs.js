@@ -518,10 +518,10 @@ function getLimitMarkLine(limit){
     return line;
 }
 
-function getSimpleSeries(index, data){
+function getSimpleSeries(params, data){
     let series = {
         type: 'custom',
-        name: 'recieved',
+        name: params.name,
         emphasis: {disabled: true},
         stack: 'yes',
         renderItem: renderSortedStackedBarChart,
@@ -529,7 +529,7 @@ function getSimpleSeries(index, data){
         dimensions: ['time', 'value'],
         encode: {
             x: 0,
-            y: index
+            y: params.index
         },
         data: data
     }
