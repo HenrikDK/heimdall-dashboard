@@ -313,23 +313,31 @@ let setup = (props, ctx) => {
     
     let usageSeries = getMetricSeries(metrics.value.cpuUsage);
 
-    let time = usageSeries.map(x => luxon.DateTime.fromMillis(x[0] * 1000).toFormat('HH:mm'));
-    let usage = usageSeries.map(x => parseFloat(x[1]));
+    let usage = usageSeries.map(x => { return [
+        luxon.DateTime.fromMillis(x[0] * 1000).toFormat('HH:mm'),
+        parseFloat(x[1])
+    ]});
     
-    charts.value.podCpu = historicCpu(usage, [], time)
+    let series = [{index: 1, name:'Usage', color: isDark.value ? '#3d90ce' : '#5470c6'}]
+    console.log(`updating chart, length ${usage.length}, first item ${usage[0][0]} - ${usage[0][1]}, last item ${usage[usage.length - 1][0]} - ${usage[usage.length -1][1]}`)
+
+    updateSimpleChart(chartOptions.value, usage, series, 'vCore');
+    chart.value.setOption(chartOptions.value, {replaceMerge: ['xAxis', 'yAxis', 'series', 'data']});
   };
   
   let updateMemory = () => {
-    if (!metrics.value.memoryUsage || metrics.value.memoryUsage?.length === 0 || !metrics.value.memoryLimits || metrics.value.memoryLimits?.length === 0) return;
+    if (!metrics.value.memoryUsage || metrics.value.memoryUsage?.length === 0) return;
     
-    let capacitySeries = getMetricSeries(metrics.value.memoryLimits);
     let usageSeries = getMetricSeries(metrics.value.memoryUsage);
 
-    let time = usageSeries.map(x => luxon.DateTime.fromMillis(x[0] * 1000).toFormat('HH:mm'));
-    let usage = usageSeries.map(x => parseFloat(x[1] / 1024 / 1024 / 1024));
-    let limits = capacitySeries.map(x => parseFloat(x[1] / 1024 / 1024 / 1024).toFixed(2))
-    
-    charts.value.podMemory = historicMemory(usage, limits, time)
+    let usage = usageSeries.map(x => {
+      return [
+           luxon.DateTime.fromMillis(x[0] * 1000).toFormat('HH:mm'),
+            parseFloat(x[1] / 1024 / 1024 / 1024)]
+    });
+
+    //(options, data = [], series = 1, unit = '', limit = 0, max = 0)
+    updateSimpleChart(chartOptions.value, usage, 1, 'GiB');
   };
   
   watch(clusterEvents, () => {
