@@ -1,4 +1,4 @@
-﻿<template id="cluster">
+<template id="cluster">
   <div class="pl-2 pr-4 w-100">
 
     <div v-if="config.metrics" class="flex my-2 items-center">
@@ -265,17 +265,15 @@ let setup = (props, ctx) => {
   watch(() => cluster.value.daemonSets, updateClusterDaemonSets);
   
   onMounted(async () => {
-    var host = window.location.origin;
-    
     updateMetrics();
     
-    streamResults(host + '/k8s/api/v1/pods', j => cluster.value.pods = j, connections.value);
-    streamResults(host + '/k8s/apis/apps/v1/deployments', j => cluster.value.deployments = j, connections.value);
-    streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => cluster.value.daemonSets = j, connections.value);
-    streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => cluster.value.statefulSets = j, connections.value);
-    streamResults(host + '/k8s/apis/apps/v1/replicasets', j => cluster.value.replicaSets = j, connections.value);
-    streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => cluster.value.cronJobs = j, connections.value);
-    streamResults(host + '/k8s/apis/batch/v1/jobs', j => cluster.value.jobs = j, connections.value);
+    streamResults('/k8s/api/v1/pods', j => cluster.value.pods = j, connections.value);
+    streamResults('/k8s/apis/apps/v1/deployments', j => cluster.value.deployments = j, connections.value);
+    streamResults('/k8s/apis/apps/v1/daemonsets', j => cluster.value.daemonSets = j, connections.value);
+    streamResults('/k8s/apis/apps/v1/statefulsets', j => cluster.value.statefulSets = j, connections.value);
+    streamResults('/k8s/apis/apps/v1/replicasets', j => cluster.value.replicaSets = j, connections.value);
+    streamResults('/k8s/apis/batch/v1/cronjobs', j => cluster.value.cronJobs = j, connections.value);
+    streamResults('/k8s/apis/batch/v1/jobs', j => cluster.value.jobs = j, connections.value);
   });
 
   onUnmounted(async () => {
