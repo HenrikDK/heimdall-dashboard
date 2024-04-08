@@ -1,4 +1,4 @@
-﻿using AspNetCore.Proxy.Options;
+using AspNetCore.Proxy.Options;
 using Heimdall.Dashboard.Ui.Infrastructure;
 
 namespace Heimdall.Dashboard.Ui.Controllers;
@@ -67,7 +67,7 @@ public class ProxyController : ControllerBase
         _configuration = configuration;
         _logger = logger;
         _token = new Lazy<string>(GetMetricsAuthentication);
-        _metricsHeaders = new Lazy<List<string>>(() => _configuration.GetValue("external-metrics-headers", "").Split(",").ToList());
+        _metricsHeaders = new Lazy<List<string>>(GetHeaders);
         _metricsServer = new Lazy<string>(GetMetricsServer);
     }
 
@@ -161,5 +161,14 @@ public class ProxyController : ControllerBase
         var token = string.IsNullOrEmpty(user) ? "" : $"{user}:{pass}".ToBase64();
 
         return token;
+    }
+
+    private List<string> GetHeaders()
+    {
+        var headers = _configuration.GetValue("external-metrics-headers", "").Split(",").ToList();
+
+        headers = headers.Where(x => x.Length > 0).ToList();
+
+        return headers;
     }
 }
