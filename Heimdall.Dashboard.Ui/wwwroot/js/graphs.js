@@ -1,4 +1,4 @@
-function workload(type = 'Unknown', running = 0, pending = 0){
+﻿function workload(type = 'Unknown', running = 0, pending = 0){
     let data = [];
     let active = false;
     
@@ -428,7 +428,7 @@ function renderSortedStackedBarChart(params, api){
       }
       ]
     };
-  };
+};
 
 function getSimpleChart(){
     let option = {
