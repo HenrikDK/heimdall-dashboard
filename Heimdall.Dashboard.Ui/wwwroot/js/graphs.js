@@ -468,9 +468,9 @@ function getSimpleChart(){
     return option;
 }
 
-function updateSimpleChart(options, data = [], series = [], unit = '', limit = 0, max = 0){
+function updateSimpleChart(options, series = [], unit, limit = 0, max = 0){
     options.yAxis['axisLabel'] = {
-        formatter: unit !== '' ? '{value} ' + unit : '{value}'
+        formatter: unit.suffix !== '' ? '{value} ' + unit.suffix : '{value}'
     }
 
     if (max > 0){
