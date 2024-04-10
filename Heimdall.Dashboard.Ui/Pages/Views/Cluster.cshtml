@@ -109,7 +109,7 @@ let setup = (props, ctx) => {
   
   const charts = ref({
     cluster:{
-        performance: historic(),
+        performance: getSimpleChart(),
         cpus: current('CPU'),
         memory: current('Memory')
     },
