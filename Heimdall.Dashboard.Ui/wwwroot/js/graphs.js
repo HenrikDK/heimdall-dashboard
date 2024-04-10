@@ -430,6 +430,20 @@ function renderSortedStackedBarChart(params, api){
     };
 };
 
+function formatCpuValue(value){
+    let decimals = value < 1 ? 4 : 2;
+    
+    return `${value.toFixed(decimals)}`;
+}
+
+function formatByteValue(value){
+    if (value < 1000) return value;
+
+    let unit = getUnitFromBytes(value)
+
+    return `${(value / unit.magnitude).toFixed(1)} ${unit.suffix}`;
+}
+
 function getSimpleChart(){
     let option = {
         animation: false,
@@ -454,7 +468,7 @@ function getSimpleChart(){
         },
         yAxis: {
             type: 'value',
-            position: 'right',
+            position: 'right'
         },
         grid: {
             left: '2%',
@@ -469,8 +483,15 @@ function getSimpleChart(){
 }
 
 function updateSimpleChart(options, series = [], unit, isDark = false, limit = 0, max = 0){
+    
     options.yAxis['axisLabel'] = {
-        formatter: unit.suffix !== '' ? '{value} ' + unit.suffix : '{value}'
+        formatter: '{value}'
+    }
+
+    options.tooltip['valueFormatter'] = undefined;    
+    if (unit.suffix !== ''){
+        options.yAxis['axisLabel']['formatter'] = formatByteValue;
+        options.tooltip['valueFormatter'] = formatByteValue;    
     }
 
     options.yAxis['max'] = undefined;
@@ -527,7 +548,7 @@ function getSimpleSeries(options, isDark){
     let series = {
         type: 'custom',
         name: options.params.name,
-        color: isDark ? options.params.darkColor : options.params.lightColor,
+        color: isDark ? options.params.colorDark : options.params.colorLight,
         emphasis: {disabled: true},
         stack: 'yes',
         renderItem: renderSortedStackedBarChart,
