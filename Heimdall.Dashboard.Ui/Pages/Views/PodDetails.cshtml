@@ -265,33 +265,33 @@ let setup = (props, ctx) => {
     cpu: [
       { 
         type:'pod', name:'cpu-usage', pods: route.params.name, namespace: route.params.namespace, 
-        metrics: [], data: [], params: { unit = 'cores', name:'Usage', index: 1}
+        metrics: [], data: [], params: { unit: 'cores', name:'Usage', index: 1}
       }
     ],
     memory: [
       {
         type:'pod', name:'mem-usage', pods: route.params.name, namespace: route.params.namespace, 
-        metrics: [], data: [], params: { unit = 'bytes', name:'Usage', index: 1}
+        metrics: [], data: [], params: { unit: 'bytes', name:'Usage', index: 1}
       },
     ],
     network: [ // light-blue: #73c0de light-green: #91cc75, dark: light-blue: #58d9f9 ligth-green: #7cffb2
       {
         type:'pod', name:'net-recv', pods: route.params.name, namespace: route.params.namespace, 
-        metrics: [], data: [], params: { unit = 'bytes', name:'Receive' }
+        metrics: [], data: [], params: { unit: 'bytes', name:'Receive' }
       }, 
       {
         type:'pod', name:'net-sent', pods: route.params.name, namespace: route.params.namespace, 
-        metrics: [], data: [], params: { unit = 'bytes', name:'Transmit' }
+        metrics: [], data: [], params: { unit: 'bytes', name:'Transmit' }
       }
     ],
     filesystem: [ // yellow: #fac858 orange: #fc8452 dark: yellow: #fddd60 orange: #ff8a45
       {
         type:'pod', name:'fs-reads', pods: route.params.name, namespace: route.params.namespace, 
-        metrics: [], data: [], params: { unit = 'bytes', name:'Reads' }
+        metrics: [], data: [], params: { unit: 'bytes', name:'Reads' }
       }, 
       {
         type:'pod', name:'fs-writes', pods: route.params.name, namespace: route.params.namespace, 
-        metrics: [], data: [], params: { unit = 'bytes', name:'Writes' }
+        metrics: [], data: [], params: { unit: 'bytes', name:'Writes' }
       }
     ]
   });
