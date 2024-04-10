@@ -473,6 +473,7 @@ function updateSimpleChart(options, series = [], unit, isDark = false, limit = 0
         formatter: unit.suffix !== '' ? '{value} ' + unit.suffix : '{value}'
     }
 
+    options.yAxis['max'] = undefined;
     if (max > 0){
         options.yAxis['max'] = max
     }
@@ -482,6 +483,7 @@ function updateSimpleChart(options, series = [], unit, isDark = false, limit = 0
 
     let first = getSimpleSeries(series[0], isDark);
 
+    first['markLine'] = undefined;
     if (limit > 0){
         let line = getLimitMarkLine(limit);
         first['markLine'] = line;
@@ -511,7 +513,7 @@ function getLimitMarkLine(limit){
             },
             emphasis: {disabled: true},
             label: {
-                position: 'end',
+                position: 'middle',
                 formatter: 'Limit'
             },
 
