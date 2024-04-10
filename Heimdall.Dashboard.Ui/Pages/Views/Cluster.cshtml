@@ -1,4 +1,4 @@
-﻿<template id="cluster">
+<template id="cluster">
   <div class="pl-2 pr-4 w-100">
 
     <div v-if="config.metrics" class="flex my-2 items-center">
@@ -99,32 +99,32 @@ let setup = (props, ctx) => {
       ],
       current: [
         { 
-          type:'cluster', name:'memory-available', metrics: []
+          type:'cluster', name:'memory-available', instant: true, metrics: []
         },
         { 
-          type:'cluster', name:'memory-requests', metrics: []
+          type:'cluster', name:'memory-requests', instant: true, metrics: []
         },
         { 
-          type:'cluster', name:'memory-limits', metrics: []
+          type:'cluster', name:'memory-limits', instant: true, metrics: []
         },
         { 
-          type:'cluster', name:'memory-capacity', metrics: []
+          type:'cluster', name:'memory-capacity', instant: true, metrics: []
         },
         { 
-          type:'cluster', name:'memory-allocatable', metrics: []
+          type:'cluster', name:'memory-allocatable', instant: true, metrics: []
         },
 
         { 
-          type:'cluster', name:'cpu-requests', metrics: []
+          type:'cluster', name:'cpu-requests', instant: true, metrics: []
         },
         { 
-          type:'cluster', name:'cpu-limits', metrics: []
+          type:'cluster', name:'cpu-limits', instant: true, metrics: []
         },
         { 
-          type:'cluster', name:'cpu-capacity', metrics: []
+          type:'cluster', name:'cpu-capacity', instant: true, metrics: []
         },
         { 
-          type:'cluster', name:'cpu-allocatable', metrics: []
+          type:'cluster', name:'cpu-allocatable', instant: true, metrics: []
         }
       ]
   });
