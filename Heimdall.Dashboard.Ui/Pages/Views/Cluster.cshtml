@@ -183,6 +183,7 @@ let setup = (props, ctx) => {
   };
   
   let updateCpu = async () => {
+    /*
     if (!metrics.value.nodeCpu || metrics.value.nodeCpu?.length === 0 || !metrics.value.kubeCpu || metrics.value.kubeCpu?.length === 0) return;
     
     let capacity = getMetricLastPoints(metrics.value.kubeCpu, 'kube_node_status_capacity');
@@ -201,10 +202,11 @@ let setup = (props, ctx) => {
     let usagePct = usageValue / capacity * 100;
     let usage = {pct: usagePct.toFixed(2), units: usageValue.toFixed(2) };
     
-    charts.value.cluster.cpus = current('CPU', 'vCores', usage, requests, limits);
+    charts.value.cluster.cpus = current('CPU', 'vCores', usage, requests, limits);*/
   };
   
   let updateMemory = async () => {
+    /*
     if (!metrics.value.kubeMemory || metrics.value.kubeMemory?.length === 0 || !metrics.value.nodeMemory || metrics.value.nodeMemory?.length === 0) return;
     
     let capacity = getMetricLastPoints(metrics.value.kubeMemory, 'kube_node_status_capacity');
@@ -223,11 +225,11 @@ let setup = (props, ctx) => {
     let usagePct = usageValue / capacity * 100;
     let usage = {pct: usagePct.toFixed(2), units: (usageValue / 1024 / 1024 / 1024).toFixed(2) };
     // todo calculate unit
-    charts.value.cluster.memory = current('Memory', 'GiB', usage, requests, limits);
+    charts.value.cluster.memory = current('Memory', 'GiB', usage, requests, limits);*/
   };
 
   let updateHistory = async () => {
-    if (!metrics.value.kubeMemory || metrics.value.kubeMemory?.length === 0 || !metrics.value.nodeMemory || metrics.value.nodeMemory?.length === 0) return;
+/*    if (!metrics.value.kubeMemory || metrics.value.kubeMemory?.length === 0 || !metrics.value.nodeMemory || metrics.value.nodeMemory?.length === 0) return;
     if (!metrics.value.nodeCpu || metrics.value.nodeCpu?.length === 0 || !metrics.value.kubeCpu || metrics.value.kubeCpu?.length === 0) return;
     
     let memoryCapacity = getMetricLastPoints(metrics.value.kubeMemory, 'kube_node_status_capacity');
@@ -248,7 +250,8 @@ let setup = (props, ctx) => {
         data: computeUsage.map(x => parseFloat(x[1]).toFixed(2))
     }
     
-    charts.value.cluster.performance = historic(memory, compute, time);              
+    charts.value.cluster.performance = historic(memory, compute, time);
+    */
   };
   
   let updateMetrics = async () => {
