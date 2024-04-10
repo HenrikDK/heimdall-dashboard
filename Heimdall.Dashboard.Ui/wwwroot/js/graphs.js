@@ -477,7 +477,7 @@ function updateSimpleChart(options, series = [], unit, limit = 0, max = 0){
         options.yAxis['max'] = max
     }
 
-    let first = getSimpleSeries(series[0], data);
+    let first = getSimpleSeries(series[0]);
 
     if (limit > 0){
         let line = getLimitMarkLine(limit);
@@ -488,7 +488,7 @@ function updateSimpleChart(options, series = [], unit, limit = 0, max = 0){
 
     if (series.length < 2) return options;
 
-    let second = getSimpleSeries(series[1], data);
+    let second = getSimpleSeries(series[1]);
     options.series.push(second);
 
     return options;
@@ -518,10 +518,10 @@ function getLimitMarkLine(limit){
     return line;
 }
 
-function getSimpleSeries(params, data){
+function getSimpleSeries(options){
     let series = {
         type: 'custom',
-        name: params.name,
+        name: options.params.name,
         emphasis: {disabled: true},
         stack: 'yes',
         renderItem: renderSortedStackedBarChart,
@@ -529,9 +529,9 @@ function getSimpleSeries(params, data){
         dimensions: ['time', 'value'],
         encode: {
             x: 0,
-            y: params.index
+            y: options.params.index
         },
-        data: data
+        data: options.data
     }
 
     return series;
