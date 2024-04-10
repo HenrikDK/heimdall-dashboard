@@ -468,7 +468,7 @@ function getSimpleChart(){
     return option;
 }
 
-function updateSimpleChart(options, series = [], unit, limit = 0, max = 0){
+function updateSimpleChart(options, series = [], unit, isDark = false, limit = 0, max = 0){
     options.yAxis['axisLabel'] = {
         formatter: unit.suffix !== '' ? '{value} ' + unit.suffix : '{value}'
     }
@@ -476,8 +476,11 @@ function updateSimpleChart(options, series = [], unit, limit = 0, max = 0){
     if (max > 0){
         options.yAxis['max'] = max
     }
+    if (max === 0 && limit > 0){
+        options.yAxis['max'] = limit * 1.1
+    }
 
-    let first = getSimpleSeries(series[0]);
+    let first = getSimpleSeries(series[0], isDark);
 
     if (limit > 0){
         let line = getLimitMarkLine(limit);
@@ -488,7 +491,7 @@ function updateSimpleChart(options, series = [], unit, limit = 0, max = 0){
 
     if (series.length < 2) return options;
 
-    let second = getSimpleSeries(series[1]);
+    let second = getSimpleSeries(series[1], isDark);
     options.series.push(second);
 
     return options;
@@ -518,10 +521,11 @@ function getLimitMarkLine(limit){
     return line;
 }
 
-function getSimpleSeries(options){
+function getSimpleSeries(options, isDark){
     let series = {
         type: 'custom',
         name: options.params.name,
+        color: isDark ? options.params.darkColor : options.params.lightColor,
         emphasis: {disabled: true},
         stack: 'yes',
         renderItem: renderSortedStackedBarChart,
