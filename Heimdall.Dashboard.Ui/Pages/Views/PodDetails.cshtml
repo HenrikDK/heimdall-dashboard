@@ -1,4 +1,4 @@
-<template id="pod-details">
+﻿<template id="pod-details">
   <div class="pl-2 pr-4 max-w-5xl mx-auto">
     
   <br/>
@@ -27,7 +27,8 @@
 
         <chart-toggle name="filesystem" :state="chartState" label="Filesystem" @@update="e => chartState = e"></chart-toggle>
 
-        <chart-toggle name="limit" :state="limitState" label="Limit" :state-visible="true" @@update="e => limitState = !limitState"></chart-toggle>
+        <chart-toggle v-if="['cpu', 'memory'].includes(chartState)" name="limit" :state="limitState" label="Limit" :state-visible="true" @@update="e => limitState = !limitState"></chart-toggle>
+        <div v-else class="w-[105px] me-2"></div>
       </div>
     </div>
     
