@@ -1,4 +1,4 @@
-﻿<template id="pod-details">
+<template id="pod-details">
   <div class="pl-2 pr-4 max-w-5xl mx-auto">
     
   <br/>
@@ -375,7 +375,7 @@ let setup = (props, ctx) => {
     events.value = clusterEvents.value.filter(x => x?.involvedObject?.name === name);
   });
       
-  watch(() => limitState.value, () => {
+  watch([limitState, chartState], () => {
     updateCpu();
     updateMemory();
   })
