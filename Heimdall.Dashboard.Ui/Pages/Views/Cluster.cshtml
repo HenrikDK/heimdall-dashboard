@@ -276,8 +276,6 @@ let setup = (props, ctx) => {
   watch(() => cluster.value.daemonSets, updateClusterDaemonSets);
   
   onMounted(async () => {
-    updateMetrics();
-    
     streamResults('/k8s/api/v1/pods', j => cluster.value.pods = j, connections.value);
     streamResults('/k8s/apis/apps/v1/deployments', j => cluster.value.deployments = j, connections.value);
     streamResults('/k8s/apis/apps/v1/daemonsets', j => cluster.value.daemonSets = j, connections.value);
@@ -296,8 +294,7 @@ let setup = (props, ctx) => {
     filterNamespace, 
     updateClusterPods, updateClusterDeployments, updateClusterJobs, updateClusterCronJobs, 
     updateClusterStatefulSets, updateClusterReplicaSets, updateClusterDaemonSets,
-    updateCpu, updateMemory, updateHistory, updateMetrics,
-    
+    updateCpu, updateMemory, updateHistory, updateMetrics
   }
 }
 
