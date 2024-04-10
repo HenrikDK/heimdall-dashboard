@@ -340,6 +340,15 @@ let setup = (props, ctx) => {
     var newDatetime = DT.fromISO(String(value));
     return toHumanValues(newDatetime.diff(date,  unit)).join(' ') + ' Ago';
   }
+
+  let updateMetrics = async () => {
+    if (props.config.metrics){
+      streamMetrics(metrics.value.cpu, updateCpu, connections.value);
+      streamMetrics(metrics.value.memory, updateMemory, connections.value);
+      streamMetrics(metrics.value.network, updateNetworking, connections.value);
+      streamMetrics(metrics.value.filesystem, updateFilesystem, connections.value);
+    }
+  }
   
   let updateCpu = () => {
     if (!metrics.value.cpu) return;
@@ -370,30 +379,46 @@ let setup = (props, ctx) => {
 
     updateSimpleChart(charts.value.memory, metrics.value.memory, unit, isDark.value, limit);
   };
+
+  let updateNetworking = () => {
+    if (!metrics.value.network) return;
+    if (metrics.value.network[0].metrics.length < 1) return;
+
+    var [data, max, unit] = getDataSeries(metrics.value.network);
+
+    updateSimpleChart(charts.value.network, metrics.value.network, unit, isDark.value);
+  }
+
+  let updateFilesystem = () => {
+    if (!metrics.value.filesystem) return;
+    if (metrics.value.filesystem[0].metrics.length < 1) return;
+
+    var [data, max, unit] = getDataSeries(metrics.value.filesystem);
+
+    updateSimpleChart(charts.value.filesystem, metrics.value.filesystem, unit, isDark.value);
+  }
   
+  watch(() => props.config.metrics, () => {
+    updateMetrics();
+  });
+
   watch(clusterEvents, () => {
     let name = route.params.name;
     events.value = clusterEvents.value.filter(x => x?.involvedObject?.name === name);
   });
       
-  watch([limitState, chartState], () => {
+  watch([limitState, chartState, isDark], () => {
     updateCpu();
     updateMemory();
+    updateNetworking();
+    updateFilesystem();
   })
 
   onMounted(async () => {
     let namespace = route.params.namespace;
     let options = { pods: name, namespace: namespace };
 
-    if (props.config.metrics){
-
-      streamMetrics(metrics.value.filesystem, updateFilesystem, connections.value);
-      streamMetrics(metrics.value.network, updateNetworking, connections.value);
-      streamMetrics(metrics.value.memory, updateMemory, connections.value);
-      streamMetrics(metrics.value.cpu, updateCpu, connections.value);
-    }
-    
-    streamMetrics(metrics.value.memory, updateMemory, connections.value);
+    updateMetrics();
 
     streamResult(`/k8s/api/v1/namespaces/${namespace}/pods`, route.params.name, j => pod.value = j, connections.value);
     streamResults(`/k8s/api/v1/namespaces/${namespace}/events`, j => clusterEvents.value = j, connections.value)
@@ -407,7 +432,7 @@ let setup = (props, ctx) => {
       connections, isDark, events, clusterEvents, pod, 
       metrics, charts, chartState, initOptions, limitState, 
       getContainerStatusObjects, getContainerStatus, toLocal, toHuman,
-      updateCpu, updateMemory
+      updateCpu, updateMemory, updateNetworking, updateFilesystem, updateMetrics
   }
 }
 
