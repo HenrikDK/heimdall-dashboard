@@ -71,7 +71,11 @@ function toHumanValues(dur) {
 function getMetricUrl(options, begin, end, step = '60s'){
     let host = window.location.origin;
     let query = getMetricQuery(options)
-    let result = `${host}/prometheus/api/v1/query_range?start=${begin.toISO()}&end=${end.toISO()}&step=${step}&query=`;
+
+    let result = options.instant ? 
+     `${host}/prometheus/api/v1/query?time=${begin.toISO()}&query=` :
+     `${host}/prometheus/api/v1/query_range?start=${begin.toISO()}&end=${end.toISO()}&step=${step}&query=`;
+    
     result += encodeURIComponent(query)
     return result;
 }
