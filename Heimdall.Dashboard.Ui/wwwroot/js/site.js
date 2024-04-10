@@ -171,7 +171,7 @@ function getDataSeries(options) {
 }
 
 const base = 1024;
-const units = [
+const byte_units = [
   {suffix: "B", magnitude: 1},
   {suffix: "KiB", magnitude: base ** 1},
   {suffix: "MiB", magnitude: base ** 2},
@@ -181,10 +181,10 @@ const units = [
   {suffix: "EiB", magnitude: base ** 6},
 ];
 
-const unitRegex = /(?<value>[0-9]+(\.[0-9]*)?)(?<suffix>(B|[KMGTPE]iB?))?/;
+const bytes_regex = /(?<value>[0-9]+(\.[0-9]*)?)(?<suffix>(B|[KMGTPE]iB?))?/;
 
 function unitsToBytes(value) {
-  const match = value.match(unitRegex);
+  const match = value.match(bytes_regex);
 
   if (!match?.groups) {
     return NaN;
@@ -196,7 +196,7 @@ function unitsToBytes(value) {
     return parsedValue;
   }
 
-  const unit = units.filter(x => x.suffix === match.groups.suffix)[0];
+  const unit = byte_units.filter(x => x.suffix === match.groups.suffix)[0];
 
   return parseInt((parsedValue * unit.magnitude).toFixed(1));
 }
@@ -214,9 +214,45 @@ function getUnitFromBytes(bytes){
 
     const index = Math.floor(Math.log(bytes) / Math.log(base));
 
-    if (index < magnitudes.length - 1){
-        return magnitudes[index];
+    if (index < byte_units.length - 1){
+        return byte_units[index];
     }
     
-    return magnitudes[magnitudes.length -1];
+    return byte_units[byte_units.length -1];
+}
+
+
+const cpu_units = [
+    {suffix: "n", magnitude: 1000 ** -3},
+    {suffix: "u", magnitude: 1000 ** -2},
+    {suffix: "m", magnitude: 1000 ** -1}, // milli
+    {suffix: "",  magnitude: 1}, // no units
+    {suffix: "k", magnitude: 1000 ** 1},
+    {suffix: "M", magnitude: 1000 ** 2},
+    {suffix: "G", magnitude: 1000 ** 3},
+    {suffix: "P", magnitude: 1000 ** 4},
+    {suffix: "T", magnitude: 1000 ** 5},
+    {suffix: "E", magnitude: 1000 ** 6},
+  ];
+
+function cpuUnitsToNumber(value) {
+    if (!value){
+        return 0;
+    }
+
+    let n = value.slice(-1);
+    let digits = value.slice(0, -1);
+    const isDigit = /\d+/.test(n);
+
+    if (isDigit){
+      return parseFloat(value);
+    }
+    
+    const converters = cpu_units.filter(x => x.suffix == n);
+  
+    if (converters.length === 0) {
+      return 0;
+    }
+  
+    return parseFloat(digits) * converters[0].magnitude;
 }
