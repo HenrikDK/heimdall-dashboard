@@ -97,7 +97,7 @@ function getMetricQuery(options) {
             switch (options.name) {
                 case "cpu-usage":
                     return `sum(rate(container_cpu_usage_seconds_total{container!="POD",container!="",pod=~"${options.pods}",namespace="${options.namespace}"}[3m])) by (pod)`;
-                case "memory-usage":
+                case "mem-usage":
                     return `sum(container_memory_working_set_bytes{container!="POD",container!="",pod=~"${options.pods}",namespace="${options.namespace}"}) by (pod)`;
 
                 case "fs-writes":
@@ -105,9 +105,9 @@ function getMetricQuery(options) {
                 case "fs-reads":
                     return `sum(rate(container_fs_reads_bytes_total{container!="", pod=~"${options.pods}", namespace="${options.namespace}"}[3m])) by (pod)`;
                     
-                case "network-received":
+                case "net-recv":
                     return `sum(rate(container_network_receive_bytes_total{pod=~"${options.pods}",namespace="${options.namespace}"}[3m])) by (pod)`;
-                case "network-sent":
+                case "net-sent":
                     return `sum(rate(container_network_transmit_bytes_total{pod=~"${options.pods}",namespace="${options.namespace}"}[3m])) by (pod)`;
             }
             break;
@@ -133,16 +133,18 @@ function getMetricLastPoints(data, metric= '') {
 }
 
 function getDataSeries(options) {
-    if (options.length < 1) return [];
+    if (options.length < 1) return [[], 0, {suffix: "", magnitude: 1}];
+
+    if (options[0].metrics.length < 1) return [[], 0, {suffix: "", magnitude: 1}];
     
     let time = options[0].metrics.values.map(x => x[0]);
     let first = options[0].metrics.values.map(x => parseFloat(x[1]));
     let second = options.length > 1 ? options[1].metrics.values.map(x => parseFloat(x[1])) : [];
-    let firstMax = Math.max(first);
-    let secondMax = second.length > 0 ? Math.max(second) : 0;
+    let firstMax = Math.max(...first);
+    let secondMax = second.length > 0 ? Math.max(...second) : 0;
     let trueMax = firstMax > secondMax ? firstMax : secondMax;
 
-    let unit = first?.params?.unit === 'bytes' ? getUnitFromBytes(firstMax) : {suffix: "", magnitude: 1};
+    let unit = options[0]?.params?.unit === 'bytes' ? getUnitFromBytes(firstMax) : {suffix: "", magnitude: 1};
 
     let data = time.map((t, index) => {
         let short = luxon.DateTime.fromMillis(t * 1000).toFormat('HH:mm');
@@ -199,6 +201,28 @@ function unitsToBytes(value) {
   const unit = byte_units.filter(x => x.suffix === match.groups.suffix)[0];
 
   return parseInt((parsedValue * unit.magnitude).toFixed(1));
+}
+
+function memoryUnitToBytes(value){
+    if (!value){
+        return 0;
+    }
+
+    let n = value.slice(-2);
+    let digits = value.slice(0, -2);
+    const isDigit = /\d+/.test(n);
+
+    if (isDigit){
+      return parseFloat(value);
+    }
+    
+    const converters = byte_units.filter(x => x.suffix.startsWith(n));
+  
+    if (converters.length === 0) {
+      return 0;
+    }
+  
+    return parseFloat(digits) * converters[0].magnitude;
 }
 
 function bytesToUnits(bytes, precision = 1){
