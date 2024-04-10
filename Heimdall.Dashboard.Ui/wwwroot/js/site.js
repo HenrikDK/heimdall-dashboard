@@ -85,11 +85,11 @@ function getMetricQuery(options) {
                 case "memory-usage":
                     return `sum(container_memory_working_set_bytes{container!="POD",container!="",instance=~"${options.nodes.join('|')}"}) by (component)`;
                 case "cpu-usage":
-                    return `sum(rate(node_cpu_seconds_total{kubernetes_node=~"${options.nodes.join('|')}", mode=~"user|system"}[${this.rateAccuracy}]))`;
-                    
+                    return `sum(rate(node_cpu_seconds_total{kubernetes_node=~"${options.nodes.join('|')}", mode=~"user|system"}[3m]))`;
+                
                 // instance
                 case "memory-available":
-                    return `sum(node_memory_MemTotal_bytes - (node_memory_MemFree_bytes + node_memory_Buffers_bytes + node_memory_Cached_bytes)) by (kubernetes_name)`.replace(/_bytes/g, `_bytes{kubernetes_node=~"${options.nodes.join('|')}"}`);
+                    return `sum(node_memory_MemTotal_bytes - (node_memory_MemFree_bytes + node_memory_Buffers_bytes + node_memory_Cached_bytes)) by (kubernetes_name)`.replace('_bytes', `_bytes{kubernetes_node=~"${options.nodes.join('|')}"}`);
                 case "memory-requests":
                     return `sum(kube_pod_container_resource_requests{node=~"${options.nodes.join('|')}", resource="memory"}) by (component)`;
                 case "memory-limits":
@@ -107,7 +107,7 @@ function getMetricQuery(options) {
                 case "cpu-capacity":
                     return `sum(kube_node_status_capacity{node=~"${options.nodes.join('|')}", resource="cpu"}) by (component)`;
                 case "cpu-allocatable":
-                    return `sum(kube_node_status_allocatable{node=~"${options.nodes.join('|')}", resource="cpu"}) by (component)`;        
+                    return `sum(kube_node_status_allocatable{node=~"${options.nodes.join('|')}", resource="cpu"}) by (component)`;
             }
             break;
 
