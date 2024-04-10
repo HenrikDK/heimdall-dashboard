@@ -149,7 +149,7 @@ router.beforeEach(beforeEach)
 const app = createApp({
   methods: {
     updateNodes(){
-      this.nodes = this.clusterNodes.map(x => x.metadata.name).join('|');
+      this.nodes = this.clusterNodes.map(x => x.metadata.name);
     }
   },
   data() {
@@ -159,7 +159,7 @@ const app = createApp({
           config: {},
           search: "",
           logSearch: "",
-          nodes: "",
+          nodes: [],
           clusterNodes: null,
       }
     },
