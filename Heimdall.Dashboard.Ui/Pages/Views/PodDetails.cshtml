@@ -344,10 +344,9 @@ let setup = (props, ctx) => {
     var [data, max, unit] = getDataSeries(metrics.value.cpu);
 
     let limit = 0;
-    if (limitState.value){
-    
-    let containers = pod.value?.spec?.containers?.map(x => cpuUnitsToNumber(x.resources?.limits.cpu)) ?? [];
-    limit = containers.reduce((a, b) => a + b, 0);
+    if (limitState.value){    
+      let containers = pod.value?.spec?.containers?.map(x => cpuUnitsToNumber(x.resources?.limits.cpu)) ?? [];
+      limit = containers.reduce((a, b) => a + b, 0);
     }
 
     updateSimpleChart(charts.value.cpu, metrics.value.cpu, unit, isDark.value, limit);
