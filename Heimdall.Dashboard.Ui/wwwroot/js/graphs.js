@@ -411,7 +411,7 @@ function updateSimpleChart(options, series = [], unit, isDark = false, limit = 0
         formatter: '{value}'
     }
 
-    options.tooltip['valueFormatter'] = undefined;    
+    options.tooltip['valueFormatter'] = formatCpuValue;    
     if (unit.suffix !== ''){
         options.yAxis['axisLabel']['formatter'] = formatByteValue;
         options.tooltip['valueFormatter'] = formatByteValue;    
