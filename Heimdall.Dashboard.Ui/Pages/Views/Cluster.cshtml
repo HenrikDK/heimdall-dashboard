@@ -203,8 +203,38 @@ let setup = (props, ctx) => {
     charts.value.workloads.daemonsets = workload('Daemon Sets', running, pending);
   };
   
-  let updateCpu = async () => {
+  let updateCpu = () => {
+    if (!metrics.value.cpu) return;
+    if (metrics.value.cpu[0].metrics.length < 1) return;
+
+    var [data, max, unit] = getDataSeries(metrics.value.cpu);
+
+    let limit = 0;
+    if (limitState.value){    
+      let containers = pod.value?.spec?.containers?.map(x => cpuUnitsToNumber(x.resources?.limits.cpu)) ?? [];
+      limit = containers.reduce((a, b) => a + b, 0);
+    }
+
+    updateSimpleChart(charts.value.cluster.cpu, metrics.value.cpu, unit, isDark.value, limit);
+  };
+  
+  let updateMemory = () => {
+    if (!metrics.value.memory) return;
+    if (metrics.value.memory[0].metrics.length < 1) return;
+
+    var [data, max, unit] = getDataSeries(metrics.value.memory);
+    
+    let limit = 0;
+    if (limitState.value){    
+      let containers = pod.value?.spec?.containers?.map(x => memoryUnitToBytes(x.resources?.limits.memory)) ?? [];
+      limit = containers.reduce((a, b) => a + b, 0);
+    }
+
+    updateSimpleChart(charts.value.cluster.memory, metrics.value.memory, unit, isDark.value, limit);
+  };
     /*
+  let updateCpu = async () => {
+
     if (!metrics.value.nodeCpu || metrics.value.nodeCpu?.length === 0 || !metrics.value.kubeCpu || metrics.value.kubeCpu?.length === 0) return;
     
     let capacity = getMetricLastPoints(metrics.value.kubeCpu, 'kube_node_status_capacity');
@@ -223,11 +253,11 @@ let setup = (props, ctx) => {
     let usagePct = usageValue / capacity * 100;
     let usage = {pct: usagePct.toFixed(2), units: usageValue.toFixed(2) };
     
-    charts.value.cluster.cpus = current('CPU', 'vCores', usage, requests, limits);*/
+    charts.value.cluster.cpus = current('CPU', 'vCores', usage, requests, limits);
   };
   
   let updateMemory = async () => {
-    /*
+    
     if (!metrics.value.kubeMemory || metrics.value.kubeMemory?.length === 0 || !metrics.value.nodeMemory || metrics.value.nodeMemory?.length === 0) return;
     
     let capacity = getMetricLastPoints(metrics.value.kubeMemory, 'kube_node_status_capacity');
@@ -246,8 +276,8 @@ let setup = (props, ctx) => {
     let usagePct = usageValue / capacity * 100;
     let usage = {pct: usagePct.toFixed(2), units: (usageValue / 1024 / 1024 / 1024).toFixed(2) };
     // todo calculate unit
-    charts.value.cluster.memory = current('Memory', 'GiB', usage, requests, limits);*/
-  };
+    charts.value.cluster.memory = current('Memory', 'GiB', usage, requests, limits);
+  };*/
 
   let updateHistory = async () => {
 /*    if (!metrics.value.kubeMemory || metrics.value.kubeMemory?.length === 0 || !metrics.value.nodeMemory || metrics.value.nodeMemory?.length === 0) return;
