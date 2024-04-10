@@ -343,9 +343,14 @@ let setup = (props, ctx) => {
   let updateCpu = () => {
     var [data, max, unit] = getDataSeries(metrics.value.cpu);
 
-    metrics.value.cpu[0].params['color'] = isDark.value ? '#4992ff' : '#5470c6' // blue: #5470c6, dark: blue: #4992ff
+    let limit = 0;
+    if (limitState.value){
     
-    updateSimpleChart(charts.value.cpu, metrics.value.cpu, unit, isDark.value);
+    let containers = pod.value?.spec?.containers?.map(x => cpuUnitsToNumber(x.resources?.limits.cpu)) ?? [];
+    limit = containers.reduce((a, b) => a + b, 0);
+    }
+
+    updateSimpleChart(charts.value.cpu, metrics.value.cpu, unit, isDark.value, limit);
   };
   
   let updateMemory = () => {
@@ -361,6 +366,12 @@ let setup = (props, ctx) => {
     events.value = clusterEvents.value.filter(x => x?.involvedObject?.name === name);
   });
       
+  watch(() => limitState.value, () => {
+    if (chartState.value === 'cpu'){
+      return updateCpu();
+    }
+  })
+
   onMounted(async () => {
     let namespace = route.params.namespace;
     let options = { pods: name, namespace: namespace };
