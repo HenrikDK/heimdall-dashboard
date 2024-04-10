@@ -20,7 +20,14 @@ function streamMetrics(options, cb, connections = null) {
             if (!isApiRequestInProgress) {
                 isApiRequestInProgress = true;
 
-                let end = DT.now();
+                let now = DT.utc();
+                
+                if (now.toObject().second >= 30){
+                    now = now.set({second: 30, millisecond: 0});
+                } else {
+                    now = now.set({second: 0, millisecond: 0});
+                }
+                let end = now;
                 let begin = end.minus({ hours: 1 });
 
                 try {
@@ -30,15 +37,15 @@ function streamMetrics(options, cb, connections = null) {
                         x['metrics'] = metrics?.data?.result[0] ?? metrics;
                     }));
                     
-                    cb(options);
                 } catch (err) {
                     console.error('Unable to send request', {err});
                 } finally {
                     isApiRequestInProgress = false;
                 }
+                cb(options);
             }
         } catch (err) {
-            console.error('No metrics', {err, url});
+            console.error('No metrics', {err, options});
         }
     }
     if (connections){
