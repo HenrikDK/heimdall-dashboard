@@ -1,4 +1,4 @@
-﻿<template id="pod-details">
+<template id="pod-details">
   <div class="pl-2 pr-4 max-w-5xl mx-auto">
     
   <br/>
@@ -345,10 +345,7 @@ let setup = (props, ctx) => {
 
     metrics.value.cpu[0].params['color'] = isDark.value ? '#4992ff' : '#5470c6' // blue: #5470c6, dark: blue: #4992ff
     
-    //console.log(`updating chart, length ${usage.length}, first item ${usage[0][0]} - ${usage[0][1]}, last item ${usage[usage.length - 1][0]} - ${usage[usage.length -1][1]}`)
-
-    updateSimpleChart(charts.value.cpu, metrics.value.cpu, 'vCore', );
-//    chart.value.setOption(chartOptions.value, {replaceMerge: ['xAxis', 'yAxis', 'series', 'data']});
+    updateSimpleChart(charts.value.cpu, metrics.value.cpu, unit, isDark.value);
   };
   
   let updateMemory = () => {
