@@ -281,7 +281,7 @@ let setup = (props, ctx) => {
     charts.value.cluster.memory = current('Memory', 'GiB', usage, requests, limits);
   };*/
 
-  let updateHistory = async () => {
+  let updateCurrent = async () => {
 /*    if (!metrics.value.kubeMemory || metrics.value.kubeMemory?.length === 0 || !metrics.value.nodeMemory || metrics.value.nodeMemory?.length === 0) return;
     if (!metrics.value.nodeCpu || metrics.value.nodeCpu?.length === 0 || !metrics.value.kubeCpu || metrics.value.kubeCpu?.length === 0) return;
     
@@ -312,9 +312,11 @@ let setup = (props, ctx) => {
     {
       metrics.value.memory.forEach(x => x['nodes'] = props.nodes)
       metrics.value.cpu.forEach(x => x['nodes'] = props.nodes)
+      metrics.value.current.forEach(x => x['nodes'] = props.nodes)
 
       streamMetrics(metrics.value.memory, updateMemory, connections.value);
       streamMetrics(metrics.value.cpu, updateCpu, connections.value);
+      streamMetrics(metrics.value.current, updateCurrent, connections.value);
     }
   }
     
@@ -361,7 +363,7 @@ let setup = (props, ctx) => {
     filterNamespace, 
     updateClusterPods, updateClusterDeployments, updateClusterJobs, updateClusterCronJobs, 
     updateClusterStatefulSets, updateClusterReplicaSets, updateClusterDaemonSets,
-    updateCpu, updateMemory, updateHistory, updateMetrics
+    updateCpu, updateMemory, updateCurrent, updateMetrics
   }
 }
 
