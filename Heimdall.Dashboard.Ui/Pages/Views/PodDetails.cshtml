@@ -341,6 +341,9 @@ let setup = (props, ctx) => {
   }
   
   let updateCpu = () => {
+    if (!metrics.value.cpu) return;
+    if (metrics.value.cpu[0].metrics.length < 1) return;
+
     var [data, max, unit] = getDataSeries(metrics.value.cpu);
 
     let limit = 0;
@@ -353,11 +356,18 @@ let setup = (props, ctx) => {
   };
   
   let updateMemory = () => {
-    var [data, max, unit] = getDataSeries(metrics.value.cpu);
-    
-    metrics.value.cpu[0].params['color'] = isDark.value ? '#dd79ff' : '#ea7ccc' // pink: #ea7ccc, dark: pink: #dd79ff
+    if (!metrics.value.memory) return;
+    if (metrics.value.memory[0].metrics.length < 1) return;
 
-    updateSimpleChart(chartOptions.value, usage, 1, '');
+    var [data, max, unit] = getDataSeries(metrics.value.memory);
+    
+    let limit = 0;
+    if (limitState.value){    
+      let containers = pod.value?.spec?.containers?.map(x => memoryUnitToBytes(x.resources?.limits.memory)) ?? [];
+      limit = containers.reduce((a, b) => a + b, 0);
+    }
+
+    updateSimpleChart(charts.value.memory, metrics.value.memory, unit, isDark.value, limit);
   };
   
   watch(clusterEvents, () => {
@@ -366,9 +376,8 @@ let setup = (props, ctx) => {
   });
       
   watch(() => limitState.value, () => {
-    if (chartState.value === 'cpu'){
-      return updateCpu();
-    }
+    updateCpu();
+    updateMemory();
   })
 
   onMounted(async () => {
@@ -378,15 +387,12 @@ let setup = (props, ctx) => {
     if (props.config.metrics){
 
       streamMetrics(metrics.value.filesystem, updateFilesystem, connections.value);
-
       streamMetrics(metrics.value.network, updateNetworking, connections.value);
-
       streamMetrics(metrics.value.memory, updateMemory, connections.value);
-
       streamMetrics(metrics.value.cpu, updateCpu, connections.value);
     }
     
-    streamMetrics(metrics.value.cpu, updateCpu, connections.value);
+    streamMetrics(metrics.value.memory, updateMemory, connections.value);
 
     streamResult(`/k8s/api/v1/namespaces/${namespace}/pods`, route.params.name, j => pod.value = j, connections.value);
     streamResults(`/k8s/api/v1/namespaces/${namespace}/events`, j => clusterEvents.value = j, connections.value)
