@@ -20,13 +20,13 @@
           </div>
         </div>
 
-        <v-chart :option="charts.cluster.performance" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+        <v-chart :option="charts.cluster[chartState]" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
       </div>
       <div class="large-graph">
-        <v-chart :option="charts.cluster.cpus" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+        <v-chart :option="charts.cluster.currentCpu" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
       </div>
       <div class="large-graph">
-        <v-chart :option="charts.cluster.memory" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+        <v-chart :option="charts.cluster.currentMemory" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
       </div>
     </div>
         
@@ -85,35 +85,54 @@ let setup = (props, ctx) => {
   const metrics = ref({
       cpu: [
         { 
-          type:'cluster', name:'node-cpu-stats', 
-          metrics: [], data: [], params: { unit: 'cores', name:'Usage', index: 1, colorDark: '#4992ff', colorLight: '#5470c6'}
-        },
-        { 
-          type:'cluster', name:'kube-cpu-stats', 
+          type:'cluster', name:'cpu-usage', 
           metrics: [], data: [], params: { unit: 'cores', name:'Usage', index: 1, colorDark: '#4992ff', colorLight: '#5470c6'}
         }
       ],
       memory: [
         {
-          type:'cluster', name:'node-memory-stats', 
+          type:'cluster', name:'memory-usage', 
           metrics: [], data: [], params: { unit: 'bytes', name:'Usage', index: 1, colorDark: '#dd79ff', colorLight: '#ea7ccc'}
-        },
-        { 
-          type:'cluster', name:'container-memory', 
-          metrics: [], data: [], params: { unit: 'cores', name:'Usage', index: 1, colorDark: '#4992ff', colorLight: '#5470c6'}
-        },
-        { 
-          type:'cluster', name:'kube-memory-stats', 
-          metrics: [], data: [], params: { unit: 'cores', name:'Usage', index: 1, colorDark: '#4992ff', colorLight: '#5470c6'}
         }
       ],
+      current: [
+        { 
+          type:'cluster', name:'memory-available', metrics: []
+        },
+        { 
+          type:'cluster', name:'memory-requests', metrics: []
+        },
+        { 
+          type:'cluster', name:'memory-limits', metrics: []
+        },
+        { 
+          type:'cluster', name:'memory-capacity', metrics: []
+        },
+        { 
+          type:'cluster', name:'memory-allocatable', metrics: []
+        },
+
+        { 
+          type:'cluster', name:'cpu-requests', metrics: []
+        },
+        { 
+          type:'cluster', name:'cpu-limits', metrics: []
+        },
+        { 
+          type:'cluster', name:'cpu-capacity', metrics: []
+        },
+        { 
+          type:'cluster', name:'cpu-allocatable', metrics: []
+        }
+      ]
   });
   
   const charts = ref({
     cluster:{
-        performance: getSimpleChart(),
-        cpus: current('CPU'),
-        memory: current('Memory')
+        cpu: getSimpleChart(),
+        memory: getSimpleChart(),
+        currentCpu: current('CPU'),
+        currentMemory: current('Memory')
     },
     workloads:{
         pods: workload('Pods', 0, 0),
