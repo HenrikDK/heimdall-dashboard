@@ -70,14 +70,17 @@ let setup = (props, ctx) => {
   });
 
   const metrics = ref({
-      memory: [
-        {type: 'cluster', name: 'kube-memory-stats', nodes: props.nodes, metrics: [], data: []},
-        {type: 'cluster', name: 'container-memory', nodes: props.nodes, metrics: [], data: []},
-        {type: 'cluster', name: 'node-memory-stats', nodes: props.nodes, metrics: [], data: []},
-      ],
       cpu: [
-        {type: 'cluster', name: 'kube-cpu-stats', nodes: props.nodes, metrics: [], data: []}, 
-        {type: 'cluster', name: 'node-cpu-stats', nodes: props.nodes, metrics: [], data: []}
+        { 
+          type:'cluster', name:'cpu-usage', pods: route.params.name, namespace: route.params.namespace, 
+          metrics: [], data: [], params: { unit: 'cores', name:'Usage', index: 1, colorDark: '#4992ff', colorLight: '#5470c6'}
+        }
+      ],
+      memory: [
+        {
+          type:'cluster', name:'mem-usage', pods: route.params.name, namespace: route.params.namespace, 
+          metrics: [], data: [], params: { unit: 'bytes', name:'Usage', index: 1, colorDark: '#dd79ff', colorLight: '#ea7ccc'}
+        },
       ],
       kubeMemory: null,
       containerMemory: null,
