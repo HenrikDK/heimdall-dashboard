@@ -437,7 +437,7 @@ function formatCpuValue(value){
 }
 
 function formatByteValue(value){
-    if (value < 1000) return value;
+    if (value < 1000) return `${value.toFixed(0)} B`;
 
     let unit = getUnitFromBytes(value)
 
@@ -483,7 +483,13 @@ function getSimpleChart(){
 }
 
 function updateSimpleChart(options, series = [], unit, isDark = false, limit = 0, max = 0){
-    
+    options.tooltip['backgroundColor'] = '#fff';
+    options.tooltip['borderColor'] = '#fff';
+    if (isDark){
+        options.tooltip['backgroundColor'] = '#000';
+        options.tooltip['borderColor'] = '#000';
+    }
+
     options.yAxis['axisLabel'] = {
         formatter: '{value}'
     }
@@ -510,12 +516,21 @@ function updateSimpleChart(options, series = [], unit, isDark = false, limit = 0
         first['markLine'] = line;
     }
     options.series.splice(0, options.series.length);
-    options.series.push(first);
 
-    if (series.length < 2) return options;
+    if (series.length < 2){
+        options.series.push(first);
+        return options;
+    } 
 
     let second = getSimpleSeries(series[1], isDark);
-    options.series.push(second);
+
+    if (series[1].params.max > series[0].params.max){
+        options.series.push(first);
+        options.series.push(second);
+    } else {
+        options.series.push(second);
+        options.series.push(first);
+    }
 
     return options;
 }
