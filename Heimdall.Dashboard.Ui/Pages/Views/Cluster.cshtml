@@ -53,12 +53,14 @@
 
 <script type="module">
 import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useDark } from "@@vueuse/core";
 
 let setup = (props, ctx) => {
   const isDark = useDark();
   const initOptions = ref({ renderer: "svg" });
   const connections = ref([]);
+  const route = ref();
   const cluster = ref({
     pods: null,
     deployments: null,
