@@ -1,4 +1,4 @@
-﻿<template id="cluster">
+<template id="cluster">
   <div class="pl-2 pr-4 w-100">
 
     <div v-if="config.metrics" class="flex my-2 items-center">
@@ -9,6 +9,17 @@
         
     <div v-if="config.metrics" class="flex justify-between mb-4 mt-1">
       <div class="wide-graph">
+
+        <div class="flex justify-center mb-4">
+          <div class="flex">
+            <chart-toggle name="cpu" :state="chartState" label="CPU" @@update="e => chartState = e"></chart-toggle>
+
+            <chart-toggle name="memory" :state="chartState" label="Memory" @@update="e => chartState = e"></chart-toggle>
+
+            <chart-toggle name="limit" :state="limitState" label="Limit" :state-visible="true" @@update="e => limitState = !limitState"></chart-toggle>
+          </div>
+        </div>
+
         <v-chart :option="charts.cluster.performance" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
       </div>
       <div class="large-graph">
