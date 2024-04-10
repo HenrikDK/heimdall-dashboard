@@ -83,21 +83,28 @@ let setup = (props, ctx) => {
   const metrics = ref({
       cpu: [
         { 
-          type:'cluster', name:'cpu-usage', pods: route.params.name, namespace: route.params.namespace, 
+          type:'cluster', name:'node-cpu-stats', 
+          metrics: [], data: [], params: { unit: 'cores', name:'Usage', index: 1, colorDark: '#4992ff', colorLight: '#5470c6'}
+        },
+        { 
+          type:'cluster', name:'kube-cpu-stats', 
           metrics: [], data: [], params: { unit: 'cores', name:'Usage', index: 1, colorDark: '#4992ff', colorLight: '#5470c6'}
         }
       ],
       memory: [
         {
-          type:'cluster', name:'mem-usage', pods: route.params.name, namespace: route.params.namespace, 
+          type:'cluster', name:'node-memory-stats', 
           metrics: [], data: [], params: { unit: 'bytes', name:'Usage', index: 1, colorDark: '#dd79ff', colorLight: '#ea7ccc'}
         },
+        { 
+          type:'cluster', name:'container-memory', 
+          metrics: [], data: [], params: { unit: 'cores', name:'Usage', index: 1, colorDark: '#4992ff', colorLight: '#5470c6'}
+        },
+        { 
+          type:'cluster', name:'kube-memory-stats', 
+          metrics: [], data: [], params: { unit: 'cores', name:'Usage', index: 1, colorDark: '#4992ff', colorLight: '#5470c6'}
+        }
       ],
-      kubeMemory: null,
-      containerMemory: null,
-      nodeMemory: null,
-      kubeCpu: null,
-      nodeCpu: null,
   });
   
   const charts = ref({
