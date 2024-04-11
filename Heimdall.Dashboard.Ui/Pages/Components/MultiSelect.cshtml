@@ -1,29 +1,19 @@
 ﻿<template id="multiselect">
-  <div ref="target"  class="relative" aria-label="Select Environment">
-    <button @@click="isOpen = !isOpen" type="button"
-      class="h-9 w-full text-gray-200 items-center flex justify-end box-border cursor-pointer border border-white/[.4] outline-0 rounded 
-          bg-brand dark:bg-zinc-900 text-white/[.6] leading-snug outline-none focus:border-white">
+  <div ref="target"  class="relative" aria-label="Select Environment"  title="Shift + N to filter namespace">
+    <div tabindex="-1" :data-focus="hasFocus"
+      class="h-9 w-full text-gray-200 items-center flex justify-end box-border cursor-pointer border border-white/[.4] rounded 
+          bg-brand text-white/[.6] leading-snug outline-none 
+          dark:bg-zinc-900 
+          data-[focus=true]:border-white">
       
       <template v-if="values.length > 0">
-        <input type="text" ref="input" id="ns-search" v-model="search" @@keyUp="handleKeypress"
+        <input type="text" ref="input" id="ns-search" v-model="search" @@keyUp="handleKeypress" @@focus="hasFocus = true" @@blur="hasFocus = false"
                class="bg-transparent w-full h-8 ml-3 outline-none text-gray-200 placeholder-white/[.6]"
                :placeholder="placeholder"
           :aria-expanded="isOpen"
-          role="combobox"
-        />
+          role="combobox"/>
+        
       </template>
-      
-      <!-- Label 
-      <template v-if="values.length > 0 && selected.length > 0">
-        <div class="flex items-center h-9 absolute left-0 top-0 bg-transparent leading-snug pl-3.5">
-          {{selected.length}} Selected 
-        </div>
-      </template>
-      <template v-if="values.length > 0 && selected.length === 0">
-        <div class="flex items-center h-9 absolute left-0 top-0 bg-transparent leading-snug pl-3.5">
-          Select namespaces
-        </div>
-      </template> -->
       
       <!-- Spinner -->
       <template v-if="values.length === 0">
@@ -56,7 +46,7 @@
           </svg>
         </span>
       </template>
-    </button>
+    </div>
 
     <!-- Options -->
     <div @@focusout="isOpen = false" tabindex="-1" data-ns="1"
@@ -82,6 +72,12 @@
             <span class="ml-8">{{ v }}</span>
           </li>
         </template>
+        <template v-else>
+          <li class="py-1 px-1 flex bg-white text-gray-600 dark:bg-zinc-900 dark:text-gray-400">
+            <span class="ml-8">...</span>
+          </li>
+        </template>
+
       </ul>
       
       <template v-if="values.length === 0" name="loading">
@@ -100,6 +96,7 @@ import { onClickOutside } from '@@vueuse/core'
 let setup = (props, ctx) => {
   const noOptions = ref(false);
   const isOpen = ref(false);
+  const hasFocus = ref(false)
   const selected = ref([]);
   const cursor = ref(-1);
   const search = ref('');
@@ -167,6 +164,8 @@ let setup = (props, ctx) => {
   }
 
   let handleKeypress = (e) => {
+    e.preventDefault();
+
     if(e.key === 'Escape'){
       if (search.value.length > 0 || cursor.value > -1){
         search.value = '';
@@ -179,13 +178,13 @@ let setup = (props, ctx) => {
     }
 
     if(e.key === 'Enter'){
-      if (cursor.value > -1 && cursor.value < props.values.length - 1){
-        handleOptionClick(props.values[cursor.value]);
+      if (cursor.value > -1 && cursor.value < items.value.length - 1){
+        handleOptionClick(items.value[cursor.value]);
       }
     }
 
     if (e.key === 'ArrowDown'){
-      if (cursor.value < props.values.length - 1){
+      if (cursor.value < items.value.length - 1){
         cursor.value += 1;
       }
     }
@@ -206,7 +205,7 @@ let setup = (props, ctx) => {
     window.document.removeEventListener('keydown', onKeyDown);
   });
  
-  return { noOptions, isOpen, selected, search, placeholder, target, items, cursor,
+  return { noOptions, isOpen, selected, search, placeholder, target, items, cursor, hasFocus,
     setExclusive, handleClear, handleOptionClick, handleKeypress, onKeyDown}
 }
 
