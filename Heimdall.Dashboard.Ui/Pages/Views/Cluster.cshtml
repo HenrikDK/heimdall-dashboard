@@ -312,6 +312,10 @@ let setup = (props, ctx) => {
     updateClusterDaemonSets();
   });
   
+  watch([chartState, isDark], () => {
+    updateMetricsCharts();
+  });
+
   watch(() => props.nodes, () => {
     updateMetrics();
   });
