@@ -1,5 +1,6 @@
 ﻿<template id="chart-toggle">
-  <div @@click="$emit('update', name)" :class="[visible ? 'w-[105px]' : '', stateVisible ? '': 'aria-checked:cursor-default']" :aria-checked="active"
+  <div @@click="$emit('update', name)" :aria-checked="active"
+  :class="[visible ? 'w-[105px]' : '', stateVisible ? '': 'aria-checked:cursor-default']"
   class="flex px-4 py-1 me-2 rounded-lg items-center justify-center border cursor-pointer 
   border-gray-300 bg-white fill-gray-300
   hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
