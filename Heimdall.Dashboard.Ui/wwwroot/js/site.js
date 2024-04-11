@@ -138,20 +138,24 @@ function getMetricQuery(options) {
     return ''
 }
 
-function getMetricLastPoints(data, metric= '') {
-    let metrics = data
-    if (metric.length > 0){
-        metrics = metrics.filter(x => x.metric["__name__"] === metric)
-    }
-    let result = metrics.map(x => {
-        try {
-            return x.values.slice(-1)[0][1];
-        } catch {
-            return undefined;
-        }
-    });
+function getMetricLastPoints(metric) {
+    if (metric.values.length < 0) return undefined;
 
-    return parseFloat(result[0]);
+    let result = metric.values.slice(-1)[0][1];
+
+    return parseFloat(result);
+}
+
+function getInstantMetricValue(options, metric= '') {
+    if (options.length < 1) return undefined;
+    
+    let series = options.filter(x => x.name === metric);
+    if (series.length < 1) return undefined;
+
+    let results = series[0].metrics;
+    if (results.length < 1) return undefined;
+
+    return parseFloat(results.value[1])
 }
 
 function getDataSeries(options) {
