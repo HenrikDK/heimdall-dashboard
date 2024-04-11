@@ -8,7 +8,7 @@
       </log-controls>
     </div>
     
-    <log-viewer :events="logEvents" :wrap="wrap" :direction="direction"></log-viewer>
+    <log-viewer :events="logEvents" :wrap="wrap" :direction="direction" :log-search="logSearch"></log-viewer>
   </div>
 </template>
 
@@ -36,13 +36,12 @@ let setup = (props, ctx) => {
   }
   
   onMounted(async () => {
-    var host = window.location.origin;
     let namespace = route.params.namespace;
     let name = route.params.name;
     let container = route.params.container;
     
     const url = `/k8s/api/v1/namespaces/${namespace}/pods/${name}/log?container=${container}&previous=false&tailLines=1000&follow=true`;
-    streamLogs(host + url, updateLogs, connections.value);
+    streamLogs(url, updateLogs, connections.value);
 
     setTimeout(() => {
       let event = logEvents.value[logEvents.value.length - 1];
@@ -59,6 +58,6 @@ let setup = (props, ctx) => {
   }
 }
 
-components["pod-logs"] = { template: "#pod-logs", props: ['search'], setup };
+components["pod-logs"] = { template: "#pod-logs", props: ['logSearch'], setup };
 routes.push({path:'/namespace/:namespace/pods/:name/containers/:container/logs', name:'pod-logs', component: components["pod-logs"]})    
 </script>
