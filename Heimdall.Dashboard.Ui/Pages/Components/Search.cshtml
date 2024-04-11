@@ -1,8 +1,9 @@
 <template id="search">
   <div class="relative" aria-label="Search..">
-    <div class="h-9 w-full text-gray-200 items-center flex justify-center box-border cursor-pointer border border-white/[.4] outline-0 rounded 
+    <div tabindex="-1" :data-focus="hasFocus"
+      class="h-9 w-full text-gray-200 items-center flex justify-center box-border cursor-pointer border border-white/[.4] outline-0 rounded 
         bg-brand dark:bg-zinc-900 text-white/[.6] leading-snug outline-none 
-        data-[focus=true]:border-white data-[focus=true]:text-white data-[focus=true]:fill-white" tabindex="-1" :data-focus="hasFocus">
+        data-[focus=true]:border-white data-[focus=true]:text-white data-[focus=true]:fill-white">
       
       <span aria-hidden="true" tabindex="0" role="button" @@click="search"
             class="left-0 pl-1.5 absolute z-50 text-white/[.6] transition duration-300 flex-shrink-0 flex-grow-0 flex">
