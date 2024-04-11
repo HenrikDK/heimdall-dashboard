@@ -7,7 +7,7 @@
           data-[focus=true]:border-white">
       
       <template v-if="values.length > 0">
-        <input type="text" ref="input" id="ns-search" v-model="search" @@keyUp="handleKeypress" @@focus="hasFocus = true" @@blur="hasFocus = false"
+        <input type="text" ref="input" id="ns-search" v-model="search" @@keyDown="handleKeypress" @@focus="hasFocus = true" @@blur="hasFocus = false"
                class="bg-transparent w-full h-8 ml-3 outline-none text-gray-200 placeholder-white/[.6]"
                :placeholder="placeholder"
           :aria-expanded="isOpen"
@@ -57,10 +57,11 @@
       
       <ul class="flex flex-col p-0 m-0 list-none" role="listbox">
         <template v-if="items.length > 0">
-          <li v-for="(v, index) in items" @@click="handleOptionClick(v)" role="option" :aria-selected="selected.includes(v)" :data-ns="v" :data-cursor="cursor === index" 
+          <li v-for="(v, index) in items" @@click="handleOptionClick(v)" role="option" :id="'ns-' + index" :aria-selected="selected.includes(v)" :data-ns="v" :data-cursor="cursor === index" 
               class="py-1 px-1 flex aria-selected:font-medium aria-selected:text-black dark:aria-selected:text-white
                 bg-white text-gray-600 hover:bg-blue-200 hover:text-blue-600
-                data-cursor:bg-red-100
+                data-[cursor=true]:bg-blue-200 data-[cursor=true]:text-blue-600
+                dark:data-[cursor=true]:text-white dark:data-[cursor=true]:bg-zinc-700/[.9]
                 dark:bg-zinc-900 dark:text-gray-400 dark:hover:text-white dark:hover:bg-zinc-700/[.9]">
             <template v-if="selected.includes(v)">
               <span class="absolute text-blue-600">
@@ -164,8 +165,6 @@ let setup = (props, ctx) => {
   }
 
   let handleKeypress = (e) => {
-    e.preventDefault();
-
     if(e.key === 'Escape'){
       if (search.value.length > 0 || cursor.value > -1){
         search.value = '';
@@ -177,8 +176,15 @@ let setup = (props, ctx) => {
       }
     }
 
+    if(e.key === ' '){
+      e.preventDefault();
+      if (cursor.value > -1 && cursor.value < items.value.length){
+        handleOptionClick(items.value[cursor.value]);
+      }
+    }
+
     if(e.key === 'Enter'){
-      if (cursor.value > -1 && cursor.value < items.value.length - 1){
+      if (cursor.value > -1 && cursor.value < items.value.length){
         handleOptionClick(items.value[cursor.value]);
       }
     }
@@ -186,13 +192,25 @@ let setup = (props, ctx) => {
     if (e.key === 'ArrowDown'){
       if (cursor.value < items.value.length - 1){
         cursor.value += 1;
+        let option = document.getElementById('ns-' + cursor.value)
+        if (cursor.value > 0 && option){
+          option.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+        }
       }
     }
 
     if (e.key === 'ArrowUp'){
       if (cursor.value > -1){
         cursor.value -= 1;
+        let option = document.getElementById('ns-' + cursor.value)
+        if (cursor.value > 0 && option){
+          option.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+        }
       }
+    }
+
+    if (cursor.value > items.value.length - 1){
+      cursor.value = 0;
     }
   }
  
