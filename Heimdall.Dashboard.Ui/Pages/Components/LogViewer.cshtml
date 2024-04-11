@@ -153,6 +153,35 @@ let setup = (props, ctx) => {
     }, 500);
   })
 
+  let findOccurrences = (lines, query) => {
+    const regex = new RegExp(escapeRegex(query), "gi");
+
+    return lines.flatMap((line, index) => Array.from(line.matchAll(regex), () => index));
+  }
+
+  let escapeRegExp = (str) => {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
+  }
+
+  let onSearch = () => {
+    if (!query) {
+      return this.reset();
+    }
+
+    this.occurrences = this.findOccurrences(text ?? [], query);
+
+    if (!this.occurrences.length) {
+      return;
+    }
+
+    // If new highlighted keyword in exact same place as previous one, then no changing in active overlay
+    if (this.occurrences[this.activeOverlayIndex] === undefined) {
+      this.activeOverlayIndex = this.getNextOverlay(true);
+    }
+  }
+
+  //watch(() => props.direction, () => {
+
   /* 
   // scroll to search
    useEffect(() => {
@@ -167,7 +196,8 @@ components["log-viewer"] = { template: "#log-viewer", emits: [], setup,
   props: {
     events: Array,
     wrap: Boolean,
-    direction: String
+    direction: String,
+    logSearch: String
   }
 };
 </script>
