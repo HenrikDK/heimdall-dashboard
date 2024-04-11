@@ -235,65 +235,38 @@ let setup = (props, ctx) => {
 
     updateSimpleChart(charts.value.cluster.memory, metrics.value.memory, unit, isDark.value, 0, max);
   };
-    /*
-  let updateCpu = async () => {
-    //unit = getUnitFromBytes(memoryAllocatable)
-
-
-    if (!metrics.value.nodeCpu || metrics.value.nodeCpu?.length === 0 || !metrics.value.kubeCpu || metrics.value.kubeCpu?.length === 0) return;
-    
-    let capacity = getMetricLastPoints(metrics.value.kubeCpu, 'kube_node_status_capacity');
-    let requestValue = getMetricLastPoints(metrics.value.kubeCpu, 'kube_pod_container_resource_requests');
-    let requestPct = requestValue / capacity * 100;
-    let requests = {pct: requestPct.toFixed(2), units: requestValue.toFixed(2) };
-    
-    let limitValue = getMetricLastPoints(metrics.value.kubeCpu, 'kube_pod_container_resource_limits');
-    let limitPct = limitValue / capacity * 100;
-    if (limitPct > 100){
-        limitPct = 100;
-    }
-    let limits = {pct: limitPct.toFixed(2), units: limitValue.toFixed(2) };
-    
-    let usageValue = getMetricLastPoints(metrics.value.nodeCpu);
-    let usagePct = usageValue / capacity * 100;
-    let usage = {pct: usagePct.toFixed(2), units: usageValue.toFixed(2) };
-    
-    charts.value.cluster.cpus = current('CPU', 'vCores', usage, requests, limits);
-  };
-  
-  let updateMemory = async () => {
-    
-    if (!metrics.value.kubeMemory || metrics.value.kubeMemory?.length === 0 || !metrics.value.nodeMemory || metrics.value.nodeMemory?.length === 0) return;
-    
-    let capacity = getMetricLastPoints(metrics.value.kubeMemory, 'kube_node_status_capacity');
-    let requestValue = getMetricLastPoints(metrics.value.kubeMemory, 'kube_pod_container_resource_requests');
-    let requestPct = requestValue / capacity * 100;
-    let requests = {pct: requestPct.toFixed(2), units: (requestValue / 1024 / 1024 / 1024).toFixed(2) };
-    
-    let limitValue = getMetricLastPoints(metrics.value.kubeMemory, 'kube_pod_container_resource_limits');
-    let limitPct = limitValue / capacity * 100;
-    if (limitPct > 100){
-        limitPct = 100;
-    }
-    let limits = {pct: limitPct.toFixed(2), units: (limitValue / 1024 / 1024 / 1024).toFixed(2) };              
-    
-    let usageValue = getMetricLastPoints(metrics.value.nodeMemory);              
-    let usagePct = usageValue / capacity * 100;
-    let usage = {pct: usagePct.toFixed(2), units: (usageValue / 1024 / 1024 / 1024).toFixed(2) };
-    // todo calculate unit
-    charts.value.cluster.memory = current('Memory', 'GiB', usage, requests, limits);
-  };*/
 
   let updateCurrent = async () => {
     if (!metrics.value.memory || !metrics.value.cpu) return;
     if (metrics.value.memory[0].metrics.length < 1 || metrics.value.cpu[0].metrics.length < 1) return;
 
     let memoryCapacity = getInstantMetricValue(metrics.value.current, 'memory-capacity');
+    if (!memoryCapacity) return;
+
     let memoryUsage = getMetricLastPoints(metrics.value.memory[0].metrics);
     let memoryAvailable = getInstantMetricValue(metrics.value.current, 'memory-available');
     let memoryAllocatable = getInstantMetricValue(metrics.value.current, 'memory-allocatable');
     let memoryRequests = getInstantMetricValue(metrics.value.current, 'memory-requests');
     let memoryLimits = getInstantMetricValue(metrics.value.current, 'memory-limits');
+
+    let mUnit = getUnitFromBytes(memoryCapacity);
+
+    let memRequestPct = memoryRequests / memoryCapacity * 100;
+    let memRequestValue = memoryRequests / mUnit.magnitude;
+    let mRequests = {pct: memRequestPct.toFixed(2), units: memRequestValue.toFixed(2) };
+
+    let memLimitPct = memoryLimits / memoryCapacity * 100;
+    let memLimitValue = memoryLimits / mUnit.magnitude;
+    if (memLimitPct > 100){
+        memLimitPct = 100;
+    }
+    let mLimits = {pct: memLimitPct.toFixed(2), units: memLimitValue.toFixed(2)};
+
+    let memUsageValue = memoryUsage / mUnit.magnitude;
+    let memUsagePct = memoryUsage / memoryCapacity * 100;
+    let mUsage = {pct: memUsagePct.toFixed(2), units: memUsageValue.toFixed(2) };
+
+    charts.value.cluster.currentMemory = current('Memory', mUnit.suffix, mUsage, mRequests, mLimits);
 
     let cpuCapacity = getInstantMetricValue(metrics.value.current, 'cpu-capacity');
     let cpuUsage = getMetricLastPoints(metrics.value.cpu[0].metrics);
@@ -301,28 +274,19 @@ let setup = (props, ctx) => {
     let cpuRequests = getInstantMetricValue(metrics.value.current, 'cpu-requests');
     let cpuLimits = getInstantMetricValue(metrics.value.current, 'cpu-limits');
 
-/*  
+    let cpuRequestPct = cpuRequests / cpuCapacity * 100;
+    let cRequests = {pct: cpuRequestPct.toFixed(2), units: cpuRequests.toFixed(2) };
     
-    let memory = {
-        max: (memoryCapacity / 1024 / 1024 / 1024).toFixed(2),
-        data: memoryUsage.map(x => (x[1] / 1024 / 1024 / 1024).toFixed(2))
+    let cpuLimitPct = cpuLimits / cpuCapacity * 100;
+    if (cpuLimitPct > 100){
+        cpuLimitPct = 100;
     }
+    let cLimits = {pct: cpuLimitPct.toFixed(2), units: cpuRequests.toFixed(2) };              
     
-        { 
-          type:'cluster', name:'memory-limits', instant: true, metrics: []
-        },
-        { 
-          type:'cluster', name:'memory-allocatable', instant: true, metrics: []
-
-    let computeCapacity = getMetricLastPoints(metrics.value.kubeCpu, 'kube_node_status_capacity');
-    let computeUsage = getMetricSeries(metrics.value.nodeCpu);
-    let compute = {
-        max: computeCapacity.toFixed(2),
-        data: computeUsage.map(x => parseFloat(x[1]).toFixed(2))
-    }
+    let cpuUsagePct = cpuUsage / cpuCapacity * 100;
+    let cUsage = {pct: cpuUsagePct.toFixed(2), units: cpuUsage.toFixed(2) };
     
-    charts.value.cluster.performance = historic(memory, compute, time);
-    */
+    charts.value.cluster.currentCpu = current('CPU', 'vCores', cUsage, cRequests, cLimits);
   };
   
   let updateMetrics = async () => {
