@@ -1,4 +1,4 @@
-<template id="cluster">
+﻿<template id="cluster">
   <div class="pl-2 pr-4 w-100">
 
     <div v-if="config.metrics" class="flex my-2 items-center">
@@ -15,8 +15,6 @@
             <chart-toggle name="cpu" :state="chartState" label="CPU" @@update="e => chartState = e"></chart-toggle>
 
             <chart-toggle name="memory" :state="chartState" label="Memory" @@update="e => chartState = e"></chart-toggle>
-
-            <chart-toggle name="limit" :state="limitState" label="Limit" :state-visible="true" @@update="e => limitState = !limitState"></chart-toggle>
           </div>
         </div>
 
@@ -73,7 +71,6 @@ let setup = (props, ctx) => {
   const initOptions = ref({ renderer: "svg" });
   const connections = ref([]);
   const chartState = ref('cpu');
-  const limitState = ref(false);
   const cluster = ref({
     pods: null,
     deployments: null,
@@ -205,37 +202,43 @@ let setup = (props, ctx) => {
     charts.value.workloads.daemonsets = workload('Daemon Sets', running, pending);
   };
   
+  let updateMetricsCharts = () => {
+    updateCpu();
+    updateMemory();
+    updateCurrent();
+  }
+
   let updateCpu = () => {
     if (!metrics.value.cpu) return;
     if (metrics.value.cpu[0].metrics.length < 1) return;
 
+    let cpuCapacity = getInstantMetricValue(metrics.value.current, 'cpu-capacity');
+    if (!cpuCapacity) return;
+
     var [data, max, unit] = getDataSeries(metrics.value.cpu);
 
-    let limit = 0;
-    if (limitState.value){    
-      let containers = pod.value?.spec?.containers?.map(x => cpuUnitsToNumber(x.resources?.limits.cpu)) ?? [];
-      limit = containers.reduce((a, b) => a + b, 0);
-    }
+    max = cpuCapacity ?? 0;
 
-    updateSimpleChart(charts.value.cluster.cpu, metrics.value.cpu, unit, isDark.value, limit);
+    updateSimpleChart(charts.value.cluster.cpu, metrics.value.cpu, unit, isDark.value, 0, max);
   };
   
   let updateMemory = () => {
     if (!metrics.value.memory) return;
     if (metrics.value.memory[0].metrics.length < 1) return;
 
+    let memoryCapacity = getInstantMetricValue(metrics.value.current, 'memory-capacity');
+    if (!memoryCapacity) return;
+
     var [data, max, unit] = getDataSeries(metrics.value.memory);
     
-    let limit = 0;
-    if (limitState.value){    
-      let containers = pod.value?.spec?.containers?.map(x => memoryUnitToBytes(x.resources?.limits.memory)) ?? [];
-      limit = containers.reduce((a, b) => a + b, 0);
-    }
+    max = memoryCapacity ?? 0;
 
-    updateSimpleChart(charts.value.cluster.memory, metrics.value.memory, unit, isDark.value, limit);
+    updateSimpleChart(charts.value.cluster.memory, metrics.value.memory, unit, isDark.value, 0, max);
   };
     /*
   let updateCpu = async () => {
+    //unit = getUnitFromBytes(memoryAllocatable)
+
 
     if (!metrics.value.nodeCpu || metrics.value.nodeCpu?.length === 0 || !metrics.value.kubeCpu || metrics.value.kubeCpu?.length === 0) return;
     
@@ -282,20 +285,35 @@ let setup = (props, ctx) => {
   };*/
 
   let updateCurrent = async () => {
-/*    if (!metrics.value.kubeMemory || metrics.value.kubeMemory?.length === 0 || !metrics.value.nodeMemory || metrics.value.nodeMemory?.length === 0) return;
-    if (!metrics.value.nodeCpu || metrics.value.nodeCpu?.length === 0 || !metrics.value.kubeCpu || metrics.value.kubeCpu?.length === 0) return;
+    if (!metrics.value.memory || !metrics.value.cpu) return;
+    if (metrics.value.memory[0].metrics.length < 1 || metrics.value.cpu[0].metrics.length < 1) return;
+
+    let memoryCapacity = getInstantMetricValue(metrics.value.current, 'memory-capacity');
+    let memoryUsage = getMetricLastPoints(metrics.value.memory[0].metrics);
+    let memoryAvailable = getInstantMetricValue(metrics.value.current, 'memory-available');
+    let memoryAllocatable = getInstantMetricValue(metrics.value.current, 'memory-allocatable');
+    let memoryRequests = getInstantMetricValue(metrics.value.current, 'memory-requests');
+    let memoryLimits = getInstantMetricValue(metrics.value.current, 'memory-limits');
+
+    let cpuCapacity = getInstantMetricValue(metrics.value.current, 'cpu-capacity');
+    let cpuUsage = getMetricLastPoints(metrics.value.cpu[0].metrics);
+    let cpuAllocatable = getInstantMetricValue(metrics.value.current, 'cpu-allocatable');
+    let cpuRequests = getInstantMetricValue(metrics.value.current, 'cpu-requests');
+    let cpuLimits = getInstantMetricValue(metrics.value.current, 'cpu-limits');
+
+/*  
     
-    let memoryCapacity = getMetricLastPoints(metrics.value.kubeMemory, 'kube_node_status_capacity');
-    let memoryUsage = getMetricSeries(metrics.value.nodeMemory);
-    // due to query differences, memory usage result is 2 entries longer than compute usage, so we drop the first 2 (oldest) entries
-    memoryUsage.shift();
-    memoryUsage.shift();
-    let time = memoryUsage.map(x => luxon.DateTime.fromMillis(x[0] * 1000).toFormat('HH:mm'));
     let memory = {
         max: (memoryCapacity / 1024 / 1024 / 1024).toFixed(2),
         data: memoryUsage.map(x => (x[1] / 1024 / 1024 / 1024).toFixed(2))
     }
     
+        { 
+          type:'cluster', name:'memory-limits', instant: true, metrics: []
+        },
+        { 
+          type:'cluster', name:'memory-allocatable', instant: true, metrics: []
+
     let computeCapacity = getMetricLastPoints(metrics.value.kubeCpu, 'kube_node_status_capacity');
     let computeUsage = getMetricSeries(metrics.value.nodeCpu);
     let compute = {
@@ -314,9 +332,9 @@ let setup = (props, ctx) => {
       metrics.value.cpu.forEach(x => x['nodes'] = props.nodes)
       metrics.value.current.forEach(x => x['nodes'] = props.nodes)
 
-      streamMetrics(metrics.value.memory, updateMemory, connections.value);
-      streamMetrics(metrics.value.cpu, updateCpu, connections.value);
-      streamMetrics(metrics.value.current, updateCurrent, connections.value);
+      streamMetrics(metrics.value.memory, updateMetricsCharts, connections.value);
+      streamMetrics(metrics.value.cpu, updateMetricsCharts, connections.value);
+      streamMetrics(metrics.value.current, updateMetricsCharts, connections.value);
     }
   }
     
@@ -359,11 +377,11 @@ let setup = (props, ctx) => {
   });
     
   return {
-    isDark, initOptions, cluster, metrics, charts, connections, chartState, limitState,
+    isDark, initOptions, cluster, metrics, charts, connections, chartState,
     filterNamespace, 
     updateClusterPods, updateClusterDeployments, updateClusterJobs, updateClusterCronJobs, 
     updateClusterStatefulSets, updateClusterReplicaSets, updateClusterDaemonSets,
-    updateCpu, updateMemory, updateCurrent, updateMetrics
+    updateCpu, updateMemory, updateCurrent, updateMetrics, updateMetricsCharts
   }
 }
 
