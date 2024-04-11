@@ -40,7 +40,7 @@
       <div :style="{ height: `${virtualizer.getTotalSize()}px`, position: 'relative', width: '100%' }"
         class="text-sm text-gray-700 dark:text-gray-300 dark:divide-zinc-700"> <!-- body -->
       
-        <div v-if="!loading && rows.length == 0" class="justify-center w-full flex py-2">
+        <div v-if="loading && rows.length == 0" class="justify-center w-full flex py-2">
           <spinner></spinner>
         </div>
 
