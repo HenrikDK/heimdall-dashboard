@@ -1,5 +1,5 @@
-<template id="multiselect">
-  <div ref="target"  class="relative" aria-label="Select Environment"  title="Shift + N to filter namespace">
+﻿<template id="multiselect">
+  <div ref="target" class="relative" aria-label="Select Environment"  title="Shift + N to filter namespace">
     <div tabindex="-1" :data-focus="hasFocus"
       class="h-9 w-full text-gray-200 items-center flex justify-end box-border cursor-pointer border border-white/[.4] rounded 
           bg-brand text-white/[.6] leading-snug outline-none 
@@ -7,7 +7,7 @@
           data-[focus=true]:border-white">
       
       <template v-if="values.length > 0">
-        <input type="text" ref="input" id="nss" autocomplete="new-password" v-model="search" @@keyDown="handleKeypress" @@focus="foucsIn" @@blur="focusOut"
+        <input type="text" ref="input" id="nss" autocomplete="new-password" v-model="search" @@keyDown="handleKeypress" @@focus="foucsIn"
                class="bg-transparent w-full h-8 ml-3 outline-none text-gray-200 placeholder-white/[.6]"
                :placeholder="placeholder"
           :aria-expanded="isOpen"
@@ -137,6 +137,7 @@ let setup = (props, ctx) => {
     isOpen.value = false;
     hasFocus.value = false;
     search.value = '';
+    target.value.element.blur();
   }
   
   onClickOutside(target, focusOut)
