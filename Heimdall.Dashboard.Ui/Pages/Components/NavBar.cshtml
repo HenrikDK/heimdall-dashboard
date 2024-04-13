@@ -57,7 +57,6 @@ import {useDark, useToggle} from "@@vueuse/core";
 import {ref, onMounted, watch, computed} from 'vue';
 
 let setup = (props, ctx) => {
-  const filters = ref([]);
   const cluster = ref([]);
   const namespaces = ref([]);
   const route = useRoute();
@@ -70,22 +69,14 @@ let setup = (props, ctx) => {
               
     let ns = cluster.value.map(x => { return x.metadata.name})
     
-    if (filters.value && filters.value.length > 0){
-      ns = ns.filter(x => nsEndsWith(x, filters.value));
-      ctx.emit('filters', namespaces.value);
+    if (props.filters && props.filters.length > 0){
+      ns = ns.filter(x => props.filters.includes(x));
     }
     
     ns.sort();
     
     namespaces.value = ns;
-  };
-  
-  let nsEndsWith = (ns, ends) => {
-    let value = false;
-    value = ends.some(element => {
-      return ns.endsWith(element);
-    });
-    return value;
+    ctx.emit('filters', namespaces.value);
   };
   
   const nsVisible = computed(() => {
@@ -115,22 +106,19 @@ let setup = (props, ctx) => {
     return visible
   })
   
-  watch([filters, cluster], updateList);
+  watch([cluster], updateList);
   
   onMounted(async () => {
-    fetch("/?handler=filters")
-     .then(d => d.json())
-     .then(j => filters.value = j);
     
     streamResults('/k8s/api/v1/namespaces', j => cluster.value = j)
   });
   
   return {
-    filters, cluster, namespaces, 
+    cluster, namespaces, 
     nsVisible, searchVisible, logSearchVisible, 
-    isDark, toggleDark, updateList, nsEndsWith
+    isDark, toggleDark, updateList
   }
 }
 
-components["nav-bar"] = { template: "#nav-bar", setup };
+components["nav-bar"] = { template: "#nav-bar", props:['filters'], setup };
 </script>
