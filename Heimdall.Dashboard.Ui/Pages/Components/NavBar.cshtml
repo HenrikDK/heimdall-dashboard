@@ -106,11 +106,10 @@ let setup = (props, ctx) => {
     return visible
   })
   
-  watch([cluster], updateList);
+  watch(cluster, updateList);
   
   onMounted(async () => {
-    
-    streamResults('/k8s/api/v1/namespaces', j => cluster.value = j)
+    streamResults('/k8s/api/v1/namespaces', j => cluster.value = j);
   });
   
   return {
