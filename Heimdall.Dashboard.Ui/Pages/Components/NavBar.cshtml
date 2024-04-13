@@ -20,15 +20,15 @@
           
           <div :class="nsVisible ? '' : 'hidden'"
                class="mr-3 w-60">
-            <multiselect :values="namespaces" @@update:model-value="$emit('select-ns', $event)"></multiselect>
+            <multiselect :values="namespaces"></multiselect>
           </div>
           <div :class="searchVisible ? '' : 'hidden'"
                class="mr-3 w-60">
-            <search @@update:search="$emit('search', $event)"></search>
+            <search></search>
           </div>
           <div :class="logSearchVisible ? '' : 'hidden'"
                class="mr-3 w-96">
-            <log-search @@update:log-search="$emit('log-search', $event)"></log-search>
+            <log-search></log-search>
           </div>
 
           <div class="mx-3">
@@ -132,5 +132,5 @@ let setup = (props, ctx) => {
   }
 }
 
-components["nav-bar"] = { template: "#nav-bar", emits: ['search', 'select-ns', 'filters'], setup };
+components["nav-bar"] = { template: "#nav-bar", setup };
 </script>
