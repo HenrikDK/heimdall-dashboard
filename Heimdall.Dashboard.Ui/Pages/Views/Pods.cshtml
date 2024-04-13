@@ -46,8 +46,8 @@ let setup = (props, ctx) => {
     
     let result = [...clusterPods.value];
                     
-    if (props.filters?.length){
-        result = result.filter(x => filterName(x, props.filters))
+    if (props.filters?.length > 0){
+        result = result.filter(x => props.filters.includes(x.metadata.namespace))
     }
     
     pods.value = result;
