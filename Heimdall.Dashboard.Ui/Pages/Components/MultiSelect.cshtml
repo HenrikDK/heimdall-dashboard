@@ -125,10 +125,18 @@ let setup = (props, ctx) => {
     e.stopPropagation();
   }
   
+  let foucsIn = () => {
+    if (isOpen.value || items.value.length === 0) return;
+    
+    isOpen.value = true;
+    hasFocus.value = true;
+  }
+
   let focusOut = () => {
     if (!isOpen.value && search.value.length === 0) return;
     
     isOpen.value = false;
+    hasFocus.value = false;
     search.value = '';
   }
   
@@ -150,7 +158,7 @@ let setup = (props, ctx) => {
   }
 
   let onKeyDown = (e) => {
-    var control = document.getElementById("ns-search");
+    var control = document.getElementById("nss");
     
     if (e.key === 'N' && e.target !== control.value &&
       window.document.activeElement !== control.value &&
