@@ -39,12 +39,8 @@
 import { ref, watch, onMounted } from 'vue'
 
 let setup = (props, ctx) => {
-  const hasFocus = ref(false)
-  const query = ref('')
-  
-  let search = () =>{
-    ctx.emit('update:search', query.value)
-  }
+  const hasFocus = ref(false);
+  const query = useGlobalSearch();
   
   let clear = () =>{
     query.value = ''
@@ -74,10 +70,6 @@ let setup = (props, ctx) => {
       control?.select()
     }
   }
-      
-  watch(query, () => {
-    ctx.emit('update:search', query.value)
-  })
   
   onMounted(async () =>{
     window.document.addEventListener('keydown', onDocumentKeydown);
@@ -86,5 +78,5 @@ let setup = (props, ctx) => {
   return {hasFocus, query, search, clear, onKeydown, onDocumentKeydown}
 }
 
-components["search"] = { template: "#search", emits: ['update:search'], setup };
+components["search"] = { template: "#search", setup };
 </script>
