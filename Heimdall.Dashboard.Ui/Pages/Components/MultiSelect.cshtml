@@ -1,4 +1,4 @@
-﻿<template id="multiselect">
+<template id="multiselect">
   <div ref="target"  class="relative" aria-label="Select Environment"  title="Shift + N to filter namespace">
     <div tabindex="-1" :data-focus="hasFocus"
       class="h-9 w-full text-gray-200 items-center flex justify-end box-border cursor-pointer border border-white/[.4] rounded 
@@ -98,7 +98,7 @@ let setup = (props, ctx) => {
   const noOptions = ref(false);
   const isOpen = ref(false);
   const hasFocus = ref(false)
-  const selected = useGlobalNamespace();
+  const selected = useGlobalNamespaces();
   const cursor = ref(-1);
   const search = ref('');
   const target = ref(null)
