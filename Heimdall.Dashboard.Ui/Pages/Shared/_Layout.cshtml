@@ -17,7 +17,8 @@
   components = {};
   routes = [];
   nsBus = undefined;
-  useGlobalNamespace = undefined;
+  useGlobalNamespaces = undefined;
+  useGlobalSearch = undefined;
 
   process = {env: "production"}
 
@@ -84,7 +85,8 @@ import { registerTheme } from 'echarts/core'
 import { default as ECharts } from 'vue-echarts'
 import { useEventBus, createGlobalState, useStorage } from '@@vueuse/core'
 
-useGlobalNamespace = createGlobalState(() => useStorage('heimdall-namespace', []))
+useGlobalNamespaces = createGlobalState(() => useStorage('heimdall-namespace', []))
+useGlobalSearch = createGlobalState(() => useStorage('heimdall-search', ''))
 
 nsBus = useEventBus('namespace')
 
@@ -158,12 +160,9 @@ const app = createApp({
   data() {
       return {
           filters: [],
-          namespaces: [],
           config: {},
-          search: "",
-          logSearch: "",
           nodes: [],
-          clusterNodes: null,
+          clusterNodes: [],
       }
     },
   watch:{
