@@ -71,6 +71,7 @@ let setup = (props, ctx) => {
   const initOptions = ref({ renderer: "svg" });
   const connections = ref([]);
   const chartState = ref('cpu');
+  const namespaces = useGlobalNamespaces();
   const cluster = ref({
     pods: null,
     deployments: null,
@@ -146,8 +147,8 @@ let setup = (props, ctx) => {
 
   let filterNamespace = (values) => {
     let filtered = values;
-    if (props.namespaces.length > 0){
-      filtered = values?.filter(x => props.namespaces.some(y => x.metadata.namespace === y));
+    if (namespaces.value.length > 0){
+      filtered = values?.filter(x => namespaces.value.some(y => x.metadata.namespace === y));
     }
     return filtered;
   };
@@ -302,7 +303,7 @@ let setup = (props, ctx) => {
     }
   }
     
-  watch(() => props.namespaces, () => {
+  watch(namespaces, () => {
     updateClusterPods();
     updateClusterDeployments();
     updateClusterJobs();
@@ -345,7 +346,7 @@ let setup = (props, ctx) => {
   });
     
   return {
-    isDark, initOptions, cluster, metrics, charts, connections, chartState,
+    isDark, initOptions, cluster, metrics, charts, connections, chartState, namespaces,
     filterNamespace, 
     updateClusterPods, updateClusterDeployments, updateClusterJobs, updateClusterCronJobs, 
     updateClusterStatefulSets, updateClusterReplicaSets, updateClusterDaemonSets,
@@ -353,6 +354,6 @@ let setup = (props, ctx) => {
   }
 }
 
-components["cluster"] = {template: "#cluster", props: ['config', 'namespaces', 'nodes'], setup};
+components["cluster"] = {template: "#cluster", props: ['config', 'nodes'], setup};
 routes.push({path:'/', name:'cluster',  component: components["cluster"]})
 </script>
