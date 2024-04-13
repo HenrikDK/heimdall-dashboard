@@ -13,7 +13,7 @@
         </span>
       </span>
 
-      <input id="log-search-input" v-model="query" name="search-box" type="text" @@focus="hasFocus = true" @@blur="hasFocus = false" @@keydown="onKeydown"
+      <input id="ls-input" v-model="query" type="text" autocomplete="new-password" @@focus="hasFocus = true" @@blur="hasFocus = false" @@keydown="onKeydown"
            class="h-full w-full px-8 border-none outline-0 bg-transparent autofill:bg-transparent text-white" />
       
       <template v-if="query.length < 1" name="shortcut-icon">
@@ -61,7 +61,7 @@ let setup = (props, ctx) => {
   }
 
   let onDocumentKeydown = (e) =>{
-    var control = document.getElementById("log-search-input")
+    var control = document.getElementById("ls-input")
     if (e.key === '/' && e.target !== control.value &&
       window.document.activeElement !== control.value &&
       e.target instanceof HTMLInputElement === false)
