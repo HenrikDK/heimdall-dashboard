@@ -1,4 +1,4 @@
-﻿<template id="multiselect">
+<template id="multiselect">
   <div ref="target"  class="relative" aria-label="Select Environment"  title="Shift + N to filter namespace">
     <div tabindex="-1" :data-focus="hasFocus"
       class="h-9 w-full text-gray-200 items-center flex justify-end box-border cursor-pointer border border-white/[.4] rounded 
@@ -7,7 +7,7 @@
           data-[focus=true]:border-white">
       
       <template v-if="values.length > 0">
-        <input type="text" ref="input" id="ns-search" v-model="search" @@keyDown="handleKeypress" @@focus="hasFocus = true" @@blur="hasFocus = false"
+        <input type="text" ref="input" id="nss" autocomplete="new-password" v-model="search" @@keyDown="handleKeypress" @@focus="foucsIn" @@blur="focusOut"
                class="bg-transparent w-full h-8 ml-3 outline-none text-gray-200 placeholder-white/[.6]"
                :placeholder="placeholder"
           :aria-expanded="isOpen"
