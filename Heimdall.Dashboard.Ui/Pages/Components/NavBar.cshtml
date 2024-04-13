@@ -57,28 +57,10 @@ import {useDark, useToggle} from "@@vueuse/core";
 import {ref, onMounted, watch, computed} from 'vue';
 
 let setup = (props, ctx) => {
-  const cluster = ref([]);
-  const namespaces = ref([]);
   const route = useRoute();
-  
   const isDark = useDark();
   const toggleDark = useToggle(isDark);
-  
-  let updateList = async () => {
-    if (!cluster.value && cluster.value.length > 0) return;
-              
-    let ns = cluster.value.map(x => { return x.metadata.name})
     
-    if (props.filters && props.filters.length > 0){
-      ns = ns.filter(x => props.filters.includes(x));
-    }
-    
-    ns.sort();
-    
-    namespaces.value = ns;
-    ctx.emit('filters', namespaces.value);
-  };
-  
   const nsVisible = computed(() => {
     let visible = true;
     if (route.path.endsWith('/logs'))
@@ -105,19 +87,12 @@ let setup = (props, ctx) => {
       visible = true;
     return visible
   })
-  
-  watch(cluster, updateList);
-  
-  onMounted(async () => {
-    streamResults('/k8s/api/v1/namespaces', j => cluster.value = j);
-  });
-  
+      
   return {
-    cluster, namespaces, 
     nsVisible, searchVisible, logSearchVisible, 
-    isDark, toggleDark, updateList
+    isDark, toggleDark
   }
 }
 
-components["nav-bar"] = { template: "#nav-bar", props:['filters'], setup };
+components["nav-bar"] = { template: "#nav-bar", props:['namespaces'], setup };
 </script>

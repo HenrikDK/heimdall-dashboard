@@ -157,27 +157,74 @@ const app = createApp({
   methods: {
     updateNodes(){
       this.nodes = this.clusterNodes.map(x => x.metadata.name);
+    },
+    updateNamespaces(){
+      let namespaces = this.clusterNamespaces.map(x => x.metadata.name);
+
+      let result = [];
+      if (this.config.filters.length > 0)
+      {
+        let filters = this.config.filters.split(',');
+        let fstarts = filters.filter(x => x.startsWith('^')).map(x => x.replace('^', '').trim());
+        let fends = filters.filter(x => x.endsWith('$')).map(x => x.replace('$', '').trim());
+        let fincludes = filters.filter(x => !x.includes('^') && !x.includes('$')).map(x => x.trim()); 
+
+        namespaces.forEach(x => {
+          if (fstarts.length > 0 && fstarts.some(y => x.startsWith(y))){
+            result.push(x);
+            return;
+          }
+
+          if (fends.length > 0 && fends.some(y => x.endsWith(y))){
+            result.push(x);
+            return;
+          }
+
+          if (fincludes.length > 0 && fincludes.includes(x)){
+            result.push(x);
+          }
+        })
+      }
+      else{
+        result = namespaces;
+      }
+
+      result.sort();
+
+      this.namespaces = result;
     }
   },
   data() {
       return {
-          filters: [],
-          config: {},
-          nodes: [],
-          clusterNodes: [],
+        namespaces: [],
+        config: {},
+        nodes: [],
+        connections: [],
+        clusterNodes: [],
+        clusterNamespaces: [],
       }
     },
   watch:{
     clusterNodes(){
       this.updateNodes();
+    },
+    clusterNamespaces(){
+      this.updateNamespaces();
+    },
+    config(){
+      this.updateNamespaces();
     }
   },
   async mounted() {
-      fetch('api/features')
-        .then(r => r.json())
-        .then(j => this.config = j);
+    fetch('api/features')
+      .then(r => r.json())
+      .then(j => this.config = j);
       
-      streamResults('/k8s/api/v1/nodes', j => this.clusterNodes = j);
+    streamResults('/k8s/api/v1/nodes', j => this.clusterNodes = j, this.connections);
+    streamResults('/k8s/api/v1/namespaces', j => this.clusterNamespaces = j, this.connections);
+  },
+  async beforeUnmount(){
+    closeConnections(this.connections)
   }
 })
 Object.entries(components).forEach(([k,v]) =>{
