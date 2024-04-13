@@ -436,6 +436,6 @@ let setup = (props, ctx) => {
   }
 }
 
-components["pod-details"] = {template: "#pod-details", props: ['config', 'namespaces', 'filters'], setup};
+components["pod-details"] = {template: "#pod-details", props: ['config', 'filters'], setup};
 routes.push({path:'/namespaces/:namespace/pods/:name/details', name:'pod-details', component: components["pod-details"]})
 </script>

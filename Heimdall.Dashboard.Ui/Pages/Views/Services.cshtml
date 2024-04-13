@@ -4,7 +4,7 @@
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Services</span>
     </div>
   
-  <vue-table :columns="columns" :initial-sort="sorting" :data="services" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
+  <vue-table :columns="columns" :initial-sort="sorting" :data="services" :loading="loading"></vue-table>
   
   </div>
 </template>
@@ -65,6 +65,6 @@ let setup = (props, ctx) => {
   return { loading, sorting, columns, clusterServices, services, getKubeDns, updateServices }
 }
 
-components["services"] = { template: "#services", props: ['namespaces', 'search', 'filters'], setup };
+components["services"] = { template: "#services", props: ['filters'], setup };
 routes.push({path:'/services', name:'services', component: components["services"]})    
 </script>

@@ -4,7 +4,7 @@
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Workloads</span>
     </div>
         
-    <vue-table :columns="columns" :initial-sort="sorting" :data="workloads" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
+    <vue-table :columns="columns" :initial-sort="sorting" :data="workloads" :loading="loading"></vue-table>
         
   </div>
 </template>
@@ -14,7 +14,7 @@ import { ref, watch, onMounted, onUnmounted } from 'vue'
 
 let setup = (props, ctx) => {  
   const loading = ref(true);
-  const connections = ref([]);        
+  const connections = ref([]);
   const clusterWorkloads = ref([]);
   const clusterCronJobs = ref([]);
   const clusterDaemonSets = ref([]);
@@ -58,7 +58,7 @@ let setup = (props, ctx) => {
     loading.value = false;
   }
   
-  watch([() => props.filters, () => props.namespaces, clusterWorkloads, clusterCronJobs, clusterDaemonSets, clusterJobs, clusterStatefulSets], updateWorkloads);
+  watch([() => props.filters, clusterWorkloads, clusterCronJobs, clusterDaemonSets, clusterJobs, clusterStatefulSets], updateWorkloads);
   
   onMounted(async () => {
     streamResults('/k8s/apis/apps/v1/deployments', j => clusterWorkloads.value = j, connections.value)
@@ -79,6 +79,6 @@ let setup = (props, ctx) => {
   }
 }
 
-components["workloads"] = { template: "#workloads", props: ['namespaces', 'search', 'filters'], setup };
+components["workloads"] = { template: "#workloads", props: ['filters'], setup };
 routes.push({path:'/workloads', name:'workloads', component: components["workloads"]})
 </script>

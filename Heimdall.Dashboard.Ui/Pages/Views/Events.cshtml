@@ -5,7 +5,7 @@
     <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
   </div>
 
-  <vue-table :columns="columns" :initial-sort="sorting" :data="events" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
+  <vue-table :columns="columns" :initial-sort="sorting" :data="events" :loading="loading"></vue-table>
         
   </div>
 </template>
@@ -62,6 +62,6 @@ let setup = (props, ctx) => {
   return { loading, clusterEvents, events, sorting, columns, updateEvents, connections }
 }
 
-components["events"] = {template: "#events", props: ['namespaces', 'search'], setup};
+components["events"] = {template: "#events", setup};
 routes.push({path:'/events', name:'events',  component: components["events"]})
 </script>

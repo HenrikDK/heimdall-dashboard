@@ -8,7 +8,7 @@
       </log-controls>
     </div>
     
-    <log-viewer :events="logEvents" :wrap="wrap" :direction="direction" :log-search="logSearch"></log-viewer>
+    <log-viewer :events="logEvents" :wrap="wrap" :direction="direction"></log-viewer>
   </div>
 </template>
 
@@ -58,6 +58,6 @@ let setup = (props, ctx) => {
   }
 }
 
-components["pod-logs"] = { template: "#pod-logs", props: ['logSearch'], setup };
+components["pod-logs"] = { template: "#pod-logs", setup };
 routes.push({path:'/namespace/:namespace/pods/:name/containers/:container/logs', name:'pod-logs', component: components["pod-logs"]})    
 </script>
