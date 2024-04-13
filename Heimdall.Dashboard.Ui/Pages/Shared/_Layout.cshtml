@@ -192,11 +192,15 @@ const app = createApp({
       result.sort();
 
       this.namespaces = result;
+      if (this.config.filters.length > 0){
+        this.filters = result;
+      }
     }
   },
   data() {
       return {
         namespaces: [],
+        filters: [],
         config: {},
         nodes: [],
         connections: [],
