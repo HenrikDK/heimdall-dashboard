@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 <html lang="en">
 <head>
@@ -16,7 +16,8 @@
   <script>
   components = {};
   routes = [];
-  eventBus = {};
+  nsBus = undefined;
+  useGlobalNamespace = undefined;
 
   process = {env: "production"}
 
@@ -81,9 +82,11 @@ import { createApp } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { registerTheme } from 'echarts/core'
 import { default as ECharts } from 'vue-echarts'
-import { useEventBus } from '@@vueuse/core'
+import { useEventBus, createGlobalState, useStorage } from '@@vueuse/core'
 
-eventBus = useEventBus('filter')
+useGlobalNamespace = createGlobalState(() => useStorage('heimdall-namespace', []))
+
+nsBus = useEventBus('namespace')
 
 registerTheme('dark', getDarkTheme());  
 components['v-chart'] = ECharts;
