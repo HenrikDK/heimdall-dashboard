@@ -24,7 +24,7 @@ let setup = (props, ctx) => {
   };
   
   let nsClick = (e) => {
-    eventBus.emit(getNamespace(props.row));
+    nsBus.emit(getNamespace(props.row));
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
