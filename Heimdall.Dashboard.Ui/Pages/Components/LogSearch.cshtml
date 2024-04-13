@@ -42,7 +42,7 @@ let setup = (props, ctx) => {
   const query = ref('')
   
   let search = () =>{
-    ctx.emit('update:log-search', query.value)
+    logBus.emit(query.value)
   }
   
   let clear = () =>{
@@ -52,6 +52,11 @@ let setup = (props, ctx) => {
   let onKeydown = (e) =>{
     if (e.key === 'Escape') {
       query.value = ''
+      return
+    }
+
+    if (e.key === 'Enter'){
+      logBus.emit(query.value)
     }
   }
 
@@ -69,7 +74,7 @@ let setup = (props, ctx) => {
   }
       
   watch(query, () => {
-    ctx.emit('update:log-search', query.value)
+    logBus.emit(query.value)
   })
   
   onMounted(async () =>{
@@ -79,5 +84,5 @@ let setup = (props, ctx) => {
   return {hasFocus, query, search, clear, onKeydown, onDocumentKeydown}
 }
 
-components["log-search"] = { template: "#log-search", emits: ['update:log-search'], setup };
+components["log-search"] = { template: "#log-search", setup };
 </script>

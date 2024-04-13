@@ -17,6 +17,7 @@
   components = {};
   routes = [];
   nsBus = undefined;
+  logBus = undefined;
   useGlobalNamespaces = undefined;
   useGlobalSearch = undefined;
 
@@ -89,6 +90,7 @@ useGlobalNamespaces = createGlobalState(() => useStorage('heimdall-namespace', [
 useGlobalSearch = createGlobalState(() => useStorage('heimdall-search', ''))
 
 nsBus = useEventBus('namespace')
+logBus = useEventBus('log-search')
 
 registerTheme('dark', getDarkTheme());  
 components['v-chart'] = ECharts;
