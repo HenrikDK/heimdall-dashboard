@@ -1,4 +1,4 @@
-<template id="multiselect">
+﻿<template id="multiselect">
   <div ref="target"  class="relative" aria-label="Select Environment"  title="Shift + N to filter namespace">
     <div tabindex="-1" :data-focus="hasFocus"
       class="h-9 w-full text-gray-200 items-center flex justify-end box-border cursor-pointer border border-white/[.4] rounded 
@@ -98,7 +98,7 @@ let setup = (props, ctx) => {
   const noOptions = ref(false);
   const isOpen = ref(false);
   const hasFocus = ref(false)
-  const selected = ref([]);
+  const selected = useGlobalNamespace();
   const cursor = ref(-1);
   const search = ref('');
   const target = ref(null)
@@ -115,13 +115,12 @@ let setup = (props, ctx) => {
   
   let setExclusive = (e) => {
     selected.value = [e]
-    ctx.emit('update:modelValue', selected.value)
   }
+
   let handleClear = (e) => {
     selected.value = []
     isOpen.value = false;
     search.value = '';
-    ctx.emit('update:modelValue', selected.value)
     e.stopPropagation();
   }
   
@@ -145,13 +144,11 @@ let setup = (props, ctx) => {
   let handleOptionClick = (option) => {
     if (selected.value.includes(option)) {
       selected.value = selected.value.filter(o => o !== option)
-      ctx.emit('update:modelValue', selected.value)
       return
     }
 
     if (option) {
       selected.value = [...selected.value, option];
-      ctx.emit('update:modelValue', selected.value)
     }
     
     focus();                  
@@ -223,7 +220,7 @@ let setup = (props, ctx) => {
   }
  
   onMounted(async () => {
-    eventBus.on(setExclusive);
+    nsBus.on(setExclusive);
     window.document.addEventListener('keydown', onKeyDown);
   })
 
@@ -231,7 +228,7 @@ let setup = (props, ctx) => {
     window.document.removeEventListener('keydown', onKeyDown);
   });
  
-  return { noOptions, isOpen, selected, search, placeholder, target, items, cursor, hasFocus,
+  return { noOptions, isOpen, selected, search, placeholder, target, items, cursor, hasFocus, foucsIn, focusOut, 
     setExclusive, handleClear, handleOptionClick, handleKeypress, onKeyDown}
 }
 
