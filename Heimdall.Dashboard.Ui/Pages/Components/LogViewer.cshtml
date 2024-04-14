@@ -273,7 +273,7 @@ let setup = (props, ctx) => {
 
         if (activeOverlay.value == next) return;
         activeOverlay.value = next;
-        // virtualizer.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'end', smoothScroll: false });
+        virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'middle', smoothScroll: false });
         updateId.value += 1; // redraw view
       return;
     }
@@ -282,11 +282,11 @@ let setup = (props, ctx) => {
     {
       if (overlays.value.length === 0) return;
         
-      let next = e.shiftKey ? getPrevOverlay(true) : getNextOverlay(true);
+      let next = reverse ? getPrevOverlay(true) : getNextOverlay(true);
 
       if (activeOverlay.value == next) return;
       activeOverlay.value = next;
-      // virtualizer.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'end', smoothScroll: false });
+      virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'middle', smoothScroll: false });
       updateId.value += 1; // redraw view
       
       return;
@@ -294,6 +294,14 @@ let setup = (props, ctx) => {
 
     if (e.key === 'ArrowDown')
     {
+      if (overlays.value.length === 0) return;
+        
+      let next = reverse ? getNextOverlay(true) : getPrevOverlay(true);
+
+      if (activeOverlay.value == next) return;
+      activeOverlay.value = next;
+      virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'middle', smoothScroll: false });
+      updateId.value += 1; // redraw view
 
       return;
     }
