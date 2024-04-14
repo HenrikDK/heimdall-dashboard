@@ -170,17 +170,17 @@ let setup = (props, ctx) => {
   let findOccurrences = (lines, query) => {
     const regex = new RegExp(escapeRegExp(query), "gi");
     
-    let overlays = [];
-    let occurrences = {};
+    let ol = [];
+    let oc = {};
     lines.forEach((line, index) => {
       let matches = [...line.matchAll(regex).map(x => x.index)]
       if (matches.length > 0){
-        occurrences[index] = matches;
-        overlays = overlays.concat(matches.map(x => ({row:index, index: x })));
+        oc[index] = matches;
+        ol = ol.concat(matches.map(x => ({row:index, index: x })));
       }
     });
 
-    return [overlays, occurrences];
+    return [ol, oc];
   }
 
   let getNextOverlay = (loopResults = false) => {
@@ -210,13 +210,13 @@ let setup = (props, ctx) => {
     if (query.value !== q){
       query.value = q;
       occurrences.value = [];
-      overlays = [];
+      overlays.value = [];
       activeOverlay.value = -1;
     }
 
     if (query.value === '') {
       occurrences.value = [];
-      overlays = [];
+      overlays.value = [];
       activeOverlay.value = -1;
       return;
     }
@@ -237,9 +237,7 @@ let setup = (props, ctx) => {
     }
   }
 
-  logBus.on((q) => {
-    debouncedSearch(q);
-    })
+  logBus.on((q) => { debouncedSearch(q); })
 
   //watch(() => props.direction, () => {
 
