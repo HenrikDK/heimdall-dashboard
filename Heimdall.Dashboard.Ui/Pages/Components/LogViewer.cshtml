@@ -16,8 +16,12 @@
           :ref="measureElement"
           :style="{ position: 'absolute', top: `${virtualRow.start}px`, left: 0, width: widthStyle }"
           >
-<!--          <div v-html="getRow(virtualRow.index)"><div> -->
-          <span>{{ logEvents[virtualRow.index] }}</span>
+          <template v-if="query.length > 0" v-for="segment in getRow(virtualRow.index)">
+            <span v-if="segment.overlay && segment.active" class="bg-orange-500 dark:bg-orange-700">{{segment.content}}</span>
+            <span v-else-if="segment.overlay" class="bg-green-500 dark:bg-green-700">{{segment.content}}</span>
+            <span v-else>{{ segment.content }}</span>
+          </template>
+          <span v-else>{{ logEvents[virtualRow.index] }}</span>
         </div>
 
         <div class="sticky top-5 flex justify-end">
@@ -74,19 +78,45 @@ let setup = (props, ctx) => {
     }
   })
 
-  let getRow = (i) => {
-    let row = logEvents.value[i]
-    let overlays = undefined;
-    if (occurrences.value.length > 0){
-      overlays = occurrences.value.fiter(x => x[0] === i)
-    }
-    content = [];
-    return 
-  }
-
   let widthStyle = computed(() => { return props.wrap ? '100%' : 'max-content'});
 
   const virtualizer = useVirtualizer(virtualizerOptions)
+
+  let getRow = (i) => {
+    let row = logEvents.value[i]
+    let hits = occurrences.value[i] ?? [];
+    if (hits.length === 0) return [{ content: row }];
+
+    let result = []
+    let length = query.value.length;
+    let current = overlays.value[activeOverlay.value];
+    hits.forEach((curr, idx) => {
+      let prev = hits[idx - 1];
+      let next = hits[idx + 1];
+      
+      let start = 0
+      if (prev !== undefined){
+        start = prev + length;
+      }
+      let end = next ?? row.length - 1;
+
+      let segment1 = row.slice(start, curr);
+      result.push({ content: segment1 });
+      let active = false;
+      if (current !== undefined){
+        active = curr == current?.index && i === current?.row;
+      }
+      let segment2 = row.slice(curr, curr + length);
+      result.push({ content: segment2, overlay: true, active: active });
+
+      if (next == undefined){
+        let segment3 = row.slice(curr + length, end);
+        result.push({ content: segment3 });
+      }
+    });
+
+    return result;
+  }
 
   const viewLoaded = () => {
     if (loaded.value === true) return;
@@ -149,7 +179,13 @@ let setup = (props, ctx) => {
       logEvents.value = [...props.events].reverse();
     }
     debouncedInit();
-    
+
+    if (query.value.length > 0){
+      let [ov, oc] = findOccurrences(logEvents.value, query.value);
+      overlays.value = ov;
+      occurrences.value = oc;
+    }
+
     if (!loaded.value) return;
     updateId.value += 1;
   })
@@ -198,14 +234,15 @@ let setup = (props, ctx) => {
   }
 
   let onSearch = (q) => {
-/*    if (query.value === q){ // trigger next overlay
+    if (query.value === q && query.value !== ''){ // trigger next overlay
         if (overlays.value.length === 0) return;
         let next = getNextOverlay(true);
         if (activeOverlay.value == next) return;
         activeOverlay.value = next;
         // virtualizer.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'end', smoothScroll: false });
+        updateId.value += 1; // redraw view
       return;
-    }*/
+    }
 
     if (query.value !== q){
       query.value = q;
@@ -228,13 +265,18 @@ let setup = (props, ctx) => {
     if (occurrences.value.length === 0) return;
 
     let next = getNextOverlay(true);
+    
     if (activeOverlay.value < 0 && overlays.value.length > 0){
+      activeOverlay.value = next;
         // virtualizer.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'end', smoothScroll: false });
     }
+
     // If new highlighted keyword in exact same place as previous one, then no changing in active overlay
     if (overlays.value[activeOverlay.value] === undefined) {
       //activeOverlay.value = getNextOverlay(true);
     }
+
+    updateId.value += 1; // redraw view
   }
 
   logBus.on((q) => { debouncedSearch(q); })
@@ -249,7 +291,7 @@ let setup = (props, ctx) => {
   */
 
   return {virtualizer, virtualizerOptions, measureElement, widthStyle, parentRef, 
-    query, occurrences, findOccurrences, escapeRegExp, onSearch, debouncedSearch, overlays, activeOverlay, getNextOverlay,
+    query, occurrences, findOccurrences, escapeRegExp, onSearch, debouncedSearch, overlays, activeOverlay, getNextOverlay, getRow,
     logEvents, loaded, updateId, isBottom, isTop, toBottom, toTop, viewLoaded, debouncedInit}
 }
 
