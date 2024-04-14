@@ -16,7 +16,7 @@
           :ref="measureElement"
           :style="{ position: 'absolute', top: `${virtualRow.start}px`, left: 0, width: widthStyle }"
           >
-
+<!--          <div v-html="getRow(virtualRow.index)"><div> -->
           <span>{{ logEvents[virtualRow.index] }}</span>
         </div>
 
@@ -58,8 +58,12 @@ import { useVirtualizer } from '@@tanstack/vue-virtual'
 let setup = (props, ctx) => {
   const parentRef = ref(null);
   const updateId = ref(0);
-  const loaded = ref(false)
-  const logEvents = ref([])
+  const loaded = ref(false);
+  const logEvents = ref([]);
+  const occurrences = ref([]);
+  const overlays = ref([]);
+  const activeOverlay = ref(-1);
+  const query = ref('');
 
   let virtualizerOptions = computed(() => {
     return {
@@ -69,6 +73,16 @@ let setup = (props, ctx) => {
       getScrollElement: () => parentRef.value,
     }
   })
+
+  let getRow = (i) => {
+    let row = logEvents.value[i]
+    let overlays = undefined;
+    if (occurrences.value.length > 0){
+      overlays = occurrences.value.fiter(x => x[0] === i)
+    }
+    content = [];
+    return 
+  }
 
   let widthStyle = computed(() => { return props.wrap ? '100%' : 'max-content'});
 
@@ -82,6 +96,7 @@ let setup = (props, ctx) => {
     }
   }
 
+  const debouncedSearch = _.debounce((q) => onSearch(q), 300, {maxWait: 2});
   const debouncedInit = _.debounce(() => viewLoaded(), 500, {maxWait: 2});
 
   const measureElement = (el) => {
@@ -153,31 +168,78 @@ let setup = (props, ctx) => {
   })
 
   let findOccurrences = (lines, query) => {
-    const regex = new RegExp(escapeRegex(query), "gi");
+    const regex = new RegExp(escapeRegExp(query), "gi");
+    
+    let overlays = [];
+    let occurrences = {};
+    lines.forEach((line, index) => {
+      let matches = [...line.matchAll(regex).map(x => x.index)]
+      if (matches.length > 0){
+        occurrences[index] = matches;
+        overlays = overlays.concat(matches.map(x => ({row:index, index: x })));
+      }
+    });
 
-    return lines.flatMap((line, index) => Array.from(line.matchAll(regex), () => index));
+    return [overlays, occurrences];
+  }
+
+  let getNextOverlay = (loopResults = false) => {
+    const next = activeOverlay.value + 1;
+
+    if (next > overlays.value.length - 1) {
+      return loopResults ? 0 : activeOverlay.value;
+    }
+
+    return next;
   }
 
   let escapeRegExp = (str) => {
     return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
   }
 
-  let onSearch = () => {
-    if (!query) {
-      return this.reset();
+  let onSearch = (q) => {
+/*    if (query.value === q){ // trigger next overlay
+        if (overlays.value.length === 0) return;
+        let next = getNextOverlay(true);
+        if (activeOverlay.value == next) return;
+        activeOverlay.value = next;
+        // virtualizer.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'end', smoothScroll: false });
+      return;
+    }*/
+
+    if (query.value !== q){
+      query.value = q;
+      occurrences.value = [];
+      overlays = [];
+      activeOverlay.value = -1;
     }
 
-    this.occurrences = this.findOccurrences(text ?? [], query);
-
-    if (!this.occurrences.length) {
+    if (query.value === '') {
+      occurrences.value = [];
+      overlays = [];
+      activeOverlay.value = -1;
       return;
     }
 
+    let [ov, oc] = findOccurrences(logEvents.value, query.value);
+    overlays.value = ov;
+    occurrences.value = oc;
+
+    if (occurrences.value.length === 0) return;
+
+    let next = getNextOverlay(true);
+    if (activeOverlay.value < 0 && overlays.value.length > 0){
+        // virtualizer.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'end', smoothScroll: false });
+    }
     // If new highlighted keyword in exact same place as previous one, then no changing in active overlay
-    if (this.occurrences[this.activeOverlayIndex] === undefined) {
-      this.activeOverlayIndex = this.getNextOverlay(true);
+    if (overlays.value[activeOverlay.value] === undefined) {
+      //activeOverlay.value = getNextOverlay(true);
     }
   }
+
+  logBus.on((q) => {
+    debouncedSearch(q);
+    })
 
   //watch(() => props.direction, () => {
 
@@ -188,7 +250,8 @@ let setup = (props, ctx) => {
   }, [model.searchStore.activeOverlayIndex])
   */
 
-  return {virtualizer, virtualizerOptions, measureElement, widthStyle, parentRef,
+  return {virtualizer, virtualizerOptions, measureElement, widthStyle, parentRef, 
+    query, occurrences, findOccurrences, escapeRegExp, onSearch, debouncedSearch, overlays, activeOverlay, getNextOverlay,
     logEvents, loaded, updateId, isBottom, isTop, toBottom, toTop, viewLoaded, debouncedInit}
 }
 
