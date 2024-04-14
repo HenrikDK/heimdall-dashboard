@@ -16,10 +16,12 @@
           :ref="measureElement"
           :style="{ position: 'absolute', top: `${virtualRow.start}px`, left: 0, width: widthStyle }"
           >
-          <template v-if="query.length > 0" v-for="segment in getRow(virtualRow.index)">
-            <span v-if="segment.overlay && segment.active" class="bg-orange-500 dark:bg-orange-700">{{segment.content}}</span>
-            <span v-else-if="segment.overlay" class="bg-green-500 dark:bg-green-700">{{segment.content}}</span>
-            <span v-else>{{ segment.content }}</span>
+          <template v-if="query.length > 0 && occurrences[virtualRow.index]">
+            <template v-for="segment in getRow(virtualRow.index)">
+              <span v-if="segment.overlay && segment.active" class="bg-orange-300 dark:bg-orange-700">{{segment.content}}</span>
+              <span v-else-if="segment.overlay" class="bg-green-300 dark:bg-green-700">{{segment.content}}</span>
+              <span v-else>{{ segment.content }}</span>
+            </template>
           </template>
           <span v-else>{{ logEvents[virtualRow.index] }}</span>
         </div>
@@ -98,7 +100,7 @@ let setup = (props, ctx) => {
       if (prev !== undefined){
         start = prev + length;
       }
-      let end = next ?? row.length - 1;
+      let end = next ?? row.length;
 
       let segment1 = row.slice(start, curr);
       result.push({ content: segment1 });
@@ -219,6 +221,16 @@ let setup = (props, ctx) => {
     return [ol, oc];
   }
 
+  let getPrevOverlay = (loopResults = false) => {
+    const prev = activeOverlay.value - 1;
+
+    if (prev < 0) {
+      return loopResults ? overlays.value.length - 1 : activeOverlay.value;
+    }
+
+    return prev;
+  }
+
   let getNextOverlay = (loopResults = false) => {
     const next = activeOverlay.value + 1;
 
@@ -233,10 +245,18 @@ let setup = (props, ctx) => {
     return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
   }
 
-  let onSearch = (q) => {
-    if (query.value === q && query.value !== ''){ // trigger next overlay
+  let handleEvent = (e) => {
+    let reverse = e.shiftKey ?? false;
+    if (props.direction == 'up'){
+      reverse = !reverse;
+    }
+
+    if (e.key === 'Enter') // trigger next overlay
+    {
         if (overlays.value.length === 0) return;
-        let next = getNextOverlay(true);
+        
+        let next = reverse ? getPrevOverlay(true) : getNextOverlay(true);
+
         if (activeOverlay.value == next) return;
         activeOverlay.value = next;
         // virtualizer.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'end', smoothScroll: false });
@@ -244,8 +264,32 @@ let setup = (props, ctx) => {
       return;
     }
 
-    if (query.value !== q){
-      query.value = q;
+    if (e.key === 'ArrowUp')
+    {
+      if (overlays.value.length === 0) return;
+        
+      let next = e.shiftKey ? getPrevOverlay(true) : getNextOverlay(true);
+
+      if (activeOverlay.value == next) return;
+      activeOverlay.value = next;
+      // virtualizer.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'end', smoothScroll: false });
+      updateId.value += 1; // redraw view
+      
+      return;
+    }
+
+    if (e.key === 'ArrowDown')
+    {
+
+      return;
+    }
+  }
+
+  let onSearch = (q) => {
+    if (query.value === q.query && query.value !== '') return;
+
+    if (query.value !== q.query){
+      query.value = q.query;
       occurrences.value = [];
       overlays.value = [];
       activeOverlay.value = -1;
@@ -264,24 +308,27 @@ let setup = (props, ctx) => {
 
     if (occurrences.value.length === 0) return;
 
-    let next = getNextOverlay(true);
+    let reverse = props.direction == 'up' ? true : false;
+
+    let next = reverse ? getPrevOverlay(true) : getNextOverlay(true);
     
     if (activeOverlay.value < 0 && overlays.value.length > 0){
       activeOverlay.value = next;
-        // virtualizer.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'end', smoothScroll: false });
+      // virtualizer.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'end', smoothScroll: false });
     }
 
     // If new highlighted keyword in exact same place as previous one, then no changing in active overlay
     if (overlays.value[activeOverlay.value] === undefined) {
-      //activeOverlay.value = getNextOverlay(true);
+      // activeOverlay.value = getNextOverlay(true);
     }
 
     updateId.value += 1; // redraw view
   }
 
-  logBus.on((q) => { debouncedSearch(q); })
-
-  //watch(() => props.direction, () => {
+  logBus.on((q) => { 
+    debouncedSearch(q); 
+    handleEvent(q.e);
+  })
 
   /* 
   // scroll to search
@@ -291,7 +338,7 @@ let setup = (props, ctx) => {
   */
 
   return {virtualizer, virtualizerOptions, measureElement, widthStyle, parentRef, 
-    query, occurrences, findOccurrences, escapeRegExp, onSearch, debouncedSearch, overlays, activeOverlay, getNextOverlay, getRow,
+    query, occurrences, findOccurrences, escapeRegExp, onSearch, debouncedSearch, overlays, activeOverlay, getNextOverlay, getPrevOverlay, getRow, handleEvent, 
     logEvents, loaded, updateId, isBottom, isTop, toBottom, toTop, viewLoaded, debouncedInit}
 }
 
