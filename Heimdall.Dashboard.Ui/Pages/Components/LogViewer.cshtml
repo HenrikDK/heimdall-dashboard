@@ -70,6 +70,7 @@ let setup = (props, ctx) => {
   const overlays = ref([]);
   const activeOverlay = ref(-1);
   const query = ref('');
+  const status = useGlobalOverlays();
 
   let virtualizerOptions = computed(() => {
     return {
@@ -192,6 +193,11 @@ let setup = (props, ctx) => {
     updateId.value += 1;
   })
 
+  watch([overlays, activeOverlay], () => {
+    status.value.current = props.direction === 'up' ? overlays.value.length - activeOverlay.value : activeOverlay.value + 1;
+    status.value.total = overlays.value.length;
+  })
+
   watch(() => props.direction, () => {
     if (props.direction === 'up'){
       logEvents.value = [...props.events];
@@ -259,13 +265,13 @@ let setup = (props, ctx) => {
     return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
   }
 
-  let handleEvent = (e) => {
+  let handleEvent = (e) => { // navigate overlay
     let reverse = e.shiftKey ?? false;
     if (props.direction == 'up'){
       reverse = !reverse;
     }
 
-    if (e.key === 'Enter') // trigger next overlay
+    if (e.key === 'Enter') 
     {
         if (overlays.value.length === 0) return;
         
@@ -348,15 +354,8 @@ let setup = (props, ctx) => {
     handleEvent(q.e);
   })
 
-  /* 
-  // scroll to search
-   useEffect(() => {
-    rowVirtualizer.scrollToIndex(model.searchStore.occurrences[model.searchStore.activeOverlayIndex], { align: 'end', smoothScroll: false });
-  }, [model.searchStore.activeOverlayIndex])
-  */
-
   return {virtualizer, virtualizerOptions, measureElement, widthStyle, parentRef, 
-    query, occurrences, findOccurrences, escapeRegExp, onSearch, debouncedSearch, overlays, activeOverlay, getNextOverlay, getPrevOverlay, getRow, handleEvent, 
+    query, status, occurrences, findOccurrences, escapeRegExp, onSearch, debouncedSearch, overlays, activeOverlay, getNextOverlay, getPrevOverlay, getRow, handleEvent, 
     logEvents, loaded, updateId, isBottom, isTop, toBottom, toTop, viewLoaded, debouncedInit}
 }
 

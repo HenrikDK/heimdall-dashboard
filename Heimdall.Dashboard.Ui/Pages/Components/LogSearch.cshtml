@@ -24,11 +24,14 @@
       <template v-if="query.length > 0" name="clear-icon">
         <span aria-hidden="true" tabindex="0" role="button" aria-roledescription="❎" @@click="clear"
               class="mr-2 right-0 absolute z-50 opacity-40 stroke-white transition duration-300 flex-shrink-0 flex-grow-0 flex hover:opacity-80">
-          <span class="w-6 h-6 py-px box-content inline-block">
+          <span class="w-6 h-6 me-2 box-content inline-block">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="w-6 h-6">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </span>
+          <template v-if="status.total > 0">
+            <span>{{ status.current }} / {{ status.total }}</span>
+          </template>
         </span>
       </template>
     </div>
@@ -41,6 +44,7 @@ import { ref, watch, onMounted } from 'vue'
 let setup = (props, ctx) => {
   const hasFocus = ref(false)
   const query = ref('')
+  const status = useGlobalOverlays();
   
   let search = () =>{
     logBus.emit({query: query.value, e: {key: 'Enter'}})
@@ -97,7 +101,10 @@ let setup = (props, ctx) => {
     window.document.addEventListener('keydown', onDocumentKeydown);
   })
   
-  return {hasFocus, query, search, clear, onKeyUp, onKeyDown, onDocumentKeydown}
+  return {
+    hasFocus, query, search, status, 
+    clear, onKeyUp, onKeyDown, onDocumentKeydown
+  }
 }
 
 components["log-search"] = { template: "#log-search", setup };

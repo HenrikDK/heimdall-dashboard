@@ -20,6 +20,7 @@
   logBus = undefined;
   useGlobalNamespaces = undefined;
   useGlobalSearch = undefined;
+  useGlobalOverlays = undefined;
 
   process = {env: "production"}
 
@@ -80,14 +81,15 @@
 @RenderSection("Scripts", required: false)
 
 <script type="module">
-import { createApp } from 'vue'
+import { createApp, ref } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { registerTheme } from 'echarts/core'
 import { default as ECharts } from 'vue-echarts'
 import { useEventBus, createGlobalState, useStorage } from '@@vueuse/core'
 
-useGlobalNamespaces = createGlobalState(() => useStorage('heimdall-namespace', []))
-useGlobalSearch = createGlobalState(() => useStorage('heimdall-search', ''))
+useGlobalNamespaces = createGlobalState(() => useStorage('heimdall-namespace', []));
+useGlobalSearch = createGlobalState(() => useStorage('heimdall-search', ''));
+useGlobalOverlays = createGlobalState(() => ref({current: undefined, total: 0}));
 
 nsBus = useEventBus('namespace')
 logBus = useEventBus('log-search')
