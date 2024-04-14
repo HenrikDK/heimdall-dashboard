@@ -74,6 +74,16 @@ let setup = (props, ctx) => {
 
   const virtualizer = useVirtualizer(virtualizerOptions)
 
+  const viewLoaded = () => {
+    if (loaded.value === true) return;
+    loaded.value = true;
+    if (props.direction === 'up' && logEvents.value.length > 0){
+      virtualizer.value.scrollToIndex(logEvents.value.length - 1, { align: 'end', smoothScroll: false });
+    }
+  }
+
+  const debouncedInit = _.debounce(() => viewLoaded(), 500, {maxWait: 2});
+
   const measureElement = (el) => {
     nextTick(() => {
       if (!el) return;
@@ -120,9 +130,10 @@ let setup = (props, ctx) => {
   watch(() => props.events, () => {
     if (props.direction == 'up'){
       logEvents.value = [...props.events];
-    }else{
+    } else {
       logEvents.value = [...props.events].reverse();
     }
+    debouncedInit();
     
     if (!loaded.value) return;
     updateId.value += 1;
@@ -132,25 +143,13 @@ let setup = (props, ctx) => {
     if (props.direction === 'up'){
       logEvents.value = [...props.events];
       toBottom();
-    }else{
+    } else {
       logEvents.value = [...props.events].reverse();
       toTop();
     }
     
     if (!loaded.value) return;
     updateId.value += 1;
-  })
-
-  onMounted(() => {
-    setTimeout(() => {
-      loaded.value = true;
-    }, 500);
-
-    setTimeout(() => {
-      if (props.direction === 'up' && logEvents.value.length > 0){
-        virtualizer.value.scrollToIndex(logEvents.value.length - 1, { align: 'end', smoothScroll: false });  
-      }
-    }, 500);
   })
 
   let findOccurrences = (lines, query) => {
@@ -189,7 +188,8 @@ let setup = (props, ctx) => {
   }, [model.searchStore.activeOverlayIndex])
   */
 
-  return {virtualizer, logEvents, virtualizerOptions, measureElement, widthStyle, parentRef, loaded, updateId, isBottom, isTop, toBottom, toTop}
+  return {virtualizer, virtualizerOptions, measureElement, widthStyle, parentRef,
+    logEvents, loaded, updateId, isBottom, isTop, toBottom, toTop, viewLoaded, debouncedInit}
 }
 
 components["log-viewer"] = { template: "#log-viewer", emits: [], setup, 
