@@ -13,8 +13,9 @@
         </span>
       </span>
 
-      <input id="ls-input" v-model="query" type="search" autocomplete="off" @@focus="hasFocus = true" @@blur="hasFocus = false" @@keydown="onKeydown" placeholder="Search.. "
-           class="h-full w-full px-8 border-none outline-0 bg-transparent autofill:bg-transparent text-white" />
+      <input id="ls-input" v-model="query" type="search" autocomplete="off" 
+          @@focus="hasFocus = true" @@blur="hasFocus = false" @@keyDown="onKeyDown" @@keyUp="onKeyUp" 
+          class="h-full w-full px-8 border-none outline-0 bg-transparent autofill:bg-transparent text-white" />
       
       <template v-if="query.length < 1" name="shortcut-icon">
         <span class="absolute right-0 mr-2 rounded shortcut h-6 w-5 bg-white/[.1] text-center" :title="'Press &quot;/&quot; to search'">/</span>
@@ -42,27 +43,42 @@ let setup = (props, ctx) => {
   const query = ref('')
   
   let search = () =>{
-    logBus.emit(query.value)
+    logBus.emit({query: query.value, e: {key: 'Enter'}})
   }
   
   let clear = () =>{
     query.value = ''
   }
   
-  let onKeydown = (e) =>{
+  let onKeyDown = (e) => {
     if (e.key === 'Escape') {
-      query.value = ''
-      return
+      if (query.value.length > 0){
+        query.value = ''
+      }
+      else if (query.value.length === 0)
+      {
+        document.activeElement.blur()
+      }
+      return;
     }
 
+    if (['ArrowUp', 'ArrowDown'].includes(e.key)){
+      e.preventDefault();
+      logBus.emit({query: query.value, e: e});
+      return;
+    }
+  }
+
+  let onKeyUp = (e) =>{
     if (e.key === 'Enter'){
-      logBus.emit(query.value)
+      logBus.emit({query: query.value, e: e});
+      return;
     }
   }
 
   let onDocumentKeydown = (e) =>{
     var control = document.getElementById("ls-input")
-    if (e.key === '/' && e.target !== control.value &&
+    if ((e.key === '/' || e.key === 'S') && e.target !== control.value &&
       window.document.activeElement !== control.value &&
       e.target instanceof HTMLInputElement === false)
     {
@@ -74,14 +90,14 @@ let setup = (props, ctx) => {
   }
       
   watch(query, () => {
-    logBus.emit(query.value)
+    logBus.emit({query: query.value, e: {}})
   })
   
   onMounted(async () =>{
     window.document.addEventListener('keydown', onDocumentKeydown);
   })
   
-  return {hasFocus, query, search, clear, onKeydown, onDocumentKeydown}
+  return {hasFocus, query, search, clear, onKeyUp, onKeyDown, onDocumentKeydown}
 }
 
 components["log-search"] = { template: "#log-search", setup };
