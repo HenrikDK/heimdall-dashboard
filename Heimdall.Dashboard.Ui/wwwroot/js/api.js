@@ -86,7 +86,7 @@ async function streamLogs(path, cb, connections = null) {
             ending = '';
         }
         
-        if (lines[lines.length - 1].length === 0){
+        if (lines[lines.length - 1]?.length === 0){
             lines = lines.slice(0, -1);
         }
         
