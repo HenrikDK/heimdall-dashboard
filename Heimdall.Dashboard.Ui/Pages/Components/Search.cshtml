@@ -14,7 +14,8 @@
         </span>
       </span>
 
-      <input id="s-input" v-model="query" type="text" autocomplete="new-password" @@focus="hasFocus = true" @@blur="hasFocus = false" @@keydown="onKeydown" autocomplete="off" 
+      <input id="s-input" v-model="query" type="search" :autocomplete="off"
+          @@focus="hasFocus = true" @@blur="hasFocus = false" @@keydown="onKeydown" autocomplete="off" 
            class="h-full w-full px-8 border-none outline-0 bg-transparent autofill:bg-transparent text-white" />
       
       <template v-if="query.length < 1" name="shortcut-icon">
