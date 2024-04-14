@@ -335,14 +335,10 @@ let setup = (props, ctx) => {
     let next = reverse ? getPrevOverlay(true) : getNextOverlay(true);
     
     if (activeOverlay.value < 0 && overlays.value.length > 0){
-      activeOverlay.value = next;
-      // virtualizer.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'end', smoothScroll: false });
+      activeOverlay.value = next;      
     }
 
-    // If new highlighted keyword in exact same place as previous one, then no changing in active overlay
-    if (overlays.value[activeOverlay.value] === undefined) {
-      // activeOverlay.value = getNextOverlay(true);
-    }
+    virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'middle', smoothScroll: false });
 
     updateId.value += 1; // redraw view
   }
