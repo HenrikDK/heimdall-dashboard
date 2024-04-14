@@ -30,3 +30,8 @@ a, a:visited {
 {
     cursor: col-resize;   
 }
+
+[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+}
