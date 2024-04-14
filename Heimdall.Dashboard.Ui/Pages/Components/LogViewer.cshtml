@@ -195,9 +195,23 @@ let setup = (props, ctx) => {
   watch(() => props.direction, () => {
     if (props.direction === 'up'){
       logEvents.value = [...props.events];
+      if (query.value.length > 0)
+      {
+        let [ov, oc] = findOccurrences(logEvents.value, query.value);
+        overlays.value = ov;
+        occurrences.value = oc;
+        activeOverlay.value = overlays.value.length - 1;
+      }
       toBottom();
     } else {
       logEvents.value = [...props.events].reverse();
+      if (query.value.length > 0)
+      {
+        let [ov, oc] = findOccurrences(logEvents.value, query.value);
+        overlays.value = ov;
+        occurrences.value = oc;
+        activeOverlay.value = 0;
+      }
       toTop();
     }
     
