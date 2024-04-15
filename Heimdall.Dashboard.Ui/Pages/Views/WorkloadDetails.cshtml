@@ -105,7 +105,7 @@
 </template>
 
 <script type="module">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router';
 
 let setup = (props, ctx) => {
@@ -133,7 +133,6 @@ let setup = (props, ctx) => {
   }
   
   onMounted(async () => {
-    var host = window.location.origin;
     let name = route.params.name;
     let type = route.params.type;
     let namespace = route.params.namespace;
@@ -143,7 +142,7 @@ let setup = (props, ctx) => {
         url = `/k8s/apis/batch/v1/namespaces/${namespace}/${type}s`    
     }
     
-    streamResult(host + url, name, j => item.value = j, connections.value);
+    streamResult(url, name, j => item.value = j, connections.value);
   });
   
   onUnmounted(async () => {
@@ -156,6 +155,6 @@ let setup = (props, ctx) => {
   }
 }
 
-components["workload-details"] = { template: "#workload-details", props: ['config', 'namespaces', 'search', 'filters'], setup };    
+components["workload-details"] = { template: "#workload-details", props: ['config', 'filters'], setup };    
 routes.push({path:'/namespaces/:namespace/workloads/:name/:type', name:'workload-details', component: components["workload-details"]})    
 </script>

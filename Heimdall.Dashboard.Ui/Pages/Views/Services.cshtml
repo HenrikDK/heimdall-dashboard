@@ -4,7 +4,7 @@
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Services</span>
     </div>
   
-  <vue-table :columns="columns" :initial-sort="sorting" :data="services" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
+  <vue-table :columns="columns" :initial-sort="sorting" :data="services" :loading="loading"></vue-table>
   
   </div>
 </template>
@@ -44,8 +44,9 @@ let setup = (props, ctx) => {
     if (!clusterServices.value) return;
       
     let result = [...clusterServices.value];
-    if (props.filters?.length){
-      result = this.result.filter(x => filterName(x, props.filters))
+    
+    if (props.filters?.length > 0){
+        result = result.filter(x => props.filters.includes(x.metadata.namespace))
     }
       
     services.value = result;
@@ -55,8 +56,7 @@ let setup = (props, ctx) => {
   watch([() => props.filters, clusterServices], updateServices);
   
   onMounted(() => {
-    var host = window.location.origin;
-    streamResults(host + '/k8s/api/v1/services', j => clusterServices.value = j, connections.value)
+    streamResults('/k8s/api/v1/services', j => clusterServices.value = j, connections.value)
   });
 
   onUnmounted(async () => {
@@ -66,6 +66,6 @@ let setup = (props, ctx) => {
   return { loading, sorting, columns, clusterServices, services, getKubeDns, updateServices }
 }
 
-components["services"] = { template: "#services", props: ['namespaces', 'search', 'filters'], setup };
+components["services"] = { template: "#services", props: ['filters'], setup };
 routes.push({path:'/services', name:'services', component: components["services"]})    
 </script>

@@ -7,15 +7,26 @@
 
     <br/>
         
-    <div v-if="config.metrics" class="flex justify-between mb-4 mt-1">
-      <div class="wide-graph">
-        <v-chart :option="charts.cluster.performance" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+    <div v-if="config.metrics" class="flex justify-between mb-8 mt-1">
+      <div class="">
+
+        <div class="flex justify-center mb-4">
+          <div class="flex">
+            <chart-toggle name="cpu" :state="chartState" label="CPU" @@update="e => chartState = e"></chart-toggle>
+
+            <chart-toggle name="memory" :state="chartState" label="Memory" @@update="e => chartState = e"></chart-toggle>
+          </div>
+        </div>
+
+        <div class="wide-graph">
+          <v-chart :option="charts.cluster[chartState]" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+        </div>
       </div>
       <div class="large-graph">
-        <v-chart :option="charts.cluster.cpus" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+        <v-chart :option="charts.cluster.currentCpu" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
       </div>
       <div class="large-graph">
-        <v-chart :option="charts.cluster.memory" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+        <v-chart :option="charts.cluster.currentMemory" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
       </div>
     </div>
         
@@ -59,6 +70,8 @@ let setup = (props, ctx) => {
   const isDark = useDark();
   const initOptions = ref({ renderer: "svg" });
   const connections = ref([]);
+  const chartState = ref('cpu');
+  const namespaces = useGlobalNamespaces();
   const cluster = ref({
     pods: null,
     deployments: null,
@@ -68,19 +81,58 @@ let setup = (props, ctx) => {
     jobs: null,
     cronJobs: null,
   });
+
   const metrics = ref({
-      kubeMemory: null,
-      containerMemory: null,
-      nodeMemory: null,
-      kubeCpu: null,
-      nodeCpu: null,
+      cpu: [
+        { 
+          type:'cluster', name:'cpu-usage', 
+          metrics: [], data: [], params: { unit: 'cores', name:'Usage', index: 1, colorDark: '#4992ff', colorLight: '#5470c6'}
+        }
+      ],
+      memory: [
+        {
+          type:'cluster', name:'memory-usage', 
+          metrics: [], data: [], params: { unit: 'bytes', name:'Usage', index: 1, colorDark: '#dd79ff', colorLight: '#ea7ccc'}
+        }
+      ],
+      current: [
+        { 
+          type:'cluster', name:'memory-available', instant: true, metrics: []
+        },
+        { 
+          type:'cluster', name:'memory-requests', instant: true, metrics: []
+        },
+        { 
+          type:'cluster', name:'memory-limits', instant: true, metrics: []
+        },
+        { 
+          type:'cluster', name:'memory-capacity', instant: true, metrics: []
+        },
+        { 
+          type:'cluster', name:'memory-allocatable', instant: true, metrics: []
+        },
+
+        { 
+          type:'cluster', name:'cpu-requests', instant: true, metrics: []
+        },
+        { 
+          type:'cluster', name:'cpu-limits', instant: true, metrics: []
+        },
+        { 
+          type:'cluster', name:'cpu-capacity', instant: true, metrics: []
+        },
+        { 
+          type:'cluster', name:'cpu-allocatable', instant: true, metrics: []
+        }
+      ]
   });
   
   const charts = ref({
     cluster:{
-        performance: historic(),
-        cpus: current('CPU'),
-        memory: current('Memory')
+        cpu: getSimpleChart(),
+        memory: getSimpleChart(),
+        currentCpu: current('CPU'),
+        currentMemory: current('Memory')
     },
     workloads:{
         pods: workload('Pods', 0, 0),
@@ -95,8 +147,8 @@ let setup = (props, ctx) => {
 
   let filterNamespace = (values) => {
     let filtered = values;
-    if (props.namespaces.length > 0){
-      filtered = values?.filter(x => props.namespaces.some(y => x.metadata.namespace === y));
+    if (namespaces.value.length > 0){
+      filtered = values?.filter(x => namespaces.value.some(y => x.metadata.namespace === y));
     }
     return filtered;
   };
@@ -151,98 +203,107 @@ let setup = (props, ctx) => {
     charts.value.workloads.daemonsets = workload('Daemon Sets', running, pending);
   };
   
-  let updateCpu = async () => {
-    if (!metrics.value.nodeCpu || metrics.value.nodeCpu?.length === 0 || !metrics.value.kubeCpu || metrics.value.kubeCpu?.length === 0) return;
-    
-    let capacity = getMetricLastPoints(metrics.value.kubeCpu, 'kube_node_status_capacity');
-    let requestValue = getMetricLastPoints(metrics.value.kubeCpu, 'kube_pod_container_resource_requests');
-    let requestPct = requestValue / capacity * 100;
-    let requests = {pct: requestPct.toFixed(2), units: requestValue.toFixed(2) };
-    
-    let limitValue = getMetricLastPoints(metrics.value.kubeCpu, 'kube_pod_container_resource_limits');
-    let limitPct = limitValue / capacity * 100;
-    if (limitPct > 100){
-        limitPct = 100;
-    }
-    let limits = {pct: limitPct.toFixed(2), units: limitValue.toFixed(2) };
-    
-    let usageValue = getMetricLastPoints(metrics.value.nodeCpu);
-    let usagePct = usageValue / capacity * 100;
-    let usage = {pct: usagePct.toFixed(2), units: usageValue.toFixed(2) };
-    
-    charts.value.cluster.cpus = current('CPU', 'vCores', usage, requests, limits);
+  let updateMetricsCharts = () => {
+    updateCpu();
+    updateMemory();
+    updateCurrent();
+  }
+
+  let updateCpu = () => {
+    if (!metrics.value.cpu) return;
+    if (metrics.value.cpu[0].metrics.length < 1) return;
+
+    let cpuCapacity = getInstantMetricValue(metrics.value.current, 'cpu-capacity');
+    if (!cpuCapacity) return;
+
+    var [data, max, unit] = getDataSeries(metrics.value.cpu);
+
+    max = cpuCapacity ?? 0;
+
+    updateSimpleChart(charts.value.cluster.cpu, metrics.value.cpu, unit, isDark.value, 0, max);
   };
   
-  let updateMemory = async () => {
-    if (!metrics.value.kubeMemory || metrics.value.kubeMemory?.length === 0 || !metrics.value.nodeMemory || metrics.value.nodeMemory?.length === 0) return;
+  let updateMemory = () => {
+    if (!metrics.value.memory) return;
+    if (metrics.value.memory[0].metrics.length < 1) return;
+
+    let memoryCapacity = getInstantMetricValue(metrics.value.current, 'memory-capacity');
+    if (!memoryCapacity) return;
+
+    var [data, max, unit] = getDataSeries(metrics.value.memory);
     
-    let capacity = getMetricLastPoints(metrics.value.kubeMemory, 'kube_node_status_capacity');
-    let requestValue = getMetricLastPoints(metrics.value.kubeMemory, 'kube_pod_container_resource_requests');
-    let requestPct = requestValue / capacity * 100;
-    let requests = {pct: requestPct.toFixed(2), units: (requestValue / 1024 / 1024 / 1024).toFixed(2) };
-    
-    let limitValue = getMetricLastPoints(metrics.value.kubeMemory, 'kube_pod_container_resource_limits');
-    let limitPct = limitValue / capacity * 100;
-    if (limitPct > 100){
-        limitPct = 100;
-    }
-    let limits = {pct: limitPct.toFixed(2), units: (limitValue / 1024 / 1024 / 1024).toFixed(2) };              
-    
-    let usageValue = getMetricLastPoints(metrics.value.nodeMemory);              
-    let usagePct = usageValue / capacity * 100;
-    let usage = {pct: usagePct.toFixed(2), units: (usageValue / 1024 / 1024 / 1024).toFixed(2) };
-    // todo calculate unit
-    charts.value.cluster.memory = current('Memory', 'GiB', usage, requests, limits);
+    max = memoryCapacity ?? 0;
+
+    updateSimpleChart(charts.value.cluster.memory, metrics.value.memory, unit, isDark.value, 0, max);
   };
 
-  let updateHistory = async () => {
-    if (!metrics.value.kubeMemory || metrics.value.kubeMemory?.length === 0 || !metrics.value.nodeMemory || metrics.value.nodeMemory?.length === 0) return;
-    if (!metrics.value.nodeCpu || metrics.value.nodeCpu?.length === 0 || !metrics.value.kubeCpu || metrics.value.kubeCpu?.length === 0) return;
-    
-    let memoryCapacity = getMetricLastPoints(metrics.value.kubeMemory, 'kube_node_status_capacity');
-    let memoryUsage = getMetricSeries(metrics.value.nodeMemory);
-    // due to query differences, memory usage result is 2 entries longer than compute usage, so we drop the first 2 (oldest) entries
-    memoryUsage.shift();
-    memoryUsage.shift();
-    let time = memoryUsage.map(x => luxon.DateTime.fromMillis(x[0] * 1000).toFormat('HH:mm'));
-    let memory = {
-        max: (memoryCapacity / 1024 / 1024 / 1024).toFixed(2),
-        data: memoryUsage.map(x => (x[1] / 1024 / 1024 / 1024).toFixed(2))
+  let updateCurrent = async () => {
+    if (!metrics.value.memory || !metrics.value.cpu) return;
+    if (metrics.value.memory[0].metrics.length < 1 || metrics.value.cpu[0].metrics.length < 1) return;
+
+    let memoryCapacity = getInstantMetricValue(metrics.value.current, 'memory-capacity');
+    if (!memoryCapacity) return;
+
+    let memoryUsage = getMetricLastPoints(metrics.value.memory[0].metrics);
+    let memoryAvailable = getInstantMetricValue(metrics.value.current, 'memory-available');
+    let memoryAllocatable = getInstantMetricValue(metrics.value.current, 'memory-allocatable');
+    let memoryRequests = getInstantMetricValue(metrics.value.current, 'memory-requests');
+    let memoryLimits = getInstantMetricValue(metrics.value.current, 'memory-limits');
+
+    let mUnit = getUnitFromBytes(memoryCapacity);
+
+    let memRequestPct = memoryRequests / memoryCapacity * 100;
+    let memRequestValue = memoryRequests / mUnit.magnitude;
+    let mRequests = {pct: memRequestPct.toFixed(2), units: memRequestValue.toFixed(2) };
+
+    let memLimitPct = memoryLimits / memoryCapacity * 100;
+    let memLimitValue = memoryLimits / mUnit.magnitude;
+    if (memLimitPct > 100){
+        memLimitPct = 100;
     }
+    let mLimits = {pct: memLimitPct.toFixed(2), units: memLimitValue.toFixed(2)};
+
+    let memUsageValue = memoryUsage / mUnit.magnitude;
+    let memUsagePct = memoryUsage / memoryCapacity * 100;
+    let mUsage = {pct: memUsagePct.toFixed(2), units: memUsageValue.toFixed(2) };
+
+    charts.value.cluster.currentMemory = current('Memory', mUnit.suffix, mUsage, mRequests, mLimits);
+
+    let cpuCapacity = getInstantMetricValue(metrics.value.current, 'cpu-capacity');
+    let cpuUsage = getMetricLastPoints(metrics.value.cpu[0].metrics);
+    let cpuAllocatable = getInstantMetricValue(metrics.value.current, 'cpu-allocatable');
+    let cpuRequests = getInstantMetricValue(metrics.value.current, 'cpu-requests');
+    let cpuLimits = getInstantMetricValue(metrics.value.current, 'cpu-limits');
+
+    let cpuRequestPct = cpuRequests / cpuCapacity * 100;
+    let cRequests = {pct: cpuRequestPct.toFixed(2), units: cpuRequests.toFixed(2) };
     
-    let computeCapacity = getMetricLastPoints(metrics.value.kubeCpu, 'kube_node_status_capacity');
-    let computeUsage = getMetricSeries(metrics.value.nodeCpu);
-    let compute = {
-        max: computeCapacity.toFixed(2),
-        data: computeUsage.map(x => parseFloat(x[1]).toFixed(2))
+    let cpuLimitPct = cpuLimits / cpuCapacity * 100;
+    if (cpuLimitPct > 100){
+        cpuLimitPct = 100;
     }
+    let cLimits = {pct: cpuLimitPct.toFixed(2), units: cpuRequests.toFixed(2) };              
     
-    charts.value.cluster.performance = historic(memory, compute, time);              
+    let cpuUsagePct = cpuUsage / cpuCapacity * 100;
+    let cUsage = {pct: cpuUsagePct.toFixed(2), units: cpuUsage.toFixed(2) };
+    
+    charts.value.cluster.currentCpu = current('CPU', 'vCores', cUsage, cRequests, cLimits);
   };
   
   let updateMetrics = async () => {
     if (props.nodes.length > 0 && props.config.metrics)
     {
-      var host = window.location.origin;
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'kube-memory-stats', { nodes: props.nodes }), j => metrics.value.kubeMemory = j.data.result, connections.value);
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'container-memory', { nodes: props.nodes }), j => metrics.value.containerMemory = j.data.result, connections.value);
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'node-memory-stats', { nodes: props.nodes }), j => metrics.value.nodeMemory = j.data.result, connections.value);
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'kube-cpu-stats', { nodes: props.nodes }), j => metrics.value.kubeCpu = j.data.result, connections.value);
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('cluster', 'node-cpu-stats', { nodes: props.nodes }), j => metrics.value.nodeCpu = j.data.result, connections.value);
+      metrics.value.memory.forEach(x => x['nodes'] = props.nodes)
+      metrics.value.cpu.forEach(x => x['nodes'] = props.nodes)
+      metrics.value.current.forEach(x => x['nodes'] = props.nodes)
+
+      streamMetrics(metrics.value.memory, updateMetricsCharts, connections.value);
+      streamMetrics(metrics.value.cpu, updateMetricsCharts, connections.value);
+      streamMetrics(metrics.value.current, updateMetricsCharts, connections.value);
     }
   }
-  
-  watch(() => [metrics.value.nodeCpu, metrics.value.kubeCpu], () => {
-    updateCpu(); 
-    updateHistory();    
-  });
-  
-  watch(() => [metrics.value.nodeMemory, metrics.value.kubeMemory], () => {
-    updateMemory();
-    updateHistory();    
-  })
-  
-  watch(() => props.namespaces, () => {
+    
+  watch(namespaces, () => {
     updateClusterPods();
     updateClusterDeployments();
     updateClusterJobs();
@@ -252,6 +313,10 @@ let setup = (props, ctx) => {
     updateClusterDaemonSets();
   });
   
+  watch([chartState, isDark], () => {
+    updateMetricsCharts();
+  });
+
   watch(() => props.nodes, () => {
     updateMetrics();
   });
@@ -265,17 +330,15 @@ let setup = (props, ctx) => {
   watch(() => cluster.value.daemonSets, updateClusterDaemonSets);
   
   onMounted(async () => {
-    var host = window.location.origin;
-    
     updateMetrics();
     
-    streamResults(host + '/k8s/api/v1/pods', j => cluster.value.pods = j, connections.value);
-    streamResults(host + '/k8s/apis/apps/v1/deployments', j => cluster.value.deployments = j, connections.value);
-    streamResults(host + '/k8s/apis/apps/v1/daemonsets', j => cluster.value.daemonSets = j, connections.value);
-    streamResults(host + '/k8s/apis/apps/v1/statefulsets', j => cluster.value.statefulSets = j, connections.value);
-    streamResults(host + '/k8s/apis/apps/v1/replicasets', j => cluster.value.replicaSets = j, connections.value);
-    streamResults(host + '/k8s/apis/batch/v1/cronjobs', j => cluster.value.cronJobs = j, connections.value);
-    streamResults(host + '/k8s/apis/batch/v1/jobs', j => cluster.value.jobs = j, connections.value);
+    streamResults('/k8s/api/v1/pods', j => cluster.value.pods = j, connections.value);
+    streamResults('/k8s/apis/apps/v1/deployments', j => cluster.value.deployments = j, connections.value);
+    streamResults('/k8s/apis/apps/v1/daemonsets', j => cluster.value.daemonSets = j, connections.value);
+    streamResults('/k8s/apis/apps/v1/statefulsets', j => cluster.value.statefulSets = j, connections.value);
+    streamResults('/k8s/apis/apps/v1/replicasets', j => cluster.value.replicaSets = j, connections.value);
+    streamResults('/k8s/apis/batch/v1/cronjobs', j => cluster.value.cronJobs = j, connections.value);
+    streamResults('/k8s/apis/batch/v1/jobs', j => cluster.value.jobs = j, connections.value);
   });
 
   onUnmounted(async () => {
@@ -283,15 +346,14 @@ let setup = (props, ctx) => {
   });
     
   return {
-    isDark, initOptions, cluster, metrics, charts, connections,
+    isDark, initOptions, cluster, metrics, charts, connections, chartState, namespaces,
     filterNamespace, 
     updateClusterPods, updateClusterDeployments, updateClusterJobs, updateClusterCronJobs, 
     updateClusterStatefulSets, updateClusterReplicaSets, updateClusterDaemonSets,
-    updateCpu, updateMemory, updateHistory, updateMetrics,
-    
+    updateCpu, updateMemory, updateCurrent, updateMetrics, updateMetricsCharts
   }
 }
 
-components["cluster"] = {template: "#cluster", props: ['config', 'namespaces', 'nodes'], setup};
+components["cluster"] = {template: "#cluster", props: ['config', 'nodes'], setup};
 routes.push({path:'/', name:'cluster',  component: components["cluster"]})
 </script>

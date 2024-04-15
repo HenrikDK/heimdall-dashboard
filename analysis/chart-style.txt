@@ -1,0 +1,140 @@
+let renderSortedStackedBarChart = (params, api) => {
+  var start = api.coord([api.value(0), api.value(1 + params.seriesIndex)]);
+  var size = api.size([1, api.value(1)]);
+  var style = api.style();
+  height = size[1];
+  if (params.seriesIndex > 0){
+    height = api.value(1) ? size[1] - size2[1] : size[1];
+  }
+  
+  return {
+    type: 'group',
+    children: [
+      {
+    type: 'rect',
+    shape: {
+      x: start[0] - size[0] * 0.5,
+      y: start[1],
+      width: size[0],
+      height: size[1]
+    },
+    style: {...style,
+        opacity: 0.2
+      }
+    },
+    {
+      type: 'rect',
+      shape: {
+        x: start[0] - size[0] * 0.5,
+        y: start[1],
+        width: size[0],
+        height: 3,
+      },
+      style: style,
+    }
+    ]
+  };
+};
+
+const data = [
+  ['20:13', 3, 5],
+  ['20:14', 7, 9],
+  ['20:15', 12, 14],
+  ['20:16', 15, 17],
+  ['20:17', 10, 12],
+  ['20:18', 9, 15],
+  ['20:19', 8, 10],
+  ['20:20', null, 10],
+  ['20:21', 8, null],
+  ['20:22', 8, 10],
+  ['20:23', 4, 6]
+];
+
+option = {
+  animation: false,
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: { 
+      type: 'shadow',
+      shadowStyle:{
+        color: '#a9a9a9',
+        opacity: 0.07
+      }
+    }
+  },
+  xAxis: {
+    type: 'category'
+  },
+  legend: {
+    show: true,
+    selectedMode: false
+  },
+  yAxis: {
+    type: 'value',
+    position: 'left',
+    max: 50,
+    axisLabel: {
+      formatter: '{value} GiB'
+    }
+  },
+  grid: {
+    left: '7%',
+    right: '10%',
+    top: '10%',
+    bottom: '7%',
+  },
+  series: [
+    {
+      type: 'custom',
+      name: 'sent',
+      emphasis: {disabled: true},
+      stack: 'yes',
+      markLine: {
+        symbol: 'none',
+        data: [
+          {
+              yAxis: 22,
+              lineStyle:{
+                color: 'lightgray',
+                width: 2,
+                type:'solid'
+              
+              },
+              emphasis: {disabled: true},
+              label: {
+                position: 'end',
+                formatter: 'Limit'
+              },
+
+          },
+        ]
+      },      
+      renderItem: renderSortedStackedBarChart,
+      label: {
+        show: false,
+      },
+      dimensions: ['time', 'value'],
+      encode: {
+        x: 0,
+        y: 1
+      },
+      data: data
+    },
+    {
+      type: 'custom',
+      name: 'recieved',
+      emphasis: {disabled: true},
+      stack: 'yes',
+      renderItem: renderSortedStackedBarChart,
+      label: {
+        show: false,
+      },
+      dimensions: ['time', 'value'],
+      encode: {
+        x: 0,
+        y: 2
+      },
+      data: data
+    }
+  ]
+};

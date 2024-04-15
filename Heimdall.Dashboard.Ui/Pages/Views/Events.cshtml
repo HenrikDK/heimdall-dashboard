@@ -5,7 +5,7 @@
     <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
   </div>
 
-  <vue-table :columns="columns" :initial-sort="sorting" :data="events" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
+  <vue-table :columns="columns" :initial-sort="sorting" :data="events" :loading="loading"></vue-table>
         
   </div>
 </template>
@@ -24,7 +24,13 @@ let setup = (props, ctx) => {
     
     const currentTime = new Date();
     const before12Hours = new Date(currentTime.setHours(currentTime.getHours() - 12));
+
     let recent = clusterEvents.value.filter(x=>(new Date(x.lastTimestamp)) >= before12Hours)
+
+    if (props.filters?.length > 0){
+        recent = recent.filter(x => props.filters.includes(x.metadata.namespace))
+    }
+
     if (recent.length === 0){
       recent = clusterEvents.value.slice(0, 100);
     }
@@ -52,8 +58,7 @@ let setup = (props, ctx) => {
   ]);
   
   onMounted(async () => {
-    var host = window.location.origin;
-    streamResults(host + '/k8s/api/v1/events', j => clusterEvents.value = j, connections.value);
+    streamResults('/k8s/api/v1/events', j => clusterEvents.value = j, connections.value);
   });
   
   onUnmounted(async () => {
@@ -63,6 +68,6 @@ let setup = (props, ctx) => {
   return { loading, clusterEvents, events, sorting, columns, updateEvents, connections }
 }
 
-components["events"] = {template: "#events", props: ['namespaces', 'search'], setup};
+components["events"] = {template: "#events", props: ['filters'], setup};
 routes.push({path:'/events', name:'events',  component: components["events"]})
 </script>

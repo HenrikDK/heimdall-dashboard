@@ -68,55 +68,68 @@ function toHumanValues(dur) {
     return result
 }
 
-function getMetric(type, name, options = {}, step = '60s'){
-    var DT = luxon.DateTime;
-    let end = DT.now();
-    let begin = end.minus({ hours: 1 });
+function getMetricUrl(options, begin, end, step = '60s'){
+    let host = window.location.origin;
+    let query = getMetricQuery(options)
+
+    let result = options.instant ? 
+     `${host}/prometheus/api/v1/query?time=${begin.toISO()}&query=` :
+     `${host}/prometheus/api/v1/query_range?start=${begin.toISO()}&end=${end.toISO()}&step=${step}&query=`;
     
-    let result = `/query_range?start=${begin.toUTC().toISO()}&end=${end.toUTC().toISO()}&step=${step}&query=`;
-    result += encodeURIComponent(getMetricQuery(type, name, options))
+    result += encodeURIComponent(query)
     return result;
 }
 
-function getMetricQuery(type = '', name = '', options = {}) {
-    switch(type) {
+function getMetricQuery(options) {
+    switch(options.type) {
         case "cluster":
-            switch (name) {
-                case "node-memory-stats":
-                    return `sum(node_memory_MemTotal_bytes{kubernetes_node=~"${options.nodes}"} - (node_memory_MemFree_bytes{kubernetes_node=~"${options.nodes}"} + node_memory_Buffers_bytes{kubernetes_node=~"${options.nodes}"} + node_memory_Cached_bytes{kubernetes_node=~"${options.nodes}"})) by (component)`;
-                case "container-memory":
-                    return `sum(container_memory_working_set_bytes{container!="POD",container!="",instance=~"${options.nodes}"}) by (component)`;
-                case "kube-memory-stats":
-                    return `sum({__name__=~"kube_pod_container_resource_requests|kube_pod_container_resource_limits|kube_node_status_capacity|kube_node_status_allocatable", kubernetes_node=~"${options.nodes}", resource="memory"}) by (__name__, component)`;
+            switch (options.name) {
 
-                case "node-cpu-stats":
-                    return `sum(rate(node_cpu_seconds_total{kubernetes_node=~"${options.nodes}", mode=~"user|system"}[1m]))`;
-                case "kube-cpu-stats":
-                    return `sum({__name__=~"kube_pod_container_resource_requests|kube_pod_container_resource_limits|kube_node_status_capacity|kube_node_status_allocatable", kubernetes_node=~"${options.nodes}", resource="cpu"}) by (__name__, component)`;
+                // historic
+                case "memory-usage":
+                    return `sum(container_memory_working_set_bytes{container!="POD",container!="",instance=~"${options.nodes.join('|')}"}) by (component)`;
+                case "cpu-usage":
+                    return `sum(rate(node_cpu_seconds_total{kubernetes_node=~"${options.nodes.join('|')}", mode=~"user|system"}[3m]))`;
+                
+                // instance
+                case "memory-available":
+                    return `sum(node_memory_MemTotal_bytes - (node_memory_MemFree_bytes + node_memory_Buffers_bytes + node_memory_Cached_bytes)) by (kubernetes_name)`.replace('_bytes', `_bytes{kubernetes_node=~"${options.nodes.join('|')}"}`);
+                case "memory-requests":
+                    return `sum(kube_pod_container_resource_requests{node=~"${options.nodes.join('|')}", resource="memory"}) by (component)`;
+                case "memory-limits":
+                    return `sum(kube_pod_container_resource_limits{node=~"${options.nodes.join('|')}", resource="memory"}) by (component)`;
+                case "memory-capacity":
+                    return `sum(kube_node_status_capacity{node=~"${options.nodes.join('|')}", resource="memory"}) by (component)`;
+                case "memory-allocatable":
+                    return `sum(kube_node_status_allocatable{node=~"${options.nodes.join('|')}", resource="memory"}) by (component)`;
+                
+                // instance
+                case "cpu-requests":
+                    return `sum(kube_pod_container_resource_requests{node=~"${options.nodes.join('|')}", resource="cpu"}) by (component)`;
+                case "cpu-limits":
+                    return `sum(kube_pod_container_resource_limits{node=~"${options.nodes.join('|')}", resource="cpu"}) by (component)`;
+                case "cpu-capacity":
+                    return `sum(kube_node_status_capacity{node=~"${options.nodes.join('|')}", resource="cpu"}) by (component)`;
+                case "cpu-allocatable":
+                    return `sum(kube_node_status_allocatable{node=~"${options.nodes.join('|')}", resource="cpu"}) by (component)`;
             }
             break;
+
         case "pod":
-            switch (name) {
+            switch (options.name) {
                 case "cpu-usage":
                     return `sum(rate(container_cpu_usage_seconds_total{container!="POD",container!="",pod=~"${options.pods}",namespace="${options.namespace}"}[3m])) by (pod)`;
-                case "cpu-limits":
-                    return `sum(kube_pod_container_resource_limits{pod=~"${options.pods}",resource="cpu",namespace="${options.namespace}"}) by (pod)`;
-
-                case "memory-usage":
+                case "mem-usage":
                     return `sum(container_memory_working_set_bytes{container!="POD",container!="",pod=~"${options.pods}",namespace="${options.namespace}"}) by (pod)`;
-                case "memory-limits":
-                    return `sum(kube_pod_container_resource_limits{pod=~"${options.pods}",resource="memory",namespace="${options.namespace}"}) by (pod)`;
 
-                case "fs-usage":
-                    return `sum(container_fs_usage_bytes{container!="POD",container!="",pod=~"${options.pods}",namespace="${options.namespace}"}) by (pod)`;
                 case "fs-writes":
                     return `sum(rate(container_fs_writes_bytes_total{container!="", pod=~"${options.pods}", namespace="${options.namespace}"}[3m])) by (pod)`;
                 case "fs-reads":
                     return `sum(rate(container_fs_reads_bytes_total{container!="", pod=~"${options.pods}", namespace="${options.namespace}"}[3m])) by (pod)`;
                     
-                case "network-received":
+                case "net-recv":
                     return `sum(rate(container_network_receive_bytes_total{pod=~"${options.pods}",namespace="${options.namespace}"}[3m])) by (pod)`;
-                case "network-sent":
+                case "net-sent":
                     return `sum(rate(container_network_transmit_bytes_total{pod=~"${options.pods}",namespace="${options.namespace}"}[3m])) by (pod)`;
             }
             break;
@@ -125,34 +138,171 @@ function getMetricQuery(type = '', name = '', options = {}) {
     return ''
 }
 
-function getMetricLastPoints(data, metric= '') {
-    let metrics = data
-    if (metric.length > 0){
-        metrics = metrics.filter(x => x.metric["__name__"] === metric)
-    }
-    let result = metrics.map(x => {
-        try {
-            return x.values.slice(-1)[0][1];
-        } catch {
-            return undefined;
-        }
-    });
+function getMetricLastPoints(metric) {
+    if (metric.values.length < 0) return undefined;
 
-    return parseFloat(result[0]);
+    let result = metric.values.slice(-1)[0][1];
+
+    return parseFloat(result);
 }
 
-function getMetricSeries(data, metric= '') {
-    let metrics = data
-    if (metric.length > 0){
-        metrics = metrics.filter(x => x.metric["__name__"] === metric)
-    }
-    let result = metrics.map(x => {
-        try {
-            return x.values;
-        } catch {
-            return undefined;
+function getInstantMetricValue(options, metric= '') {
+    if (options.length < 1) return undefined;
+    
+    let series = options.filter(x => x.name === metric);
+    if (series.length < 1) return undefined;
+
+    let results = series[0].metrics;
+    if (results.length < 1) return undefined;
+
+    return parseFloat(results.value[1])
+}
+
+function getDataSeries(options) {
+    if (options.length < 1) return [[], 0, {suffix: "", magnitude: 1}];
+
+    if (options[0].metrics.length < 1) return [[], 0, {suffix: "", magnitude: 1}];
+    
+    let time = options[0].metrics.values.map(x => x[0]);
+    let first = options[0].metrics.values.map(x => parseFloat(x[1]));
+    let second = options.length > 1 ? options[1].metrics.values.map(x => parseFloat(x[1])) : [];
+    let firstMax = Math.max(...first);
+    let secondMax = second.length > 0 ? Math.max(...second) : 0;
+    let trueMax = firstMax > secondMax ? firstMax : secondMax;
+
+    let unit = options[0]?.params?.unit === 'bytes' ? getUnitFromBytes(firstMax) : {suffix: "", magnitude: 1};
+
+    let data = time.map((t, index) => {
+        let short = luxon.DateTime.fromMillis(t * 1000).toFormat('HH:mm');
+
+        if (second.length < 1){
+            return [short, first[index]]
+        }
+
+        if (firstMax > secondMax){
+            return [short, second[index], first[index]];
+        } else{
+            return [short, first[index], second[index]];
         }
     });
 
-    return result[0];
+    options[0].params['max'] = firstMax;
+    options[0].data = data;
+    if (options.length > 1){
+        options[1].data = data;
+        options[1].params['max'] = secondMax;
+        options[1].params['index'] = secondMax > firstMax ? 2 : 1;
+        options[0].params['index'] = firstMax > secondMax ? 2 : 1;
+    }
+
+    return [data, trueMax, unit]
+}
+
+const base = 1024;
+const byte_units = [
+  {suffix: "B", magnitude: 1},
+  {suffix: "KiB", magnitude: base ** 1},
+  {suffix: "MiB", magnitude: base ** 2},
+  {suffix: "GiB", magnitude: base ** 3},
+  {suffix: "TiB", magnitude: base ** 4},
+  {suffix: "PiB", magnitude: base ** 5},
+  {suffix: "EiB", magnitude: base ** 6},
+];
+
+const bytes_regex = /(?<value>[0-9]+(\.[0-9]*)?)(?<suffix>(B|[KMGTPE]iB?))?/;
+
+function unitsToBytes(value) {
+  const match = value.match(bytes_regex);
+
+  if (!match?.groups) {
+    return NaN;
+  }
+
+  const parsedValue = parseFloat(match.groups.value);
+
+  if (!match.groups?.suffix) {
+    return parsedValue;
+  }
+
+  const unit = byte_units.filter(x => x.suffix === match.groups.suffix)[0];
+
+  return parseInt((parsedValue * unit.magnitude).toFixed(1));
+}
+
+function memoryUnitToBytes(value){
+    if (!value){
+        return 0;
+    }
+
+    let n = value.slice(-2);
+    let digits = value.slice(0, -2);
+    const isDigit = /\d+/.test(n);
+
+    if (isDigit){
+      return parseFloat(value);
+    }
+    
+    const converters = byte_units.filter(x => x.suffix.startsWith(n));
+  
+    if (converters.length === 0) {
+      return 0;
+    }
+  
+    return parseFloat(digits) * converters[0].magnitude;
+}
+
+function bytesToUnits(bytes, precision = 1){
+  let unit = getUnitFromBytes(bytes);
+
+  return `${(bytes / unit.magnitude).toFixed(precision)}${unit.suffix}`;
+}
+
+function getUnitFromBytes(bytes){
+    if (bytes <= 0 || isNaN(bytes) || !isFinite(bytes)) {
+        return "N/A";
+    }
+
+    const index = Math.floor(Math.log(bytes) / Math.log(base));
+
+    if (index < byte_units.length - 1){
+        return byte_units[index];
+    }
+    
+    return byte_units[byte_units.length -1];
+}
+
+
+const cpu_units = [
+    {suffix: "n", magnitude: 1000 ** -3},
+    {suffix: "u", magnitude: 1000 ** -2},
+    {suffix: "m", magnitude: 1000 ** -1}, // milli
+    {suffix: "",  magnitude: 1}, // no units
+    {suffix: "k", magnitude: 1000 ** 1},
+    {suffix: "M", magnitude: 1000 ** 2},
+    {suffix: "G", magnitude: 1000 ** 3},
+    {suffix: "P", magnitude: 1000 ** 4},
+    {suffix: "T", magnitude: 1000 ** 5},
+    {suffix: "E", magnitude: 1000 ** 6},
+  ];
+
+function cpuUnitsToNumber(value) {
+    if (!value){
+        return 0;
+    }
+
+    let n = value.slice(-1);
+    let digits = value.slice(0, -1);
+    const isDigit = /\d+/.test(n);
+
+    if (isDigit){
+      return parseFloat(value);
+    }
+    
+    const converters = cpu_units.filter(x => x.suffix == n);
+  
+    if (converters.length === 0) {
+      return 0;
+    }
+  
+    return parseFloat(digits) * converters[0].magnitude;
 }

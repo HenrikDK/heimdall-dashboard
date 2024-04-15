@@ -4,7 +4,7 @@
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Ingresses</span>
     </div>
 
-    <vue-table :columns="columns" :initial-sort="sorting" :data="ingresses" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
+    <vue-table :columns="columns" :initial-sort="sorting" :data="ingresses" :loading="loading"></vue-table>
   
   </div>
 </template>
@@ -31,9 +31,9 @@ let setup = (props, ctx) => {
       
      let result = [...clusterIngresses.value];
                       
-     if (props.filters?.length){
-          result = result.filter(x => filterName(x, props.filters))
-     }
+    if (props.filters?.length > 0){
+        result = result.filter(x => props.filters.includes(x.metadata.namespace))
+    }
       
      ingresses.value = result;
      loading.value = false;
@@ -58,8 +58,7 @@ let setup = (props, ctx) => {
   watch([props.filters, clusterIngresses], updateIngresses);
   
   onMounted(() => {
-    var host = window.location.origin;
-    streamResults(host + '/k8s/apis/networking.k8s.io/v1/ingresses', j => clusterIngresses.value = j, connections.value)
+    streamResults('/k8s/apis/networking.k8s.io/v1/ingresses', j => clusterIngresses.value = j, connections.value)
   });
 
   onUnmounted(async () => {
@@ -69,6 +68,6 @@ let setup = (props, ctx) => {
   return { loading, clusterIngresses, ingresses, sorting, columns, getLoadBalancers, connections }
 }
 
-components["ingresses"] = { template: "#ingresses", props: ['namespaces', 'search', 'filters'], setup };
+components["ingresses"] = { template: "#ingresses", props: ['filters'], setup };
 routes.push({path:'/ingresses', name:'ingresses', component: components["ingresses"]})    
 </script>

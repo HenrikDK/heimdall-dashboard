@@ -1,5 +1,5 @@
 ﻿<template id="log-search">
-  <div class="relative" aria-label="Search Log">
+  <div class="relative" aria-label="Search Log" title="Shift + S or / to search">
     <div class="h-9 w-full text-gray-200 items-center flex justify-center box-border cursor-pointer border border-white/[.4] outline-0 rounded 
         bg-brand dark:bg-zinc-900 text-white/[.6] leading-snug outline-none 
         data-[focus=true]:border-white data-[focus=true]:text-white data-[focus=true]:fill-white" tabindex="-1" :data-focus="hasFocus">
@@ -13,8 +13,9 @@
         </span>
       </span>
 
-      <input id="log-search-input" v-model="query" name="search-box" type="text" @@focus="hasFocus = true" @@blur="hasFocus = false" @@keydown="onKeydown"
-           class="h-full w-full px-8 border-none outline-0 bg-transparent autofill:bg-transparent text-white" />
+      <input id="ls-input" v-model="query" type="search" autocomplete="off" 
+          @@focus="hasFocus = true" @@blur="hasFocus = false" @@keyDown="onKeyDown" @@keyUp="onKeyUp" 
+          class="h-full w-full px-8 border-none outline-0 bg-transparent autofill:bg-transparent text-white" />
       
       <template v-if="query.length < 1" name="shortcut-icon">
         <span class="absolute right-0 mr-2 rounded shortcut h-6 w-5 bg-white/[.1] text-center" :title="'Press &quot;/&quot; to search'">/</span>
@@ -23,11 +24,14 @@
       <template v-if="query.length > 0" name="clear-icon">
         <span aria-hidden="true" tabindex="0" role="button" aria-roledescription="❎" @@click="clear"
               class="mr-2 right-0 absolute z-50 opacity-40 stroke-white transition duration-300 flex-shrink-0 flex-grow-0 flex hover:opacity-80">
-          <span class="w-6 h-6 py-px box-content inline-block">
+          <span class="w-6 h-6 me-2 box-content inline-block">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="w-6 h-6">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </span>
+          <template v-if="status.total > 0">
+            <span>{{ status.current }} / {{ status.total }}</span>
+          </template>
         </span>
       </template>
     </div>
@@ -40,24 +44,45 @@ import { ref, watch, onMounted } from 'vue'
 let setup = (props, ctx) => {
   const hasFocus = ref(false)
   const query = ref('')
+  const status = useGlobalOverlays();
   
   let search = () =>{
-    ctx.emit('update:log-search', query.value)
+    logBus.emit({query: query.value, e: {key: 'Enter'}})
   }
   
   let clear = () =>{
     query.value = ''
   }
   
-  let onKeydown = (e) =>{
+  let onKeyDown = (e) => {
     if (e.key === 'Escape') {
-      query.value = ''
+      if (query.value.length > 0){
+        query.value = ''
+      }
+      else if (query.value.length === 0)
+      {
+        document.activeElement.blur()
+      }
+      return;
+    }
+
+    if (['ArrowUp', 'ArrowDown'].includes(e.key)){
+      e.preventDefault();
+      logBus.emit({query: query.value, e: e});
+      return;
+    }
+  }
+
+  let onKeyUp = (e) =>{
+    if (e.key === 'Enter'){
+      logBus.emit({query: query.value, e: e});
+      return;
     }
   }
 
   let onDocumentKeydown = (e) =>{
-    var control = document.getElementById("log-search-input")
-    if (e.key === '/' && e.target !== control.value &&
+    var control = document.getElementById("ls-input")
+    if ((e.key === '/' || e.key === 'S') && e.target !== control.value &&
       window.document.activeElement !== control.value &&
       e.target instanceof HTMLInputElement === false)
     {
@@ -69,15 +94,18 @@ let setup = (props, ctx) => {
   }
       
   watch(query, () => {
-    ctx.emit('update:log-search', query.value)
+    logBus.emit({query: query.value, e: {}})
   })
   
   onMounted(async () =>{
     window.document.addEventListener('keydown', onDocumentKeydown);
   })
   
-  return {hasFocus, query, search, clear, onKeydown, onDocumentKeydown}
+  return {
+    hasFocus, query, search, status, 
+    clear, onKeyUp, onKeyDown, onDocumentKeydown
+  }
 }
 
-components["log-search"] = { template: "#log-search", emits: ['update:log-search'], setup };
+components["log-search"] = { template: "#log-search", setup };
 </script>

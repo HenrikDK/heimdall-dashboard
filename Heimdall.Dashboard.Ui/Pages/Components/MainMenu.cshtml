@@ -1,32 +1,32 @@
 ﻿<template id="main-menu">
   <div class="bg-neutral-200 dark:bg-dark">
     <nav class="fixed">
-      <div class="group min-w-12 min-h-12">
-        <router-link :to="{ name: 'events' }" class="flex flex-col items-center pointer py-3">
+      <div class="group">
+        <router-link :to="{ name: 'events' }" class="flex flex-col items-center pointer py-2">
           <events-btn :active="$route.path.startsWith('/events')"></events-btn>
         </router-link>
       </div>
             
-      <div class="group min-w-12 min-h-12">
-        <router-link :to="{ name: 'workloads' }" class="flex flex-col items-center pointer py-3">
+      <div class="group">
+        <router-link :to="{ name: 'workloads' }" class="flex flex-col items-center pointer py-2">
           <deployments-btn :active="$route.path.startsWith('/workloads')"></deployments-btn>
         </router-link>
       </div>
 
-      <div class="group min-w-12 min-h-12">
-        <router-link :to="{ name: 'pods' }" class="flex flex-col items-center pointer py-3">
+      <div class="group">
+        <router-link :to="{ name: 'pods' }" class="flex flex-col items-center pointer py-2">
           <pods-btn :active="$route.path.startsWith('/pods')"></pods-btn>
         </router-link>
       </div>
 
-      <div class="group min-w-12 min-h-12">
-        <router-link :to="{ name: 'services' }" class="flex flex-col items-center pointer py-3">
+      <div class="group">
+        <router-link :to="{ name: 'services' }" class="flex flex-col items-center pointer py-2">
           <services-btn :active="$route.path.startsWith('/services')"></services-btn>
         </router-link>
       </div>
 
-      <div class="group min-w-12 min-h-12">
-        <router-link :to="{ name: 'ingresses' }" class="flex flex-col items-center pointer py-3">
+      <div class="group">
+        <router-link :to="{ name: 'ingresses' }" class="flex flex-col items-center pointer py-2">
           <ingress-btn :active="$route.path.startsWith('/ingresses')"></ingress-btn>
         </router-link>
       </div>

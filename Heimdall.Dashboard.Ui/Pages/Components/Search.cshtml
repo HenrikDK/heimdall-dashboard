@@ -1,8 +1,9 @@
 ﻿<template id="search">
-  <div class="relative" aria-label="Search..">
-    <div class="h-9 w-full text-gray-200 items-center flex justify-center box-border cursor-pointer border border-white/[.4] outline-0 rounded 
+  <div class="relative" aria-label="Search.." title="Shift + S or / to search">
+    <div tabindex="-1" :data-focus="hasFocus"
+      class="h-9 w-full text-gray-200 items-center flex justify-center box-border cursor-pointer border border-white/[.4] outline-0 rounded 
         bg-brand dark:bg-zinc-900 text-white/[.6] leading-snug outline-none 
-        data-[focus=true]:border-white data-[focus=true]:text-white data-[focus=true]:fill-white" tabindex="-1" :data-focus="hasFocus">
+        data-[focus=true]:border-white data-[focus=true]:text-white data-[focus=true]:fill-white">
       
       <span aria-hidden="true" tabindex="0" role="button" @@click="search"
             class="left-0 pl-1.5 absolute z-50 text-white/[.6] transition duration-300 flex-shrink-0 flex-grow-0 flex">
@@ -13,7 +14,8 @@
         </span>
       </span>
 
-      <input id="search-input" v-model="query" name="search-box" type="text" @@focus="hasFocus = true" @@blur="hasFocus = false" @@keydown="onKeydown"
+      <input id="s-input" v-model="query" type="search" autocomplete="off"
+          @@focus="hasFocus = true" @@blur="hasFocus = false" @@keydown="onKeydown" autocomplete="off" 
            class="h-full w-full px-8 border-none outline-0 bg-transparent autofill:bg-transparent text-white" />
       
       <template v-if="query.length < 1" name="shortcut-icon">
@@ -38,12 +40,8 @@
 import { ref, watch, onMounted } from 'vue'
 
 let setup = (props, ctx) => {
-  const hasFocus = ref(false)
-  const query = ref('')
-  
-  let search = () =>{
-    ctx.emit('update:search', query.value)
-  }
+  const hasFocus = ref(false);
+  const query = useGlobalSearch();
   
   let clear = () =>{
     query.value = ''
@@ -51,13 +49,19 @@ let setup = (props, ctx) => {
   
   let onKeydown = (e) =>{
     if (e.key === 'Escape') {
-      query.value = ''
+      if (query.value.length > 0){
+        query.value = ''
+      }
+      else if (query.value.length === 0)
+      {
+        document.activeElement.blur()
+      }
     }
   }
 
   let onDocumentKeydown = (e) =>{
-    var control = document.getElementById("search-input")
-    if (e.key === '/' && e.target !== control.value &&
+    var control = document.getElementById("s-input")
+    if ((e.key === '/' || e.key === 'S') && e.target !== control.value &&
       window.document.activeElement !== control.value &&
       e.target instanceof HTMLInputElement === false)
     {
@@ -67,10 +71,6 @@ let setup = (props, ctx) => {
       control?.select()
     }
   }
-      
-  watch(query, () => {
-    ctx.emit('update:search', query.value)
-  })
   
   onMounted(async () =>{
     window.document.addEventListener('keydown', onDocumentKeydown);
@@ -79,5 +79,5 @@ let setup = (props, ctx) => {
   return {hasFocus, query, search, clear, onKeydown, onDocumentKeydown}
 }
 
-components["search"] = { template: "#search", emits: ['update:search'], setup };
+components["search"] = { template: "#search", setup };
 </script>

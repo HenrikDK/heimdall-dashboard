@@ -16,60 +16,24 @@
     </div>
   </div>
     
-  <div class="justify-center my-4">
-    <div class="flex">
-      <div class="w-1/4"></div>
+  <div class="my-4">
+    <div class="flex justify-center mb-4">
       <div class="flex">
-        <div class="flex px-4 py-1 me-2 rounded-lg items-center justify-center border cursor-pointer 
-        border-gray-300 bg-white fill-gray-300
-        hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
-        dark:border-white/[.4] dark:text-white/[.6] 
-        dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:fill-blue-400
-        dark:bg-zinc-900">
-          CPU
-        </div>
-        <div class="flex px-4 py-1 me-2 rounded-lg items-center justify-center border cursor-pointer 
-        border-gray-300 bg-white fill-gray-300
-        hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
-        dark:border-white/[.4] dark:text-white/[.6] 
-        dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:fill-blue-400
-        dark:bg-zinc-900">
-          Memory
-        </div>
-        <div class="flex px-4 py-1 me-2 rounded-lg items-center justify-center border cursor-pointer 
-        border-gray-300 bg-white fill-gray-300
-        hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
-        dark:border-white/[.4] dark:text-white/[.6] 
-        dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:fill-blue-400
-        dark:bg-zinc-900">
-          Network
-        </div>
-        <div class="flex px-4 py-1 me-2 rounded-lg items-center justify-center border cursor-pointer 
-        border-gray-300 bg-white fill-gray-300
-        hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
-        dark:border-white/[.4] dark:text-white/[.6] 
-        dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:fill-blue-400
-        dark:bg-zinc-900">
-          Filesystem
-        </div>
-        <div class="flex px-4 py-1 me-2 rounded-lg items-center justify-center border cursor-pointer 
-        border-gray-300 bg-white fill-gray-300
-        hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
-        dark:border-white/[.4] dark:text-white/[.6] 
-        dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:fill-blue-400
-        dark:bg-zinc-900">
-          Limit: {{ }}
-        </div>   
+        <chart-toggle name="cpu" :state="chartState" label="CPU" @@update="e => chartState = e"></chart-toggle>
+
+        <chart-toggle name="memory" :state="chartState" label="Memory" @@update="e => chartState = e"></chart-toggle>
+
+        <chart-toggle name="network" :state="chartState" label="Network" @@update="e => chartState = e"></chart-toggle>
+
+        <chart-toggle name="filesystem" :state="chartState" label="Filesystem" @@update="e => chartState = e"></chart-toggle>
+
+        <chart-toggle v-if="['cpu', 'memory'].includes(chartState)" name="limit" :state="limitState" label="Limit" :state-visible="true" @@update="e => limitState = !limitState"></chart-toggle>
+        <div v-else class="w-[105px] me-2"></div>
       </div>
     </div>
     
-
     <div class="wide-details-graph">
-      <v-chart :option="charts.podCpu" :theme="isDark ? 'dark' : ''" :init-options="initOptions" :updateOptions="updateOptions"></v-chart>
-    </div>
-    
-    <div v-if="metrics.type == 'mem'" class="wide-details-graph">
-      <v-chart :option="charts.podMemory" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+      <v-chart ref="chart" :option="charts[chartState]" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
     </div>
   </div>
 
@@ -287,25 +251,57 @@ let setup = (props, ctx) => {
   const isDark = useDark();
   const route = useRoute();
   const connections = ref([]);
+
+  const pod = ref({});
+
   const events = ref([]);
   const clusterEvents = ref([]);  
-  const updateOptions = ref({replaceMerge: ['xAxis', 'yAxis', 'series']});
+
+  const chart = ref();
+  const chartState = ref('cpu');
+  const limitState = ref(false);
   const initOptions = ref({ renderer: "svg" });
-  const pod = ref({});
   
   const metrics = ref({
-    cpuUsage: null,
-    memUsage: null,
-    fsReads: null,
-    fsWrites: null,
-    netRecv: null,
-    netSent: null
+    cpu: [
+      { 
+        type:'pod', name:'cpu-usage', pods: route.params.name, namespace: route.params.namespace, 
+        metrics: [], data: [], params: { unit: 'cores', name:'Usage', index: 1, colorDark: '#4992ff', colorLight: '#5470c6'}
+      }
+    ],
+    memory: [
+      {
+        type:'pod', name:'mem-usage', pods: route.params.name, namespace: route.params.namespace, 
+        metrics: [], data: [], params: { unit: 'bytes', name:'Usage', index: 1, colorDark: '#dd79ff', colorLight: '#ea7ccc'}
+      },
+    ],
+    network: [
+      {
+        type:'pod', name:'net-recv', pods: route.params.name, namespace: route.params.namespace, 
+        metrics: [], data: [], params: { unit: 'bytes', name:'Receive', colorDark: '#58d9f9', colorLight: '#73c0de'}
+      }, 
+      {
+        type:'pod', name:'net-sent', pods: route.params.name, namespace: route.params.namespace, 
+        metrics: [], data: [], params: { unit: 'bytes', name:'Transmit', colorDark: '#7cffb2', colorLight: '#91cc75'}
+      }
+    ],
+    filesystem: [
+      {
+        type:'pod', name:'fs-reads', pods: route.params.name, namespace: route.params.namespace, 
+        metrics: [], data: [], params: { unit: 'bytes', name:'Reads', colorDark: '#fddd60', colorLight: '#fac858'}
+      }, 
+      {
+        type:'pod', name:'fs-writes', pods: route.params.name, namespace: route.params.namespace, 
+        metrics: [], data: [], params: { unit: 'bytes', name:'Writes', colorDark: '#ff8a45', colorLight: '#fc8452'}
+      }
+    ]
   });
   
-  const chartCpu = ref(historicCpu());
   const charts = ref({
-    podCpu: historicCpu(),
-    podMemory: historicMemory(),
+    cpu: getSimpleChart(),
+    memory: getSimpleChart(),
+    network: getSimpleChart(),
+    filesystem: getSimpleChart()
   });
   
   let getContainerStatusObjects = (name, pod) => {
@@ -344,59 +340,88 @@ let setup = (props, ctx) => {
     var newDatetime = DT.fromISO(String(value));
     return toHumanValues(newDatetime.diff(date,  unit)).join(' ') + ' Ago';
   }
+
+  let updateMetrics = async () => {
+    if (props.config.metrics){
+      streamMetrics(metrics.value.cpu, updateCpu, connections.value);
+      streamMetrics(metrics.value.memory, updateMemory, connections.value);
+      streamMetrics(metrics.value.network, updateNetworking, connections.value);
+      streamMetrics(metrics.value.filesystem, updateFilesystem, connections.value);
+    }
+  }
   
   let updateCpu = () => {
-    if (!metrics.value.cpuUsage || metrics.value.cpuUsage?.length === 0 ) return;
-    
-    let usageSeries = getMetricSeries(metrics.value.cpuUsage);
+    if (!metrics.value.cpu) return;
+    if (metrics.value.cpu[0].metrics.length < 1) return;
 
-    let time = usageSeries.map(x => luxon.DateTime.fromMillis(x[0] * 1000).toFormat('HH:mm'));
-    let usage = usageSeries.map(x => parseFloat(x[1]));
-    
-    charts.value.podCpu = historicCpu(usage, [], time)
+    var [data, max, unit] = getDataSeries(metrics.value.cpu);
+
+    let limit = 0;
+    if (limitState.value){    
+      let containers = pod.value?.spec?.containers?.map(x => cpuUnitsToNumber(x.resources?.limits.cpu)) ?? [];
+      limit = containers.reduce((a, b) => a + b, 0);
+    }
+
+    updateSimpleChart(charts.value.cpu, metrics.value.cpu, unit, isDark.value, limit);
   };
   
   let updateMemory = () => {
-    if (!metrics.value.memoryUsage || metrics.value.memoryUsage?.length === 0 || !metrics.value.memoryLimits || metrics.value.memoryLimits?.length === 0) return;
-    
-    let capacitySeries = getMetricSeries(metrics.value.memoryLimits);
-    let usageSeries = getMetricSeries(metrics.value.memoryUsage);
+    if (!metrics.value.memory) return;
+    if (metrics.value.memory[0].metrics.length < 1) return;
 
-    let time = usageSeries.map(x => luxon.DateTime.fromMillis(x[0] * 1000).toFormat('HH:mm'));
-    let usage = usageSeries.map(x => parseFloat(x[1] / 1024 / 1024 / 1024));
-    let limits = capacitySeries.map(x => parseFloat(x[1] / 1024 / 1024 / 1024).toFixed(2))
+    var [data, max, unit] = getDataSeries(metrics.value.memory);
     
-    charts.value.podMemory = historicMemory(usage, limits, time)
+    let limit = 0;
+    if (limitState.value){    
+      let containers = pod.value?.spec?.containers?.map(x => memoryUnitToBytes(x.resources?.limits.memory)) ?? [];
+      limit = containers.reduce((a, b) => a + b, 0);
+    }
+
+    updateSimpleChart(charts.value.memory, metrics.value.memory, unit, isDark.value, limit);
   };
+
+  let updateNetworking = () => {
+    if (!metrics.value.network) return;
+    if (metrics.value.network[0].metrics.length < 1) return;
+
+    var [data, max, unit] = getDataSeries(metrics.value.network);
+
+    updateSimpleChart(charts.value.network, metrics.value.network, unit, isDark.value);
+  }
+
+  let updateFilesystem = () => {
+    if (!metrics.value.filesystem) return;
+    if (metrics.value.filesystem[0].metrics.length < 1) return;
+
+    var [data, max, unit] = getDataSeries(metrics.value.filesystem);
+
+    updateSimpleChart(charts.value.filesystem, metrics.value.filesystem, unit, isDark.value);
+  }
   
+  watch(() => props.config.metrics, () => {
+    updateMetrics();
+  });
+
   watch(clusterEvents, () => {
     let name = route.params.name;
     events.value = clusterEvents.value.filter(x => x?.involvedObject?.name === name);
   });
-  
-  watch(() => [metrics.value.cpuUsage], updateCpu);
-  watch(() => [metrics.value.memoryUsage], updateMemory);
-    
+      
+  watch([limitState, chartState, isDark], () => {
+    updateCpu();
+    updateMemory();
+    updateNetworking();
+    updateFilesystem();
+  })
+
   onMounted(async () => {
-    let host = window.location.origin;
-    let name = route.params.name;
     let namespace = route.params.namespace;
     let options = { pods: name, namespace: namespace };
 
-    if (props.config.metrics){
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'fs-reads', options), j => metrics.value.fsReads = j.data.result, connections.value);
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'fs-writes', options), j => metrics.value.fsWrites = j.data.result, connections.value);
+    updateMetrics();
 
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'net-recv', options), j => metrics.value.netRecv = j.data.result, connections.value);
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'net-sent', options), j => metrics.value.netSent = j.data.result, connections.value);
-
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'mem-usage', options), j => metrics.value.memoryUsage = j.data.result, connections.value);
-      streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-usage', options), j => metrics.value.cpuUsage = j.data.result, connections.value);
-    }
-    streamMetrics(host + '/prometheus/api/v1' + getMetric('pod', 'cpu-usage', options), j => metrics.value.cpuUsage = j.data.result, connections.value);
-
-    streamResult(host + `/k8s/api/v1/namespaces/${namespace}/pods`, name, j => pod.value = j, connections.value);
-    streamResults(host + `/k8s/api/v1/namespaces/${namespace}/events`, j => clusterEvents.value = j, connections.value)
+    streamResult(`/k8s/api/v1/namespaces/${namespace}/pods`, route.params.name, j => pod.value = j, connections.value);
+    streamResults(`/k8s/api/v1/namespaces/${namespace}/events`, j => clusterEvents.value = j, connections.value)
   });
 
   onUnmounted(async () => {
@@ -404,12 +429,13 @@ let setup = (props, ctx) => {
   });
   
   return {
-      isDark, events, clusterEvents, initOptions, pod, metrics, charts, connections, chartCpu, 
-      getContainerStatusObjects, getContainerStatus, toLocal, toHuman, updateOptions,
-      updateCpu, updateMemory
+      connections, isDark, events, clusterEvents, pod, 
+      metrics, charts, chartState, initOptions, limitState, 
+      getContainerStatusObjects, getContainerStatus, toLocal, toHuman,
+      updateCpu, updateMemory, updateNetworking, updateFilesystem, updateMetrics
   }
 }
 
-components["pod-details"] = {template: "#pod-details", props: ['config', 'namespaces', 'filters'], setup};
+components["pod-details"] = {template: "#pod-details", props: ['config', 'filters'], setup};
 routes.push({path:'/namespaces/:namespace/pods/:name/details', name:'pod-details', component: components["pod-details"]})
 </script>

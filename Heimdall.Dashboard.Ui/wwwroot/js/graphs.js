@@ -59,89 +59,6 @@
     return graph
 }
 
-function historic(memory = {}, compute = {}, time=[]){
-    const colors = ['#5470C6', '#91CC75', '#EE6666'];
-    option = {
-        color: colors,
-        tooltip: {
-            trigger: 'axis',
-            axisPointer: {
-                type: 'cross'
-            }
-        },
-        backgroundColor: '',
-        grid: {
-            left: '5%',
-            right: '5%',
-            top: '7%',
-            bottom: '5%',
-        },
-        legend: {
-            data: ['CPU', 'Memory']
-        },
-        xAxis: [
-            {
-                type: 'category',
-                boundaryGap: false,
-                axisTick: {
-                    alignWithLabel: true
-                },
-                data: time,
-            }
-        ],
-        yAxis: [
-            {
-                max: memory.max,
-                type: 'value',
-                name: `Memory (${memory.unit ?? 'GiB'})`,
-                position: 'right',
-                alignTicks: true,
-                axisLine: {
-                    show: true,
-                    lineStyle: {
-                        color: colors[1]
-                    }
-                },
-                axisLabel: {
-                    formatter: '{value}'
-                }
-            },
-            {
-                max: compute.max,
-                type: 'value',
-                name: `CPU (${compute.unit ?? 'vCores'})`,
-                position: 'left',
-                alignTicks: true,
-                axisLine: {
-                    show: true,
-                    lineStyle: {
-                        color: colors[0]
-                    }
-                },
-                axisLabel: {
-                    formatter: '{value}'
-                }
-            }
-        ],
-        series: [
-            {
-                name: 'CPU',
-                type: 'line',
-                animationDuration: 300,
-                yAxisIndex: 1,
-                data: compute.data
-            },
-            {
-                name: 'Memory',
-                type: 'line',
-                animationDuration: 300,
-                data: memory.data
-            }
-        ]
-    };
-    return option;
-}
-
 function current(type = '', unit = '', usageValues= {}, requestsValues = {}, limitsValues = {}){
     let usage = []
     let requests = []
@@ -392,46 +309,62 @@ function historicMemory(usage = [], limits = [], time = []){
 }
 
 function renderSortedStackedBarChart(params, api){
-    var start = api.coord([api.value(0), api.value(1 + params.seriesIndex)]);
-    var size = api.size([1, api.value(1)]);
-    var style = api.style();
+    let start = api.coord([api.value(0), api.value(1 + params.seriesIndex)]);
+    let size = api.size([1, api.value(1 + params.seriesIndex)]);
+    let style = api.style();
     height = size[1];
     if (params.seriesIndex > 0){
-        height = api.value(1) ? size[1] - size2[1] : size[1];
+      let size2 = api.size([1, api.value(1)]);
+      height = api.value(1) ? size[1] - size2[1] : size[1];
     }
-
+    
     return {
-        type: 'group',
-        children: [
-            {
-                type: 'rect',
-                shape: {
-                    x: start[0] - size[0] * 0.5,
-                    y: start[1],
-                    width: size[0],
-                    height: size[1]
-                },
-                style: {...style,
-                    opacity: 0.2
-                }
-            },
-            {
-                type: 'rect',
-                shape: {
-                    x: start[0] - size[0] * 0.5,
-                    y: start[1],
-                    width: size[0],
-                    height: 3,
-                },
-                style: style,
-            }
-        ]
+      type: 'group',
+      children: [
+        {
+      type: 'rect',
+      shape: {
+        x: start[0] - size[0] * 0.5,
+        y: start[1],
+        width: size[0],
+        height: height
+      },
+      style: {...style,
+          opacity: 0.2
+        }
+      },
+      {
+        type: 'rect',
+        shape: {
+          x: start[0] - size[0] * 0.5,
+          y: start[1],
+          width: size[0],
+          height: 3,
+        },
+        style: style,
+      }
+      ]
     };
 };
+
+function formatCpuValue(value){
+    let decimals = value < 1 ? 4 : 2;
+    
+    return `${value.toFixed(decimals)}`;
+}
+
+function formatByteValue(value){
+    if (value < 1000) return `${value.toFixed(0)} B`;
+
+    let unit = getUnitFromBytes(value)
+
+    return `${(value / unit.magnitude).toFixed(1)} ${unit.suffix}`;
+}
 
 function getSimpleChart(){
     let option = {
         animation: false,
+        backgroundColor: '',
         tooltip: {
             trigger: 'axis',
             axisPointer: { 
@@ -447,17 +380,18 @@ function getSimpleChart(){
         },
         legend: {
             show: true,
-            selectedMode: false
+            selectedMode: false,
+            top: 'bottom'
         },
         yAxis: {
             type: 'value',
-            position: 'left',
+            position: 'right'
         },
         grid: {
-            left: '7%',
+            left: '2%',
             right: '10%',
-            top: '10%',
-            bottom: '7%',
+            top: '5%',
+            bottom: '14%',
         },
         series: []
     };
@@ -465,27 +399,55 @@ function getSimpleChart(){
     return option;
 }
 
-function updateSimpleChart(options, data = [], series = 1, unit = '', limit = 0, max = 0){
-    options.yAxis['axisLabel'] = {
-        formatter: unit !== '' ? '{value} ' + unit : '{value}'
+function updateSimpleChart(options, series = [], unit, isDark = false, limit = 0, max = 0){
+    options.tooltip['backgroundColor'] = '#fff';
+    options.tooltip['borderColor'] = '#fff';
+    if (isDark){
+        options.tooltip['backgroundColor'] = '#000';
+        options.tooltip['borderColor'] = '#000';
     }
 
+    options.yAxis['axisLabel'] = {
+        formatter: '{value}'
+    }
+
+    options.tooltip['valueFormatter'] = formatCpuValue;    
+    if (unit.suffix !== ''){
+        options.yAxis['axisLabel']['formatter'] = formatByteValue;
+        options.tooltip['valueFormatter'] = formatByteValue;    
+    }
+
+    options.yAxis['max'] = undefined;
     if (max > 0){
         options.yAxis['max'] = max
     }
+    if (max === 0 && limit > 0){
+        options.yAxis['max'] = limit * 1.1
+    }
 
-    let first = getSimpleSeries(1, data);
+    let first = getSimpleSeries(series[0], isDark);
 
+    first['markLine'] = undefined;
     if (limit > 0){
         let line = getLimitMarkLine(limit);
         first['markLine'] = line;
     }
-    options.series.push(first);
+    options.series.splice(0, options.series.length);
 
-    if (series < 2) return option;
+    if (series.length < 2){
+        options.series.push(first);
+        return options;
+    } 
 
-    let second = getSimpleSeries(2, data);
-    options.series.push(second);
+    let second = getSimpleSeries(series[1], isDark);
+
+    if (series[1].params.max > series[0].params.max){
+        options.series.push(first);
+        options.series.push(second);
+    } else {
+        options.series.push(second);
+        options.series.push(first);
+    }
 
     return options;
 }
@@ -504,7 +466,7 @@ function getLimitMarkLine(limit){
             },
             emphasis: {disabled: true},
             label: {
-                position: 'end',
+                position: 'middle',
                 formatter: 'Limit'
             },
 
@@ -514,10 +476,11 @@ function getLimitMarkLine(limit){
     return line;
 }
 
-function getSimpleSeries(index, data){
+function getSimpleSeries(options, isDark){
     let series = {
         type: 'custom',
-        name: 'recieved',
+        name: options.params.name,
+        color: isDark ? options.params.colorDark : options.params.colorLight,
         emphasis: {disabled: true},
         stack: 'yes',
         renderItem: renderSortedStackedBarChart,
@@ -525,9 +488,9 @@ function getSimpleSeries(index, data){
         dimensions: ['time', 'value'],
         encode: {
             x: 0,
-            y: index
+            y: options.params.index
         },
-        data: data
+        data: options.data
     }
 
     return series;

@@ -8,8 +8,10 @@
     });
 }
 
-function streamMetrics(url, cb, connections = null) {
+function streamMetrics(options, cb, connections = null) {
+    var DT = luxon.DateTime;
     let isApiRequestInProgress = false;
+
     const handel = setInterval(getMetrics, 30000);
     getMetrics();
 
@@ -17,17 +19,33 @@ function streamMetrics(url, cb, connections = null) {
         try {
             if (!isApiRequestInProgress) {
                 isApiRequestInProgress = true;
+
+                let now = DT.utc();
+                
+                if (now.toObject().second >= 30){
+                    now = now.set({second: 30, millisecond: 0});
+                } else {
+                    now = now.set({second: 0, millisecond: 0});
+                }
+                let end = now;
+                let begin = end.minus({ hours: 1 });
+
                 try {
-                    const metric = await request(url);
-                    cb(metric.items || metric);
+                    await Promise.all(options.map(async (x) => {
+                        let url = getMetricUrl(x, begin, end);
+                        const metrics = await request(url);
+                        x['metrics'] = metrics?.data?.result[0] ?? metrics;
+                    }));
+                    
                 } catch (err) {
                     console.error('Unable to send request', {err});
                 } finally {
                     isApiRequestInProgress = false;
                 }
+                cb(options);
             }
         } catch (err) {
-            console.error('No metrics', {err, url});
+            console.error('No metrics', {err, options});
         }
     }
     if (connections){
@@ -41,7 +59,9 @@ function streamMetrics(url, cb, connections = null) {
     }
 }
 
-async function streamLogs(url, cb, connections = null) {
+async function streamLogs(path, cb, connections = null) {
+    var host = window.location.origin;
+    let url = host + path;
     const watchUrl = url.replace('http', 'ws');
     let ending = ''
     const {cancel} = stream(watchUrl, transformer, false);
@@ -66,7 +86,7 @@ async function streamLogs(url, cb, connections = null) {
             ending = '';
         }
         
-        if (lines[lines.length - 1].length === 0){
+        if (lines[lines.length - 1]?.length === 0){
             lines = lines.slice(0, -1);
         }
         
@@ -74,7 +94,9 @@ async function streamLogs(url, cb, connections = null) {
     }
 }
 
-async function streamResults(url, cb, connections = null) {
+async function streamResults(path, cb, connections = null) {
+    var host = window.location.origin;
+    let url = host + path;
     let isCancelled = false;
     let socket = {};
     const results = {};
@@ -158,7 +180,9 @@ async function streamResults(url, cb, connections = null) {
     }
 }
 
-async function streamResult(url, name, cb) {
+async function streamResult(path, name, cb) {
+    var host = window.location.origin;
+    let url = host + path;
     let isCancelled = false;
     let socket= {};
     run();

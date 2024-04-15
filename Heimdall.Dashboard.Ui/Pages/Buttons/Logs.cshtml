@@ -1,6 +1,6 @@
 ﻿<template id="logs-btn">
   <router-link :to="{ name: 'pod-logs', params: { namespace: $route.params.namespace, name: $route.params.name, container: container }}" :title="$route.params.name + '/' + container + ' logs'">
-    <div class="flex px-2 rounded-lg items-center justify-center border cursor-pointer w-28	
+    <div class="flex px-2 rounded-lg items-center justify-center border cursor-pointer w-28 
         border-gray-300 bg-white fill-gray-300
         hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
         dark:border-white/[.4] dark:text-white/[.6] 

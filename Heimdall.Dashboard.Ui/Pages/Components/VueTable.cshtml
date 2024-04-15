@@ -40,7 +40,7 @@
       <div :style="{ height: `${virtualizer.getTotalSize()}px`, position: 'relative', width: '100%' }"
         class="text-sm text-gray-700 dark:text-gray-300 dark:divide-zinc-700"> <!-- body -->
       
-        <div v-if="!loading && rows.length == 0" class="justify-center w-full flex py-2">
+        <div v-if="loading && rows.length == 0" class="justify-center w-full flex py-2">
           <spinner></spinner>
         </div>
 
@@ -76,6 +76,8 @@ let setup = (props, ctx) => {
   const sorting = ref([]);
   const timer = ref('');
   const rows = ref([]);
+  const search = useGlobalSearch();
+  const namespaces = useGlobalNamespaces()
   
   const updateKey = ref(0);
   provide('updateKey', updateKey)
@@ -140,7 +142,7 @@ let setup = (props, ctx) => {
       x.nsFiltered = false;
     })
     
-    filterRows(content, props.columns, props.namespaces, props.search)
+    filterRows(content, props.columns, namespaces.value, search.value)
     
     rows.value = content.filter(row => !row.filtered && !row.nsFiltered)
   }
@@ -154,7 +156,7 @@ let setup = (props, ctx) => {
     return { name: 'pod-details', params: { namespace: row.metadata.namespace, name: row.metadata.name }}
   };
   
-  watch([() => props.columns,() => props.data,() => props.namespaces,() => props.search, sorting], updateTable);
+  watch([() => props.columns,() => props.data, namespaces, search, sorting], updateTable);
   
   onMounted(() => {
     if (props.initialSort !== undefined && props.initialSort.length > 0){
@@ -171,11 +173,11 @@ let setup = (props, ctx) => {
   
   return {
     sorting, timer, updateKey, rows, virtualizerOptions, virtualizer, measureElement, parentRef,
-    getLink, cancelAutoUpdate, onSelectSort, updateTable
+    getLink, cancelAutoUpdate, onSelectSort, updateTable, search, namespaces
   }
 }
 
-components["vue-table"] = { template: "#vue-table", props: ['data', 'columns', 'initialSort', 'namespaces', 'loading', 'search'], setup };
+components["vue-table"] = { template: "#vue-table", props: ['data', 'columns', 'initialSort', 'loading'], setup };
 </script>
 
 <script>

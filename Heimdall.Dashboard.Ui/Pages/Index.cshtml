@@ -8,6 +8,7 @@
 }
 
 @section VueComponents {
+    <partial name="Buttons/ChartToggle"/>
     <partial name="Buttons/Deployments"/>
     <partial name="Buttons/Events"/>
     <partial name="Buttons/Ingress"/>
@@ -56,12 +57,12 @@
 {
 }
 
-<nav-bar @@select-ns="(n) => namespaces = n" @@filters="(f) => filters = f" @@search="(s) => search = s" @@log-search="(s) => logSearch = s"></nav-bar>
+<nav-bar :namespaces="namespaces"></nav-bar>
 
-<div class="grid grid-cols-[85px_1fr] gap-2 h-screen fixed w-full">
+<div class="grid grid-cols-[81px_1fr] gap-2 h-screen fixed w-full">
     <main-menu></main-menu>
     
     <main id="content" class="overflow-auto dark:[color-scheme:dark]">
-        <router-view :namespaces="namespaces" :config="config" :search="search" :log-search="logSearch" :nodes="nodes" :filters="filters"></router-view>
+        <router-view :config="config" :nodes="nodes" :filters="filters"></router-view>
     </main>
 </div>

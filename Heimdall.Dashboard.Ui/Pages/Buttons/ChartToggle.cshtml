@@ -1,0 +1,44 @@
+﻿<template id="chart-toggle">
+  <div @@click="$emit('update', name)" :aria-checked="active"
+  :class="[visible ? 'w-[105px]' : '', stateVisible ? '': 'aria-checked:cursor-default']"
+  class="flex px-4 py-1 me-2 rounded-lg items-center justify-center border cursor-pointer 
+  border-gray-300 bg-white fill-gray-300
+  hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
+  aria-checked:border-sky-500 aria-checked:bg-sky-100 aria-checked:fill-sky-500  
+  dark:border-white/[.4] dark:text-white/[.6] 
+  dark:hover:border-blue-400 dark:hover:text-blue-400 dark:hover:fill-blue-400
+  aria-checked:dark:border-blue-400 aria-checked:dark:text-blue-400 aria-checked:dark:fill-blue-400
+  dark:bg-zinc-900">
+    <span v-if="visible">
+      {{label}}: {{active ? 'On' : 'Off'}}
+    </span>
+    <span v-else>
+      {{label}}
+    </span>
+  </div>
+</template>
+
+<script type="module">
+import { ref, watchEffect, computed } from 'vue'
+
+let setup = (props, ctx) => {
+  let active = ref(false);
+  let visible = ref(false);
+  
+  watchEffect(() => { 
+    if (visible.value){
+      active.value = props.state
+    } else{
+      active.value = props.name == props.state
+    }
+    })
+
+  watchEffect(() => { visible.value = props.stateVisible})
+
+  return {active, visible}
+}
+
+components["chart-toggle"] = { template: "#chart-toggle", setup,
+emits: ['update'], 
+props: ['name', 'label', 'state', 'stateVisible'] };
+</script>

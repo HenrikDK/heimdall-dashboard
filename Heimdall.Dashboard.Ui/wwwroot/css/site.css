@@ -17,16 +17,21 @@ a, a:visited {
 }
 
 .wide-details-graph{
-    width: 60rem;
+    width: 61rem;
     height: 24rem;
 }
 
 .wide-graph{
     width: 64rem;
-    height: 26rem;
+    height: 24rem;
 }
 
 .cursor-resize
 {
     cursor: col-resize;   
+}
+
+[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
 }

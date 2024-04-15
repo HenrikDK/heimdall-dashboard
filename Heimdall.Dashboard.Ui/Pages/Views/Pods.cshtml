@@ -4,7 +4,7 @@
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pods</span>
     </div>
     
-    <vue-table :columns="columns" :initial-sort="sorting" :data="pods" :namespaces="namespaces" :loading="loading" :search="search"></vue-table>
+    <vue-table :columns="columns" :initial-sort="sorting" :data="pods" :loading="loading"></vue-table>
     
   </div>
 </template>
@@ -46,8 +46,8 @@ let setup = (props, ctx) => {
     
     let result = [...clusterPods.value];
                     
-    if (props.filters?.length){
-        result = result.filter(x => filterName(x, props.filters))
+    if (props.filters?.length > 0){
+        result = result.filter(x => props.filters.includes(x.metadata.namespace))
     }
     
     pods.value = result;
@@ -57,8 +57,7 @@ let setup = (props, ctx) => {
   watch([() => props.filters, clusterPods ], updatePods);
   
   onMounted(async () => {
-    var host = window.location.origin;
-    streamResults(host + '/k8s/api/v1/pods', j => clusterPods.value = j, connections.value);
+    streamResults('/k8s/api/v1/pods', j => clusterPods.value = j, connections.value);
   });
 
   onUnmounted(async () => {
@@ -70,6 +69,6 @@ let setup = (props, ctx) => {
   }
 }
 
-components["pods"] = { template: "#pods", props: ['namespaces', 'search', 'filters'], setup};
+components["pods"] = { template: "#pods", props: ['filters'], setup};
 routes.push({path:'/pods', name:'pods', component: components["pods"]});
 </script>

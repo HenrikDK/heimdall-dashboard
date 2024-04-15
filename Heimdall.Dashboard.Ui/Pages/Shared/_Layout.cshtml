@@ -16,7 +16,11 @@
   <script>
   components = {};
   routes = [];
-  eventBus = {};
+  nsBus = undefined;
+  logBus = undefined;
+  useGlobalNamespaces = undefined;
+  useGlobalSearch = undefined;
+  useGlobalOverlays = undefined;
 
   process = {env: "production"}
 
@@ -77,13 +81,18 @@
 @RenderSection("Scripts", required: false)
 
 <script type="module">
-import { createApp } from 'vue'
+import { createApp, ref } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { registerTheme } from 'echarts/core'
 import { default as ECharts } from 'vue-echarts'
-import { useEventBus } from '@@vueuse/core'
+import { useEventBus, createGlobalState, useStorage } from '@@vueuse/core'
 
-eventBus = useEventBus('filter')
+useGlobalNamespaces = createGlobalState(() => useStorage('heimdall-namespace', []));
+useGlobalSearch = createGlobalState(() => useStorage('heimdall-search', ''));
+useGlobalOverlays = createGlobalState(() => ref({current: undefined, total: 0}));
+
+nsBus = useEventBus('namespace')
+logBus = useEventBus('log-search')
 
 registerTheme('dark', getDarkTheme());  
 components['v-chart'] = ECharts;
@@ -149,33 +158,79 @@ router.beforeEach(beforeEach)
 const app = createApp({
   methods: {
     updateNodes(){
-      this.nodes = this.clusterNodes.map(x => x.metadata.name).join('|');
+      this.nodes = this.clusterNodes.map(x => x.metadata.name);
+    },
+    updateNamespaces(){
+      let namespaces = this.clusterNamespaces.map(x => x.metadata.name);
+
+      let result = [];
+      if (this.config.filters.length > 0)
+      {
+        let filters = this.config.filters.split(',');
+        let fstarts = filters.filter(x => x.startsWith('^')).map(x => x.replace('^', '').trim());
+        let fends = filters.filter(x => x.endsWith('$')).map(x => x.replace('$', '').trim());
+        let fincludes = filters.filter(x => !x.includes('^') && !x.includes('$')).map(x => x.trim()); 
+
+        namespaces.forEach(x => {
+          if (fstarts.length > 0 && fstarts.some(y => x.startsWith(y))){
+            result.push(x);
+            return;
+          }
+
+          if (fends.length > 0 && fends.some(y => x.endsWith(y))){
+            result.push(x);
+            return;
+          }
+
+          if (fincludes.length > 0 && fincludes.includes(x)){
+            result.push(x);
+          }
+        })
+      }
+      else{
+        result = namespaces;
+      }
+
+      result.sort();
+
+      this.namespaces = result;
+      if (this.config.filters.length > 0){
+        this.filters = result;
+      }
     }
   },
   data() {
       return {
-          filters: [],
-          namespaces: [],
-          config: {},
-          search: "",
-          logSearch: "",
-          nodes: "",
-          clusterNodes: null,
+        namespaces: [],
+        filters: [],
+        config: {},
+        nodes: [],
+        connections: [],
+        clusterNodes: [],
+        clusterNamespaces: [],
       }
     },
   watch:{
     clusterNodes(){
       this.updateNodes();
+    },
+    clusterNamespaces(){
+      this.updateNamespaces();
+    },
+    config(){
+      this.updateNamespaces();
     }
   },
   async mounted() {
-      var host = window.location.origin;
+    fetch('api/features')
+      .then(r => r.json())
+      .then(j => this.config = j);
       
-      fetch('api/features')
-        .then(r => r.json())
-        .then(j => this.config = j);
-      
-      streamResults(host + '/k8s/api/v1/nodes', j => this.clusterNodes = j);
+    streamResults('/k8s/api/v1/nodes', j => this.clusterNodes = j, this.connections);
+    streamResults('/k8s/api/v1/namespaces', j => this.clusterNamespaces = j, this.connections);
+  },
+  async beforeUnmount(){
+    closeConnections(this.connections)
   }
 })
 Object.entries(components).forEach(([k,v]) =>{
