@@ -17,16 +17,25 @@
           </router-link>
         </div>
         <div class="flex justify-end items-center">
-          
-          <div :class="nsVisible ? '' : 'hidden'"
+
+          <div v-if="nsVisible"
+               class="mr-3">
+            <main-help></main-help>
+          </div>
+          <div v-if="nsVisible"
                class="mr-3 w-60">
             <multiselect :values="namespaces"></multiselect>
           </div>
-          <div :class="searchVisible ? '' : 'hidden'"
+          <div v-if="searchVisible"
                class="mr-3 w-60">
             <search></search>
           </div>
-          <div :class="logSearchVisible ? '' : 'hidden'"
+
+          <div v-if="logSearchVisible"
+               class="mr-3">
+            <log-help></log-help>
+          </div>
+          <div v-if="logSearchVisible"
                class="mr-3 w-96">
             <log-search></log-search>
           </div>
