@@ -358,7 +358,7 @@ let setup = (props, ctx) => {
 
     let limit = 0;
     if (limitState.value){    
-      let containers = pod.value?.spec?.containers?.map(x => cpuUnitsToNumber(x.resources?.limits.cpu)) ?? [];
+      let containers = pod.value?.spec?.containers?.map(x => cpuUnitsToNumber(x.resources?.limits?.cpu)) ?? [];
       limit = containers.reduce((a, b) => a + b, 0);
     }
 
@@ -373,7 +373,7 @@ let setup = (props, ctx) => {
     
     let limit = 0;
     if (limitState.value){    
-      let containers = pod.value?.spec?.containers?.map(x => memoryUnitToBytes(x.resources?.limits.memory)) ?? [];
+      let containers = pod.value?.spec?.containers?.map(x => memoryUnitToBytes(x.resources?.limits?.memory)) ?? [];
       limit = containers.reduce((a, b) => a + b, 0);
     }
 
