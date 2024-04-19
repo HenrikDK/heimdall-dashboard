@@ -1,4 +1,4 @@
-function workload(type = 'Unknown', running = 0, pending = 0){
+﻿function workload(type = 'Unknown', running = 0, pending = 0){
     let data = [];
     let active = false;
     
@@ -254,7 +254,7 @@ function getSimpleChart(){
         },
         grid: {
             left: '2%',
-            right: '10%',
+            right: '6%',
             top: '5%',
             bottom: '14%',
         },
