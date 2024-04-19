@@ -126,11 +126,11 @@ public class ProxyController : ControllerBase
 
     private string GetMetricsServer()
     {
-        var type = _configuration.GetValue("metrics-type", "");
-        var nameSpace = _configuration.GetValue("cluster-metrics-namespace", "");
-        var service = _configuration.GetValue("cluster-metrics-service", "");
-        var port = _configuration.GetValue("cluster-metrics-port", "");
-        var externalHost = _configuration.GetValue("external-metrics-url", "");
+        var type = _configuration.GetValue("metrics_type", "");
+        var nameSpace = _configuration.GetValue("cluster_metrics_namespace", "");
+        var service = _configuration.GetValue("cluster_metrics_service", "");
+        var port = _configuration.GetValue("cluster_metrics_port", "");
+        var externalHost = _configuration.GetValue("external_metrics_url", "");
 
         if (type == "cluster" && K8sClient.InCluster)
         {
@@ -152,11 +152,11 @@ public class ProxyController : ControllerBase
 
     private string GetMetricsAuthentication()
     {
-        var type = _configuration.GetValue("metrics-type", "cluster");
+        var type = _configuration.GetValue("metrics_type", "cluster");
         if (type == "cluster") return "";
 
-        var user = _configuration.GetValue("metrics-user", "");
-        var pass = _configuration.GetValue("metrics-password", "");
+        var user = _configuration.GetValue("metrics_user", "");
+        var pass = _configuration.GetValue("metrics_password", "");
 
         var token = string.IsNullOrEmpty(user) ? "" : $"{user}:{pass}".ToBase64();
 
@@ -165,7 +165,7 @@ public class ProxyController : ControllerBase
 
     private List<string> GetHeaders()
     {
-        var headers = _configuration.GetValue("external-metrics-headers", "").Split(",").ToList();
+        var headers = _configuration.GetValue("external_metrics_headers", "").Split(",").ToList();
 
         headers = headers.Where(x => x.Length > 0).ToList();
 

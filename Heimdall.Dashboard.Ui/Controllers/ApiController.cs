@@ -18,8 +18,8 @@ public class ApiController : ControllerBase
     public ApiController(IConfiguration configuration, ILogger<ApiController> logger)
     {
         _logger = logger;
-        _canRestartPod = new Lazy<bool>(() => configuration.GetValue("can-restart-pod", false));
-        _canScalePods = new Lazy<bool>(() => configuration.GetValue("can-scale-pods", false));
+        _canRestartPod = new Lazy<bool>(() => configuration.GetValue("can_restart_pods", false));
+        _canScalePods = new Lazy<bool>(() => configuration.GetValue("can_scale_pods", false));
         _filters = new Lazy<string>(() => configuration.GetValue("filters", ""));
         _metrics = new Lazy<bool>(() => configuration.GetValue("metrics", true));
     }
