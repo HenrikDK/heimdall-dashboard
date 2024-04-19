@@ -185,9 +185,51 @@
           <div class="px-2 py-1 w-1/4">Ports</div>
           <div class="flex flex-wrap w-3/4 truncate">
             <template v-for="p in c.ports">
-              <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ p.containerPort }}/{{ p.protocol}}</div>
+              <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{p.name}}: {{ p.containerPort }}/{{ p.protocol}}</div>
             </template>
           </div>
+        </div>
+        <div v-if="c.livenessProbe" class="flex mb-2">
+          <div class="px-2 py-1 w-1/4">Liveness</div>
+          <div class="flex flex-wrap w-3/4">
+            <div v-if="c.livenessProbe.httpGet" class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">
+              http-get: {{ c.livenessProbe.httpGet.path }}
+            </div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">Initial Delay: {{c.livenessProbe.initialDelaySeconds}}s</div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">Interval: {{c.livenessProbe.periodSeconds}}s</div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">Timeout: {{c.livenessProbe.timeoutSeconds}}s</div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">#Failure: {{c.livenessProbe.failureThreshold}}</div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">#Success: {{c.livenessProbe.successThreshold}}</div>
+          </div>
+        </div>
+        <div v-if="c.readinessProbe" class="flex mb-2">
+          <div class="px-2 py-1 w-1/4">Readiness</div>
+          <div class="flex flex-wrap w-3/4">
+            <div v-if="c.readinessProbe.httpGet" class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">
+              http-get: {{ c.readinessProbe.httpGet.path }}
+            </div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">Initial Delay: {{c.readinessProbe.initialDelaySeconds}}s</div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">Interval: {{c.readinessProbe.periodSeconds}}s</div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">Timeout: {{c.readinessProbe.timeoutSeconds}}s</div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">#Failure: {{c.readinessProbe.failureThreshold}}</div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">#Success: {{c.readinessProbe.successThreshold}}</div>
+          </div>
+        </div>
+        <div v-if="c.resources?.requests?.cpu" class="flex mb-2">
+          <div class="px-2 py-1 w-1/4">Cpu Request</div>
+          <div class="py-1">{{ c.resources?.requests?.cpu }}</div>
+        </div>
+        <div v-if="c.resources?.limits?.cpu" class="flex mb-2">
+          <div class="px-2 py-1 w-1/4">Cpu Limit</div>
+          <div class="py-1">{{ c.resources?.limits?.cpu }}</div>
+        </div>
+        <div v-if="c.resources?.requests?.memory" class="flex mb-2">
+          <div class="px-2 py-1 w-1/4">Memory Request</div>
+          <div class="py-1">{{ c.resources?.requests?.memory }}</div>
+        </div>
+        <div v-if="c.resources?.limits?.memory" class="flex mb-2">
+          <div class="px-2 py-1 w-1/4">Memory Limit</div>
+          <div class="py-1">{{ c.resources?.limits?.memory }}</div>
         </div>
         <div class="flex mb-2">
           <div class="px-2 py-1 w-1/4">Last Status</div>
@@ -207,22 +249,6 @@
               </div>
             </template>
           </div>
-        </div>
-        <div v-if="c.resources?.requests?.cpu" class="flex mb-2">
-          <div class="px-2 py-1 w-1/4">Cpu Request</div>
-          <div class="py-1">{{ c.resources?.requests?.cpu }}</div>
-        </div>
-        <div v-if="c.resources?.limits?.cpu" class="flex mb-2">
-          <div class="px-2 py-1 w-1/4">Cpu Limit</div>
-          <div class="py-1">{{ c.resources?.limits?.cpu }}</div>
-        </div>
-        <div v-if="c.resources?.requests?.memory" class="flex mb-2">
-          <div class="px-2 py-1 w-1/4">Memory Request</div>
-          <div class="py-1">{{ c.resources?.requests?.memory }}</div>
-        </div>
-        <div v-if="c.resources?.limits?.memory" class="flex mb-2">
-          <div class="px-2 py-1 w-1/4">Memory Limit</div>
-          <div class="py-1">{{ c.resources?.limits?.memory }}</div>
         </div>
       </div>
   </div>
