@@ -154,9 +154,25 @@
           <div class="px-2 py-1 w-1/4">Environment</div>
           <div class="flex flex-col w-3/4 truncate">
             <template v-if="c.env">
-              <div v-for="e in c.env" class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-2 mb-1 overflow-hidden">
-                {{ e.name }}: {{ e.value}}
-              </div>
+              <template v-for="e in c.env">
+                <div v-if="e.valueFrom?.fieldRef" class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-2 mb-1 overflow-hidden">
+                  {{ e.name }}: fieldRef({{e.valueFrom.fieldRef.apiVersion }}:{{ e.valueFrom.fieldRef.fieldPath }})
+                </div>
+                <div v-else-if="e.valueFrom?.secretKeyRef" title="Value and mapping hidden" 
+                  class="bg-gray-200 dark:bg-zinc-800 flex w-fit rounded py-0.5 px-2 mb-1 overflow-hidden">
+                  {{ e.name }}: secret({{ e.valueFrom.secretKeyRef.name}})
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ps-1 w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.25-8.25-3.286Zm0 13.036h.008v.008H12v-.008Z" />
+                  </svg>
+                </div>
+                <div v-else-if="e.valueFrom?.configMapKeyRef"
+                  class="bg-gray-200 dark:bg-zinc-800 flex w-fit rounded py-0.5 px-2 mb-1 overflow-hidden">
+                  {{ e.name }}: configMap({{ e.valueFrom.configMapKeyRef.name}}).{{ e.valueFrom.configMapKeyRef.key}}
+                </div>
+                <div v-else class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-2 mb-1 overflow-hidden">
+                  {{ e.name }}: {{ e.value}}
+                </div>
+              </template>
             </template>
             <template v-if="c.envFrom">
               <div v-for="e in c.envFrom" title="Value and mapping hidden"
