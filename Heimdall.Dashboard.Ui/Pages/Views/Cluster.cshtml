@@ -282,7 +282,7 @@ let setup = (props, ctx) => {
     if (cpuLimitPct > 100){
         cpuLimitPct = 100;
     }
-    let cLimits = {pct: cpuLimitPct.toFixed(2), units: cpuRequests.toFixed(2) };              
+    let cLimits = {pct: cpuLimitPct.toFixed(2), units: cpuLimits.toFixed(2) };              
     
     let cpuUsagePct = cpuUsage / cpuCapacity * 100;
     let cUsage = {pct: cpuUsagePct.toFixed(2), units: cpuUsage.toFixed(2) };

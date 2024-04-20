@@ -54,17 +54,17 @@
     </div>
     <div v-if="pod?.metadata?.labels" class="flex mb-2">
       <div class="px-2 py-1 w-1/4">Labels</div>
-      <div class="flex w-3/4 flex-wrap truncate">
+      <div class="w-3/4 flex flex-col truncate">
         <template v-for="(v, k) in pod?.metadata?.labels">
-          <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ k }}: {{v}}</div>
+          <div class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-2 mb-1 overflow-hidden">{{ k }}: {{v}}</div>
         </template>
       </div>
     </div>
     <div v-if="pod?.metadata?.annotations" class="flex mb-2">
       <div class="px-2 py-1 w-1/4">Annotations</div>
-      <div class="flex w-3/4 flex-wrap truncate">
+      <div class="w-3/4 flex flex-col truncate">
         <template v-for="(v, k) in pod?.metadata?.annotations">
-          <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ k }}: {{v}}</div>
+          <div class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-2 mb-1 overflow-hidden">{{ k }}: {{v}}</div>
         </template>
       </div>
     </div>
@@ -150,21 +150,102 @@
             </template>
           </div>
         </div>
-        <div v-if="c.env" class="flex mb-2">
+        <div v-if="c.env || c.envFrom" class="flex mb-2">
           <div class="px-2 py-1 w-1/4">Environment</div>
-          <div class="flex flex-wrap w-3/4 truncate">
-            <template v-for="e in c.env">
-              <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ e.name }}: {{ e.value}}</div>
+          <div class="flex flex-col w-3/4 truncate">
+            <template v-if="c.env">
+              <template v-for="e in c.env">
+                <div v-if="e.valueFrom?.fieldRef" class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-2 mb-1 overflow-hidden">
+                  {{ e.name }}: fieldRef({{e.valueFrom.fieldRef.apiVersion }}:{{ e.valueFrom.fieldRef.fieldPath }})
+                </div>
+                <div v-else-if="e.valueFrom?.secretKeyRef" title="Value and mapping hidden" 
+                  class="bg-gray-200 dark:bg-zinc-800 flex w-fit rounded py-0.5 px-2 mb-1 overflow-hidden">
+                  {{ e.name }}: secret({{ e.valueFrom.secretKeyRef.name}})
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ps-1 w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.25-8.25-3.286Zm0 13.036h.008v.008H12v-.008Z" />
+                  </svg>
+                </div>
+                <div v-else-if="e.valueFrom?.configMapKeyRef"
+                  class="bg-gray-200 dark:bg-zinc-800 flex w-fit rounded py-0.5 px-2 mb-1 overflow-hidden">
+                  {{ e.name }}: configMap({{ e.valueFrom.configMapKeyRef.name}}).{{ e.valueFrom.configMapKeyRef.key}}
+                </div>
+                <div v-else class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-2 mb-1 overflow-hidden">
+                  {{ e.name }}: {{ e.value}}
+                </div>
+              </template>
             </template>
+            <template v-if="c.envFrom">
+              <div v-for="e in c.envFrom" title="Value and mapping hidden"
+                class="bg-gray-200 flex dark:bg-zinc-800 w-fit rounded py-0.5 px-2 mb-1 overflow-hidden">
+                {{ e.secretRef.name }} 
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ps-1 w-6 h-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.25-8.25-3.286Zm0 13.036h.008v.008H12v-.008Z" />
+                </svg>
+              </div>
+            </template>
+          </div>
+        </div>
+        <div v-if="c.volumeMounts" class="flex mb-2">
+          <div class="px-2 py-1 w-1/4">Mounts</div>
+          <div class="flex flex-col w-3/4 truncate">
+          <div class="w-fit">
+            <div v-for="e in c.volumeMounts" 
+              class="rounded py-0.5 mb-1 overflow-hidden">
+              <div class="bg-gray-200 dark:bg-zinc-800 px-1">{{ e.mountPath }}</div>
+              <div class="px-1">from {{ e.name}}</div>
+            </div>
+            </div>
           </div>
         </div>
         <div v-if="c.ports" class="flex mb-2">
           <div class="px-2 py-1 w-1/4">Ports</div>
           <div class="flex flex-wrap w-3/4 truncate">
             <template v-for="p in c.ports">
-              <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ p.containerPort }}/{{ p.protocol}}</div>
+              <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{p.name}}: {{ p.containerPort }}/{{ p.protocol}}</div>
             </template>
           </div>
+        </div>
+        <div v-if="c.livenessProbe" class="flex mb-2">
+          <div class="px-2 py-1 w-1/4">Liveness</div>
+          <div class="flex flex-wrap w-3/4">
+            <div v-if="c.livenessProbe.httpGet" class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">
+              http-get: {{ c.livenessProbe.httpGet.path }}
+            </div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">Initial Delay: {{c.livenessProbe.initialDelaySeconds}}s</div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">Interval: {{c.livenessProbe.periodSeconds}}s</div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">Timeout: {{c.livenessProbe.timeoutSeconds}}s</div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">#Failure: {{c.livenessProbe.failureThreshold}}</div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">#Success: {{c.livenessProbe.successThreshold}}</div>
+          </div>
+        </div>
+        <div v-if="c.readinessProbe" class="flex mb-2">
+          <div class="px-2 py-1 w-1/4">Readiness</div>
+          <div class="flex flex-wrap w-3/4">
+            <div v-if="c.readinessProbe.httpGet" class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">
+              http-get: {{ c.readinessProbe.httpGet.path }}
+            </div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">Initial Delay: {{c.readinessProbe.initialDelaySeconds}}s</div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">Interval: {{c.readinessProbe.periodSeconds}}s</div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">Timeout: {{c.readinessProbe.timeoutSeconds}}s</div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">#Failure: {{c.readinessProbe.failureThreshold}}</div>
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2">#Success: {{c.readinessProbe.successThreshold}}</div>
+          </div>
+        </div>
+        <div v-if="c.resources?.requests?.cpu" class="flex mb-2">
+          <div class="px-2 py-1 w-1/4">Cpu Request</div>
+          <div class="py-1">{{ c.resources?.requests?.cpu }}</div>
+        </div>
+        <div v-if="c.resources?.limits?.cpu" class="flex mb-2">
+          <div class="px-2 py-1 w-1/4">Cpu Limit</div>
+          <div class="py-1">{{ c.resources?.limits?.cpu }}</div>
+        </div>
+        <div v-if="c.resources?.requests?.memory" class="flex mb-2">
+          <div class="px-2 py-1 w-1/4">Memory Request</div>
+          <div class="py-1">{{ c.resources?.requests?.memory }}</div>
+        </div>
+        <div v-if="c.resources?.limits?.memory" class="flex mb-2">
+          <div class="px-2 py-1 w-1/4">Memory Limit</div>
+          <div class="py-1">{{ c.resources?.limits?.memory }}</div>
         </div>
         <div class="flex mb-2">
           <div class="px-2 py-1 w-1/4">Last Status</div>
@@ -185,22 +266,93 @@
             </template>
           </div>
         </div>
-        <div v-if="c.resources?.requests?.cpu" class="flex mb-2">
-          <div class="px-2 py-1 w-1/4">Cpu Request</div>
-          <div class="py-1">{{ c.resources?.requests?.cpu }}</div>
+      </div>
+  </div>
+
+  <br>
+
+  <div class="flex my-4 items-center">
+    <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Volumes</span>
+  </div>
+
+  <div v-for="c in pod?.spec?.volumes" 
+       class="text-gray-500 dark:text-gray-300 text-md font-light sans rounded-lg shadow-md border border-gray-200 dark:border-zinc-800 mb-4">
+    <div class="my-2">
+        <div class="flex mb-2">
+          <div class="px-2 py-1 w-1/4 fill-gray-500 dark:fill-gray-300 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 pe-2" viewBox="0 0 24 24">
+              <path d="M3 20v-4h18v4zm2-1h2v-2H5zM3 8V4h18v4zm2-1h2V5H5zm-2 7v-4h18v4zm2-1h2v-2H5z"/>
+            </svg>
+            <div class="py-1">{{ c.name }}</div>
+          </div>
+          <div class="flex justify-between items-center grow">
+          </div>
         </div>
-        <div v-if="c.resources?.limits?.cpu" class="flex mb-2">
-          <div class="px-2 py-1 w-1/4">Cpu Limit</div>
-          <div class="py-1">{{ c.resources?.limits?.cpu }}</div>
-        </div>
-        <div v-if="c.resources?.requests?.memory" class="flex mb-2">
-          <div class="px-2 py-1 w-1/4">Memory Request</div>
-          <div class="py-1">{{ c.resources?.requests?.memory }}</div>
-        </div>
-        <div v-if="c.resources?.limits?.memory" class="flex mb-2">
-          <div class="px-2 py-1 w-1/4">Memory Limit</div>
-          <div class="py-1">{{ c.resources?.limits?.memory }}</div>
-        </div>
+        <template v-if="c.persistentVolumeClaim">
+          <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Kind</div><div class="py-1">PersistentVolumeClaim</div>
+          </div>
+          <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Name</div>
+            <div class="py-1 truncate">{{ c.persistentVolumeClaim.claimName }}</div>
+          </div>
+        </template>
+        <template v-if="c.configMap">
+          <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Kind</div><div class="py-1">ConfigMap</div>
+          </div>
+          <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Name</div>
+            <div class="py-1 truncate">{{ c.configMap.name }}</div>
+          </div>
+        </template>
+        <template v-if="c.emptyDir">
+          <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Kind</div><div class="py-1">EmptyDir</div>
+          </div>
+          <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Medium</div>
+            <div class="py-1 truncate">{{ c.EmptyDir?.medium ?? 'nodes default medium' }}</div>
+          </div>
+        </template>
+        <template v-if="c.projected">
+          <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Kind</div><div class="py-1">Projected</div>
+          </div>
+          <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Sources</div>
+            <div class="pt-4 flex flex-col">
+              <div class="w-fit">
+                <template v-for="s in c.projected.sources">
+                  <template v-if="s.serviceAccountToken">
+                    <div>
+                      <div class="px-2 bg-gray-200 dark:bg-zinc-800">Service Account Token</div>
+                      <div class="flex items-center"><div class="px-2 py-1 w-32">Expiration</div><div>{{s.serviceAccountToken.expirationSeconds}}</div></div>
+                      <div class="flex items-center"><div class="px-2 py-1 w-32">Path</div><div>{{s.serviceAccountToken.path}}</div></div>
+                    </div>
+                  </template>
+                  <template v-if="s.configMap">
+                    <div>
+                      <div class="px-2 bg-gray-200 dark:bg-zinc-800">Config Map</div>
+                      <div class="flex items-center"><div class="px-2 py-1 w-32">Name</div><div>{{s.configMap.name}}</div></div>
+                      <div v-for="i in s.configMap.items" class="flex items-center">
+                        <div class="px-2 py-1 w-32">Items</div><div>{{i.key}} -> {{i.path}}</div>
+                      </div>
+                    </div>
+                  </template>
+                  <template v-if="s.downwardAPI">
+                    <div>
+                      <div class="px-2 bg-gray-200 dark:bg-zinc-800">Kubernetes Api</div>
+                      <div v-for="i in s.downwardAPI.items" class="flex items-center">
+                        <div class="px-2 py-1 w-32">Items</div><div>{{i.path}}</div>
+                      </div>
+                    </div>
+                  </template>
+                </template>
+              </div>
+            </div>
+          </div>
+        </template>
       </div>
   </div>
 
@@ -358,7 +510,7 @@ let setup = (props, ctx) => {
 
     let limit = 0;
     if (limitState.value){    
-      let containers = pod.value?.spec?.containers?.map(x => cpuUnitsToNumber(x.resources?.limits.cpu)) ?? [];
+      let containers = pod.value?.spec?.containers?.map(x => cpuUnitsToNumber(x.resources?.limits?.cpu)) ?? [];
       limit = containers.reduce((a, b) => a + b, 0);
     }
 
@@ -373,7 +525,7 @@ let setup = (props, ctx) => {
     
     let limit = 0;
     if (limitState.value){    
-      let containers = pod.value?.spec?.containers?.map(x => memoryUnitToBytes(x.resources?.limits.memory)) ?? [];
+      let containers = pod.value?.spec?.containers?.map(x => memoryUnitToBytes(x.resources?.limits?.memory)) ?? [];
       limit = containers.reduce((a, b) => a + b, 0);
     }
 
