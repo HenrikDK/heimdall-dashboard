@@ -41,7 +41,7 @@
 <script type="module">
 let setup = (props, ctx) => {
   let getContainerStatuses = (row) => {
-    let containers = row.status.containerStatuses;
+    let containers = row.status.containerStatuses ?? [];
     let initContainers = row.status.initContainerStatuses ?? [];
     return [...containers, ...initContainers]
   }
