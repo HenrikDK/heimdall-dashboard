@@ -1,6 +1,6 @@
 <template id="kube-dns">
   <div class="py-2" :class="classes" v-once>
-    <div v-for="dns in getServices(row)">
+    <div v-for="dns in getServices(row)" class="pl-4">
       {{ dns }}
     </div>
   </div>
