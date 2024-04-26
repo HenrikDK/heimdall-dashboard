@@ -161,7 +161,7 @@ function getInstantMetricValue(options, metric= '') {
 function getDataSeries(options) {
     if (options.length < 1) return [[], 0, {suffix: "", magnitude: 1}];
 
-    if (options[0].metrics.length < 1) return [[], 0, {suffix: "", magnitude: 1}];
+    if (options[0].metrics.length < 1 || options[0].metrics?.values === undefined) return [[], 0, {suffix: "", magnitude: 1}];
     
     let time = options[0].metrics.values.map(x => x[0]);
     let first = options[0].metrics.values.map(x => parseFloat(x[1]));
