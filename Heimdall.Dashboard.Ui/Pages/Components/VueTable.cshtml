@@ -81,7 +81,7 @@ let setup = (props, ctx) => {
   const route = useRoute();
   const search = useGlobalSearch();
   const namespaces = useGlobalNamespaces();
-  const sorting = useStorage(`heimdall-${route.params.name}-table-sorting`, props.initialSort ?? []);
+  const sorting = useStorage(`heimdall-${route.name}-table-sorting`, props.initialSort ?? []);
   
   let fatScrollbar = computed(() => navigator.userAgent.includes('Windows'));
   
