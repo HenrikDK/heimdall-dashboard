@@ -107,12 +107,12 @@ let setup = (props, ctx) => {
       result.push({ content: segment1 });
       let active = false;
       if (current !== undefined){
-        active = curr == current?.index && i === current?.row;
+        active = curr === current?.index && i === current?.row;
       }
       let segment2 = row.slice(curr, curr + length);
       result.push({ content: segment2, overlay: true, active: active });
 
-      if (next == undefined){
+      if (next === undefined){
         let segment3 = row.slice(curr + length, end);
         result.push({ content: segment3 });
       }
@@ -165,18 +165,18 @@ let setup = (props, ctx) => {
 
   let toBottom = () => {
     if (logEvents.value.length > 0){
-      virtualizer.value.scrollToIndex(logEvents.value.length - 1, { align: 'end', smoothScroll: false });  
+      virtualizer.value.scrollToIndex(logEvents.value.length - 1, { align: 'end', smoothScroll: false });
     }
   }
 
   let toTop = () => {
     if (logEvents.value.length > 0){
-      virtualizer.value.scrollToIndex(0, { align: 'end', smoothScroll: false });  
+      virtualizer.value.scrollToIndex(0, { align: 'end', smoothScroll: false });
     }
   }
 
   watch(() => props.events, () => {
-    if (props.direction == 'up'){
+    if (props.direction === 'up'){
       logEvents.value = [...props.events];
     } else {
       logEvents.value = [...props.events].reverse();
@@ -267,7 +267,7 @@ let setup = (props, ctx) => {
 
   let handleEvent = (e) => { // navigate overlay
     let reverse = e.shiftKey ?? false;
-    if (props.direction == 'up'){
+    if (props.direction === 'up'){
       reverse = !reverse;
     }
 
@@ -277,7 +277,7 @@ let setup = (props, ctx) => {
         
         let next = reverse ? getPrevOverlay(true) : getNextOverlay(true);
 
-        if (activeOverlay.value == next) return;
+        if (activeOverlay.value === next) return;
         activeOverlay.value = next;
         virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'middle', smoothScroll: false });
         updateId.value += 1; // redraw view
@@ -290,7 +290,7 @@ let setup = (props, ctx) => {
         
       let next = reverse ? getPrevOverlay(true) : getNextOverlay(true);
 
-      if (activeOverlay.value == next) return;
+      if (activeOverlay.value === next) return;
       activeOverlay.value = next;
       virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'middle', smoothScroll: false });
       updateId.value += 1; // redraw view
@@ -304,7 +304,7 @@ let setup = (props, ctx) => {
         
       let next = reverse ? getNextOverlay(true) : getPrevOverlay(true);
 
-      if (activeOverlay.value == next) return;
+      if (activeOverlay.value === next) return;
       activeOverlay.value = next;
       virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'middle', smoothScroll: false });
       updateId.value += 1; // redraw view
@@ -336,7 +336,7 @@ let setup = (props, ctx) => {
 
     if (occurrences.value.length === 0) return;
 
-    let reverse = props.direction == 'up' ? true : false;
+    let reverse = props.direction === 'up';
 
     let next = reverse ? getPrevOverlay(true) : getNextOverlay(true);
     
