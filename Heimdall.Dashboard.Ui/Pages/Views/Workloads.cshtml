@@ -35,7 +35,7 @@ let setup = (props, ctx) => {
       accessor: row => row.status, formatter:'deployment-lights' },
     { header:"Age", id:"age", sorter:"text", classes:"w-40",
       accessor: row => row.metadata.creationTimestamp, formatter:'object-age' },
-    { header:"Conditions", id:"status", canSort:false, classes:"truncate 2xl:w-64 xl:w-52 lg:w-44", 
+    { header:"Conditions", id:"status", canSort:false, classes:"truncate 2xl:w-60 xl:w-52 lg:w-44", 
       accessor: row => row.status, formatter:'deployment-conditions' },
   ]);
   
