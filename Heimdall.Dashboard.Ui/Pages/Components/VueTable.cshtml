@@ -69,15 +69,20 @@
 </template>
 
 <script type="module">
-import { ref, provide, watch, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { useVirtualizer } from '@@tanstack/vue-virtual'
+import { ref, provide, watch, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { useVirtualizer } from '@@tanstack/vue-virtual';
+import { useStorage } from '@@vueuse/core';
+import { useRoute } from 'vue-router';
 
 let setup = (props, ctx) => {
   const parentRef = ref(null);
-  const sorting = ref([]);
   const timer = ref('');
   const rows = ref([]);
+  const route = useRoute();
   const search = useGlobalSearch();
+  const namespaces = useGlobalNamespaces();
+  const sorting = useStorage(`heimdall-${route.params.name}-table-sorting`, props.initialSort ?? []);
+  
   let fatScrollbar = computed(() => navigator.userAgent.includes('Windows'));
   
   const updateKey = ref(0);
@@ -166,10 +171,6 @@ let setup = (props, ctx) => {
   watch([() => props.columns,() => props.data, namespaces, search, sorting], updateTable);
   
   onMounted(() => {
-    if (props.initialSort !== undefined && props.initialSort.length > 0){
-      sorting.value = [...props.initialSort];
-    }
-        
     updateTable();
     timer.value = setInterval(() => updateKey.value += 1, 5000);
   });
@@ -179,7 +180,7 @@ let setup = (props, ctx) => {
   });
   
   return {
-    sorting, timer, updateKey, rows, virtualizerOptions, virtualizer, measureElement, parentRef,
+    sorting, timer, updateKey, rows, virtualizerOptions, virtualizer, measureElement, parentRef, route,
     getLink, cancelAutoUpdate, onSelectSort, updateTable, search, namespaces, fatScrollbar, scrollable
   }
 }
