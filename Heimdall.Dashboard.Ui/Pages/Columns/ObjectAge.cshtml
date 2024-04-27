@@ -14,7 +14,6 @@ let setup = (props, ctx) => {
     }
     
     let DT = window.DateTime || luxon.DateTime;
-    let invalid = "";
     const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
     var date = DT.now();
     var newDatetime = DT.fromISO(String(age));

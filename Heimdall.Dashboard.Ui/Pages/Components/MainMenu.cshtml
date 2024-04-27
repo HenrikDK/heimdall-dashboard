@@ -1,32 +1,32 @@
 ﻿<template id="main-menu">
   <div class="bg-neutral-200 dark:bg-dark">
-    <nav class="fixed">
-      <div class="group">
-        <router-link :to="{ name: 'events' }" class="flex flex-col items-center pointer py-2">
+    <nav class="fixed ps-0.5">
+      <div class="group mt-5">
+        <router-link :to="{ name: 'events' }" class="flex flex-col items-center pointer">
           <events-btn :active="$route.path.startsWith('/events')"></events-btn>
         </router-link>
       </div>
             
-      <div class="group">
-        <router-link :to="{ name: 'workloads' }" class="flex flex-col items-center pointer py-2">
+      <div class="group mt-5">
+        <router-link :to="{ name: 'workloads' }" class="flex flex-col items-center pointer">
           <deployments-btn :active="$route.path.startsWith('/workloads')"></deployments-btn>
         </router-link>
       </div>
 
-      <div class="group">
-        <router-link :to="{ name: 'pods' }" class="flex flex-col items-center pointer py-2">
+      <div class="group mt-5">
+        <router-link :to="{ name: 'pods' }" class="flex flex-col items-center pointer">
           <pods-btn :active="$route.path.startsWith('/pods')"></pods-btn>
         </router-link>
       </div>
 
-      <div class="group">
-        <router-link :to="{ name: 'services' }" class="flex flex-col items-center pointer py-2">
+      <div class="group mt-5">
+        <router-link :to="{ name: 'services' }" class="flex flex-col items-center pointer">
           <services-btn :active="$route.path.startsWith('/services')"></services-btn>
         </router-link>
       </div>
 
-      <div class="group">
-        <router-link :to="{ name: 'ingresses' }" class="flex flex-col items-center pointer py-2">
+      <div class="group mt-5">
+        <router-link :to="{ name: 'ingresses' }" class="flex flex-col items-center pointer">
           <ingress-btn :active="$route.path.startsWith('/ingresses')"></ingress-btn>
         </router-link>
       </div>

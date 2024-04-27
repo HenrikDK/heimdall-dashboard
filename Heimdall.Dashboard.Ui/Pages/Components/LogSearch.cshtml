@@ -69,14 +69,12 @@ let setup = (props, ctx) => {
     if (['ArrowUp', 'ArrowDown'].includes(e.key)){
       e.preventDefault();
       logBus.emit({query: query.value, e: e});
-      return;
     }
   }
 
   let onKeyUp = (e) =>{
     if (e.key === 'Enter'){
       logBus.emit({query: query.value, e: e});
-      return;
     }
   }
 

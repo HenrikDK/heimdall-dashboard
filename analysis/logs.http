@@ -1,0 +1,5 @@
+### 
+GET http://localhost:8080/k8s/api/v1/namespaces/prometheus/pods/prometheus-node-exporter-28jb7/log?container=prometheus-node-exporter&previous=false&tailLines=1000&follow=false
+
+###
+DELETE http://localhost:8080/api/namespaces/flipt/pods/flipt-84cbd49745-zfrph
