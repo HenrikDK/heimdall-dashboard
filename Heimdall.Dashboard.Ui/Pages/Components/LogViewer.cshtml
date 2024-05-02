@@ -173,7 +173,7 @@ let setup = (props, ctx) => {
 
   let toTop = () => {
     if (logEvents.value.length > 0){
-      virtualizer.value.scrollToIndex(0, { align: 'end', smoothScroll: false });
+      virtualizer.value.scrollToIndex(0, { align: 'start', smoothScroll: false });
     }
   }
 
@@ -281,7 +281,7 @@ let setup = (props, ctx) => {
 
         if (activeOverlay.value === next) return;
         activeOverlay.value = next;
-        virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'middle', smoothScroll: false });
+        virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'center', smoothScroll: false });
         updateId.value += 1; // redraw view
       return;
     }
@@ -294,7 +294,7 @@ let setup = (props, ctx) => {
 
       if (activeOverlay.value === next) return;
       activeOverlay.value = next;
-      virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'middle', smoothScroll: false });
+      virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'center', smoothScroll: false });
       updateId.value += 1; // redraw view
       
       return;
@@ -308,7 +308,7 @@ let setup = (props, ctx) => {
 
       if (activeOverlay.value === next) return;
       activeOverlay.value = next;
-      virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'middle', smoothScroll: false });
+      virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'center', smoothScroll: false });
       updateId.value += 1; // redraw view
 
       return;
@@ -345,8 +345,10 @@ let setup = (props, ctx) => {
     if (activeOverlay.value < 0 && overlays.value.length > 0){
       activeOverlay.value = next;      
     }
-
-    virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'middle', smoothScroll: false });
+    let row = overlays.value[activeOverlay.value].row;
+    if (row !== undefined){
+      virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'center', behavior: false });
+    }
 
     updateId.value += 1; // redraw view
   }
