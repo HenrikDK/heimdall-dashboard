@@ -10,7 +10,9 @@
             <spinner></spinner>
         </div>
 
-        <div v-for="virtualRow in virtualizer.getVirtualItems()" class="px-2 break-words leading-5 break-all dark:hover:bg-zinc-900 hover:bg-gray-100"
+        <div v-for="virtualRow in virtualizer.getVirtualItems()" 
+          class="px-2 break-words leading-5 break-all dark:hover:bg-zinc-800 hover:bg-sky-100"
+          :class="[overlays[activeOverlay]?.row === virtualRow.index ? 'dark:bg-zinc-800 bg-sky-100' : '']"
           :key="virtualRow.key + '-' + updateId"
           :data-index="virtualRow.index"
           :ref="measureElement"
