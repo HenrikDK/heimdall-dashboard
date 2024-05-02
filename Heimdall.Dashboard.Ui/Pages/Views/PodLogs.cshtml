@@ -45,8 +45,8 @@ let setup = (props, ctx) => {
 
     setTimeout(() => {
       let event = logEvents.value[logEvents.value.length - 1];
-      json.value = event.startsWith('{')
-    }, 300);
+      json.value = event?.startsWith('{') ?? false;
+    }, 500);
   });
 
   onUnmounted(async () => {
