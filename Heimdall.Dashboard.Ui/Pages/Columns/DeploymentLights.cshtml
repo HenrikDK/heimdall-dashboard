@@ -56,10 +56,9 @@ let setup = (props, ctx) => {
         ready = row.status.active;
     }
 
-    let result = [];    
-
-    result += [...Array(waiting)].map(x => 0);
-    result += [...Array(ready)].map(x => 1);
+    let result = [];
+    [...Array(waiting)].forEach(x => result.push(0));
+    [...Array(ready)].forEach(x => result.push(1));
 
     return result
   }
