@@ -25,17 +25,33 @@
       </div>
       <div v-if="item?.metadata?.labels" class="flex mb-2">
         <div class="px-2 py-1 w-1/4">Labels</div>
-        <div class="flex w-3/4 flex-wrap truncate">
+        <div class="flex w-3/4 flex-col truncate">
           <template v-for="(v, k) in item?.metadata?.labels">
-            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ k }}: {{v}}</div>
+            <div class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-2 mb-1 overflow-hidden">{{ k }}: {{v}}</div>
           </template>
         </div>
       </div>
       <div v-if="item?.metadata?.annotations" class="flex mb-2">
         <div class="px-2 py-1 w-1/4">Annotations</div>
-        <div class="flex w-3/4 flex-wrap truncate">
+        <div class="flex w-3/4 flex-col truncate">
           <template v-for="(v, k) in item?.metadata?.annotations">
-            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ k }}: {{v}}</div>
+            <div class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-2 mb-1 overflow-hidden">{{ k }}: {{v}}</div>
+          </template>
+        </div>
+      </div>
+      <div v-if="item?.spec?.selector" class="flex mb-2">
+        <div class="px-2 py-1 w-1/4">Selector</div>
+        <div class="flex w-3/4 flex-col truncate">
+          <template v-for="(v, k) in item?.spec?.selector?.matchLabels">
+            <div class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-2 mb-1 overflow-hidden">{{ k }}: {{v}}</div>
+          </template>
+        </div>
+      </div>
+      <div v-if="item?.spec?.template?.spec?.containers" class="flex mb-2">
+        <div class="px-2 py-1 w-1/4">Images</div>
+        <div class="flex w-3/4 flex-col truncate">
+          <template v-for="c in item.spec.template.spec.containers">
+            <div class="py-1">{{ c.image }}</div>
           </template>
         </div>
       </div>
@@ -56,12 +72,18 @@
           </template>
         </div>
       </div>
-      <div v-if="item?.spec?.selector" class="flex mb-2">
-        <div class="px-2 py-1 w-1/4">Selector</div>
-        <div class="flex w-3/4 flex-wrap truncate">
-          <template v-for="(v, k) in item?.spec?.selector?.matchLabels">
-            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ k }}: {{v}}</div>
-          </template>
+      <div v-if="item?.status && item?.status?.replicas === undefined" class="flex mb-2">
+        <div class="px-2 py-1 w-1/4">Scheduled</div>
+        <div class="flex w-3/4">
+          <div class="py-1 flex">
+            <div v-if="item?.status?.currentNumberScheduled !== undefined">{{ item?.status?.desiredNumberScheduled }} desired</div>
+            <div v-if="item?.status?.updatedNumberScheduled !== undefined">, {{ item?.status?.updatedNumberScheduled }} updated</div>
+            <div v-if="item?.status?.numberReady !== undefined">, {{ item?.status?.numberReady }} total</div>
+            <div v-if="item?.status?.numberAvailable !== undefined">, {{ item?.status?.numberAvailable }} available</div>
+            <div v-if="item?.status?.numberAvailable !== undefined && item?.status?.numberReady !== undefined">
+              , {{ item?.status?.numberReady - item?.status?.numberAvailable }} unavailable
+            </div>
+          </div>
         </div>
       </div>
       <div v-if="item?.spec?.template?.spec?.nodeSelector" class="flex mb-2">
