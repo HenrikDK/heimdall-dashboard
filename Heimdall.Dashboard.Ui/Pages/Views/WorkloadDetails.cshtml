@@ -120,21 +120,62 @@
         </div>
       </div>
     </div>
-        
+
+    <div v-if="pods.length > 0" class="flex my-4 items-center">
+      <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pods</span>
+    </div>
+
+    <div v-if="events.length > 0" class="flex my-4 items-center">
+      <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
+    </div>
+
+    <div v-if="events.length > 0" class="text-gray-500 dark:text-gray-300 text-md font-light sans rounded-lg shadow-lg border border-gray-200 dark:border-zinc-800">
+      <template v-for="event in events">
+        <div class="my-3">
+          <div :class="event.type === 'Warning' ? 'text-red-500' : ''"
+              class="mb-2 px-4 py-1 w-full break-words">
+            {{ event.message }}
+          </div>
+          <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Source</div>
+            <div class="py-1 w-3/4 truncate">{{event.source.host}} {{event.source.component}}</div>
+          </div>
+          <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Count</div>
+            <div class="py-1 w-3/4 truncate">{{ event.count }}</div>
+          </div>
+          <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Sub object</div>
+            <div class="py-1 w-3/4 truncate">{{ event?.involvedObject?.name }}</div>
+          </div>
+          <div class="flex mb-2">
+            <div class="px-2 py-1 w-1/4">Last seen</div>
+            <div class="py-1 w-3/4 truncate">{{ toLocal(event.lastTimestamp) }} ({{ toHuman(event.lastTimestamp) }})</div>
+          </div>
+        </div>
+      </template>
+    </div>
+
     <br/><br/>
     
   </div>
 </template>
 
 <script type="module">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router';
 
 let setup = (props, ctx) => {
   const item = ref({});
   const connections = ref([]);
   const route = useRoute();
-  
+
+  const pods = ref([]);
+  const clusterPods = ref([]);
+
+  const events = ref([]);
+  const clusterEvents = ref([]);  
+
   let toLocal = (value) => {
     if (!value) return '';
       
@@ -153,6 +194,22 @@ let setup = (props, ctx) => {
     var newDatetime = DT.fromISO(String(value));
     return toHumanValues(newDatetime.diff(date,  unit)).join(' ') + ' Ago';
   }
+
+  let matchLabels = (labels, selector) => {
+    let result = Object.keys(selector).every(x => labels[x] === selector[x])
+    return result;
+  }
+
+  watch([clusterPods, item], () => {
+    if (item.value?.spec?.selector?.matchLabels === undefined) return;
+
+    pods.value = clusterPods.value.filter(x => matchLabels(x?.metadata?.labels, item.value?.spec?.selector?.matchLabels));
+  });
+
+  watch(clusterEvents, () => {
+    let name = route.params.name;
+    events.value = clusterEvents.value.filter(x => x?.involvedObject?.name === name);
+  });
   
   onMounted(async () => {
     let name = route.params.name;
@@ -165,6 +222,8 @@ let setup = (props, ctx) => {
     }
     
     streamResult(url, name, j => item.value = j, connections.value);
+    streamResults(`/k8s/api/v1/namespaces/${namespace}/pods`, j => clusterPods.value = j, connections.value);
+    streamResults(`/k8s/api/v1/namespaces/${namespace}/events`, j => clusterEvents.value = j, connections.value)
   });
   
   onUnmounted(async () => {
@@ -172,6 +231,8 @@ let setup = (props, ctx) => {
   });
 
   return { 
+    pods, clusterPods,
+    events, clusterEvents,
     item, connections,
     toLocal, toHuman 
   }
