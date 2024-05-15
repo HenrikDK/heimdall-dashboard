@@ -3,8 +3,8 @@
     <div class="flex my-2 items-center justify-between">
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pod Logs / {{ $route.params.namespace }} / {{ $route.params.name }}</span>
       
-      <log-controls :events="logEvents" :wrap="wrap" :direction="direction" :json="json" 
-        @@wrap="(w) => wrap = w" @@direction="(d) => direction = d">
+      <log-controls :events="logEvents" :wrap="wrap" :direction="direction" :json="json" :filter="filter"
+        @@wrap="(w) => wrap = w" @@direction="(d) => direction = d" @@filter="(f) => filter = f">
       </log-controls>
     </div>
     
@@ -22,6 +22,7 @@ let setup = (props, ctx) => {
   const json = ref(false);
   const direction = ref('up');
   const wrap = ref(true);
+  const filter = ref(false);
 
   const logEvents = ref([]);
 
@@ -54,7 +55,7 @@ let setup = (props, ctx) => {
   });
   
   return {
-    logEvents, updateLogs, direction, wrap, connections, json
+    logEvents, updateLogs, direction, wrap, connections, json, filter
   }
 }
 
