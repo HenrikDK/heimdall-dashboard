@@ -1,4 +1,4 @@
-﻿<template id="log-viewer">
+<template id="log-viewer">
   <div ref="parentRef" :style="{contain: 'strict', overflow: 'auto', height: '85vh'}"
       class="border border-gray-300 rounded-md
       cursor-text font-mono text-xs 
@@ -167,7 +167,7 @@ let setup = (props, ctx) => {
 
   let toBottom = () => {
     if (logEvents.value.length > 0){
-      virtualizer.value.scrollToIndex(logEvents.value.length - 1, { align: 'end', smoothScroll: false });
+      virtualizer.value.scrollToOffset(virtualizer.value.getTotalSize() + 100, { align: 'end', smoothScroll: false });
     }
   }
 
