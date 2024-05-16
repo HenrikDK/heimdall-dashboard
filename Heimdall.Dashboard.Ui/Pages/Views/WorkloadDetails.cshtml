@@ -3,7 +3,7 @@
 
     <br/>
 
-    <div class="flex mb-8 items-center text-gray-500 dark:text-gray-300 font-light sans">
+    <div class="flex mb-8 text-xl items-center text-gray-500 dark:text-gray-300 font-light sans">
       <div class="text-md">{{item.kind}} / {{item?.metadata?.namespace }} / {{ item?.metadata?.name }}</div>
     </div>
     
@@ -18,8 +18,7 @@
 
           <chart-toggle name="filesystem" :state="chartState" label="Filesystem" @@update="e => chartState = e"></chart-toggle>
 
-          <chart-toggle v-if="['cpu', 'memory'].includes(chartState)" name="limit" :state="limitState" label="Limit" :state-visible="true" @@update="e => limitState = !limitState"></chart-toggle>
-          <div v-else class="w-[105px] me-2"></div>
+          <div class="w-[105px] me-2"></div>
         </div>
       </div>
       
@@ -186,10 +185,12 @@
 </template>
 
 <script type="module">
+import { useDark } from "@@vueuse/core";
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router';
 
 let setup = (props, ctx) => {
+  const isDark = useDark();
   const item = ref({});
   const connections = ref([]);
   const route = useRoute();
@@ -370,7 +371,7 @@ let setup = (props, ctx) => {
   return { 
     pods, clusterPods, events, clusterEvents,
     item, connections, toLocal, toHuman,
-    metrics, charts, chartState, initOptions, limitState, 
+    metrics, charts, chartState, initOptions, limitState, isDark,
     updateCpu, updateMemory, updateNetworking, updateFilesystem, updateMetrics
   }
 }
