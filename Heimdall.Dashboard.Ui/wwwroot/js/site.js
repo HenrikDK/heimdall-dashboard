@@ -198,6 +198,60 @@ function getDataSeries(options) {
     return [data, trueMax, unit]
 }
 
+function getSumSeries(options) {
+    if (options.length < 1) return [[], 0, {suffix: "", magnitude: 1}];
+
+    if (options[0].metrics.length < 1) return [[], 0, {suffix: "", magnitude: 1}];
+    
+    let time = options[0].metrics[0].values.map(x => x[0]);
+    let first = []
+    
+    time.forEach((v, i) => {
+        let val = 0;
+        options[0].metrics.forEach(y => val += parseFloat(y.values[i][1]));
+        first.push(val);
+    });
+
+    let second = [];
+    if (options.length > 1){
+        time.forEach((v, i) => {
+            let val = 0;
+            options[1].metrics.forEach(y => val += parseFloat(y.values[i][1]));
+            second.push(val);
+        });    
+    }
+    let firstMax = Math.max(...first);
+    let secondMax = second.length > 0 ? Math.max(...second) : 0;
+    let trueMax = firstMax > secondMax ? firstMax : secondMax;
+
+    let unit = options[0]?.params?.unit === 'bytes' ? getUnitFromBytes(firstMax) : {suffix: "", magnitude: 1};
+
+    let data = time.map((t, index) => {
+        let short = luxon.DateTime.fromMillis(t * 1000).toFormat('HH:mm');
+
+        if (second.length < 1){
+            return [short, first[index]]
+        }
+
+        if (firstMax > secondMax){
+            return [short, second[index], first[index]];
+        } else{
+            return [short, first[index], second[index]];
+        }
+    });
+
+    options[0].params['max'] = firstMax;
+    options[0].data = data;
+    if (options.length > 1){
+        options[1].data = data;
+        options[1].params['max'] = secondMax;
+        options[1].params['index'] = secondMax > firstMax ? 2 : 1;
+        options[0].params['index'] = firstMax > secondMax ? 2 : 1;
+    }
+
+    return [data, trueMax, unit]
+}
+
 const base = 1024;
 const byte_units = [
   {suffix: "B", magnitude: 1},
