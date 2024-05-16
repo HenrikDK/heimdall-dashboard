@@ -148,7 +148,7 @@
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pods</span>
     </div>
 
-    <vue-table :columns="columns" :initial-sort="sorting" :data="pods" :loading="loading"></vue-table>
+    <simple-table :columns="columns" :initial-sort="sorting" :data="pods" :loading="loading"></simple-table>
 
     <div v-if="events.length > 0" class="flex my-4 items-center">
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
