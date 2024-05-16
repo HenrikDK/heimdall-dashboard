@@ -1,4 +1,4 @@
-<template id="vue-table">
+<template id="simple-table">
 
   <div class="border border-gray-200 rounded-lg dark:border-zinc-700 mt-4"> <!-- table outer border -->
     <div class="flex top-0 w-full z-10 bg-gray-100 dark:bg-zinc-900 rounded-t-lg"> <!-- header -->
@@ -52,13 +52,13 @@
             :style="{ position: 'absolute', top: `${row.start}px`,  width: '100%' }" >
 
             <router-link v-if="$route.name === 'pods'" :to="getEntityLink(rows[row.index])">
-              <vue-table-row :row="rows[row.index]" :vrow="row" :columns="columns"></vue-table-row>          
+              <table-row :row="rows[row.index]" :vrow="row" :columns="columns"></table-row>
             </router-link>
             <router-link v-else-if="$route.name === 'workloads'" :to="getEntityLink(rows[row.index])">
-              <vue-table-row :row="rows[row.index]" :vrow="row" :columns="columns"></vue-table-row>          
+              <table-row :row="rows[row.index]" :vrow="row" :columns="columns"></table-row>          
             </router-link>
             <template v-else>
-              <vue-table-row :row="rows[row.index]" :vrow="row" :columns="columns"></vue-table-row>          
+              <table-row :row="rows[row.index]" :vrow="row" :columns="columns"></table-row>          
             </template>
         </div>
       </div>
@@ -176,5 +176,5 @@ let setup = (props, ctx) => {
   }
 }
 
-components["vue-table"] = { template: "#vue-table", props: ['data', 'columns', 'initialSort', 'loading'], setup };
+components["simple-table"] = { template: "#simple-table", props: ['data', 'columns', 'initialSort', 'loading'], setup };
 </script>

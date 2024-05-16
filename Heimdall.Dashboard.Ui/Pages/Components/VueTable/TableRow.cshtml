@@ -1,4 +1,4 @@
-<template id="vue-table-row">
+<template id="table-row">
   <div class="flex w-full hover:bg-sky-100 dark:hover:bg-zinc-700">
     <template v-for="column in columns">
       <template v-if="column.formatter == undefined">
@@ -52,5 +52,5 @@ let setup = (props, ctx) => {
   return { updateId }
 }
 
-components["vue-table-row"] = { template: "#vue-table-row", props: ['row', 'columns', 'vrow'], setup};
+components["table-row"] = { template: "#table-row", props: ['row', 'columns', 'vrow'], setup};
 </script>
