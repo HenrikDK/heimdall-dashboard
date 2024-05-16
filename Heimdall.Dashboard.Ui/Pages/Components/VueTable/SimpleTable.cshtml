@@ -1,13 +1,12 @@
 <template id="simple-table">
-
-  <div class="border border-gray-200 rounded-lg dark:border-zinc-700 mt-4"> <!-- table outer border -->
+  <div class="border border-gray-200 rounded-lg dark:border-zinc-700 w-full"> <!-- table outer border -->
     <div class="flex top-0 w-full z-10 bg-gray-100 dark:bg-zinc-900 rounded-t-lg"> <!-- header -->
       <div v-for="column in columns"
            class="text-left text-xs font-strong text-black uppercase dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-zinc-700"
            :class="column.classes">
           
         <div class="flex">
-          <div class="px-4 py-2 grow shrink">
+          <div class="ps-4 py-2 grow shrink">
             {{ column.header }}
           </div>
 
@@ -32,72 +31,36 @@
           </div>
         </div>
       </div>
-      <div v-if="fatScrollbar && scrollable" class="w-4"></div>
     </div>
 
-    <div ref="parentRef" :style="{contain: 'strict', overflow: 'auto', width: '100%', height: '85vh'}"
-      class="text-left divide-y divide-gray-200 dark:divide-zinc-700 dark:bg-zinc-900 rounded-b-lg"> <!-- table -->
-
-      <div :style="{ height: `${virtualizer.getTotalSize()}px`, position: 'relative', width: '100%' }"
-        class="text-sm text-gray-700 dark:text-gray-300 dark:divide-zinc-700"> <!-- body -->
-      
-        <div v-if="loading && rows.length == 0" class="justify-center w-full flex py-2">
-          <spinner></spinner>
-        </div>
-
-        <div v-for="row in virtualizer.getVirtualItems()" 
-            :key="row.key"
-            :data-index="row.index"
-            :ref="measureElement"
-            :style="{ position: 'absolute', top: `${row.start}px`,  width: '100%' }" >
-
-            <router-link v-if="$route.name === 'pods'" :to="getEntityLink(rows[row.index])">
-              <table-row :row="rows[row.index]" :vrow="row" :columns="columns"></table-row>
-            </router-link>
-            <router-link v-else-if="$route.name === 'workloads'" :to="getEntityLink(rows[row.index])">
-              <table-row :row="rows[row.index]" :vrow="row" :columns="columns"></table-row>          
+    <div class="text-left divide-y divide-gray-200 dark:divide-zinc-700 dark:bg-zinc-900 rounded-b-lg"> <!-- table -->
+      <div class="text-sm text-gray-700 dark:text-gray-300 dark:divide-zinc-700"> <!-- body -->
+        <div v-for="row in rows" :key="row.key">
+            <router-link v-if="$route.name === 'workload-details'" :to="getEntityLink(row)">
+              <table-row :row="row" :vrow="row" :columns="columns"></table-row>
             </router-link>
             <template v-else>
-              <table-row :row="rows[row.index]" :vrow="row" :columns="columns"></table-row>          
+              <table-row :row="row" :vrow="row" :columns="columns"></table-row>          
             </template>
         </div>
       </div>
     </div>
 
   </div>
-
 </template>
 
 <script type="module">
 import { ref, provide, watch, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
-import { useVirtualizer } from '@@tanstack/vue-virtual';
 import { useStorage } from '@@vueuse/core';
 import { useRoute } from 'vue-router';
 
 let setup = (props, ctx) => {
-  const parentRef = ref(null);
-  const timer = ref('');
   const rows = ref([]);
   const route = useRoute();
-  const search = useGlobalSearch();
-  const namespaces = useGlobalNamespaces();
   const sorting = useStorage(`heimdall-${route.name}-table-sorting`, props.initialSort ?? []);
-  
-  let fatScrollbar = computed(() => navigator.userAgent.includes('Windows'));
-  
+    
   const updateKey = ref(0);
   provide('updateKey', updateKey)
-
-  let virtualizerOptions = computed(() => {
-    return {
-      count: rows.value.length,
-      estimateSize: () => 40,
-      overscan: 20,
-      getScrollElement: () => parentRef.value,
-    }
-  });
-
-  let virtualizer = useVirtualizer(virtualizerOptions);
 
   let scrollable = computed(x => {
     let height = virtualizer.value.getTotalSize();
@@ -105,17 +68,6 @@ let setup = (props, ctx) => {
     return height > max;
   });
   
-  const measureElement = (el) => {
-    nextTick(() => {
-      if (!el) return;
-      virtualizer.value.measureElement(el);
-    });
-  };
-  
-  let cancelAutoUpdate = () => {
-    clearInterval(timer.value);
-  };
-
   let onSelectSort = (e, id) => {
     var existing = sorting.value.find(x => x.id === id);
     if (!e.shiftKey){
@@ -148,33 +100,20 @@ let setup = (props, ctx) => {
     if ((props.columns?.length ?? 0) === 0) return
     
     let content = sortRows(sorting.value, props.columns, props.data)
-    
-    content.forEach(x => {
-      x.filtered = false;
-      x.nsFiltered = false;
-    })
-    
-    filterRows(content, props.columns, namespaces.value, search.value)
-    
-    rows.value = content.filter(row => !row.filtered && !row.nsFiltered)
+
+    rows.value = content
   }
     
-  watch([() => props.columns,() => props.data, namespaces, search, sorting], updateTable);
+  watch([() => props.columns,() => props.data, sorting], updateTable);
   
   onMounted(() => {
     updateTable();
-    timer.value = setInterval(() => updateKey.value += 1, 5000);
   });
-  
-  onBeforeUnmount(() => {
-    cancelAutoUpdate();
-  });
-  
+    
   return {
-    sorting, timer, updateKey, rows, virtualizerOptions, virtualizer, measureElement, parentRef, route,
-    getEntityLink, cancelAutoUpdate, onSelectSort, updateTable, search, namespaces, fatScrollbar, scrollable
+    sorting, updateKey, rows, route, getEntityLink, onSelectSort, updateTable
   }
 }
 
-components["simple-table"] = { template: "#simple-table", props: ['data', 'columns', 'initialSort', 'loading'], setup };
+components["simple-table"] = { template: "#simple-table", props: ['data', 'columns', 'initialSort'], setup };
 </script>
