@@ -1,11 +1,35 @@
 ﻿<template id="workload-details">
   <div class="pl-2 pr-4 max-w-5xl mx-auto">
-    <div class="flex my-2 items-center">
-      <span class="text-gray-500 dark:text-gray-300 text-xl font-light sans">{{item.kind}} / {{item?.metadata?.namespace }} / {{ item?.metadata?.name }}</span>
+
+    <br/>
+
+    <div class="flex mb-8 items-center text-gray-500 dark:text-gray-300 font-light sans">
+      <div class="text-md">{{item.kind}} / {{item?.metadata?.namespace }} / {{ item?.metadata?.name }}</div>
     </div>
     
+    <div class="my-4">
+      <div class="flex justify-center mb-4">
+        <div class="flex">
+          <chart-toggle name="cpu" :state="chartState" label="CPU" @@update="e => chartState = e"></chart-toggle>
+
+          <chart-toggle name="memory" :state="chartState" label="Memory" @@update="e => chartState = e"></chart-toggle>
+
+          <chart-toggle name="network" :state="chartState" label="Network" @@update="e => chartState = e"></chart-toggle>
+
+          <chart-toggle name="filesystem" :state="chartState" label="Filesystem" @@update="e => chartState = e"></chart-toggle>
+
+          <chart-toggle v-if="['cpu', 'memory'].includes(chartState)" name="limit" :state="limitState" label="Limit" :state-visible="true" @@update="e => limitState = !limitState"></chart-toggle>
+          <div v-else class="w-[105px] me-2"></div>
+        </div>
+      </div>
+      
+      <div class="wide-details-graph">
+        <v-chart ref="chart" :option="charts[chartState]" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+      </div>
+    </div>
+
     <br/>
-    
+
     <div class="text-gray-500 dark:text-gray-300 text-md font-light sans">
       <div class="flex mb-2">
         <div class="px-2 py-1 w-1/4">Created</div>
@@ -176,6 +200,53 @@ let setup = (props, ctx) => {
   const events = ref([]);
   const clusterEvents = ref([]);  
 
+  const chart = ref();
+  const chartState = ref('cpu');
+  const limitState = ref(false);
+  const initOptions = ref({ renderer: "svg" });
+
+  const metrics = ref({
+    cpu: [
+      { 
+        type:'pod', name:'cpu-usage', pods: route.params.name, namespace: route.params.namespace, 
+        metrics: [], data: [], params: { unit: 'cores', name:'Usage', index: 1, colorDark: '#4992ff', colorLight: '#5470c6'}
+      }
+    ],
+    memory: [
+      {
+        type:'pod', name:'mem-usage', pods: route.params.name, namespace: route.params.namespace, 
+        metrics: [], data: [], params: { unit: 'bytes', name:'Usage', index: 1, colorDark: '#dd79ff', colorLight: '#ea7ccc'}
+      },
+    ],
+    network: [
+      {
+        type:'pod', name:'net-recv', pods: route.params.name, namespace: route.params.namespace, 
+        metrics: [], data: [], params: { unit: 'bytes', name:'Receive', colorDark: '#58d9f9', colorLight: '#73c0de'}
+      }, 
+      {
+        type:'pod', name:'net-sent', pods: route.params.name, namespace: route.params.namespace, 
+        metrics: [], data: [], params: { unit: 'bytes', name:'Transmit', colorDark: '#7cffb2', colorLight: '#91cc75'}
+      }
+    ],
+    filesystem: [
+      {
+        type:'pod', name:'fs-reads', pods: route.params.name, namespace: route.params.namespace, 
+        metrics: [], data: [], params: { unit: 'bytes', name:'Reads', colorDark: '#fddd60', colorLight: '#fac858'}
+      }, 
+      {
+        type:'pod', name:'fs-writes', pods: route.params.name, namespace: route.params.namespace, 
+        metrics: [], data: [], params: { unit: 'bytes', name:'Writes', colorDark: '#ff8a45', colorLight: '#fc8452'}
+      }
+    ]
+  });
+
+  const charts = ref({
+    cpu: getSimpleChart(),
+    memory: getSimpleChart(),
+    network: getSimpleChart(),
+    filesystem: getSimpleChart()
+  });
+
   let toLocal = (value) => {
     if (!value) return '';
       
@@ -194,6 +265,70 @@ let setup = (props, ctx) => {
     var newDatetime = DT.fromISO(String(value));
     return toHumanValues(newDatetime.diff(date,  unit)).join(' ') + ' Ago';
   }
+
+  let updateMetrics = async () => {
+    if (props.config.metrics){
+      streamMetrics(metrics.value.cpu, updateCpu, connections.value);
+      streamMetrics(metrics.value.memory, updateMemory, connections.value);
+      streamMetrics(metrics.value.network, updateNetworking, connections.value);
+      streamMetrics(metrics.value.filesystem, updateFilesystem, connections.value);
+    }
+  }
+
+  let updateCpu = () => {
+    if (!metrics.value.cpu) return;
+    if (metrics.value.cpu[0].metrics.length < 1) return;
+
+    var [data, max, unit] = getDataSeries(metrics.value.cpu);
+
+    let limit = 0;
+    if (limitState.value){    
+      let containers = pod.value?.spec?.containers?.map(x => cpuUnitsToNumber(x.resources?.limits?.cpu)) ?? [];
+      limit = containers.reduce((a, b) => a + b, 0);
+    }
+
+    updateSimpleChart(charts.value.cpu, metrics.value.cpu, unit, isDark.value, limit);
+  };
+  
+  let updateMemory = () => {
+    if (!metrics.value.memory) return;
+    if (metrics.value.memory[0].metrics.length < 1) return;
+
+    var [data, max, unit] = getDataSeries(metrics.value.memory);
+    
+    let limit = 0;
+    if (limitState.value){    
+      let containers = pod.value?.spec?.containers?.map(x => memoryUnitToBytes(x.resources?.limits?.memory)) ?? [];
+      limit = containers.reduce((a, b) => a + b, 0);
+    }
+
+    updateSimpleChart(charts.value.memory, metrics.value.memory, unit, isDark.value, limit);
+  };
+
+  let updateNetworking = () => {
+    if (!metrics.value.network) return;
+    if (metrics.value.network[0].metrics.length < 1) return;
+
+    var [data, max, unit] = getDataSeries(metrics.value.network);
+
+    updateSimpleChart(charts.value.network, metrics.value.network, unit, isDark.value);
+  }
+
+  let updateFilesystem = () => {
+    if (!metrics.value.filesystem) return;
+    if (metrics.value.filesystem[0].metrics.length < 1) return;
+
+    var [data, max, unit] = getDataSeries(metrics.value.filesystem);
+
+    updateSimpleChart(charts.value.filesystem, metrics.value.filesystem, unit, isDark.value);
+  }
+
+  watch([limitState, chartState, isDark], () => {
+    updateCpu();
+    updateMemory();
+    updateNetworking();
+    updateFilesystem();
+  })
 
   let matchLabels = (labels, selector) => {
     let result = Object.keys(selector).every(x => labels[x] === selector[x])
@@ -216,6 +351,8 @@ let setup = (props, ctx) => {
     let type = route.params.type;
     let namespace = route.params.namespace;
     
+    updateMetrics();
+
     let url = `/k8s/apis/apps/v1/namespaces/${namespace}/${type}s`;
     if (['cronjobs', 'jobs'].includes(type + 's')){
         url = `/k8s/apis/batch/v1/namespaces/${namespace}/${type}s`    
@@ -231,10 +368,10 @@ let setup = (props, ctx) => {
   });
 
   return { 
-    pods, clusterPods,
-    events, clusterEvents,
-    item, connections,
-    toLocal, toHuman 
+    pods, clusterPods, events, clusterEvents,
+    item, connections, toLocal, toHuman,
+    metrics, charts, chartState, initOptions, limitState, 
+    updateCpu, updateMemory, updateNetworking, updateFilesystem, updateMetrics
   }
 }
 
