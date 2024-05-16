@@ -210,7 +210,7 @@ let setup = (props, ctx) => {
   const limitState = ref(false);
   const initOptions = ref({ renderer: "svg" });
 
-  const sorting = ref([ {id:'name', sort:'asc'}, { id:"namespace", sort: "desc" } ]);
+  const sorting = ref([ {id:'name', sort:'asc'} ]);
   const columns = ref([
     { header: 'Name', id: 'name', classes: 'truncate grow shrink w-52', 
       accessor: row => row.metadata.name },
