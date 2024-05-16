@@ -291,10 +291,10 @@ let setup = (props, ctx) => {
   let updateMetrics = async () => {
     if (props.config.metrics && pods.value.length > 0 && !isLoaded.value){
       isLoaded.value = true;
-      streamMetrics(metrics.value.cpu, updateCpu, connections.value);
-      streamMetrics(metrics.value.memory, updateMemory, connections.value);
-      streamMetrics(metrics.value.network, updateNetworking, connections.value);
-      streamMetrics(metrics.value.filesystem, updateFilesystem, connections.value);
+      streamMetrics(metrics.value.cpu, updateCpu, connections.value, true);
+      streamMetrics(metrics.value.memory, updateMemory, connections.value, true);
+      streamMetrics(metrics.value.network, updateNetworking, connections.value, true);
+      streamMetrics(metrics.value.filesystem, updateFilesystem, connections.value, true);
     }
   }
 
@@ -302,7 +302,7 @@ let setup = (props, ctx) => {
     if (!metrics.value.cpu) return;
     if (metrics.value.cpu[0].metrics.length < 1) return;
 
-    var [data, max, unit] = getDataSeries(metrics.value.cpu);
+    var [data, max, unit] = getSumSeries(metrics.value.cpu);
 
     updateSimpleChart(charts.value.cpu, metrics.value.cpu, unit, isDark.value);
   };
@@ -311,7 +311,7 @@ let setup = (props, ctx) => {
     if (!metrics.value.memory) return;
     if (metrics.value.memory[0].metrics.length < 1) return;
 
-    var [data, max, unit] = getDataSeries(metrics.value.memory);
+    var [data, max, unit] = getSumSeries(metrics.value.memory);
     
     updateSimpleChart(charts.value.memory, metrics.value.memory, unit, isDark.value);
   };
@@ -320,7 +320,7 @@ let setup = (props, ctx) => {
     if (!metrics.value.network) return;
     if (metrics.value.network[0].metrics.length < 1) return;
 
-    var [data, max, unit] = getDataSeries(metrics.value.network);
+    var [data, max, unit] = getSumSeries(metrics.value.network);
 
     updateSimpleChart(charts.value.network, metrics.value.network, unit, isDark.value);
   }
@@ -329,7 +329,7 @@ let setup = (props, ctx) => {
     if (!metrics.value.filesystem) return;
     if (metrics.value.filesystem[0].metrics.length < 1) return;
 
-    var [data, max, unit] = getDataSeries(metrics.value.filesystem);
+    var [data, max, unit] = getSumSeries(metrics.value.filesystem);
 
     updateSimpleChart(charts.value.filesystem, metrics.value.filesystem, unit, isDark.value);
   }
