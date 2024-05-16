@@ -8,7 +8,7 @@
     });
 }
 
-function streamMetrics(options, cb, connections = null) {
+function streamMetrics(options, cb, connections = null, multiple = false) {
     var DT = luxon.DateTime;
     let isApiRequestInProgress = false;
 
@@ -34,7 +34,11 @@ function streamMetrics(options, cb, connections = null) {
                     await Promise.all(options.map(async (x) => {
                         let url = getMetricUrl(x, begin, end);
                         const metrics = await request(url);
-                        x['metrics'] = metrics?.data?.result[0] ?? metrics;
+                        if (multiple){
+                            x['metrics'] = metrics?.data?.result ?? metrics;
+                        } else {
+                            x['metrics'] = metrics?.data?.result[0] ?? metrics;
+                        }
                     }));
                     
                 } catch (err) {
