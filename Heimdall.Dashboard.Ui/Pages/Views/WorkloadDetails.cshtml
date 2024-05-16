@@ -207,7 +207,6 @@ let setup = (props, ctx) => {
 
   const chart = ref();
   const chartState = ref('cpu');
-  const limitState = ref(false);
   const initOptions = ref({ renderer: "svg" });
 
   const sorting = ref([ {id:'name', sort:'asc'} ]);
@@ -303,13 +302,7 @@ let setup = (props, ctx) => {
 
     var [data, max, unit] = getDataSeries(metrics.value.cpu);
 
-    let limit = 0;
-    if (limitState.value){    
-      let containers = pod.value?.spec?.containers?.map(x => cpuUnitsToNumber(x.resources?.limits?.cpu)) ?? [];
-      limit = containers.reduce((a, b) => a + b, 0);
-    }
-
-    updateSimpleChart(charts.value.cpu, metrics.value.cpu, unit, isDark.value, limit);
+    updateSimpleChart(charts.value.cpu, metrics.value.cpu, unit, isDark.value);
   };
   
   let updateMemory = () => {
@@ -318,13 +311,7 @@ let setup = (props, ctx) => {
 
     var [data, max, unit] = getDataSeries(metrics.value.memory);
     
-    let limit = 0;
-    if (limitState.value){    
-      let containers = pod.value?.spec?.containers?.map(x => memoryUnitToBytes(x.resources?.limits?.memory)) ?? [];
-      limit = containers.reduce((a, b) => a + b, 0);
-    }
-
-    updateSimpleChart(charts.value.memory, metrics.value.memory, unit, isDark.value, limit);
+    updateSimpleChart(charts.value.memory, metrics.value.memory, unit, isDark.value);
   };
 
   let updateNetworking = () => {
@@ -345,7 +332,7 @@ let setup = (props, ctx) => {
     updateSimpleChart(charts.value.filesystem, metrics.value.filesystem, unit, isDark.value);
   }
 
-  watch([limitState, chartState, isDark], () => {
+  watch([chartState, isDark], () => {
     updateCpu();
     updateMemory();
     updateNetworking();
@@ -392,7 +379,7 @@ let setup = (props, ctx) => {
   return { 
     pods, clusterPods, events, clusterEvents, sorting, columns,
     item, connections, toLocal, toHuman,
-    metrics, charts, chartState, initOptions, limitState, isDark,
+    metrics, charts, chartState, initOptions, isDark,
     updateCpu, updateMemory, updateNetworking, updateFilesystem, updateMetrics
   }
 }
