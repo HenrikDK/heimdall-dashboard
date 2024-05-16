@@ -51,10 +51,10 @@
             :ref="measureElement"
             :style="{ position: 'absolute', top: `${row.start}px`,  width: '100%' }" >
 
-            <router-link v-if="$route.name === 'pods'" :to="getLink(rows[row.index])">
+            <router-link v-if="$route.name === 'pods'" :to="getEntityLink(rows[row.index])">
               <vue-table-row :row="rows[row.index]" :vrow="row" :columns="columns"></vue-table-row>          
             </router-link>
-            <router-link v-else-if="$route.name === 'workloads'" :to="getLink(rows[row.index])">
+            <router-link v-else-if="$route.name === 'workloads'" :to="getEntityLink(rows[row.index])">
               <vue-table-row :row="rows[row.index]" :vrow="row" :columns="columns"></vue-table-row>          
             </router-link>
             <template v-else>
@@ -158,16 +158,7 @@ let setup = (props, ctx) => {
     
     rows.value = content.filter(row => !row.filtered && !row.nsFiltered)
   }
-  
-  let getLink = (row) => {
-    if (['Deployment', 'DaemonSet', 'StatefulSet', 'Job', 'CronJob', ].includes(row.kind))
-    {
-        return { name: 'workload-details', params: { namespace: row.metadata.namespace, type: row.kind.toLowerCase(), name: row.metadata.name }}   
-    }
     
-    return { name: 'pod-details', params: { namespace: row.metadata.namespace, name: row.metadata.name }}
-  };
-  
   watch([() => props.columns,() => props.data, namespaces, search, sorting], updateTable);
   
   onMounted(() => {
@@ -181,7 +172,7 @@ let setup = (props, ctx) => {
   
   return {
     sorting, timer, updateKey, rows, virtualizerOptions, virtualizer, measureElement, parentRef, route,
-    getLink, cancelAutoUpdate, onSelectSort, updateTable, search, namespaces, fatScrollbar, scrollable
+    getEntityLink, cancelAutoUpdate, onSelectSort, updateTable, search, namespaces, fatScrollbar, scrollable
   }
 }
 
