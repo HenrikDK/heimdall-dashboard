@@ -29,7 +29,7 @@
 
     <br/>
 
-    <div class="text-gray-500 dark:text-gray-300 text-md font-light sans">
+    <div class="text-gray-500 dark:text-gray-300 text-md font-light sans mb-8">
       <div class="flex mb-2">
         <div class="px-2 py-1 w-1/4">Created</div>
         <div>{{ toLocal(item?.metadata?.creationTimestamp) }} ({{ toHuman(item?.metadata?.creationTimestamp) }})</div>
@@ -144,13 +144,15 @@
       </div>
     </div>
 
-    <div v-if="pods.length > 0" class="flex my-4 items-center">
+    <div v-if="pods.length > 0" class="flex mt-8 mb-4 items-center">
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pods</span>
     </div>
 
-    <simple-table :columns="columns" :initial-sort="sorting" :data="pods" :loading="loading"></simple-table>
+    <simple-table :columns="columns" :initial-sort="sorting" :data="pods"></simple-table>
 
-    <div v-if="events.length > 0" class="flex my-4 items-center">
+    <br/>
+
+    <div v-if="events.length > 0" class="flex mt-8 mb-4 items-center">
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
     </div>
 
@@ -210,8 +212,18 @@ let setup = (props, ctx) => {
 
   const sorting = ref([ {id:'name', sort:'asc'}, { id:"namespace", sort: "desc" } ]);
   const columns = ref([
-    { header: 'Name', id: 'name', classes: 'truncate grow shrink 2xl:w-[42rem] xl:w-[22rem] lg:w-[16rem]', 
-      accessor: row => row.metadata.name }
+    { header: 'Name', id: 'name', classes: 'truncate grow shrink w-52', 
+      accessor: row => row.metadata.name },
+    { header: 'Node', id: 'node', classes: 'w-72', 
+      accessor: row => row.spec.nodeName },
+    { header: 'Containers', id: 'containers', classes: 'truncate w-32', canSort: false, 
+      accessor: row => row.status.containerStatuses, formatter:'pod-lights' },
+    { header: 'Cpu', id: 'cpu', classes: 'truncate w-24', 
+      accessor: row => row.status.containerStatuses },
+    { header: 'Memory', id: 'memory', classes: 'truncate w-24', 
+      accessor: row => row.status.containerStatuses },
+    { header: 'Status', id: 'status', classes: 'w-[6rem]', canSort: false, 
+      accessor: row => row.status.phase, formatter:'pod-status' }
   ]);
 
 
