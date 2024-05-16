@@ -306,3 +306,12 @@ function cpuUnitsToNumber(value) {
   
     return parseFloat(digits) * converters[0].magnitude;
 }
+
+function getEntityLink(row) {
+    if (['Deployment', 'DaemonSet', 'StatefulSet', 'Job', 'CronJob', ].includes(row.kind))
+    {
+        return { name: 'workload-details', params: { namespace: row.metadata.namespace, type: row.kind.toLowerCase(), name: row.metadata.name }}   
+    }
+    
+    return { name: 'pod-details', params: { namespace: row.metadata.namespace, name: row.metadata.name }}
+};
