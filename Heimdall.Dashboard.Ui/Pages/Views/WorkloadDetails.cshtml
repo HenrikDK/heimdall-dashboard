@@ -148,6 +148,8 @@
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pods</span>
     </div>
 
+    <vue-table :columns="columns" :initial-sort="sorting" :data="pods" :loading="loading"></vue-table>
+
     <div v-if="events.length > 0" class="flex my-4 items-center">
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
     </div>
@@ -205,6 +207,13 @@ let setup = (props, ctx) => {
   const chartState = ref('cpu');
   const limitState = ref(false);
   const initOptions = ref({ renderer: "svg" });
+
+  const sorting = ref([ {id:'name', sort:'asc'}, { id:"namespace", sort: "desc" } ]);
+  const columns = ref([
+    { header: 'Name', id: 'name', classes: 'truncate grow shrink 2xl:w-[42rem] xl:w-[22rem] lg:w-[16rem]', 
+      accessor: row => row.metadata.name }
+  ]);
+
 
   const metrics = ref({
     cpu: [
@@ -369,7 +378,7 @@ let setup = (props, ctx) => {
   });
 
   return { 
-    pods, clusterPods, events, clusterEvents,
+    pods, clusterPods, events, clusterEvents, sorting, columns,
     item, connections, toLocal, toHuman,
     metrics, charts, chartState, initOptions, limitState, isDark,
     updateCpu, updateMemory, updateNetworking, updateFilesystem, updateMetrics
