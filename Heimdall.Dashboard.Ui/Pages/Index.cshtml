@@ -8,25 +8,29 @@
 }
 
 @section VueComponents {
-    <partial name="Buttons/ChartToggle"/>
-    <partial name="Buttons/Deployments"/>
-    <partial name="Buttons/Events"/>
-    <partial name="Buttons/Ingress"/>
-    <partial name="Buttons/Logs"/>
-    <partial name="Buttons/Pods"/>
-    <partial name="Buttons/Services"/>
+    <partial name="Components/Buttons/ChartToggle"/>
+    <partial name="Components/Buttons/Deployments"/>
+    <partial name="Components/Buttons/Events"/>
+    <partial name="Components/Buttons/Ingress"/>
+    <partial name="Components/Buttons/Logs"/>
+    <partial name="Components/Buttons/Pods"/>
+    <partial name="Components/Buttons/Services"/>
 
-    <partial name="Columns/DeploymentConditions"/>
-    <partial name="Columns/DeploymentLights"/>
-    <partial name="Columns/EventMessage"/>
-    <partial name="Columns/EventSource"/>
-    <partial name="Columns/IngressHosts"/>
-    <partial name="Columns/IngressLoadBalancers"/>
-    <partial name="Columns/KubeDns"/>
-    <partial name="Columns/Namespace"/>
-    <partial name="Columns/ObjectAge"/>
-    <partial name="Columns/PodLights"/>
-    <partial name="Columns/PodStatus"/>
+    <partial name="Components/Columns/DeploymentConditions"/>
+    <partial name="Components/Columns/DeploymentLights"/>
+    <partial name="Components/Columns/EventMessage"/>
+    <partial name="Components/Columns/EventSource"/>
+    <partial name="Components/Columns/IngressHosts"/>
+    <partial name="Components/Columns/IngressLoadBalancers"/>
+    <partial name="Components/Columns/KubeDns"/>
+    <partial name="Components/Columns/Namespace"/>
+    <partial name="Components/Columns/ObjectAge"/>
+    <partial name="Components/Columns/PodLights"/>
+    <partial name="Components/Columns/PodStatus"/>
+
+    <partial name="Components/VueTable/SimpleTable"/>
+    <partial name="Components/VueTable/VirtualTable"/>
+    <partial name="Components/VueTable/TableRow"/>
 
     <partial name="Components/LogControls"/>
     <partial name="Components/LogHelp"/>
@@ -41,9 +45,7 @@
     <partial name="Components/Search"/>
     <partial name="Components/Spinner"/>
     <partial name="Components/Tooltip"/>
-    <partial name="Components/VueTable/SimpleTable"/>
-    <partial name="Components/VueTable/VirtualTable"/>
-    <partial name="Components/VueTable/TableRow"/>
+
     
     <partial name="Views/Cluster"/>
     <partial name="Views/Events"/>
