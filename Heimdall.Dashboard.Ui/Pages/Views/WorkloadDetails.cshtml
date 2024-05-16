@@ -210,23 +210,6 @@ let setup = (props, ctx) => {
   const chartState = ref('cpu');
   const initOptions = ref({ renderer: "svg" });
 
-  const sorting = ref([ {id:'name', sort:'asc'} ]);
-  const columns = ref([
-    { header: 'Name', id: 'name', classes: 'truncate grow shrink w-52', 
-      accessor: row => row.metadata.name },
-    { header: 'Node', id: 'node', classes: 'w-72', 
-      accessor: row => row.spec.nodeName },
-    { header: 'Containers', id: 'containers', classes: 'truncate w-32', canSort: false, 
-      accessor: row => row.status.containerStatuses, formatter:'pod-lights' },
-    { header: 'Cpu', id: 'cpu', classes: 'truncate w-24', 
-      accessor: row => row.status.containerStatuses },
-    { header: 'Memory', id: 'memory', classes: 'truncate w-24', 
-      accessor: row => row.status.containerStatuses },
-    { header: 'Status', id: 'status', classes: 'w-[6rem]', canSort: false, 
-      accessor: row => row.status.phase, formatter:'pod-status' }
-  ]);
-
-
   const metrics = ref({
     cpu: [
       { 
@@ -262,12 +245,53 @@ let setup = (props, ctx) => {
     ]
   });
 
+  let getCpuUsage = (row) => {
+    if (metrics.value['cpu'][0].metrics.length < 1) return '-';
+    let pod = row.metadata.name;
+
+    let series = metrics.value['cpu'][0].metrics.filter(x => x.metric.pod == pod)[0]
+    if (series === undefined) return '-';
+
+    let usage = parseFloat(series.values.slice(-1)[0][1]);
+    
+    return usage.toFixed(3);
+  }
+
+  let getMemoryUsage = (row) => {
+    if (metrics.value['memory'][0].metrics.length < 1) return '-';
+    let pod = row.metadata.name;
+
+    let series = metrics.value['memory'][0].metrics.filter(x => x.metric.pod == pod)[0]
+
+    let usage = parseFloat(series.values.slice(-1)[0][1]);
+
+    let unit = getUnitFromBytes(usage);
+
+    return `${(usage / unit.magnitude).toFixed(1)} ${unit.suffix}`
+  }
+
   const charts = ref({
     cpu: getSimpleChart(),
     memory: getSimpleChart(),
     network: getSimpleChart(),
     filesystem: getSimpleChart()
   });
+
+  const sorting = ref([ {id:'name', sort:'asc'} ]);
+  const columns = ref([
+    { header: 'Name', id: 'name', classes: 'truncate grow shrink w-52', 
+      accessor: row => row.metadata.name },
+    { header: 'Node', id: 'node', classes: 'w-72', 
+      accessor: row => row.spec.nodeName },
+    { header: 'Containers', id: 'containers', classes: 'truncate w-32', canSort: false, 
+      accessor: row => row.status.containerStatuses, formatter:'pod-lights' },
+    { header: 'Cpu', id: 'cpu', classes: 'truncate w-24', 
+      accessor: getCpuUsage },
+    { header: 'Memory', id: 'memory', classes: 'truncate w-24', 
+      accessor: getMemoryUsage },
+    { header: 'Status', id: 'status', classes: 'w-[6rem]', canSort: false, 
+      accessor: row => row.status.phase, formatter:'pod-status' }
+  ]);
 
   let toLocal = (value) => {
     if (!value) return '';
@@ -387,7 +411,7 @@ let setup = (props, ctx) => {
   });
 
   return { 
-    pods, clusterPods, events, clusterEvents, sorting, columns, isLoaded,
+    pods, clusterPods, events, clusterEvents, sorting, columns, isLoaded, getCpuUsage, 
     item, connections, toLocal, toHuman,
     metrics, charts, chartState, initOptions, isDark,
     updateCpu, updateMemory, updateNetworking, updateFilesystem, updateMetrics
