@@ -213,6 +213,7 @@ let setup = (props, ctx) => {
   });
 
   watch(() => props.direction, () => {
+    // TODO: issue, we reset active overlay on direction change
     if (props.direction === 'up'){
       logEvents.value = [...props.events];
       if (query.value.length > 0)
@@ -235,6 +236,13 @@ let setup = (props, ctx) => {
       toTop();
     }
     
+    if (query.value.length > 0){
+      let row = overlays.value[activeOverlay.value].row;
+      if (row !== undefined){
+        virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'center', smoothScroll: false });
+      }
+    }
+
     if (!loaded.value) return;
     updateId.value += 1;
   })
