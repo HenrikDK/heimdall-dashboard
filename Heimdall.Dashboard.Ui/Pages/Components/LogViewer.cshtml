@@ -51,7 +51,7 @@
             <span v-else>{{ segment.content }}</span>
           </template>
         </template>
-        <span v-else>{{ logEvents[virtualRow.index].raw }}</span>
+        <span v-else-if="(query.length > 0 && !filter) || query.length == 0">{{ logEvents[virtualRow.index].raw }}</span>
       </div>
 
       <div v-if="direction == 'up'" style="overflow-anchor: auto; height: 1px;"></div>
@@ -202,6 +202,15 @@ let setup = (props, ctx) => {
     status.value.current = props.direction === 'up' ? overlays.value.length - activeOverlay.value : activeOverlay.value + 1;
     status.value.total = overlays.value.length;
   })
+
+  watch(() => props.filter, () =>{
+    if (query.value.length == 0) return;
+
+    let row = overlays.value[activeOverlay.value].row;
+    if (row !== undefined){
+      virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'center', smoothScroll: false });
+    }
+  });
 
   watch(() => props.direction, () => {
     if (props.direction === 'up'){
