@@ -124,14 +124,6 @@ let setup = (props, ctx) => {
     return result;
   }
 
-  const viewLoaded = () => {
-    if (loaded.value === true) return;
-    loaded.value = true;
-    if (props.direction === 'up' && logEvents.value.length > 0){
-      virtualizer.value.scrollToIndex(logEvents.value.length - 1, { align: 'end', smoothScroll: false });
-    }
-  }
-
   const debouncedSearch = _.debounce((q) => onSearch(q), 300, {maxWait: 2});
   const debouncedInit = _.debounce(() => viewLoaded(), 500, {maxWait: 2});
 
@@ -168,13 +160,22 @@ let setup = (props, ctx) => {
 
   let toBottom = () => {
     if (logEvents.value.length > 0){
-      virtualizer.value.scrollToOffset(virtualizer.value.getTotalSize() + 100, { align: 'end', smoothScroll: false });
+      parentRef.value.scrollTo(0, virtualizer.value.getTotalSize() + 100)
+      //virtualizer.value.scrollToIndex(logEvents.value.length - 1, { align: 'end', smoothScroll: false });
     }
   }
 
   let toTop = () => {
     if (logEvents.value.length > 0){
-      virtualizer.value.scrollToIndex(0, { align: 'start', smoothScroll: false });
+      parentRef.value.scrollTo(0, 0)
+    }
+  }
+
+  const viewLoaded = () => {
+    if (loaded.value === true) return;
+    loaded.value = true;
+    if (props.direction === 'up' && logEvents.value.length > 0){
+      toBottom();
     }
   }
 
