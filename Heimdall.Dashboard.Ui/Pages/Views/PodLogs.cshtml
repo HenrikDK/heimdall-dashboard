@@ -46,7 +46,7 @@ let setup = (props, ctx) => {
 
     setTimeout(() => {
       let event = logEvents.value[logEvents.value.length - 1];
-      json.value = event?.startsWith('{') ?? false;
+      json.value = event?.json ?? false;
     }, 500);
   });
 
