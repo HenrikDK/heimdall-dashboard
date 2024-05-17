@@ -1,4 +1,4 @@
-﻿<template id="log-viewer">
+<template id="log-viewer">
   <div class="absolute top-20 right-12 z-50">
     <div v-if="direction == 'up' && !isBottom" title="To bottom" alt="To bottom" @@click="toBottom"
          class="flex px-4 py-2 rounded-lg items-center justify-center border cursor-pointer
@@ -349,7 +349,7 @@ let setup = (props, ctx) => {
     }
     let row = overlays.value[activeOverlay.value].row;
     if (row !== undefined){
-      virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'center', behavior: false });
+      virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'center', smoothScroll: false });
     }
 
     updateId.value += 1; // redraw view
