@@ -1,4 +1,4 @@
-<template id="log-viewer">
+﻿<template id="log-viewer">
   <div class="absolute top-20 right-12 z-50">
     <div v-if="direction == 'up' && !isBottom" title="To bottom" alt="To bottom" @@click="toBottom"
          class="flex px-4 py-2 rounded-lg items-center justify-center border cursor-pointer
@@ -51,7 +51,7 @@
             <span v-else>{{ segment.content }}</span>
           </template>
         </template>
-        <span v-else>{{ logEvents[virtualRow.index] }}</span>
+        <span v-else>{{ logEvents[virtualRow.index].raw }}</span>
       </div>
 
       <div v-if="direction == 'up'" style="overflow-anchor: auto; height: 1px;"></div>
@@ -89,7 +89,7 @@ let setup = (props, ctx) => {
   const virtualizer = useVirtualizer(virtualizerOptions)
 
   let getRow = (i) => {
-    let row = logEvents.value[i]
+    let row = logEvents.value[i].raw
     let hits = occurrences.value[i] ?? [];
     if (hits.length === 0) return [{ content: row }];
 
