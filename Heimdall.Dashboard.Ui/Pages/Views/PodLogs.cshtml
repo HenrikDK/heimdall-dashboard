@@ -29,8 +29,8 @@ let setup = (props, ctx) => {
   let updateLogs = (j) => {
     let result = logEvents.value.concat(j)
     
-    if (result.length > 1000){
-      result = result.slice(-1000)
+    if (result.length > 5000){
+      result = result.slice(-5000)
     }
     
     logEvents.value = result
