@@ -159,6 +159,7 @@ let setup = (props, ctx) => {
   let toBottom = () => {
     if (logEvents.value.length > 0){
       //parentRef.value.scrollTo(0, virtualizer.value.getTotalSize() + 100)
+      //virtualizer.value.scrollToOffset(virtualizer.value.getTotalSize() + 100, { align: 'end', smoothScroll: false });
       virtualizer.value.scrollToIndex(logEvents.value.length - 1, { align: 'end', smoothScroll: false });
     }
   }
