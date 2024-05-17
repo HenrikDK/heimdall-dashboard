@@ -180,18 +180,21 @@ let setup = (props, ctx) => {
   }
 
   watch(() => props.events, () => {
-    if (props.direction === 'up'){
-      logEvents.value = [...props.events];
-    } else {
-      logEvents.value = [...props.events].reverse();
+    let rows = [...props.events];
+    if (props.direction !== 'up'){
+      rows.reverse();
     }
-    debouncedInit();
 
     if (query.value.length > 0){
       let [ov, oc] = findOccurrences(logEvents.value, query.value);
       overlays.value = ov;
       occurrences.value = oc;
+      // todo handle new events moving active overlay
     }
+
+    logEvents.value = rows;
+
+    debouncedInit();
 
     if (!loaded.value) return;
     updateId.value += 1;
