@@ -331,6 +331,10 @@ let setup = (props, ctx) => {
       occurrences.value = [];
       overlays.value = [];
       activeOverlay.value = -1;
+      logEvents.value.forEach(x => {
+        x['matched'] = false;
+        x['matches'] = []
+      });
       return;
     }
 
