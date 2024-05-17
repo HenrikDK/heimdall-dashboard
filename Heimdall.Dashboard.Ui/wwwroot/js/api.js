@@ -66,6 +66,7 @@ function streamMetrics(options, cb, connections = null, multiple = false) {
 async function streamLogs(path, cb, connections = null) {
     var host = window.location.origin;
     let url = host + path;
+    let id = 0;
     const watchUrl = url.replace('http', 'ws');
     let ending = ''
     const {cancel} = stream(watchUrl, transformer, false);
@@ -93,6 +94,8 @@ async function streamLogs(path, cb, connections = null) {
         if (lines[lines.length - 1]?.length === 0){
             lines = lines.slice(0, -1);
         }
+
+        lines = lines.map(x => ({raw: x, json: x.startsWith('{'), id: ++id}))
         
         cb(lines);
     }
