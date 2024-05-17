@@ -235,10 +235,15 @@ let setup = (props, ctx) => {
     let ol = [];
     let oc = {};
     lines.forEach((line, index) => {
-      let matches = [...line.matchAll(regex).map(x => x.index)]
+      let matches = [...line.raw.matchAll(regex).map(x => x.index)]
       if (matches.length > 0){
         oc[index] = matches;
         ol = ol.concat(matches.map(x => ({row:index, index: x })));
+        line['matched'] = true;
+        line['matches'] = matches
+      }else{
+        line['matched'] = false;
+        line['matches'] = []
       }
     });
 
