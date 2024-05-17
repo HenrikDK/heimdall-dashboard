@@ -165,7 +165,17 @@ let setup = (props, ctx) => {
 
   let toTop = () => {
     if (logEvents.value.length > 0){
-      parentRef.value.scrollTo(0, 0)
+      virtualizer.value.scrollToIndex(0, { align: 'start', smoothScroll: false });
+      //parentRef.value.scrollTo(0, 0)
+    }
+  }
+
+  let toOverlay = () => {
+    if (query.value.length < 1) return;
+
+    let row = overlays.value[activeOverlay.value].row;
+    if (row !== undefined){
+      virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'center', smoothScroll: false });
     }
   }
 
@@ -184,7 +194,7 @@ let setup = (props, ctx) => {
     }
 
     if (query.value.length > 0){
-      let [ov, oc] = findOccurrences(logEvents.value, query.value);
+      let [ov, oc] = findOccurrences(rows, query.value);
       overlays.value = ov;
       occurrences.value = oc;
       // todo handle new events moving active overlay
@@ -203,49 +213,40 @@ let setup = (props, ctx) => {
     status.value.total = overlays.value.length;
   })
 
-  watch(() => props.filter, () =>{
-    if (query.value.length == 0) return;
-
-    let row = overlays.value[activeOverlay.value].row;
-    if (row !== undefined){
-      virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'center', smoothScroll: false });
-    }
+  watch(() => props.filter, () => {
+    toOverlay();
   });
 
   watch(() => props.direction, () => {
-    // TODO: issue, we reset active overlay on direction change
-    if (props.direction === 'up'){
-      logEvents.value = [...props.events];
-      if (query.value.length > 0)
-      {
-        let [ov, oc] = findOccurrences(logEvents.value, query.value);
-        overlays.value = ov;
-        occurrences.value = oc;
-        activeOverlay.value = overlays.value.length - 1;
-      }
-      toBottom();
-    } else {
-      logEvents.value = [...props.events].reverse();
-      if (query.value.length > 0)
-      {
-        let [ov, oc] = findOccurrences(logEvents.value, query.value);
-        overlays.value = ov;
-        occurrences.value = oc;
-        activeOverlay.value = 0;
-      }
-      toTop();
+    let rows = [...props.events];
+    if (props.direction !== 'up'){
+      rows.reverse();
     }
+
+    if (query.value.length > 0)
+    {
+      let [ov, oc] = findOccurrences(rows, query.value);
+      overlays.value = ov;
+      occurrences.value = oc;
+      activeOverlay.value = props.direction === 'up' ? overlays.value.length - 1 : 0; // ISSUE: we do a dumb reset of active overlay on direction change
+    } 
+    
+    logEvents.value = rows;
     
     if (query.value.length > 0){
-      let row = overlays.value[activeOverlay.value].row;
-      if (row !== undefined){
-        virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'center', smoothScroll: false });
+      toOverlay();
+    }
+    else {
+      if (props.direction === 'up'){
+        toBottom();
+      }else{
+        toTop();
       }
     }
 
     if (!loaded.value) return;
     updateId.value += 1;
-  })
+})
 
   let findOccurrences = (lines, query) => {
     const regex = new RegExp(escapeRegExp(query), "gi");
@@ -389,7 +390,7 @@ let setup = (props, ctx) => {
 
   return {virtualizer, virtualizerOptions, measureElement, widthStyle, overflowStyle, parentRef, 
     query, status, occurrences, findOccurrences, escapeRegExp, onSearch, debouncedSearch, overlays, activeOverlay, getNextOverlay, getPrevOverlay, getRow, handleEvent, 
-    logEvents, loaded, updateId, isBottom, isTop, toBottom, toTop, viewLoaded, debouncedInit}
+    logEvents, loaded, updateId, isBottom, isTop, toBottom, toTop, toOverlay, viewLoaded, debouncedInit}
 }
 
 components["log-viewer"] = { template: "#log-viewer", emits: [], setup, 
