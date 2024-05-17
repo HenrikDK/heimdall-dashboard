@@ -158,15 +158,15 @@ let setup = (props, ctx) => {
 
   let toBottom = () => {
     if (logEvents.value.length > 0){
-      parentRef.value.scrollTo(0, virtualizer.value.getTotalSize() + 100)
-      //virtualizer.value.scrollToIndex(logEvents.value.length - 1, { align: 'end', smoothScroll: false });
+      //parentRef.value.scrollTo(0, virtualizer.value.getTotalSize() + 100)
+      virtualizer.value.scrollToIndex(logEvents.value.length - 1, { align: 'end', smoothScroll: false });
     }
   }
 
   let toTop = () => {
     if (logEvents.value.length > 0){
-      virtualizer.value.scrollToIndex(0, { align: 'start', smoothScroll: false });
       //parentRef.value.scrollTo(0, 0)
+      virtualizer.value.scrollToIndex(0, { align: 'start', smoothScroll: false });
     }
   }
 
