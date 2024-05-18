@@ -249,7 +249,11 @@ let setup = (props, ctx) => {
 
     if (!loaded.value) return;
     updateId.value += 1;
-})
+  })
+
+  onMounted(() => {
+    setTimeout(toBottom, 4000);
+  });
 
   let findOccurrences = (lines, query) => {
     const regex = new RegExp(escapeRegExp(query), "gi");
