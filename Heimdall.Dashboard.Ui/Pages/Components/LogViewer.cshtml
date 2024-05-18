@@ -39,13 +39,13 @@
 
       <div v-for="virtualRow in virtualizer.getVirtualItems()"
            class="px-2 break-words leading-5 break-all dark:hover:bg-zinc-800 hover:bg-sky-100"
-           :class="[overlays[activeOverlay]?.row === virtualRow.index ? 'dark:bg-zinc-800 bg-sky-100' : '']"
+           :class="[activeOverlay.id === logEvents[virtualRow.index].id ? 'dark:bg-zinc-800 bg-sky-100' : '']"
            :key="virtualRow.key + '-' + updateId"
            :data-index="virtualRow.index"
            :ref="measureElement"
            :style="{ position: 'absolute', top: `${virtualRow.start}px`, left: 0, width: widthStyle }">
-        <template v-if="query.length > 0 && occurrences[virtualRow.index]">
-          <template v-for="segment in getRow(virtualRow.index)">
+        <template v-if="query.length > 0 && logEvents[virtualRow.index].matched">
+          <template v-for="segment in getSegments(logEvents[virtualRow.index])">
             <span v-if="segment.overlay && segment.active" class="bg-orange-300 dark:bg-orange-700">{{segment.content}}</span>
             <span v-else-if="segment.overlay" class="bg-green-300 dark:bg-green-700">{{segment.content}}</span>
             <span v-else>{{ segment.content }}</span>
@@ -70,7 +70,7 @@ let setup = (props, ctx) => {
   const logEvents = ref([]);
   const occurrences = ref([]);
   const overlays = ref([]);
-  const activeOverlay = ref(-1);
+  const activeOverlay = ref({id: -1, position: -1});
   const query = ref('');
   const status = useGlobalOverlays();
 
@@ -88,14 +88,11 @@ let setup = (props, ctx) => {
 
   const virtualizer = useVirtualizer(virtualizerOptions)
 
-  let getRow = (i) => {
-    let row = logEvents.value[i].raw
-    let hits = occurrences.value[i] ?? [];
-    if (hits.length === 0) return [{ content: row }];
+  let getSegments = (row) => {
+    let hits = row.matches;
 
     let result = []
     let length = query.value.length;
-    let current = overlays.value[activeOverlay.value];
     hits.forEach((curr, idx) => {
       let prev = hits[idx - 1];
       let next = hits[idx + 1];
@@ -104,19 +101,17 @@ let setup = (props, ctx) => {
       if (prev !== undefined){
         start = prev + length;
       }
-      let end = next ?? row.length;
+      let end = next ?? row.raw.length;
 
-      let segment1 = row.slice(start, curr);
+      let segment1 = row.raw.slice(start, curr);
       result.push({ content: segment1 });
-      let active = false;
-      if (current !== undefined){
-        active = curr === current?.index && i === current?.row;
-      }
-      let segment2 = row.slice(curr, curr + length);
+      let active = activeOverlay.value.id === row.id && activeOverlay.value.pos === curr;
+
+      let segment2 = row.raw.slice(curr, curr + length);
       result.push({ content: segment2, overlay: true, active: active });
 
       if (next === undefined){
-        let segment3 = row.slice(curr + length, end);
+        let segment3 = row.raw.slice(curr + length, end);
         result.push({ content: segment3 });
       }
     });
@@ -174,9 +169,9 @@ let setup = (props, ctx) => {
   let toOverlay = () => {
     if (query.value.length < 1) return;
 
-    let row = overlays.value[activeOverlay.value].row;
+    let row = logEvents.value.filter(x => x.id === activeOverlay.value.id)[0];
     if (row !== undefined){
-      virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'center', smoothScroll: false });
+      virtualizer.value.scrollToIndex(logEvents.value.indexOf(row), { align: 'center', smoothScroll: false });
     }
   }
 
@@ -195,9 +190,10 @@ let setup = (props, ctx) => {
     }
 
     if (query.value.length > 0){
-      let [ov, oc] = findOccurrences(rows, query.value);
+      let ov = findOccurrences(rows, query.value);
       overlays.value = ov;
-      occurrences.value = oc;
+      status.value.total = ov.length;
+
       // todo handle new events moving active overlay
     }
 
@@ -211,10 +207,13 @@ let setup = (props, ctx) => {
     updateId.value += 1;
   })
 
-  watch([overlays, activeOverlay], () => {
-    status.value.current = props.direction === 'up' ? overlays.value.length - activeOverlay.value : activeOverlay.value + 1;
-    status.value.total = overlays.value.length;
-  })
+/*  watch([overlays, activeOverlay], () => {
+    let current = logEvents.value.filter(x => x.id === activeOverlay.value.id)[0];
+    if (current){
+      let index = logEvents.value.indexOf(current);
+      status.value.current = props.direction === 'up' ? status.value.total - index : index + 1;
+    }
+  })*/
 
   watch(() => props.filter, () => {
     toOverlay();
@@ -228,9 +227,10 @@ let setup = (props, ctx) => {
 
     if (query.value.length > 0)
     {
-      let [ov, oc] = findOccurrences(rows, query.value);
+      let ov = findOccurrences(rows, query.value);
       overlays.value = ov;
-      occurrences.value = oc;
+      status.value.total = ov.length;
+
       activeOverlay.value = props.direction === 'up' ? overlays.value.length - 1 : 0; // ISSUE: we do a dumb reset of active overlay on direction change
     } 
     
@@ -259,27 +259,24 @@ let setup = (props, ctx) => {
     const regex = new RegExp(escapeRegExp(query), "gi");
     
     let ol = [];
-    let oc = {};
     lines.forEach((line, index) => {
       let matches = [...line.raw.matchAll(regex).map(x => x.index)]
       if (matches.length > 0){
-        oc[index] = matches;
-        ol = ol.concat(matches.map(x => ({row:index, index: x })));
+        ol = ol.concat(matches.map(x => ({id:line.id, pos: x })));
         line['matched'] = true;
         line['matches'] = matches
-      }else{
+      } else {
         line['matched'] = false;
         line['matches'] = []
       }
     });
 
-    return [ol, oc];
+    return ol;
   }
 
   let getPrevOverlay = (loopResults = false) => {
-    const prev = activeOverlay.value - 1;
-
-    if (prev < 0) {
+    const current = overlays.value.indexOf(activeOverlay.value);
+    if (current < 0) {
       return loopResults ? overlays.value.length - 1 : activeOverlay.value;
     }
 
@@ -314,8 +311,9 @@ let setup = (props, ctx) => {
 
         if (activeOverlay.value === next) return;
         activeOverlay.value = next;
+        // TODO: status.value.current = props.direction === 'up' ? status.value.total - index : index + 1;
         virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'center', smoothScroll: false });
-        updateId.value += 1; // redraw view
+        //updateId.value += 1; // redraw view
       return;
     }
 
@@ -327,8 +325,9 @@ let setup = (props, ctx) => {
 
       if (activeOverlay.value === next) return;
       activeOverlay.value = next;
+      // TODO: status.value.current = props.direction === 'up' ? status.value.total - index : index + 1;
       virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'center', smoothScroll: false });
-      updateId.value += 1; // redraw view
+      //updateId.value += 1; // redraw view
       
       return;
     }
@@ -353,13 +352,11 @@ let setup = (props, ctx) => {
 
     if (query.value !== q.query){
       query.value = q.query;
-      occurrences.value = [];
       overlays.value = [];
       activeOverlay.value = -1;
     }
 
     if (query.value === '') {
-      occurrences.value = [];
       overlays.value = [];
       activeOverlay.value = -1;
       logEvents.value.forEach(x => {
@@ -369,11 +366,11 @@ let setup = (props, ctx) => {
       return;
     }
 
-    let [ov, oc] = findOccurrences(logEvents.value, query.value);
+    let ov = findOccurrences(logEvents.value, query.value);
     overlays.value = ov;
-    occurrences.value = oc;
+    status.value.total = ov.length;
 
-    if (occurrences.value.length === 0) return;
+    if (overlays.value.length === 0) return;
 
     let reverse = props.direction === 'up';
 
@@ -387,7 +384,7 @@ let setup = (props, ctx) => {
       virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'center', smoothScroll: false });
     }
 
-    updateId.value += 1; // redraw view
+    //updateId.value += 1; // redraw view
   }
 
   logBus.on((q) => { 
@@ -396,7 +393,7 @@ let setup = (props, ctx) => {
   })
 
   return {virtualizer, virtualizerOptions, measureElement, widthStyle, overflowStyle, parentRef, 
-    query, status, occurrences, findOccurrences, escapeRegExp, onSearch, debouncedSearch, overlays, activeOverlay, getNextOverlay, getPrevOverlay, getRow, handleEvent, 
+    query, status, findOccurrences, escapeRegExp, onSearch, debouncedSearch, overlays, activeOverlay, getNextOverlay, getPrevOverlay, getSegments, handleEvent, 
     logEvents, loaded, updateId, isBottom, isTop, toBottom, toTop, toOverlay, viewLoaded, debouncedInit}
 }
 
