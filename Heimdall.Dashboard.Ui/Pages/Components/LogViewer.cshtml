@@ -171,6 +171,8 @@ let setup = (props, ctx) => {
 
     let row = logEvents.value.filter(x => x.id === activeOverlay.value.id)[0];
     if (row !== undefined){
+      let index = overlays.value.indexOf(activeOverlay.value);
+      status.value.current = props.direction === 'up' ? status.value.total - index : index + 1;
       virtualizer.value.scrollToIndex(logEvents.value.indexOf(row), { align: 'center', smoothScroll: false });
     }
   }
@@ -194,7 +196,13 @@ let setup = (props, ctx) => {
       overlays.value = ov;
       status.value.total = ov.length;
 
-      // todo handle new events moving active overlay
+      if (activeOverlay.value.id > -1){
+        let same = overlays.value.filter(x => x.id === activeOverlay.value.id && x.pos === activeOverlay.value.pos)[0]
+        if (same !== undefined){
+          activeOverlay.value = same;
+          toOverlay();
+        }
+      } 
     }
 
     logEvents.value = rows;
@@ -207,14 +215,6 @@ let setup = (props, ctx) => {
     updateId.value += 1;
   })
 
-/*  watch([overlays, activeOverlay], () => {
-    let current = logEvents.value.filter(x => x.id === activeOverlay.value.id)[0];
-    if (current){
-      let index = logEvents.value.indexOf(current);
-      status.value.current = props.direction === 'up' ? status.value.total - index : index + 1;
-    }
-  })*/
-
   watch(() => props.filter, () => {
     toOverlay();
   });
@@ -224,19 +224,12 @@ let setup = (props, ctx) => {
     if (props.direction !== 'up'){
       rows.reverse();
     }
-
-    if (query.value.length > 0)
-    {
-      let ov = findOccurrences(rows, query.value);
-      overlays.value = ov;
-      status.value.total = ov.length;
-
-      activeOverlay.value = props.direction === 'up' ? overlays.value.length - 1 : 0; // ISSUE: we do a dumb reset of active overlay on direction change
-    } 
     
     logEvents.value = rows;
     
     if (query.value.length > 0){
+      overlays.value.reverse();
+      activeOverlay.value = props.direction === 'up' ? overlays.value[overlays.value.length - 1] : overlays.value[0];
       toOverlay();
     }
     else {
@@ -275,22 +268,22 @@ let setup = (props, ctx) => {
   }
 
   let getPrevOverlay = (loopResults = false) => {
-    const current = overlays.value.indexOf(activeOverlay.value);
-    if (current < 0) {
-      return loopResults ? overlays.value.length - 1 : activeOverlay.value;
+    const prev = overlays.value.indexOf(activeOverlay.value) - 1;
+    if (prev < 0) {
+      return loopResults ? overlays.value[overlays.value.length - 1] : activeOverlay.value;
     }
 
-    return prev;
+    return overlays.value[prev];
   }
 
   let getNextOverlay = (loopResults = false) => {
-    const next = activeOverlay.value + 1;
+    const next = overlays.value.indexOf(activeOverlay.value) + 1;
 
     if (next > overlays.value.length - 1) {
-      return loopResults ? 0 : activeOverlay.value;
+      return loopResults ? overlays.value[0] : activeOverlay.value;
     }
 
-    return next;
+    return overlays.value[next];
   }
 
   let escapeRegExp = (str) => {
@@ -305,15 +298,15 @@ let setup = (props, ctx) => {
 
     if (e.key === 'Enter') 
     {
-        if (overlays.value.length === 0) return;
-        
-        let next = reverse ? getPrevOverlay(true) : getNextOverlay(true);
+      if (overlays.value.length === 0) return;
+      
+      let next = reverse ? getPrevOverlay(true) : getNextOverlay(true);
 
-        if (activeOverlay.value === next) return;
-        activeOverlay.value = next;
-        // TODO: status.value.current = props.direction === 'up' ? status.value.total - index : index + 1;
-        virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'center', smoothScroll: false });
-        //updateId.value += 1; // redraw view
+      if (activeOverlay.value === next) return;
+      activeOverlay.value = next;
+      toOverlay();
+
+      updateId.value += 1;
       return;
     }
 
@@ -325,10 +318,9 @@ let setup = (props, ctx) => {
 
       if (activeOverlay.value === next) return;
       activeOverlay.value = next;
-      // TODO: status.value.current = props.direction === 'up' ? status.value.total - index : index + 1;
-      virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'center', smoothScroll: false });
-      //updateId.value += 1; // redraw view
-      
+      toOverlay();
+
+      updateId.value += 1; // redraw view    
       return;
     }
 
@@ -340,9 +332,9 @@ let setup = (props, ctx) => {
 
       if (activeOverlay.value === next) return;
       activeOverlay.value = next;
-      virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'center', smoothScroll: false });
-      updateId.value += 1; // redraw view
+      toOverlay();
 
+      updateId.value += 1; // redraw view
       return;
     }
   }
@@ -353,12 +345,11 @@ let setup = (props, ctx) => {
     if (query.value !== q.query){
       query.value = q.query;
       overlays.value = [];
-      activeOverlay.value = -1;
+      activeOverlay.value = {id: -1, pos: -1};
     }
 
     if (query.value === '') {
       overlays.value = [];
-      activeOverlay.value = -1;
       logEvents.value.forEach(x => {
         x['matched'] = false;
         x['matches'] = []
@@ -369,6 +360,8 @@ let setup = (props, ctx) => {
     let ov = findOccurrences(logEvents.value, query.value);
     overlays.value = ov;
     status.value.total = ov.length;
+    let index = overlays.value.indexOf(activeOverlay.value);
+    status.value.current = props.direction === 'up' ? status.value.total - index : index + 1;
 
     if (overlays.value.length === 0) return;
 
@@ -376,15 +369,13 @@ let setup = (props, ctx) => {
 
     let next = reverse ? getPrevOverlay(true) : getNextOverlay(true);
     
-    if (activeOverlay.value < 0 && overlays.value.length > 0){
-      activeOverlay.value = next;      
-    }
-    let row = overlays.value[activeOverlay.value].row;
-    if (row !== undefined){
-      virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'center', smoothScroll: false });
+    if (activeOverlay.value.id < 0 && overlays.value.length > 0){
+      activeOverlay.value = next;
     }
 
-    //updateId.value += 1; // redraw view
+    toOverlay();
+
+    updateId.value += 1;
   }
 
   logBus.on((q) => { 
