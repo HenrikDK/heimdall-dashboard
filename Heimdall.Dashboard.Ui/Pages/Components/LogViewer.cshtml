@@ -203,7 +203,9 @@ let setup = (props, ctx) => {
 
     logEvents.value = rows;
 
-    debouncedInit();
+    if (rows.length == 5000){
+      debouncedInit();
+    }
 
     if (!loaded.value) return;
     updateId.value += 1;
