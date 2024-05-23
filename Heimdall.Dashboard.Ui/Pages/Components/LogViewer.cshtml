@@ -31,7 +31,8 @@
       cursor-text font-mono text-xs 
       dark:border-zinc dark:bg-black dark:border-white/[.4] dark:text-white/[.9]">
 
-    <div :style="{ height: `${virtualizer.getTotalSize()}px`, position: 'relative', width: widthStyle, 'overflow-anchor':overflowStyle }">
+    <div :style="{ height: `${virtualizer.getTotalSize()}px`, position: 'relative', width: widthStyle }"
+        :class="[direction == 'up' ? 'scroller' : '']">
 
       <div v-if="events.length == 0" class="justify-center w-full flex py-2">
         <spinner></spinner>
@@ -54,7 +55,7 @@
         <span v-else-if="(query.length > 0 && !filter) || query.length == 0">{{ logEvents[virtualRow.index].raw }}</span>
       </div>
 
-      <div v-if="direction == 'up'" style="overflow-anchor: auto; height: 1px;"></div>
+      <div v-if="direction == 'up'" class="scroll-anchor"></div>
     </div>
   </div>
 </template>
@@ -83,7 +84,6 @@ let setup = (props, ctx) => {
     }
   })
 
-  let overflowStyle = computed(() => { return props.direction == 'up' ? 'none' : 'auto'});
   let widthStyle = computed(() => { return props.wrap ? '100%' : 'max-content'});
 
   const virtualizer = useVirtualizer(virtualizerOptions)
@@ -383,7 +383,7 @@ let setup = (props, ctx) => {
     handleEvent(q.e);
   })
 
-  return {virtualizer, virtualizerOptions, measureElement, widthStyle, overflowStyle, parentRef, 
+  return {virtualizer, virtualizerOptions, measureElement, widthStyle, parentRef, 
     query, status, findOccurrences, escapeRegExp, onSearch, debouncedSearch, overlays, activeOverlay, getNextOverlay, getPrevOverlay, getSegments, handleEvent, 
     logEvents, loaded, updateId, isBottom, isTop, toBottom, toTop, toOverlay, viewLoaded, debouncedInit}
 }
