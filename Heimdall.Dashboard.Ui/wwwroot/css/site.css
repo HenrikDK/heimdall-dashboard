@@ -35,3 +35,12 @@ a, a:visited {
     -webkit-appearance: none;
     appearance: none;
 }
+
+.scroller * {
+    overflow-anchor: none;
+}
+
+.scroll-anchor {
+    overflow-anchor: auto;
+    height: 1px;
+}
