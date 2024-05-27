@@ -31,9 +31,7 @@
       cursor-text font-mono text-xs 
       dark:border-zinc dark:bg-black dark:border-white/[.4] dark:text-white/[.9]">
 
-    <div :style="{ height: `${virtualizer.getTotalSize()}px`, position: 'relative', width: widthStyle }"
-        :class="[direction == 'up' ? 'scroller' : '']">
-
+    <div :style="{ height: `${virtualizer.getTotalSize()}px`, position: 'relative', width: widthStyle }">
       <div v-if="events.length == 0" class="justify-center w-full flex py-2">
         <spinner></spinner>
       </div>
@@ -44,7 +42,7 @@
            :key="virtualRow.key + '-' + updateId"
            :data-index="virtualRow.index"
            :ref="measureElement"
-           :style="{ position: 'absolute', top: `${virtualRow.start}px`, left: 0, width: widthStyle }">
+           :style="{ position: 'absolute', top: 0, left: 0, width: widthStyle, transform: `translateY(${virtualRow.start}px)`}">
         <template v-if="query.length > 0 && logEvents[virtualRow.index].matched">
           <template v-for="segment in getSegments(logEvents[virtualRow.index])">
             <span v-if="segment.overlay && segment.active" class="bg-orange-300 dark:bg-orange-700">{{segment.content}}</span>
@@ -55,7 +53,7 @@
         <span v-else-if="(query.length > 0 && !filter) || query.length == 0">{{ logEvents[virtualRow.index].raw }}</span>
       </div>
 
-      <div v-if="direction == 'up'" class="scroll-anchor"></div>
+      <div ref="anchorRef" style="position: absolute; width: 100%; height: 1px; bottom: 0;">&nbsp;</div>
     </div>
   </div>
 </template>
@@ -63,6 +61,7 @@
 <script type="module">
 import { ref, toRef, watch, computed, onMounted, nextTick } from 'vue'
 import { useVirtualizer } from '@@tanstack/vue-virtual'
+import { useIntersectionObserver } from '@@vueuse/core'
 
 let setup = (props, ctx) => {
   const parentRef = ref(null);
@@ -73,7 +72,16 @@ let setup = (props, ctx) => {
   const overlays = ref([]);
   const activeOverlay = ref({id: -1, position: -1});
   const query = ref('');
+  const anchorRef = ref(null)
+  const anchorIsVisible = ref(false)
   const status = useGlobalOverlays();
+
+  const { stop } = useIntersectionObserver(
+    anchorRef,
+    ([{ isIntersecting }], observerElement) => {
+      anchorIsVisible.value = isIntersecting
+    },
+  )
 
   let virtualizerOptions = computed(() => {
     return {
@@ -119,8 +127,12 @@ let setup = (props, ctx) => {
     return result;
   }
 
+  let pinToBottom = () => {
+    virtualizer.value.scrollToIndex(logEvents.value.length - 1, { align: 'end', smoothScroll: false })
+  };
+
   const debouncedSearch = _.debounce((q) => onSearch(q), 300, {maxWait: 2});
-  const debouncedInit = _.debounce(() => viewLoaded(), 500, {maxWait: 2});
+  const debounceToBottom = _.debounce(pinToBottom, 300, {maxWait: 2})
 
   const measureElement = (el) => {
     nextTick(() => {
@@ -153,9 +165,10 @@ let setup = (props, ctx) => {
 
   let toBottom = () => {
     if (logEvents.value.length > 0){
+      //parentRef.value.scrollTop = parentRef.value.scrollHeight;
       //parentRef.value.scrollTo(0, virtualizer.value.getTotalSize() + 100)
-      //virtualizer.value.scrollToOffset(virtualizer.value.getTotalSize() + 100, { align: 'end', smoothScroll: false });
-      virtualizer.value.scrollToIndex(logEvents.value.length - 1, { align: 'end', smoothScroll: false });
+      virtualizer.value.scrollToOffset(virtualizer.value.getTotalSize() + 100, { align: 'end', smoothScroll: false });
+      //virtualizer.value.scrollToIndex(logEvents.value.length - 1, { align: 'end', smoothScroll: false });
     }
   }
 
@@ -177,15 +190,8 @@ let setup = (props, ctx) => {
     }
   }
 
-  const viewLoaded = () => {
-    if (loaded.value === true) return;
-    loaded.value = true;
-    if (props.direction === 'up' && logEvents.value.length > 0){
-      toBottom();
-    }
-  }
-
   watch(() => props.events, () => {
+    let changed = props.events.length !== logEvents.value.length;
     let rows = [...props.events];
     if (props.direction !== 'up'){
       rows.reverse();
@@ -205,10 +211,17 @@ let setup = (props, ctx) => {
       } 
     }
 
+    let visible = anchorIsVisible.value;
+
     logEvents.value = rows;
 
-    if (rows.length == 5000){
-      debouncedInit();
+    if (changed && !loaded.value && !visible && props.direction === 'up'){
+      console.log('pin', changed, loaded.value, visible)
+      debounceToBottom();
+    }
+
+    if (!changed){
+      loaded.value = true;
     }
 
     if (!loaded.value) return;
@@ -245,7 +258,7 @@ let setup = (props, ctx) => {
   })
 
   onMounted(() => {
-    setTimeout(toBottom, 4000);
+    setTimeout(() => {loaded.value = true} , 25000);
   });
 
   let findOccurrences = (lines, query) => {
@@ -383,9 +396,9 @@ let setup = (props, ctx) => {
     handleEvent(q.e);
   })
 
-  return {virtualizer, virtualizerOptions, measureElement, widthStyle, parentRef, 
+  return {virtualizer, virtualizerOptions, measureElement, widthStyle, parentRef, anchorRef, anchorIsVisible, 
     query, status, findOccurrences, escapeRegExp, onSearch, debouncedSearch, overlays, activeOverlay, getNextOverlay, getPrevOverlay, getSegments, handleEvent, 
-    logEvents, loaded, updateId, isBottom, isTop, toBottom, toTop, toOverlay, viewLoaded, debouncedInit}
+    logEvents, loaded, updateId, isBottom, isTop, toBottom, toTop, toOverlay}
 }
 
 components["log-viewer"] = { template: "#log-viewer", emits: [], setup, 
