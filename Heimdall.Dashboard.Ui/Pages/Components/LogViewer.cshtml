@@ -215,13 +215,8 @@ let setup = (props, ctx) => {
 
     logEvents.value = rows;
 
-    if (changed && !loaded.value && !visible && props.direction === 'up'){
-      console.log('pin', changed, loaded.value, visible)
+    if (changed && !loaded.value && !visible && props.direction === 'up' && query.value.length == 0){
       debounceToBottom();
-    }
-
-    if (!changed){
-      loaded.value = true;
     }
 
     if (!loaded.value) return;
