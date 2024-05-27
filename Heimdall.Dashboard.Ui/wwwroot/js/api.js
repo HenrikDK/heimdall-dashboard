@@ -69,11 +69,16 @@ async function streamLogs(path, cb, connections = null) {
     let id = 0;
     const watchUrl = url.replace('http', 'ws');
     let ending = ''
-    const {cancel} = stream(watchUrl, transformer, false);
+    const {cancel} = stream(watchUrl, transformer, false, true, fail);
     if (connections){
         connections.push(cancel)
     }
     return cancel;
+
+    function fail(){
+        id = 0;
+        ending = '';
+    }
 
     function transformer(item) {
         if (!item) return; // This api returns a lot of empty strings
@@ -207,7 +212,7 @@ async function streamResult(path, name, cb) {
             const fieldSelector = encodeURIComponent(`metadata.name=${name}`);
             const watchUrl = `${url}?watch=1&fieldSelector=${fieldSelector}`.replace('http', 'ws');
 
-            socket = stream(watchUrl, x => debouncedCallback(x.object), true);
+            socket = stream(watchUrl, x => debouncedCallback(x.object), true, false, null);
         } catch (err) {
             console.error('Error in api request', {err, url});
         }
@@ -221,11 +226,12 @@ async function streamResult(path, name, cb) {
     }
 }
 
-function stream(url, cb, isJson) {
+function stream(url, cb, isJson, isLog, cbf) {
     let connection = {
         close: () => {return null;},
         socket: {}
     };
+    let retry = 0;
     let isCancelled = false;
 
     connect();
@@ -247,6 +253,15 @@ function stream(url, cb, isJson) {
 
     function onFail() {
         if (isCancelled) return;
+
+        if (isLog && retry > 2){
+            console.info('Connect Failed more than 3 times, giving up.', {url});
+            return;
+        }
+
+        if (isLog && retry < 3){
+            retry += 1;
+        }
 
         console.info('Reconnecting in 3 seconds', {url});
         setTimeout(connect, 3000);
