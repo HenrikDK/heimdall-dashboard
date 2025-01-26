@@ -369,3 +369,13 @@ function getEntityLink(row) {
     
     return { name: 'pod-details', params: { namespace: row.metadata.namespace, name: row.metadata.name }}
 };
+
+function roundUp(v, n) {
+    return Math.ceil(v * Math.pow(10, n)) / Math.pow(10, n);
+}
+
+function roundUpStep(value, step) {
+    step || (step = 1.0);
+    var inv = 1.0 / step;
+    return Math.ceil(value * inv) / inv;
+}
