@@ -1,4 +1,4 @@
-function closeConnections(connections){
+﻿function closeConnections(connections){
     connections.forEach(x => {
         try {
             x();
@@ -32,6 +32,7 @@ function streamMetrics(options, cb, connections = null, multiple = false) {
                 let begin = end.minus({ hours: 1 });
 
                 try {
+                    //console.log('processing metrics', name, multiple)
                     await Promise.all(options.map(async (x) => {
                         let url = getMetricUrl(x, begin, end);
                         const metrics = await request(url);
@@ -40,6 +41,7 @@ function streamMetrics(options, cb, connections = null, multiple = false) {
                         } else {
                             x['metrics'] = metrics?.data?.result[0] ?? metrics;
                         }
+                        //console.log('requested metrics for', x, url)
                     }));
                     
                 } catch (err) {
@@ -69,46 +71,83 @@ function streamMetrics(options, cb, connections = null, multiple = false) {
     }
 }
 
-async function streamLogs(path, cb, connections = null) {
-    var host = window.location.origin;
-    let url = host + path;
+function streamLogs(url, cb, connections = null) {
+    let isApiRequestInProgress = false;
+    let errors = 0
+    let lastTimestamp = null;
     let id = 0;
-    const watchUrl = url.replace('http', 'ws');
-    let ending = ''
-    const {cancel} = stream(watchUrl, transformer, false, true, fail);
+
+    const handel = setInterval(getLogs, 10000);
+    getLogs();
+
+    async function getLogs() {
+        try {
+            if (!isApiRequestInProgress) {
+                isApiRequestInProgress = true;
+
+                log_url = url + '&previous=false&timestamps=true&tailLines=500';
+                if (lastTimestamp !== null){
+                    let DT = luxon.DateTime;
+                    let lastTime = DT.fromISO(lastTimestamp);
+                    lastTime = lastTime.plus({ seconds: 1 });
+                    log_url = url + `&previous=false&timestamps=true&sinceTime=${lastTime.toUTC().toISO()}`
+                }
+                let logs = ''
+                //console.log('fetching log', name, multiple)                
+                try {
+                    logs = await request(log_url, false);
+                    errors = 0
+                } catch (err) {
+                    errors +=1
+                    if (errors > 2){
+                        console.info(`Retry's exceeded stopping logs request`);
+                        clearInterval(handel)
+                    }
+                    console.error(`Unable to get logs, attempt ${errors}`, {err});
+                } finally {
+                    isApiRequestInProgress = false;
+                }
+
+                if (!logs) return;
+
+                lines = logs.split(/\r|\r?\n/).map(line => line.trim()).filter(x => x.length > 0);
+                if (lines.length == 0) return;
+                
+                let parsedTime = null;
+                enriched = lines.map(x => {
+                    matched = x.match(/^\d+\S+/gm);
+                    if (matched?.length > 0){
+                        timestamp = matched[0];
+                        parsedTime = matched[0];
+                    } else if (parsedTime !== null) {
+                        timestamp = parsedTime
+                    } else {
+                        timestamp = lastTimestamp
+                    }
+                    
+                    cleaned = x.replace(/^\d+.*?\s/gm, "");
+                    
+                    return {raw: x, cleaned: cleaned, json: cleaned.startsWith('{'), id: ++id, timestamp: timestamp};
+                });
+
+                last = enriched[enriched.length - 1];
+                lastTimestamp = last.timestamp;
+
+                cb(enriched);
+            }
+        } catch (err) {
+            console.error('Exception processing logs', {err});
+        }
+    }
+
     if (connections){
         connections.push(cancel)
     }
+
     return cancel;
 
-    function fail(){
-        id = 0;
-        ending = '';
-    }
-
-    function transformer(item) {
-        if (!item) return; // This api returns a lot of empty strings
-
-        let message = atob(item);
-        if (ending.length > 0){
-            message = ending + message;
-        }
-        
-        let lines = message.split('\n');
-        if (!message.endsWith('\n')){
-            ending = lines[lines.length - 1];
-            lines = lines.slice(0, -1);
-        } else{
-            ending = '';
-        }
-        
-        if (lines[lines.length - 1]?.length === 0){
-            lines = lines.slice(0, -1);
-        }
-
-        lines = lines.map(x => ({raw: x, json: x.startsWith('{'), id: ++id}))
-        
-        cb(lines);
+    function cancel() {
+        clearInterval(handel);
     }
 }
 
@@ -218,7 +257,7 @@ async function streamResult(path, name, cb) {
             const fieldSelector = encodeURIComponent(`metadata.name=${name}`);
             const watchUrl = `${url}?watch=1&fieldSelector=${fieldSelector}`.replace('http', 'ws');
 
-            socket = stream(watchUrl, x => debouncedCallback(x.object), true, false, null);
+            socket = stream(watchUrl, x => debouncedCallback(x.object), true);
         } catch (err) {
             console.error('Error in api request', {err, url});
         }
@@ -232,12 +271,11 @@ async function streamResult(path, name, cb) {
     }
 }
 
-function stream(url, cb, isJson, isLog, cbf) {
+function stream(url, cb, isJson) {
     let connection = {
         close: () => {return null;},
         socket: {}
     };
-    let retry = 0;
     let isCancelled = false;
 
     connect();
@@ -259,15 +297,6 @@ function stream(url, cb, isJson, isLog, cbf) {
 
     function onFail() {
         if (isCancelled) return;
-
-        if (isLog && retry > 2){
-            console.info('Connect Failed more than 3 times, giving up.', {url});
-            return;
-        }
-
-        if (isLog && retry < 3){
-            retry += 1;
-        }
 
         console.info('Reconnecting in 3 seconds', {url});
         setTimeout(connect, 3000);
