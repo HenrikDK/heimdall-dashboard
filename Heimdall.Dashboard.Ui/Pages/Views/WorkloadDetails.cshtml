@@ -180,7 +180,7 @@ let setup = (props, ctx) => {
   const item = ref({});
   const connections = ref([]);
   const route = useRoute();
-  const isLoaded = ref(false);
+  const streams = ref({metrics: false, k8s: false});
 
   const pods = ref([]);
   const clusterPods = ref([]);
@@ -295,13 +295,15 @@ let setup = (props, ctx) => {
   }
 
   let updateMetrics = async () => {
-    if (props.config.metrics && pods.value.length > 0 && !isLoaded.value){
-      isLoaded.value = true;
-      streamMetrics(metrics.value.cpu, updateCpu, connections.value, true);
-      streamMetrics(metrics.value.memory, updateMemory, connections.value, true);
-      streamMetrics(metrics.value.network, updateNetworking, connections.value, true);
-      streamMetrics(metrics.value.filesystem, updateFilesystem, connections.value, true);
-    }
+    if (props.config.metrics !== true || pods.value.length < 1) return;
+
+    if (streams.value.metrics) return;
+    //console.log("scheduling metrics updates");
+    streamMetrics(metrics.value.cpu, updateCpu, connections.value, true);
+    streamMetrics(metrics.value.memory, updateMemory, connections.value, true);
+    streamMetrics(metrics.value.network, updateNetworking, connections.value, true);
+    streamMetrics(metrics.value.filesystem, updateFilesystem, connections.value, true);
+    streams.value.metrics = true;
   }
 
   let updateCpu = () => {
@@ -383,9 +385,11 @@ let setup = (props, ctx) => {
         url = `/k8s/apis/batch/v1/namespaces/${namespace}/${type}s`    
     }
     
+    if (streams.value.k8s) return;
     streamResult(url, name, j => item.value = j, connections.value);
     streamResults(`/k8s/api/v1/namespaces/${namespace}/pods`, j => clusterPods.value = j, connections.value);
     streamResults(`/k8s/api/v1/namespaces/${namespace}/events`, j => clusterEvents.value = j, connections.value)
+    streams.value.k8s = true;
   });
   
   onUnmounted(async () => {
@@ -393,7 +397,7 @@ let setup = (props, ctx) => {
   });
 
   return { 
-    pods, clusterPods, events, clusterEvents, sorting, columns, isLoaded, getCpuUsage, 
+    pods, clusterPods, events, clusterEvents, sorting, columns, getCpuUsage, streams,
     item, connections, toLocal, toHuman,
     metrics, charts, chartState, initOptions, isDark,
     updateCpu, updateMemory, updateNetworking, updateFilesystem, updateMetrics
