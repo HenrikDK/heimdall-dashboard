@@ -1,0 +1,26 @@
+<template id="ingress-hosts">
+  <div class="ps-4 py-2 flex flex-col" :class="classes">
+    <template v-if="row.spec?.rules">
+      <template v-for="r in row.spec?.rules">
+        <template v-for="p in r.http.paths">
+          <div class="flex">
+            <div class="underline text-blue-500">
+              <a target="_blank" :href="'https://' + r.host + p.path">{{ 'https://' + r.host + p.path }}</a>
+            </div>
+            <div class="mx-1"> -> </div>
+            <div>{{ p.backend?.service?.name + ':' + p?.backend?.service?.port.number }}</div>
+          </div>
+        </template>
+      </template>
+    </template>
+  </div>
+</template>
+
+<script type="module">
+components["ingress-hosts"] = { template: "#ingress-hosts", 
+  props: {
+    row: {},
+    classes: ''
+  }
+};
+</script>

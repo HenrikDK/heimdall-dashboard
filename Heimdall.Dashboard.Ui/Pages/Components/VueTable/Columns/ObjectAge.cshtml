@@ -17,7 +17,7 @@ let setup = (props, ctx) => {
     const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
     var date = DT.now();
     var newDatetime = DT.fromISO(String(age));
-    return toHuman(newDatetime.diff(date, unit));
+    return toHumanDuration(newDatetime.diff(date, unit));
   }
   
   return { formatAge }
