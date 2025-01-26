@@ -563,7 +563,8 @@ let setup = (props, ctx) => {
 
   watch(clusterEvents, () => {
     let name = route.params.name;
-    events.value = clusterEvents.value.filter(x => x?.involvedObject?.name === name);
+    events.value = clusterEvents.value.filter(x => x?.involvedObject?.name === name).sort(x => x.lastTimestamp).reverse();
+  });
   });
       
   watch([limitState, chartState, isDark], () => {
