@@ -1,0 +1,48 @@
+﻿<template id="pod-events">
+  <div v-if="events.length > 0" class="flex mb-2 items-center">
+    <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
+  </div>
+
+  <div v-if="events.length > 0" 
+      class="text-gray-500 dark:text-gray-300 text-md font-light sans rounded-lg shadow-lg border border-gray-200 dark:border-zinc-800">
+    <template v-for="event in events">
+      <div class="border-b border-gray-200 dark:border-zinc-800">
+        <div :class="event.type === 'Warning' ? 'text-red-500' : ''"
+             class="mb-1 px-2 w-full break-words font-semibold">
+          {{ event.message }}
+        </div>
+        <div class="flex mb-1">
+          <div class="px-2 w-1/4">Source</div>
+          <div v-if="event.source?.host || event.source?.component" class="w-3/4 truncate">{{event.source.host}} {{event.source.component}}</div>
+          <div v-else class="w-3/4"> - </div>
+        </div>
+        <div class="flex mb-1">
+          <div class="px-2 w-1/4">Count</div>
+          <div v-if="event.count" class="w-3/4 truncate">{{ event.count }}</div>
+          <div v-else class="w-3/4"> - </div>
+        </div>
+        <div class="flex mb-1">
+          <div class="px-2 w-1/4">Sub object</div>
+          <div v-if="event?.involvedObject?.name" class="w-3/4 truncate">{{ event?.involvedObject?.name }}</div>
+          <div v-else class="w-3/4"> - </div>
+        </div>
+        <div class="flex mb-1">
+          <div class="px-2 w-1/4">Last seen</div>
+          <div v-if="event.lastTimestamp" class="w-3/4 truncate">{{ toLocal(event.lastTimestamp) }} ({{ toHuman(event.lastTimestamp) }})</div>
+          <div v-else class="w-3/4"> - </div>
+        </div>
+      </div>
+    </template>
+  </div>
+</template>
+
+<script type="module">
+import { ref } from 'vue'
+
+let setup = (props, ctx) => { 
+  
+  return { toLocal, toHuman }
+}
+
+components["pod-events"] = {template: "#pod-events", props: ['events'], setup};
+</script>
