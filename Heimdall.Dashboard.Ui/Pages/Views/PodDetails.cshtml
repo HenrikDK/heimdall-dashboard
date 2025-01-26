@@ -462,43 +462,6 @@ let setup = (props, ctx) => {
     filesystem: getSimpleChart()
   });
   
-  let getContainerStatusObjects = (name, pod) => {
-    let containers = pod?.status?.containerStatuses?.filter(x => x.name === name);
-    return containers;
-  };
-  
-  let getContainerStatus = (name, pod) => {
-    let container = pod?.status?.containerStatuses?.filter(x => x.name === name)[0];
-    let status = 'Running';
-    let color = 'text-green-500';
-    if (container?.state?.waiting)
-    {
-        status = 'Waiting';
-        color = 'text-orange-500';
-    }
-    
-    return `<div class="py-1 ${color}">${status}</div>`;
-  };
-  
-  let toLocal = (value) => {
-    if (!value) return '';
-    
-    var DT = window.DateTime || luxon.DateTime;
-    let result = DT.fromISO(String(value)).setLocale('da-dk').toFormat('y-LL-dd HH:mm:ss');
-    return result;
-  };
-  
-  let toHuman = (value) => {
-    if (!value) return ''
-    
-    var DT = window.DateTime || luxon.DateTime;
-    const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
-    var date = DT.now();
-
-    var newDatetime = DT.fromISO(String(value));
-    return toHumanValues(newDatetime.diff(date,  unit)).join(' ') + ' Ago';
-  }
-
   let updateMetrics = async () => {
     if (props.config.metrics !== true) return;
 
