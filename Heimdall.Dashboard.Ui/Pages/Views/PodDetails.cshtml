@@ -588,9 +588,12 @@ let setup = (props, ctx) => {
     let namespace = route.params.namespace;
 
     updateMetrics();
-
-    streamResult(`/k8s/api/v1/namespaces/${namespace}/pods`, route.params.name, j => pod.value = j, connections.value);
-    streamResults(`/k8s/api/v1/namespaces/${namespace}/events`, j => clusterEvents.value = j, connections.value)
+    
+    if (!streams.value.k8s){
+      streamResult(`/k8s/api/v1/namespaces/${namespace}/pods`, route.params.name, j => pod.value = j, connections.value);
+      streamResults(`/k8s/api/v1/namespaces/${namespace}/events`, j => clusterEvents.value = j, connections.value)
+      streams.value.k8s = true;
+    }
   });
 
   onUnmounted(async () => {
