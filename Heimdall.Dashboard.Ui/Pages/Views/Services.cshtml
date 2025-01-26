@@ -28,9 +28,9 @@ let setup = (props, ctx) => {
   }
     
   const columns = ref([
-    { header:'Type', id: 'type', canSort: false, classes: 'truncate 2xl:w-48 xl:w-40 lg:w-32', 
+    { header:'Type', id: 'type', canSort: false, classes: 'truncate 2xl:w-40 xl:w-32 lg:w-24', 
       accessor: row => row.spec.type },
-    { header:'Name', id: 'name', sorter: 'text', classes: 'truncate 2xl:w-64 xl:w-52 lg:w-40', 
+    { header:'Name', id: 'name', sorter: 'text', classes: 'truncate 2xl:w-[28rem] xl:w-[22rem] lg:w-[16rem]', 
       accessor: row => row.metadata.name },
     { header:'Namespace', id: 'namespace', sorter: 'text', classes: 'truncate 2xl:w-52 xl:w-44 lg:w-40', 
       accessor: row => row.metadata.namespace, formatter:'namespace' },
