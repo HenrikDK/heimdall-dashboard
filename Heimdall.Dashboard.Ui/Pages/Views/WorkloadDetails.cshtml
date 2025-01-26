@@ -1,29 +1,11 @@
-﻿<template id="workload-details">
+<template id="workload-details">
   <div class="pl-2 pr-4 max-w-5xl mx-auto">
 
-    <br/>
-
-    <div class="flex mb-8 text-xl items-center text-gray-500 dark:text-gray-300 font-light sans">
-      <div class="text-md">{{item.kind}} / {{item?.metadata?.namespace }} / {{ item?.metadata?.name }}</div>
-    </div>
-    
-    <div v-if="config.metrics" class="my-4">
-      <div class="flex justify-center mb-4">
-        <div class="flex">
-          <chart-toggle name="cpu" :state="chartState" label="CPU" @@update="e => chartState = e"></chart-toggle>
-
-          <chart-toggle name="memory" :state="chartState" label="Memory" @@update="e => chartState = e"></chart-toggle>
-
-          <chart-toggle name="network" :state="chartState" label="Network" @@update="e => chartState = e"></chart-toggle>
-
-          <chart-toggle name="filesystem" :state="chartState" label="Filesystem" @@update="e => chartState = e"></chart-toggle>
-
-          <div class="w-[105px] me-2"></div>
-        </div>
-      </div>
-      
-      <div class="wide-details-graph">
-        <v-chart ref="chart" :option="charts[chartState]" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+    <div class="flex mt-4 mb-6 text-xl items-center text-gray-500 dark:text-gray-300 font-light sans h-8">
+      <div class="text-md">
+      <router-link class="hover:text-sky-500 dark:hover:text-blue-400" :to="{ name: 'workloads' }"> {{item.kind}} </router-link> / 
+      <router-link class="hover:text-sky-500 dark:hover:text-blue-400" :to="{ name: 'workloads-redirect', params: {namespace: item?.metadata?.namespace } }"> {{item?.metadata?.namespace }} </router-link> / 
+      {{ item?.metadata?.name }}
       </div>
     </div>
 
