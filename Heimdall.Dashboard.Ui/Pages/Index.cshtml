@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @namespace Heimdall.Dashboard.Ui.Pages
 @model IndexModel
@@ -16,17 +16,17 @@
     <partial name="Components/Buttons/Pods"/>
     <partial name="Components/Buttons/Services"/>
 
-    <partial name="Components/Columns/DeploymentConditions"/>
-    <partial name="Components/Columns/DeploymentLights"/>
-    <partial name="Components/Columns/EventMessage"/>
-    <partial name="Components/Columns/EventSource"/>
-    <partial name="Components/Columns/IngressHosts"/>
-    <partial name="Components/Columns/IngressLoadBalancers"/>
-    <partial name="Components/Columns/KubeDns"/>
-    <partial name="Components/Columns/Namespace"/>
-    <partial name="Components/Columns/ObjectAge"/>
-    <partial name="Components/Columns/PodLights"/>
-    <partial name="Components/Columns/PodStatus"/>
+    <partial name="Components/VueTable/Columns/DeploymentConditions"/>
+    <partial name="Components/VueTable/Columns/DeploymentLights"/>
+    <partial name="Components/VueTable/Columns/EventMessage"/>
+    <partial name="Components/VueTable/Columns/EventSource"/>
+    <partial name="Components/VueTable/Columns/IngressHosts"/>
+    <partial name="Components/VueTable/Columns/IngressLoadBalancers"/>
+    <partial name="Components/VueTable/Columns/KubeDns"/>
+    <partial name="Components/VueTable/Columns/Namespace"/>
+    <partial name="Components/VueTable/Columns/ObjectAge"/>
+    <partial name="Components/VueTable/Columns/PodLights"/>
+    <partial name="Components/VueTable/Columns/PodStatus"/>
 
     <partial name="Components/VueTable/SimpleTable"/>
     <partial name="Components/VueTable/VirtualTable"/>
