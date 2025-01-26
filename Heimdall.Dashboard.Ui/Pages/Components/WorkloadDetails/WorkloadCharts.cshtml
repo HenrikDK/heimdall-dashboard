@@ -1,0 +1,37 @@
+﻿<template id="workload-charts">
+  <div v-if="config.metrics">
+    <div class="flex justify-center mb-4">
+      <div class="flex">
+        <chart-toggle name="cpu" :state="chartState" label="CPU" @@update="e => chartState = e"></chart-toggle>
+
+        <chart-toggle name="memory" :state="chartState" label="Memory" @@update="e => chartState = e"></chart-toggle>
+
+        <chart-toggle name="network" :state="chartState" label="Network" @@update="e => chartState = e"></chart-toggle>
+
+        <chart-toggle name="filesystem" :state="chartState" label="Filesystem" @@update="e => chartState = e"></chart-toggle>
+
+        <div class="w-[105px] me-2"></div>
+      </div>
+    </div>
+    
+    <div class="wide-details-graph">
+      <v-chart ref="chart" :option="charts[chartState]" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+    </div>
+  </div>
+</template>
+
+<script type="module">
+import { useDark } from "@@vueuse/core";
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { useRoute } from 'vue-router';
+
+let setup = (props, ctx) => {
+  const isDark = useDark();
+  const chartState = ref('cpu');
+  const initOptions = ref({ renderer: "svg" });
+  
+  return {isDark, chartState, initOptions}
+}
+
+components["workload-charts"] = { template: "#workload-charts", props: ['charts', 'config'], setup };    
+</script>
