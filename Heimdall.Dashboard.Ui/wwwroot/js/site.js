@@ -1,4 +1,4 @@
-﻿function toHuman(dur) {
+function toHuman(dur) {
     let result = "";
     if (dur.values.years && Math.abs(dur.values.years) > 0)
     {
@@ -153,7 +153,7 @@ function getInstantMetricValue(options, metric= '') {
     if (series.length < 1) return undefined;
 
     let results = series[0].metrics;
-    if (results.length < 1) return undefined;
+    if (results === undefined || results.value === undefined || results.value.length < 1) return undefined;
 
     return parseFloat(results.value[1])
 }
