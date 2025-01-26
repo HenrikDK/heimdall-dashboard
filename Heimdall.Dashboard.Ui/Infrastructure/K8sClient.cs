@@ -1,3 +1,5 @@
+using JsonSerializer = System.Text.Json.JsonSerializer;
+
 namespace Heimdall.Dashboard.Ui.Infrastructure;
 
 public class K8sClient
