@@ -158,6 +158,22 @@ function getInstantMetricValue(options, metric= '') {
     return parseFloat(results.value[1])
 }
 
+function getMultipleInstantMetricValues(options, metric= '') {
+    if (options.length < 1) return undefined;
+    
+    let series = options.filter(x => x.name === metric);
+    if (series.length < 1) return undefined;
+
+    let results = series[0].metrics;
+    if (results === undefined || results.length < 1) return undefined;
+
+    result = {}
+    results.forEach(x => {
+        result[x.metric.namespace] = parseFloat(x.value[1])
+    });
+    return result;
+}
+
 function getDataSeries(options) {
     if (options.length < 1) return [[], 0, {suffix: "", magnitude: 1}];
 
