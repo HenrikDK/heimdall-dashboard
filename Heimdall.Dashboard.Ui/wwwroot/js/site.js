@@ -118,7 +118,7 @@ function getMetricQuery(options) {
         case "pod":
             switch (options.name) {
                 case "cpu-usage":
-                    return `sum(rate(container_cpu_usage_seconds_total{container!="POD",container!="",pod=~"${options.pods}",namespace="${options.namespace}"}[3m])) by (pod)`;
+                    return `sum(rate(container_cpu_usage_seconds_total{container!="POD",container!="", pod=~"${options.pods}",namespace="${options.namespace}"}[3m])) by (pod)`;
                 case "mem-usage":
                     return `sum(container_memory_working_set_bytes{container!="POD",container!="",pod=~"${options.pods}",namespace="${options.namespace}"}) by (pod)`;
 
