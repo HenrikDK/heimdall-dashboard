@@ -1,4 +1,4 @@
-﻿<template id="cluster">
+<template id="cluster">
   <div class="pl-2 pr-4 w-100">
 
     <div v-if="config.metrics" class="flex my-2 items-center">
@@ -291,16 +291,19 @@ let setup = (props, ctx) => {
   };
   
   let updateMetrics = async () => {
-    if (props.nodes.length > 0 && props.config.metrics)
-    {
-      metrics.value.memory.forEach(x => x['nodes'] = props.nodes)
-      metrics.value.cpu.forEach(x => x['nodes'] = props.nodes)
-      metrics.value.current.forEach(x => x['nodes'] = props.nodes)
+    if (props.nodes.length < 1 || props.config.metrics !== true) return;
 
-      streamMetrics(metrics.value.memory, updateMetricsCharts, connections.value);
-      streamMetrics(metrics.value.cpu, updateMetricsCharts, connections.value);
-      streamMetrics(metrics.value.current, updateMetricsCharts, connections.value);
-    }
+    metrics.value.memory.forEach(x => x['nodes'] = props.nodes)
+    metrics.value.cpu.forEach(x => x['nodes'] = props.nodes)
+    metrics.value.current.forEach(x => x['nodes'] = props.nodes)
+
+    if (streams.value.metrics) return;      
+    //console.log("scheduling metrics updates");
+    
+    streamMetrics(metrics.value.memory, updateMetricsCharts, connections.value, false);
+    streamMetrics(metrics.value.cpu, updateMetricsCharts, connections.value, false);
+    streamMetrics(metrics.value.current, updateMetricsCharts, connections.value, false);
+    streams.value.metrics = true;
   }
     
   watch(namespaces, () => {
