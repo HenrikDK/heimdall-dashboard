@@ -1,4 +1,4 @@
-<template id="workload-details">
+﻿<template id="workload-details">
   <div class="pl-2 pr-4 max-w-5xl mx-auto">
 
     <div class="flex mt-4 mb-6 text-xl items-center text-gray-500 dark:text-gray-300 font-light sans h-8">
@@ -8,164 +8,16 @@
       {{ item?.metadata?.name }}
       </div>
     </div>
+    
+    <workload-charts :charts="charts" :config="config"></workload-charts>
 
-    <br/>
+    <workload-info :item="item" :config="config"></workload-info>
 
-    <div class="text-gray-500 dark:text-gray-300 text-md font-light sans mb-8">
-      <div class="flex mb-2">
-        <div class="px-2 py-1 w-1/4">Created</div>
-        <div>{{ toLocal(item?.metadata?.creationTimestamp) }} ({{ toHuman(item?.metadata?.creationTimestamp) }})</div>
-      </div>
-      <div class="flex mb-2">
-        <div class="px-2 py-1 w-1/4">Name</div>
-        <div class="py-1">{{ item?.metadata?.name }}</div>
-      </div>
-      <div class="flex mb-2">
-        <div class="px-2 py-1 w-1/4">Namespace</div>
-        <div class="py-1">{{ item?.metadata?.namespace }}</div>
-      </div>
-      <div class="flex mb-2">
-        <div class="px-2 py-1 w-1/4">Type</div>
-        <div class="py-1">{{ item?.kind }}</div>
-      </div>
-      <div v-if="item?.metadata?.labels" class="flex mb-2">
-        <div class="px-2 py-1 w-1/4">Labels</div>
-        <div class="flex w-3/4 flex-col truncate">
-          <template v-for="(v, k) in item?.metadata?.labels">
-            <div class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-2 mb-1 overflow-hidden">{{ k }}: {{v}}</div>
-          </template>
-        </div>
-      </div>
-      <div v-if="item?.metadata?.annotations" class="flex mb-2">
-        <div class="px-2 py-1 w-1/4">Annotations</div>
-        <div class="flex w-3/4 flex-col truncate">
-          <template v-for="(v, k) in item?.metadata?.annotations">
-            <div class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-2 mb-1 overflow-hidden">{{ k }}: {{v}}</div>
-          </template>
-        </div>
-      </div>
-      <div v-if="item?.spec?.selector" class="flex mb-2">
-        <div class="px-2 py-1 w-1/4">Selector</div>
-        <div class="flex w-3/4 flex-col truncate">
-          <template v-for="(v, k) in item?.spec?.selector?.matchLabels">
-            <div class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-2 mb-1 overflow-hidden">{{ k }}: {{v}}</div>
-          </template>
-        </div>
-      </div>
-      <div v-if="item?.spec?.template?.spec?.containers" class="flex mb-2">
-        <div class="px-2 py-1 w-1/4">Images</div>
-        <div class="flex w-3/4 flex-col truncate">
-          <template v-for="c in item.spec.template.spec.containers">
-            <div class="py-1">{{ c.image }}</div>
-          </template>
-        </div>
-      </div>
-      <div v-if="item?.status?.replicas" class="flex mb-2">
-        <div class="px-2 py-1 w-1/4">Replicas</div>
-        <div class="flex w-3/4">
-          <div class="py-1 flex">
-            <div v-if="item?.status?.replicas !== undefined">{{ item?.status?.replicas }} desired</div>
-            <div v-if="item?.status?.updatedReplicas !== undefined">, {{ item?.status?.updatedReplicas }} updated</div>
-            <div v-if="item?.status?.readyReplicas !== undefined">, {{ item?.status?.readyReplicas }} total</div>
-            <div v-if="item?.status?.availableReplicas !== undefined">, {{ item?.status?.availableReplicas }} available</div>
-            <div v-if="item?.status?.availableReplicas !== undefined && item?.status?.readyReplicas !== undefined">
-              , {{ item?.status?.readyReplicas - item?.status?.availableReplicas }} unavailable
-            </div>
-          </div>
-          <template v-if="config.canScalePods">
-            <scale-pods :item="item"></scale-pods>
-          </template>
-        </div>
-      </div>
-      <div v-if="item?.status && item?.status?.replicas === undefined" class="flex mb-2">
-        <div class="px-2 py-1 w-1/4">Scheduled</div>
-        <div class="flex w-3/4">
-          <div class="py-1 flex">
-            <div v-if="item?.status?.currentNumberScheduled !== undefined">{{ item?.status?.desiredNumberScheduled }} desired</div>
-            <div v-if="item?.status?.updatedNumberScheduled !== undefined">, {{ item?.status?.updatedNumberScheduled }} updated</div>
-            <div v-if="item?.status?.numberReady !== undefined">, {{ item?.status?.numberReady }} total</div>
-            <div v-if="item?.status?.numberAvailable !== undefined">, {{ item?.status?.numberAvailable }} available</div>
-            <div v-if="item?.status?.numberAvailable !== undefined && item?.status?.numberReady !== undefined">
-              , {{ item?.status?.numberReady - item?.status?.numberAvailable }} unavailable
-            </div>
-          </div>
-        </div>
-      </div>
-      <div v-if="item?.spec?.template?.spec?.nodeSelector" class="flex mb-2">
-        <div class="px-2 py-1 w-1/4">Node Selector</div>
-        <div class="flex w-3/4 flex-wrap truncate">
-          <template v-for="(v, k) in item?.spec?.template?.spec?.nodeSelector">
-            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">{{ k }}: {{v}}</div>
-          </template>
-        </div>
-      </div>
-      <div v-if="item?.spec?.strategy?.type" class="flex mb-2">
-        <div class="px-2 py-1 w-1/4">Strategy Type</div>
-        <div class="py-1">{{ item?.spec?.strategy?.type }}</div>
-      </div>
-      <div v-if="item?.spec?.updateStrategy?.type" class="flex mb-2">
-        <div class="px-2 py-1 w-1/4">Strategy Type</div>
-        <div class="py-1">{{ item?.spec?.updateStrategy?.type }}</div>
-      </div>
+    <workload-pods :pods="pods" :metrics="metrics"></workload-pods>
 
-      <div v-if="item?.status?.conditions" class="flex mb-2">
-        <div class="px-2 py-1 w-1/4">Conditions</div>
-        <div class="flex w-3/4 flex-wrap truncate">
-          <template v-for="s in item?.status?.conditions">
-            <div v-if="s.status === 'True'" 
-              class="rounded py-1 px-2 mr-2 mb-2 overflow-hidden"
-              :class="s.type === 'Available' ? 'border border-green-500 text-green-500' : 'border border-blue-500 text-blue-500'"
-              >
-              {{s.type}}
-            </div>
-            <div v-else class="text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-zinc-900 rounded py-1 px-2 mr-2 mb-2 overflow-hidden">
-              {{s.type}}
-            </div>
-          </template>
-        </div>
-      </div>
-    </div>
+    <workload-events :events="events"></workload-events>
 
-    <div v-if="pods.length > 0" class="flex mt-8 mb-4 items-center">
-      <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pods</span>
-    </div>
-
-    <simple-table :columns="columns" :initial-sort="sorting" :data="pods"></simple-table>
-
-    <br/>
-
-    <div v-if="events.length > 0" class="flex mt-8 mb-4 items-center">
-      <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
-    </div>
-
-    <div v-if="events.length > 0" class="text-gray-500 dark:text-gray-300 text-md font-light sans rounded-lg shadow-lg border border-gray-200 dark:border-zinc-800">
-      <template v-for="event in events">
-        <div class="my-3">
-          <div :class="event.type === 'Warning' ? 'text-red-500' : ''"
-              class="mb-2 px-4 py-1 w-full break-words">
-            {{ event.message }}
-          </div>
-          <div class="flex mb-2">
-            <div class="px-2 py-1 w-1/4">Source</div>
-            <div class="py-1 w-3/4 truncate">{{event.source.host}} {{event.source.component}}</div>
-          </div>
-          <div class="flex mb-2">
-            <div class="px-2 py-1 w-1/4">Count</div>
-            <div class="py-1 w-3/4 truncate">{{ event.count }}</div>
-          </div>
-          <div class="flex mb-2">
-            <div class="px-2 py-1 w-1/4">Sub object</div>
-            <div class="py-1 w-3/4 truncate">{{ event?.involvedObject?.name }}</div>
-          </div>
-          <div class="flex mb-2">
-            <div class="px-2 py-1 w-1/4">Last seen</div>
-            <div class="py-1 w-3/4 truncate">{{ toLocal(event.lastTimestamp) }} ({{ toHuman(event.lastTimestamp) }})</div>
-          </div>
-        </div>
-      </template>
-    </div>
-
-    <br/><br/>
+    <br/><br/><br/><br/>
     
   </div>
 </template>
