@@ -94,7 +94,7 @@ let setup = (props, ctx) => {
     var DT = luxon.DateTime;
     let now = DT.now();
     let fileType = props.json ? 'json' : 'txt'
-    let content = props.json ? JSON.stringify(props.events) : props.events.join("\r\n");
+    let content = props.events.map(x => x.cleaned).join('\r\n');
     var blob = new Blob([content]);
     let fileName = `${route.params.name}-${now.toUnixInteger()}-logs.${fileType}`;    
     let link = document.createElement('a');
