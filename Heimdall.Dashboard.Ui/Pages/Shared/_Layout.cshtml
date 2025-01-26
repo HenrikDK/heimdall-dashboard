@@ -226,10 +226,10 @@ const app = createApp({
     }
   },
   async mounted() {
-    fetch('api/features')
+    fetch('/api/features')
       .then(r => r.json())
       .then(j => this.config = j);
-      
+    
     streamResults('/k8s/api/v1/nodes', j => this.clusterNodes = j, this.connections);
     streamResults('/k8s/api/v1/namespaces', j => this.clusterNamespaces = j, this.connections);
   },
