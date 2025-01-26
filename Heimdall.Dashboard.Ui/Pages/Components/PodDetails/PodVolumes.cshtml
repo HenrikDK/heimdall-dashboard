@@ -1,0 +1,127 @@
+﻿<template id="pod-volumes">
+  <template v-if="visibility.volumes">
+    <div class="mt-6 text-gray-500 dark:text-gray-300 text-md font-light sans rounded-lg shadow-md border border-gray-200 dark:border-zinc-800 mb-4">
+      <div class="flex mb-1 justify-between select-none" @@click="visibility.volumes = !visibility.volumes">
+        <span class="px-2 text-gray-500 dark:text-gray-300 text-2xl font-light sans">Volumes</span>
+        <div class="px-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-8 w-8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+          </svg>
+        </div>
+      </div>
+    
+    <template v-for="c in pod?.spec?.volumes">
+      <div class="mt-1 pb-1 border-b border-gray-200 dark:border-zinc-800">
+          <div class="flex">
+            <div class="px-2 fill-gray-500 dark:fill-gray-300 flex items-center font-semibold">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 pe-2" viewBox="0 0 24 24">
+                <path d="M3 20v-4h18v4zm2-1h2v-2H5zM3 8V4h18v4zm2-1h2V5H5zm-2 7v-4h18v4zm2-1h2v-2H5z"/>
+              </svg>
+              <div>{{ c.name }}</div>
+            </div>
+          </div>
+          <template v-if="c.persistentVolumeClaim">
+            <div class="flex">
+              <div class="px-2 w-1/4">Kind</div><div>PersistentVolumeClaim</div>
+            </div>
+            <div class="flex">
+              <div class="px-2 w-1/4">Name</div>
+              <div class="truncate">{{ c.persistentVolumeClaim.claimName }}</div>
+            </div>
+          </template>
+          <template v-if="c.configMap">
+            <div class="flex">
+              <div class="px-2 w-1/4">Kind</div><div>ConfigMap</div>
+            </div>
+            <div class="flex">
+              <div class="px-2 w-1/4">Name</div>
+              <div class="truncate">{{ c.configMap.name }}</div>
+            </div>
+          </template>
+          <template v-if="c.secret">
+            <div class="flex">
+              <div class="px-2 w-1/4">Kind</div><div>Secret</div>
+            </div>
+            <div class="flex">
+              <div class="px-2 w-1/4">Name</div>
+              <div class="truncate">{{ c.secret.secretName }}</div>
+            </div>
+          </template>
+          <template v-if="c.emptyDir">
+            <div class="flex">
+              <div class="px-2 w-1/4">Kind</div><div>EmptyDir</div>
+            </div>
+            <div class="flex">
+              <div class="px-2 w-1/4">Medium</div>
+              <div class="truncate">{{ c.EmptyDir?.medium ?? 'nodes default medium' }}</div>
+            </div>
+          </template>
+          <template v-if="c.projected">
+            <div class="flex">
+              <div class="px-2 w-1/4">Kind</div><div>Projected</div>
+            </div>
+            <div class="flex">
+              <div class="px-2 pt-2 w-1/4">Sources</div>
+              <div class="pt-2 flex flex-col">
+                <div class="w-fit">
+                  <template v-for="s in c.projected.sources">
+                    <template v-if="s.serviceAccountToken">
+                      <div>
+                        <div class="px-2 bg-gray-200 dark:bg-zinc-800">Service Account Token</div>
+                        <div class="flex items-center"><div class="px-2 w-32">Expiration</div><div>{{s.serviceAccountToken.expirationSeconds}}</div></div>
+                        <div class="flex items-center"><div class="px-2 w-32">Path</div><div>{{s.serviceAccountToken.path}}</div></div>
+                      </div>
+                    </template>
+                    <template v-if="s.configMap">
+                      <div>
+                        <div class="px-2 bg-gray-200 dark:bg-zinc-800">Config Map</div>
+                        <div class="flex items-center"><div class="px-2 w-32">Name</div><div>{{s.configMap.name}}</div></div>
+                        <div v-for="i in s.configMap.items" class="flex items-center">
+                          <div class="px-2 w-32">Items</div><div>{{i.key}} -> {{i.path}}</div>
+                        </div>
+                      </div>
+                    </template>
+                    <template v-if="s.downwardAPI">
+                      <div>
+                        <div class="px-2 bg-gray-200 dark:bg-zinc-800">Kubernetes Api</div>
+                        <div v-for="i in s.downwardAPI.items" class="flex items-center">
+                          <div class="px-2 w-32">Items</div><div>{{i.path}}</div>
+                        </div>
+                      </div>
+                    </template>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+    </template>
+
+    </div>
+  </template>
+  <template v-else>
+    <div class="mt-6 text-gray-500 dark:text-gray-300 text-md font-light sans rounded-lg shadow-md border border-gray-200 dark:border-zinc-800 mb-4 bg-gray-200 dark:bg-zinc-800">
+      <div class="flex justify-between select-none" @@click="visibility.volumes = !visibility.volumes">
+        <span class="px-2 text-gray-500 dark:text-gray-300 text-2xl font-light sans">Volumes</span>
+        <div class="px-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-8 w-8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </template>  
+</template>
+
+<script type="module">
+import { useRoute, useRouter } from 'vue-router'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
+
+let setup = (props, ctx) => {
+  const visibility = useGlobalPodDetails();
+  
+  return { visibility }
+}
+
+components["pod-volumes"] = {template: "#pod-volumes", props: ['pod'], setup};
+</script>
