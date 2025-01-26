@@ -1,8 +1,11 @@
 ﻿<template id="pod-logs">
   <div class="pl-2 pr-4 w-100">
     <div class="flex my-2 items-center justify-between">
-      <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pod Logs / {{ $route.params.namespace }} / {{ $route.params.name }}</span>
-      
+      <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">
+        Pod Logs / 
+        <router-link class="hover:text-sky-500 dark:hover:text-blue-400" :to="{ name: 'pods-redirect' }"> {{ $route.params.namespace }} </router-link> / 
+        <router-link class="hover:text-sky-500 dark:hover:text-blue-400" :to="{ name: 'pod-details' }"> {{ $route.params.name }} </router-link>
+      </span>
       <log-controls :events="logEvents" :wrap="wrap" :direction="direction" :json="json" :filter="filter"
         @@wrap="(w) => wrap = w" @@direction="(d) => direction = d" @@filter="(f) => filter = f">
       </log-controls>
@@ -41,7 +44,7 @@ let setup = (props, ctx) => {
     let name = route.params.name;
     let container = route.params.container;
     
-    const url = `/k8s/api/v1/namespaces/${namespace}/pods/${name}/log?container=${container}&previous=false&tailLines=5000&follow=true`;
+    const url = `/k8s/api/v1/namespaces/${namespace}/pods/${name}/log?container=${container}`;
     streamLogs(url, updateLogs, connections.value);
 
     setTimeout(() => {
