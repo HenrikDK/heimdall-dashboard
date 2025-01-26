@@ -1,0 +1,39 @@
+﻿<template id="pod-charts">
+  <div v-if="config.metrics" class="my-4">
+    <div class="flex justify-center mb-2">
+      <div class="flex">
+        <chart-toggle name="cpu" :state="chartState" label="CPU" @@update="e => chartState = e"></chart-toggle>
+
+        <chart-toggle name="memory" :state="chartState" label="Memory" @@update="e => chartState = e"></chart-toggle>
+
+        <chart-toggle name="network" :state="chartState" label="Network" @@update="e => chartState = e"></chart-toggle>
+
+        <chart-toggle name="filesystem" :state="chartState" label="Filesystem" @@update="e => chartState = e"></chart-toggle>
+
+        <chart-toggle v-if="['cpu', 'memory'].includes(chartState)" name="limit" :state="limitState" label="Limit" :state-visible="true" @@update="e => limitState = !limitState"></chart-toggle>
+        <div v-else class="w-[105px] me-2"></div>
+      </div>
+    </div>
+    
+    <div class="wide-details-graph">
+      <v-chart ref="chart" :option="charts[chartState]" :theme="isDark ? 'dark' : ''" :init-options="initOptions"></v-chart>
+    </div>
+  </div>
+</template>
+
+<script type="module">
+import { useDark } from "@@vueuse/core";
+import { ref } from 'vue'
+
+let setup = (props, ctx) => {
+  const isDark = useDark();
+
+  const chartState = ref('cpu');
+  const limitState = ref(false);  
+  const initOptions = ref({ renderer: "svg" });
+  
+  return { isDark, chartState, initOptions, limitState }
+}
+
+components["pod-charts"] = {template: "#pod-charts", props: ['charts', 'config'], setup};
+</script>
