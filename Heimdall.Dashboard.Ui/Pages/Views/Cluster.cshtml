@@ -1,4 +1,4 @@
-<template id="cluster">
+﻿<template id="cluster">
   <div class="pl-2 pr-4 w-100">
 
     <div v-if="config.metrics" class="flex my-2 items-center">
@@ -71,6 +71,7 @@ let setup = (props, ctx) => {
   const initOptions = ref({ renderer: "svg" });
   const connections = ref([]);
   const chartState = ref('cpu');
+  const streams = ref({metrics: false, k8s: false});
   const namespaces = useGlobalNamespaces();
   const cluster = ref({
     pods: null,
@@ -96,34 +97,16 @@ let setup = (props, ctx) => {
         }
       ],
       current: [
-        { 
-          type:'cluster', name:'memory-available', instant: true, metrics: []
-        },
-        { 
-          type:'cluster', name:'memory-requests', instant: true, metrics: []
-        },
-        { 
-          type:'cluster', name:'memory-limits', instant: true, metrics: []
-        },
-        { 
-          type:'cluster', name:'memory-capacity', instant: true, metrics: []
-        },
-        { 
-          type:'cluster', name:'memory-allocatable', instant: true, metrics: []
-        },
+        { type:'cluster', name:'memory-available', instant: true, metrics: [] },
+        { type:'cluster', name:'memory-requests', instant: true, metrics: [] },
+        { type:'cluster', name:'memory-limits', instant: true, metrics: [] },
+        { type:'cluster', name:'memory-capacity', instant: true, metrics: [] },
+        { type:'cluster', name:'memory-allocatable', instant: true, metrics: [] },
 
-        { 
-          type:'cluster', name:'cpu-requests', instant: true, metrics: []
-        },
-        { 
-          type:'cluster', name:'cpu-limits', instant: true, metrics: []
-        },
-        { 
-          type:'cluster', name:'cpu-capacity', instant: true, metrics: []
-        },
-        { 
-          type:'cluster', name:'cpu-allocatable', instant: true, metrics: []
-        }
+        { type:'cluster', name:'cpu-requests', instant: true, metrics: [] },
+        { type:'cluster', name:'cpu-limits', instant: true, metrics: [] },
+        { type:'cluster', name:'cpu-capacity', instant: true, metrics: [] },
+        { type:'cluster', name:'cpu-allocatable', instant: true, metrics: [] }
       ]
   });
   
@@ -335,6 +318,8 @@ let setup = (props, ctx) => {
   onMounted(async () => {
     updateMetrics();
     
+    if (streams.value.k8s) return;
+
     streamResults('/k8s/api/v1/pods', j => cluster.value.pods = j, connections.value);
     streamResults('/k8s/apis/apps/v1/deployments', j => cluster.value.deployments = j, connections.value);
     streamResults('/k8s/apis/apps/v1/daemonsets', j => cluster.value.daemonSets = j, connections.value);
@@ -342,6 +327,7 @@ let setup = (props, ctx) => {
     streamResults('/k8s/apis/apps/v1/replicasets', j => cluster.value.replicaSets = j, connections.value);
     streamResults('/k8s/apis/batch/v1/cronjobs', j => cluster.value.cronJobs = j, connections.value);
     streamResults('/k8s/apis/batch/v1/jobs', j => cluster.value.jobs = j, connections.value);
+    streams.value.k8s = true;
   });
 
   onUnmounted(async () => {
@@ -350,7 +336,7 @@ let setup = (props, ctx) => {
     
   return {
     isDark, initOptions, cluster, metrics, charts, connections, chartState, namespaces,
-    filterNamespace, 
+    filterNamespace, streams,
     updateClusterPods, updateClusterDeployments, updateClusterJobs, updateClusterCronJobs, 
     updateClusterStatefulSets, updateClusterReplicaSets, updateClusterDaemonSets,
     updateCpu, updateMemory, updateCurrent, updateMetrics, updateMetricsCharts
