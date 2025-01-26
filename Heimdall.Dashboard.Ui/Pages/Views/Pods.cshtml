@@ -11,9 +11,12 @@
 
 <script type="module">
 import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 let setup = (props, ctx) => {
-  const loading = ref(true);          
+  const loading = ref(true);         
+  const route = useRoute(); 
+  const router = useRouter();
   const connections = ref([]);
   const sorting = ref([ {id:'name', sort:'asc'}, { id:"namespace", sort: "desc" } ]);
   const clusterPods = ref([]);
@@ -21,7 +24,7 @@ let setup = (props, ctx) => {
     
   let getRestarts = (row) => {
     let con = 0;
-    con += row.status.containerStatuses?.reduce((a, v) => a + v.restartCount, 0);
+    con += row.status.containerStatuses?.reduce((a, v) => a + v.restartCount, 0) ?? 0;
     con += row.status.initContainerStatuses?.reduce((a, v) => a + v.restartCount, 0) ?? 0;
     return con
   }
@@ -33,7 +36,7 @@ let setup = (props, ctx) => {
       accessor: row => row.metadata.namespace, formatter: 'namespace' },
     { header: 'Containers', id: 'containers', canSort: false, canFilter: false, classes: '2xl:w-52 xl:w-44 lg:w-32', 
       accessor: row => row.status.containerStatuses, formatter:'pod-lights' },
-    { header: 'Restarts', id: 'restarts', classes: 'w-40', sorter: 'number',
+    { header: 'Restarts', id: 'restarts', classes: 'w-40', sorter: 'number', keyed: true, 
       accessor: getRestarts },
     { header: 'Age', id: 'age', classes: 'w-40', 
       accessor: row => row.metadata.creationTimestamp, formatter:'object-age' },
@@ -57,6 +60,11 @@ let setup = (props, ctx) => {
   watch([() => props.filters, clusterPods ], updatePods);
   
   onMounted(async () => {
+    if (route.name === 'pods-redirect'){
+      nsBus.emit(route.params.namespace)
+      router.push({ name: 'pods', replace: true})
+    }
+
     streamResults('/k8s/api/v1/pods', j => clusterPods.value = j, connections.value);
   });
 
@@ -71,4 +79,5 @@ let setup = (props, ctx) => {
 
 components["pods"] = { template: "#pods", props: ['filters'], setup};
 routes.push({path:'/pods', name:'pods', component: components["pods"]});
+routes.push({path:'/namespaces/:namespace/pods', name:'pods-redirect', component: components["pods"]})
 </script>
