@@ -1,4 +1,4 @@
-<template id="pod-details">
+﻿<template id="pod-details">
   <div class="pl-2 pr-4 max-w-5xl mx-auto">
     
     <div class="flex mt-4 mb-6 text-xl justify-between items-center text-gray-500 dark:text-gray-300 font-light sans h-8">
@@ -91,6 +91,16 @@ let setup = (props, ctx) => {
     ]
   });
   
+  const planSpec = ref({
+    metrics: [
+      { type:'max', name:'max-cpu', instant:true, metrics: [], data: [] },
+      { type:'max', name:'avg-cpu', instant:true, metrics: [], data: [] },
+      { type:'max', name:'max-mem', instant:true, metrics: [], data: [] },
+      { type:'max', name:'avg-mem', instant:true, metrics: [], data: [] },
+    ],
+    recommended: []
+  })
+  
   const charts = ref({
     cpu: getSimpleChart(),
     memory: getSimpleChart(),
@@ -158,6 +168,95 @@ let setup = (props, ctx) => {
     updateSimpleChart(charts.value.filesystem, metrics.value.filesystem, unit, isDark.value);
   }
   
+  let updatePlanSpec = () => {
+    if (!planSpec.value.metrics) return;
+    if (!planSpec.value.metrics.every(x => x?.metrics?.length > 0) ) return;
+
+    planSpec.value.recommended = []
+    const envs = ['sit', 'dev', 'tst', 'uat', 'prd']
+
+    let cpuMax = getMultipleInstantMetricValues(planSpec.value.metrics, 'max-cpu')
+    let cpuAvg = getMultipleInstantMetricValues(planSpec.value.metrics, 'avg-cpu')
+    
+    let memMax = getMultipleInstantMetricValues(planSpec.value.metrics, 'max-mem')
+    let memAvg = getMultipleInstantMetricValues(planSpec.value.metrics, 'avg-mem')
+    let namespaces = Object.keys(cpuMax)
+
+    let specs = {}
+    envs.forEach(x => {
+      let match = namespaces.filter(n => n.endsWith(x));
+      if (match.length == 0) return;
+      
+      let ns = match[0];
+
+      let cpu_max = roundUp(cpuMax[ns], 2);
+      cpu_max = cpu_max * 1.3;
+      if (cpu_max < 1){
+        cpu_max = 1;
+      }
+      cpu_max = roundUpStep(cpu_max, '0.25')
+
+      let mem_max = roundUp(memMax[ns], 0);
+      mem_max *= 1.3;
+      let mem_max_unit = getUnitFromBytes(mem_max);
+      mem_max = mem_max / mem_max_unit.magnitude
+      mem_max = roundUp(mem_max, 0)
+      if (mem_max_unit.suffix === 'MiB'){
+        let tmp_max = mem_max / 1000;
+        tmp_max = roundUpStep(tmp_max, '0.25');
+        mem_max = tmp_max * 1024;
+      }
+      let mem_max_suffix = mem_max_unit.suffix.substring(0, 1);
+
+      let cpu_avg = cpuAvg[ns];
+      if (cpu_avg > 1){
+        cpu_avg = roundUpStep(cpu_avg, '0.25');
+      } else {
+        cpu_avg = roundUpStep(cpu_avg, '0.01');
+      }
+
+      let mem_avg = memAvg[ns];
+      let mem_avg_unit = getUnitFromBytes(mem_avg);
+      mem_avg = mem_avg / mem_avg_unit.magnitude;
+      mem_avg = roundUp(mem_avg, 0)
+      if (mem_avg_unit.suffix === 'MiB'){
+        let tmp_avg = mem_avg / 1000;
+        tmp_avg = roundUpStep(tmp_avg, '0.05');
+        mem_avg = tmp_avg * 1000;
+      }
+      let mem_avg_suffix = mem_avg_unit.suffix.substring(0, 1);
+      
+      let spec = `${cpu_avg}c${mem_avg}${mem_avg_suffix}-${cpu_max}c${mem_max}${mem_max_suffix}`;
+      let result = {
+        namespace: x, 
+        spec: spec.toLowerCase(), 
+        cpu_request: `${cpu_avg} vCores`,
+        mem_request: `${mem_avg} ${mem_avg_unit.suffix}`,
+        cpu_limit: `${cpu_max} vCores`,
+        mem_limit: `${mem_max} ${mem_max_unit.suffix}`,
+        };
+      planSpec.value.recommended.push(result);
+    });
+  }
+  
+  let updatePlanSpecMetrics = () => {
+    if (props.config.metrics !== true) return;
+    if (!pod.value || !pod.value.metadata?.labels) return;
+    if (!('aks/version' in pod.value.metadata?.labels)) return;
+    
+    if (!streams.value.spec){
+      planSpec.value.metrics.forEach(x => {
+        x['container'] = pod.value.spec.containers[0].name;
+        let ns = route.params.namespace;
+        x['namespace'] = ns.substring(0, ns.lastIndexOf('-'));
+      });
+
+      streamMetrics(planSpec.value.metrics, updatePlanSpec, connections.value, true);
+      streams.value.spec = true;
+    }
+    
+  }
+  
   watch(() => props.config.metrics, () => {
     updateMetrics();
   });
@@ -166,6 +265,9 @@ let setup = (props, ctx) => {
     let name = route.params.name;
     events.value = clusterEvents.value.filter(x => x?.involvedObject?.name === name).sort(x => x.lastTimestamp).reverse();
   });
+  
+  watch(pod, () => {
+    updatePlanSpecMetrics();
   });
   
   watch([limitState, chartState, isDark], () => {
@@ -195,6 +297,8 @@ let setup = (props, ctx) => {
       streamResults(`/k8s/api/v1/namespaces/${namespace}/events`, j => clusterEvents.value = j, connections.value)
       streams.value.k8s = true;
     }
+    
+    updatePlanSpec();
   });
 
   onUnmounted(async () => {
