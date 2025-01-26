@@ -1,4 +1,15 @@
-function toHuman(dur) {
+function toHuman(value) {
+    if (!value) return ''
+    
+    var DT = window.DateTime || luxon.DateTime;
+    const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
+    var date = DT.now();
+
+    var newDatetime = DT.fromISO(String(value));
+    return toHumanValues(newDatetime.diff(date,  unit)).join(' ') + ' Ago';
+}
+
+function toHumanDuration(dur) {
     let result = "";
     if (dur.values.years && Math.abs(dur.values.years) > 0)
     {
