@@ -26,7 +26,7 @@
     </div>
   </div>
   
-  <div ref="parentRef" :style="{contain: 'strict', overflow: 'auto', height: '85vh'}"
+  <div ref="parentRef" :style="{contain: 'strict', overflow: 'auto', height: parentHeight}"
       @@scroll="onScroll"
       class="border border-gray-300 rounded-md
       cursor-text font-mono text-xs 
@@ -46,12 +46,12 @@
            :style="{ position: 'absolute', top: 0, left: 0, width: widthStyle, transform: `translateY(${virtualRow.start}px)`}">
         <template v-if="query.length > 0 && logEvents[virtualRow.index].matched">
           <template v-for="segment in getSegments(logEvents[virtualRow.index])">
-            <span v-if="segment.overlay && segment.active" class="bg-orange-300 dark:bg-orange-700">{{segment.content}}</span>
-            <span v-else-if="segment.overlay" class="bg-green-300 dark:bg-green-700">{{segment.content}}</span>
-            <span v-else>{{ segment.content }}</span>
+            <span v-if="segment.overlay && segment.active" class="bg-orange-300 dark:bg-orange-700" v-html="ansiToHtml(segment.content)"></span>
+            <span v-else-if="segment.overlay" class="bg-green-300 dark:bg-green-700" v-html="ansiToHtml(segment.content)"></span>
+            <span v-else v-html="ansiToHtml(segment.content)"></span>
           </template>
         </template>
-        <span v-else-if="(query.length > 0 && !filter) || query.length == 0">{{ logEvents[virtualRow.index].raw }}</span>
+        <span v-else-if="(query.length > 0 && !filter) || query.length == 0" v-html="ansiToHtml(logEvents[virtualRow.index].cleaned)"></span>
       </div>
 
       <div ref="anchorRef" style="position: absolute; width: 100%; height: 1px; bottom: 0;">&nbsp;</div>
@@ -62,7 +62,9 @@
 <script type="module">
 import { ref, toRef, toRefs, watch, computed, onMounted, nextTick } from 'vue'
 import { useVirtualizer } from '@@tanstack/vue-virtual'
-import { useIntersectionObserver, useScroll } from '@@vueuse/core'
+import { useScroll, useWindowSize, useElementBounding } from '@@vueuse/core'
+import { AnsiUp } from 'ansi_up'
+import { default as purify } from 'dompurify'
 
 let setup = (props, ctx) => {
   const parentRef = ref(null);
@@ -78,20 +80,30 @@ let setup = (props, ctx) => {
   const anchorIsVisible = ref(false)
   const status = useGlobalOverlays();
   const { x, y, isScrolling, arrivedState, directions } = useScroll(parentRef, { offset: { bottom: 30 }})
+  const colorConverter = new AnsiUp();
+  const ansiToHtml = (s) => purify.sanitize(colorConverter.ansi_to_html(s));
+  const { width, height } = useWindowSize()
+  const parentHeight = ref('')
+  const parentDimensions = useElementBounding(parentRef)
 
-  const { stop } = useIntersectionObserver(
-    anchorRef,
-    ([{ isIntersecting }], observerElement) => {
-      anchorIsVisible.value = isIntersecting
-    },
-  )
+  let updateParentHeight = () => {
+      let pHeight = '300px'
+      try{
+        let top = parentDimensions.top.value ?? 0;
+        pHeight = height.value - top - 16 + 'px'
+      }
+      catch (err) {}
+
+      parentHeight.value = pHeight
+  }
 
   let virtualizerOptions = computed(() => {
     return {
       count: logEvents.value.length,
-      estimateSize: () => 30,
+      estimateSize: () => 38,
       overscan: 20,
       getScrollElement: () => parentRef.value,
+      enableSmoothScroll: false,
     }
   })
 
@@ -112,17 +124,17 @@ let setup = (props, ctx) => {
       if (prev !== undefined){
         start = prev + length;
       }
-      let end = next ?? row.raw.length;
+      let end = next ?? row.cleaned.length;
 
-      let segment1 = row.raw.slice(start, curr);
+      let segment1 = row.cleaned.slice(start, curr);
       result.push({ content: segment1 });
       let active = activeOverlay.value.id === row.id && activeOverlay.value.pos === curr;
 
-      let segment2 = row.raw.slice(curr, curr + length);
+      let segment2 = row.cleaned.slice(curr, curr + length);
       result.push({ content: segment2, overlay: true, active: active });
 
       if (next === undefined){
-        let segment3 = row.raw.slice(curr + length, end);
+        let segment3 = row.cleaned.slice(curr + length, end);
         result.push({ content: segment3 });
       }
     });
@@ -135,7 +147,7 @@ let setup = (props, ctx) => {
   };
 
   const debouncedSearch = _.debounce((q) => onSearch(q), 300, {maxWait: 2});
-  const debounceToBottom = _.debounce(pinToBottom, 300, {maxWait: 2})
+  const debounceToBottom = _.debounce(pinToBottom, 700, {maxWait: 2})
 
   const measureElement = (el) => {
     nextTick(() => {
@@ -270,8 +282,11 @@ let setup = (props, ctx) => {
     updateId.value += 1;
   })
 
+  watch([parentDimensions.top, height], updateParentHeight)
+
   onMounted(() => {
     setTimeout(() => {loaded.value = true} , 25000);
+    updateParentHeight();
   });
 
   let findOccurrences = (lines, query) => {
@@ -279,7 +294,7 @@ let setup = (props, ctx) => {
     
     let ol = [];
     lines.forEach((line, index) => {
-      let matches = [...line.raw.matchAll(regex).map(x => x.index)]
+      let matches = [...line.cleaned.matchAll(regex).map(x => x.index)]
       if (matches.length > 0){
         ol = ol.concat(matches.map(x => ({id:line.id, pos: x })));
         line['matched'] = true;
@@ -411,7 +426,7 @@ let setup = (props, ctx) => {
 
   return {virtualizer, virtualizerOptions, measureElement, widthStyle, parentRef, anchorRef, anchorIsVisible, onScroll, directions, scrollLockBottom,
     query, status, findOccurrences, escapeRegExp, onSearch, debouncedSearch, overlays, activeOverlay, getNextOverlay, getPrevOverlay, getSegments, handleEvent, 
-    logEvents, loaded, updateId, isBottom, isTop, toBottom, toBottomClick, toTop, toOverlay}
+    logEvents, loaded, updateId, isBottom, isTop, toBottom, toBottomClick, toTop, toOverlay, ansiToHtml, parentHeight}
 }
 
 components["log-viewer"] = { template: "#log-viewer", emits: [], setup, 
