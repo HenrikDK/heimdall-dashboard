@@ -1,9 +1,9 @@
 <template id="virtual-table">
 
-  <div class="border border-gray-200 rounded-lg dark:border-zinc-700 mt-4"> <!-- table outer border -->
+  <div class="border border-gray-200 rounded-lg dark:border-zinc-700 mt-2 h-fit"> <!-- table outer border -->
     <div class="flex top-0 w-full z-10 bg-gray-100 dark:bg-zinc-900 rounded-t-lg"> <!-- header -->
       <div v-for="column in columns"
-           class="text-left text-xs font-strong text-black uppercase dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-zinc-700"
+           class="text-left text-xs font-strong text-black uppercase dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-zinc-700 select-none"
            :class="column.classes">
           
         <div class="flex">
@@ -35,7 +35,7 @@
       <div v-if="fatScrollbar && scrollable" class="w-4"></div>
     </div>
 
-    <div ref="parentRef" :style="{contain: 'strict', overflow: 'auto', width: '100%', height: '85vh'}"
+    <div ref="parentRef" :style="{contain: 'strict', overflow: 'auto', width: '100%', height: parentHeight}"
       class="text-left divide-y divide-gray-200 dark:divide-zinc-700 dark:bg-zinc-900 rounded-b-lg"> <!-- table -->
 
       <div :style="{ height: `${virtualizer.getTotalSize()}px`, position: 'relative', width: '100%' }"
@@ -71,7 +71,7 @@
 <script type="module">
 import { ref, provide, watch, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useVirtualizer } from '@@tanstack/vue-virtual';
-import { useStorage } from '@@vueuse/core';
+import { useStorage, useWindowSize, useElementBounding } from '@@vueuse/core';
 import { useRoute } from 'vue-router';
 
 let setup = (props, ctx) => {
@@ -82,12 +82,14 @@ let setup = (props, ctx) => {
   const search = useGlobalSearch();
   const namespaces = useGlobalNamespaces();
   const sorting = useStorage(`heimdall-${route.name}-table-sorting`, props.initialSort ?? []);
-  
+  const { width, height } = useWindowSize()
   let fatScrollbar = computed(() => navigator.userAgent.includes('Windows'));
+  const parentHeight = ref('')
+  const parentDimensions = useElementBounding(parentRef)
   
   const updateKey = ref(0);
   provide('updateKey', updateKey)
-
+  
   let virtualizerOptions = computed(() => {
     return {
       count: rows.value.length,
@@ -96,6 +98,17 @@ let setup = (props, ctx) => {
       getScrollElement: () => parentRef.value,
     }
   });
+
+  let updateParentHeight = () => {
+      let pHeight = '300px'
+      try{
+        let top = parentDimensions.top.value ?? 0;
+        pHeight = height.value - top - 16 + 'px'
+      }
+      catch (err) {}
+
+      parentHeight.value = pHeight
+  }
 
   let virtualizer = useVirtualizer(virtualizerOptions);
 
@@ -158,11 +171,14 @@ let setup = (props, ctx) => {
     
     rows.value = content.filter(row => !row.filtered && !row.nsFiltered)
   }
-    
+  
+  watch([parentDimensions.top, height], updateParentHeight)
+
   watch([() => props.columns,() => props.data, namespaces, search, sorting], updateTable);
   
   onMounted(() => {
     updateTable();
+    updateParentHeight();
     timer.value = setInterval(() => updateKey.value += 1, 5000);
   });
   
@@ -171,7 +187,7 @@ let setup = (props, ctx) => {
   });
   
   return {
-    sorting, timer, updateKey, rows, virtualizerOptions, virtualizer, measureElement, parentRef, route,
+    sorting, parentHeight, timer, updateKey, rows, virtualizerOptions, virtualizer, measureElement, parentRef, route,
     getEntityLink, cancelAutoUpdate, onSelectSort, updateTable, search, namespaces, fatScrollbar, scrollable
   }
 }
