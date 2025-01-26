@@ -168,7 +168,7 @@ const app = createApp({
       let namespaces = this.clusterNamespaces.map(x => x.metadata.name);
 
       let result = [];
-      if (this.config.filters.length > 0)
+      if (this.config.filters?.length > 0)
       {
         let filters = this.config.filters.split(',');
         let fstarts = filters.filter(x => x.startsWith('^')).map(x => x.replace('^', '').trim());
@@ -198,7 +198,7 @@ const app = createApp({
       result.sort();
 
       this.namespaces = result;
-      if (this.config.filters.length > 0){
+      if (this.config.filters?.length > 0){
         this.filters = result;
       }
     }
