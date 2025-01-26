@@ -400,13 +400,15 @@
 
 <script type="module">
 import { useDark } from "@@vueuse/core";
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 
 let setup = (props, ctx) => {
   const isDark = useDark();
   const route = useRoute();
+  const router = useRouter();
   const connections = ref([]);
+  const streams = ref({metrics: false, k8s: false, spec: false});
 
   const pod = ref({});
 
@@ -601,13 +603,13 @@ let setup = (props, ctx) => {
   });
   
   return {
-      connections, isDark, events, clusterEvents, pod, 
-      metrics, charts, chartState, initOptions, limitState, 
-      getContainerStatusObjects, getContainerStatus, toLocal, toHuman,
-      updateCpu, updateMemory, updateNetworking, updateFilesystem, updateMetrics
+      connections, isDark, events, clusterEvents, pod, streams,
+      metrics, planSpec, charts, chartState, initOptions, limitState, 
+      updateCpu, updateMemory, updateNetworking, updateFilesystem, updateMetrics, updatePlanSpecMetrics, updatePlanSpec
   }
 }
 
 components["pod-details"] = {template: "#pod-details", props: ['config', 'filters'], setup};
+routes.push({path:'/namespaces/:namespace/pods/:name/logs', name:'pod-logs-redirect', component: components["pod-details"]})
 routes.push({path:'/namespaces/:namespace/pods/:name/details', name:'pod-details', component: components["pod-details"]})
 </script>
