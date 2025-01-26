@@ -1,20 +1,24 @@
-﻿<template id="pod-details">
+<template id="pod-details">
   <div class="pl-2 pr-4 max-w-5xl mx-auto">
     
-  <br/>
-
-  <div class="flex mb-8 text-xl justify-between items-center text-gray-500 dark:text-gray-300 font-light sans">
-    <div class="text-md truncate pe-2">Pod / {{pod?.metadata?.namespace }} / {{ pod?.metadata?.name }}</div>
-    <div class="flex">
-      <template v-if="config.canRestartPod && pod">
-        <restart-pod :pod="pod"></restart-pod>  
-      </template>
-      <template v-if="pod?.spec?.containers.length == 1">
-        <logs-btn :container="pod.spec.containers[0].name"></logs-btn>
-      </template>
-      <div v-else class="flex px-2 w-28"></div>
+    <div class="flex mt-4 mb-6 text-xl justify-between items-center text-gray-500 dark:text-gray-300 font-light sans h-8">
+      <div class="text-md truncate pe-2">
+      <router-link :to="{ name: 'pods' }"
+      class="hover:text-sky-500 dark:hover:text-blue-400"> Pod </router-link> / 
+      <router-link :to="{ name: 'pods-redirect', params: {namespace: pod?.metadata?.namespace } }"
+      class="hover:text-sky-500 dark:hover:text-blue-400"> {{pod?.metadata?.namespace }} </router-link> / 
+      {{ pod?.metadata?.name }}
+      </div>
+      <div class="flex">
+        <template v-if="config.canRestartPod && pod">
+          <restart-pod :pod="pod"></restart-pod>  
+        </template>
+        <template v-if="pod?.spec?.containers.length == 1">
+          <logs-btn :container="pod.spec.containers[0].name"></logs-btn>
+        </template>
+        <div v-else class="flex px-2 w-28"></div>
+      </div>
     </div>
-  </div>
     
   <div v-if="config.metrics" class="my-4">
     <div class="flex justify-center mb-4">
