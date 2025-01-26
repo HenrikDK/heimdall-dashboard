@@ -56,6 +56,7 @@ import { useRoute } from 'vue-router';
 
 let setup = (props, ctx) => {
   const rows = ref([]);
+  const timer = ref('');
   const route = useRoute();
   const sorting = useStorage(`heimdall-${route.name}-table-sorting`, props.initialSort ?? []);
     
@@ -108,8 +109,9 @@ let setup = (props, ctx) => {
   
   onMounted(() => {
     updateTable();
+    timer.value = setInterval(() => updateKey.value += 1, 5000);
   });
-    
+
   return {
     sorting, updateKey, rows, route, getEntityLink, onSelectSort, updateTable
   }
