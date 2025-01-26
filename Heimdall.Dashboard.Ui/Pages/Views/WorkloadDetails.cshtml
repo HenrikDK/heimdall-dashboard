@@ -274,26 +274,7 @@ let setup = (props, ctx) => {
     { header: 'Status', id: 'status', classes: 'w-[6rem]', canSort: false, 
       accessor: row => row.status.phase, formatter:'pod-status' }
   ]);
-
-  let toLocal = (value) => {
-    if (!value) return '';
-      
-    var DT = window.DateTime || luxon.DateTime;
-    let result = DT.fromISO(String(value)).setLocale('da-dk').toFormat('y-LL-dd HH:mm:ss');
-    return result;
-  };
   
-  let toHuman = (value) => {
-    if (!value) return '';
-    
-    var DT = window.DateTime || luxon.DateTime;
-    const unit = ["years", "days", "hours", "minutes", "seconds", "milliseconds"]
-    var date = DT.now();
-
-    var newDatetime = DT.fromISO(String(value));
-    return toHumanValues(newDatetime.diff(date,  unit)).join(' ') + ' Ago';
-  }
-
   let updateMetrics = async () => {
     if (props.config.metrics !== true || pods.value.length < 1) return;
 
