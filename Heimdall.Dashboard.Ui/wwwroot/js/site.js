@@ -1,4 +1,4 @@
-function toHuman(value) {
+﻿function toHuman(value) {
     if (!value) return ''
     
     var DT = window.DateTime || luxon.DateTime;
@@ -150,6 +150,19 @@ function getMetricQuery(options) {
                     return `sum(rate(container_network_receive_bytes_total{pod=~"${options.pods}",namespace="${options.namespace}"}[3m])) by (pod)`;
                 case "net-sent":
                     return `sum(rate(container_network_transmit_bytes_total{pod=~"${options.pods}",namespace="${options.namespace}"}[3m])) by (pod)`;
+            }
+            break;
+
+        case "max":
+            switch (options.name) {
+                case "avg-cpu":
+                    return `avg_over_time(avg by (container, namespace) (sum by (container, pod, namespace)(rate(container_cpu_usage_seconds_total{container="${options.container}", namespace=~"${options.namespace}.*"}[1m])))[7d:])`
+                case "max-cpu":
+                    return `max_over_time(max by (container, namespace) (sum by (container, pod, namespace)(rate(container_cpu_usage_seconds_total{container="${options.container}", namespace=~"${options.namespace}.*"}[1m])))[7d:])`
+                case "avg-mem":
+                    return `avg_over_time(avg by (container, namespace) (sum by (container, pod, namespace)(container_memory_working_set_bytes{container="${options.container}", namespace=~"${options.namespace}.*"}))[7d:])`
+                case "max-mem":
+                    return `max_over_time(max by (container, namespace) (sum by (container, pod, namespace)(container_memory_working_set_bytes{container="${options.container}", namespace=~"${options.namespace}.*"}))[7d:])`
             }
             break;
     }
