@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 <html lang="en">
 <head>
@@ -21,6 +21,7 @@
   useGlobalNamespaces = undefined;
   useGlobalSearch = undefined;
   useGlobalOverlays = undefined;
+  useGlobalPodDetails = undefined;
 
   process = {env: "production"}
 
@@ -94,6 +95,7 @@ import { useEventBus, createGlobalState, useStorage } from '@@vueuse/core'
 useGlobalNamespaces = createGlobalState(() => useStorage('heimdall-namespace', []));
 useGlobalSearch = createGlobalState(() => useStorage('heimdall-search', ''));
 useGlobalOverlays = createGlobalState(() => ref({current: undefined, total: 0}));
+useGlobalPodDetails = createGlobalState(() => useStorage('heimdall-pod-details', {labels: false, annotations: false, volumes: false, variables: false}));
 
 nsBus = useEventBus('namespace')
 logBus = useEventBus('log-search')
