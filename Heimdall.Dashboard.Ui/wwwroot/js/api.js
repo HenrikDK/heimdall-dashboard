@@ -42,7 +42,12 @@ function streamMetrics(options, cb, connections = null, multiple = false) {
                     }));
                     
                 } catch (err) {
-                    console.error('Unable to send request', {err});
+                    errors +=1
+                    if (errors > 2){
+                        console.info(`Retry's exceeded stopping metrics request`);
+                        clearInterval(handel)
+                    }
+                    console.error(`Unable to get metric, attempt ${errors}`, {err});
                 } finally {
                     isApiRequestInProgress = false;
                 }
