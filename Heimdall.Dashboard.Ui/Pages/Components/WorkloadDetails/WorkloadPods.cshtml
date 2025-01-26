@@ -1,0 +1,64 @@
+﻿<template id="workload-pods">
+  <div v-if="pods.length > 0" class="mb-6">
+    <div class="flex mt-6 items-center mb-2">
+      <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pods</span>
+    </div>
+
+    <simple-table :columns="columns" :initial-sort="sorting" :data="pods"></simple-table>
+  </div>
+</template>
+
+<script type="module">
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+
+let setup = (props, ctx) => {
+  let getCpuUsage = (row) => {
+    if (props.metrics['cpu'][0].metrics.length < 1) return '-';
+    let pod = row.metadata.name;
+
+    let series = props.metrics['cpu'][0].metrics.filter(x => x.metric.pod == pod)[0]
+    if (series === undefined) return '-';
+
+    let usage = parseFloat(series.values.slice(-1)[0][1]);
+    
+    return usage.toFixed(3);
+  }
+
+  let getMemoryUsage = (row) => {
+    if (props.metrics['memory'][0].metrics.length < 1) return '-';
+    let pod = row.metadata.name;
+
+    let series = props.metrics['memory'][0].metrics.filter(x => x.metric.pod == pod)[0]
+    if (series === undefined) return '-';
+
+    let usage = parseFloat(series.values.slice(-1)[0][1]);
+    let unit = getUnitFromBytes(usage);
+    return `${(usage / unit.magnitude).toFixed(1)} ${unit.suffix}`
+  }
+
+  const sorting = ref([ {id:'name', sort:'asc'} ]);
+  const columns = ref([
+    { header: 'Name', id: 'name', classes: 'truncate grow shrink w-52', 
+      accessor: row => row.metadata.name },
+    { header: 'Node', id: 'node', classes: 'w-72', 
+      accessor: row => row.spec.nodeName },
+    { header: 'Containers', id: 'containers', classes: 'truncate w-32', canSort: false, 
+      accessor: row => row.status.containerStatuses, formatter:'pod-lights' },
+    { header: 'Cpu', id: 'cpu', classes: 'truncate w-24', 
+      accessor: getCpuUsage },
+    { header: 'Memory', id: 'memory', classes: 'truncate w-24', 
+      accessor: getMemoryUsage },
+    { header: 'Status', id: 'status', classes: 'w-[6rem]', canSort: false, 
+      accessor: row => row.status.phase, formatter:'pod-status' }
+  ]);
+
+  let matchLabels = (labels, selector) => {
+    let result = Object.keys(selector).every(x => labels[x] === selector[x])
+    return result;
+  }
+  
+  return { columns, sorting }
+}
+
+components["workload-pods"] = { template: "#workload-pods", props: ['pods', 'metrics'], setup };
+</script>
