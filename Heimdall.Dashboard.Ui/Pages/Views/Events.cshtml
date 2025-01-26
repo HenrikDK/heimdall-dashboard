@@ -1,12 +1,12 @@
 ﻿<template id="events">
   <div class="pl-2 pr-4 w-100">
 
-  <div class="flex my-2 items-center">
-    <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
-  </div>
+    <div class="flex my-2 items-center">
+      <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Events</span>
+    </div>
 
-  <virtual-table :columns="columns" :initial-sort="sorting" :data="events" :loading="loading"></virtual-table>
-        
+    <virtual-table :columns="columns" :initial-sort="sorting" :data="events" :loading="loading"></virtual-table>
+    
   </div>
 </template>
 
@@ -51,7 +51,7 @@ let setup = (props, ctx) => {
         accessor: row => row.message, formatter:'event-message' },
       { header:'Source', id:'source', canSort:false, classes: 'truncate 2xl:w-80 xl:w-64 lg:w-64', 
         accessor: row => row.involvedObject.name, formatter:'event-source' },
-      { header:'Events', id:'events', sorter:'number', classes:'w-40', 
+      { header:'Events', id:'events', sorter:'number', classes:'w-40', keyed: true, 
         accessor: row => row.count },
       { header:'Age', id:'age', sorter:'text', classes:'w-32',
         accessor: row => row.lastTimestamp, formatter:'object-age' },
