@@ -1,0 +1,199 @@
+﻿<template id="pod-info">
+  <div class="text-gray-500 dark:text-gray-300 text-md font-light sans">
+    <div class="flex mb-1">
+      <div class="px-2 py-1 w-1/4">Created</div>
+      <div>{{ toLocal(pod?.metadata?.creationTimestamp) }} ({{ toHuman(pod?.metadata?.creationTimestamp) }})</div>
+    </div>
+    <div class="flex mb-1">
+      <div class="px-2 py-1 w-1/4">Name</div>
+      <div class="py-1">{{ pod?.metadata?.name }}</div>
+    </div>
+    <div class="flex mb-1">
+      <div class="px-2 py-1 w-1/4">Namespace</div>
+      <div class="py-1">{{ pod?.metadata?.namespace }}</div>
+    </div>
+    <div v-if="pod?.metadata?.labels && 'aks/plan' in pod?.metadata?.labels" class="flex mb-1">
+      <div class="px-2 py-1 w-1/4">Current plan</div>
+      <div class="py-1">{{ pod?.metadata?.labels['aks/plan'] }}</div>
+    </div>
+    <div v-if="plans.recommended.length > 0" class="flex mb-2">
+      <div class="px-2 py-1 w-1/4 flex flex-col-reverse">
+        <div class="flex">
+          <div class="hover:text-sky-500 dark:hover:text-blue-400">
+            <a href="https://github.com/DanskeStatsbaner/managed-aks-workflow/blob/main/docs/workloads/resources.md#plan-spec" target="_blank" title="plan-spec docs">Recommended plan</a>
+          </div>
+          
+          <tooltip placement="bottom" padding="">
+            <template v-slot:cell>
+              <div class="ps-2 hover:text-sky-500 dark:hover:text-blue-400">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                </svg>
+              </div>
+            </template>
+            
+            <template v-slot:tooltip>
+              <div class="text-sm w-fit px-1">
+                  <div class="w-36 break-words">Recommendations are based on the last 7 days of resource usage.</div>
+              </div>
+            </template>
+          </tooltip>
+        </div>
+      </div>
+      <div v-for="r in plans.recommended" class="pe-2 py-1">
+        <div class="flex">{{ r.namespace.toUpperCase() }}</div>
+        <div class="flex">
+          <tooltip placement="bottom" padding="">
+            <template v-slot:cell>
+              <div>{{ r.spec }}</div>
+            </template>
+            
+            <template v-slot:tooltip>
+              <div class="text-sm w-fit px-1">
+                <div class="mb-2 text-center">{{r.namespace.toUpperCase()}} recommendation</div>
+                <div class="mb-2">
+                  <div>Request (avg load)</div>
+                  <div class="ps-2">
+                    <div class="flex"><div class="w-16">CPU</div><div>{{ r.cpu_request }}</div></div>
+                    <div class="flex"><div class="w-16">RAM</div><div>{{ r.mem_request }}</div></div>
+                  </div>
+                </div>
+                <hr/>
+                <div class="">
+                  <div>Limit (max load + 30%)</div>
+                  <div class="ps-2">
+                    <div class="flex"><div class="w-16">CPU</div><div>{{ r.cpu_limit }}</div></div>
+                    <div class="flex"><div class="w-16">RAM</div><div>{{ r.mem_limit }}</div></div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </tooltip>
+        </div>
+      </div>
+      <copy-btn title="Copy instance configuration" :action="copyInstances"></copy-btn>
+    </div>
+    <div v-if="pod?.metadata?.labels" class="flex mb-1">
+      <div class="px-2 py-0.5 w-1/4 flex justify-between select-none"
+        @@click="visibility.labels = !visibility.labels">
+        <div>Labels</div>
+        <div v-if="!visibility.labels">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+          </svg>
+        </div>
+        <div v-else>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+          </svg>
+        </div>
+      </div>
+      <div class="w-3/4 flex flex-col truncate">
+        <template v-if="visibility.labels">
+          <template v-for="(v, k) in pod?.metadata?.labels">
+            <div class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-1 mb-1 overflow-hidden">{{ k }}: {{v}}</div>
+          </template>
+        </template>
+        <div v-else class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-1 mb-1 overflow-hidden">
+          {{ Object.keys(pod?.metadata?.labels).length }} labels ...
+        </div>
+      </div>
+    </div>
+    <div v-if="pod?.metadata?.annotations" class="flex mb-1">
+      <div class="px-2 py-0.5 w-1/4 flex justify-between select-none"
+        @@click="visibility.annotations = !visibility.annotations">
+        <div>Annotations</div>
+        <div v-if="!visibility.annotations">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+          </svg>
+        </div>
+        <div v-else>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+          </svg>
+        </div>
+      </div>
+      <div class="w-3/4 flex flex-col truncate">
+        <template v-if="visibility.annotations">
+          <template v-for="(v, k) in pod?.metadata?.annotations">
+            <div class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-1 mb-1 overflow-hidden">{{ k }}: {{v}}</div>
+          </template>
+        </template>
+        <div v-else class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-1 mb-1 overflow-hidden">
+          {{ Object.keys(pod?.metadata?.annotations).length }} annotations ...
+        </div>
+      </div>
+    </div>
+    <div class="flex mb-1">
+      <div class="px-2 py-1 w-1/4">Controlled by</div>
+      <div class="flex w-3/4 flex-wrap truncate">
+        <template v-for="owner in pod?.metadata?.ownerReferences">
+          <div class="py-1 flex">
+            <div class="pr-2">{{ owner.kind }}:</div>
+            <div class="text-blue-500">{{ owner.name }}</div>
+          </div>
+        </template>
+      </div>
+    </div>
+    <div v-if="pod?.status?.phase" class="flex mb-1">
+      <div class="px-2 py-1 w-1/4">Status</div>
+      <div v-if="pod?.status?.phase == 'Waiting'" class="py-1 text-orange-500">{{ pod?.status?.phase }}</div>
+      <div v-else class="py-1 text-green-500">{{ pod?.status?.phase }}</div>
+    </div>
+    <div v-if="pod?.spec?.nodeName" class="flex mb-1">
+      <div class="px-2 py-1 w-1/4">Node</div>
+      <div class="py-1 text-blue-500">{{ pod?.spec?.nodeName }}</div>
+    </div>
+    <div v-if="pod?.status?.podIPs.length > 0" class="flex mb-1">
+      <div class="px-2 py-1 w-1/4">Pod Ips</div>
+      <div class="flex w-3/4 flex-wrap truncate">
+        <template v-for="p in pod?.status?.podIPs">
+          <div class="bg-gray-200 dark:bg-zinc-800 rounded py-0.5 px-1 mr-2 mb-1 overflow-hidden">{{ p.ip }}</div>
+        </template>
+      </div>
+    </div>            
+    <div v-if="pod?.spec?.priorityClassName" class="flex mb-1">
+      <div class="px-2 py-1 w-1/4">Priority Class</div>
+      <div class="py-1 text-blue-500">{{ pod?.spec?.priorityClassName }}</div>
+    </div>
+    <div v-if="pod?.status?.qosClass" class="flex mb-1">
+      <div class="px-2 py-1 w-1/4">QoS Class</div>
+      <div class="py-1 text-blue-500">{{ pod?.status?.qosClass }}</div>
+    </div>
+    <div v-if="pod?.status?.conditions" class="flex mb-1">
+      <div class="px-2 py-1 w-1/4">Conditions</div>
+      <div class="flex w-3/4 flex-wrap truncate">
+        <template v-for="s in pod?.status?.conditions">
+          <div v-if="s.status === 'True'"
+               class="bg-gray-200 dark:bg-zinc-800 rounded py-0.5 px-1 mr-2 mb-1 overflow-hidden">
+            {{s.type}}
+          </div>
+          <div v-else class="text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-zinc-900 rounded py-0.5 px-1 mr-2 mb-1 overflow-hidden">
+            {{s.type}}
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>    
+</template>
+
+<script type="module">
+let setup = (props, ctx) => {
+  const visibility = useGlobalPodDetails();
+
+  let copyInstances = () => {
+    result = 'instance:\n'
+    props.plans.recommended.forEach(x => {
+      result += `  ${x.namespace}:\n`
+      result += `    plan: ${x.spec}\n`
+    });
+
+    navigator.clipboard.writeText(result);
+  }
+
+  return { visibility, toLocal, toHuman, copyInstances }
+}
+
+components["pod-info"] = {template: "#pod-info", props: ['pod', 'plans'], setup};
+</script>
