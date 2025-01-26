@@ -1,8 +1,11 @@
 <template id="table-row">
   <div class="flex w-full hover:bg-sky-100 dark:hover:bg-zinc-700">
     <template v-for="column in columns">
-      <template v-if="column.formatter == undefined">
-        <div class="ps-4 py-2" :class="column.classes">
+      <template v-if="column.formatter == undefined">        
+        <div v-if="column.keyed == undefined" class="ps-4 py-2" :class="column.classes" :title="column.accessor(row)">
+          {{ column.accessor(row) }}
+        </div>
+        <div v-else class="ps-4 py-2" :class="column.classes" :title="column.accessor(row)" :key="row.key + '-' + updateId">
           {{ column.accessor(row) }}
         </div>
       </template>
@@ -13,19 +16,19 @@
         <kube-dns :row="row" :classes="column.classes"></kube-dns>
       </template>
       <template v-else-if="column.formatter == 'deployment-lights'">
-        <deployment-lights :row="row" :classes="column.classes"></deployment-lights>
+        <deployment-lights :row="row" :classes="column.classes" :key="row.key + '-' + updateId"></deployment-lights>
       </template>
       <template v-else-if="column.formatter == 'deployment-conditions'">
-        <deployment-conditions :row="row" :classes="column.classes"></deployment-conditions>
+        <deployment-conditions :row="row" :classes="column.classes" :key="row.key + '-' + updateId"></deployment-conditions>
       </template>
       <template v-else-if="column.formatter == 'pod-lights'">
-        <pod-lights :row="row" :classes="column.classes" ></pod-lights>
+        <pod-lights :row="row" :classes="column.classes"></pod-lights>
       </template>
       <template v-else-if="column.formatter == 'pod-status'">
-        <pod-status :row="row" :classes="column.classes" ></pod-status>
+        <pod-status :row="row" :classes="column.classes" :key="row.key + '-' + updateId"></pod-status>
       </template>
       <template v-else-if="column.formatter == 'object-age'">
-        <object-age :row="row" :classes="column.classes" :key="updateId"></object-age>
+        <object-age :row="row" :classes="column.classes" :key="row.key + '-' + updateId"></object-age>
       </template>
       <template v-else-if="column.formatter == 'event-message'">
         <event-message :row="row" :classes="column.classes"></event-message>
@@ -37,7 +40,7 @@
         <ingress-hosts :row="row" :classes="column.classes"></ingress-hosts>
       </template>
       <template v-else-if="column.formatter == 'ingress-load-balancers'">
-        <ingress-load-balancers :row="row" :classes="column.classes"></ingress-load-balancers>
+        <ingress-load-balancers :row="row" :classes="column.classes" :key="row.key + '-' + updateId"></ingress-load-balancers>
       </template>
     </template>
   </div>
