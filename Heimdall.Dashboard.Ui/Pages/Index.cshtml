@@ -1,4 +1,4 @@
-@page "/"
+﻿@page "/"
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @namespace Heimdall.Dashboard.Ui.Pages
 @model IndexModel
@@ -51,9 +51,14 @@
     <partial name="Components/PodDetails/PodVolumes"/>
     <partial name="Components/PodDetails/RestartPod"/>
     <partial name="Components/PodDetails/ScalePods"/>
+
+    <partial name="Components/WorkloadDetails/WorkloadCharts"/>
+    <partial name="Components/WorkloadDetails/WorkloadInfo"/>
+    <partial name="Components/WorkloadDetails/WorkloadPods"/>
+    <partial name="Components/WorkloadDetails/WorkloadEvents"/>
+
     <partial name="Components/Spinner"/>
     <partial name="Components/Tooltip"/>
-
     
     <partial name="Views/Cluster"/>
     <partial name="Views/Events"/>
