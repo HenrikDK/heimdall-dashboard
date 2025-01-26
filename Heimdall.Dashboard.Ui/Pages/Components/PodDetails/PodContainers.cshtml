@@ -1,0 +1,238 @@
+﻿<template id="pod-containers">
+  <div class="flex mt-6 mb-2 items-center">
+    <div class="flex justify-between" @@click="visibility.volumes = !visibility.volumes">
+      <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Containers</span>
+    </div>
+  </div>
+
+  <div v-for="c in pod?.spec?.containers" 
+       class="text-gray-500 dark:text-gray-300 text-md font-light sans rounded-lg shadow-md border border-gray-200 dark:border-zinc-800 mb-4">
+    <div class="my-2">
+      <div class="flex">
+        <div class="px-2 py-1 w-1/4">Container</div>
+        <div class="flex justify-between items-center grow">
+          <div class="py-1">{{ c.name }}</div>
+          <div class="me-4">
+            <logs-btn :pod="pod.metadata.name" :namespace="pod.metadata.namespace" :container="c.name" ></logs-btn>  
+          </div>
+        </div>
+      </div>
+      <div class="flex">
+        <div class="px-2 py-1 w-1/4">Status</div>
+        <div v-html="getContainerStatus(c.name, pod)"></div>
+      </div>
+      <div v-if="c?.image" class="flex mb-1">
+        <div class="px-2 py-1 w-1/4">Image</div>
+        <div class="py-1 w-3/4 truncate">{{ c.image }}</div>
+      </div>
+      <div class="flex flex-col mb-2">
+        <div class="flex">
+          <div class="px-2 w-1/4"></div>
+          <div class="w-1/6">Request</div>
+          <div class="w-1/6">Limit</div>
+        </div>
+        <div class="flex">
+          <div class="px-2 py-1 w-1/4">CPU (vCores)</div>
+          <div v-if="c.resources?.requests?.cpu" class="py-1 w-1/6">{{ c.resources?.requests?.cpu }}</div>
+          <div v-else class="py-1 w-1/6">∞</div>
+          <div v-if="c.resources?.limits?.cpu" class="py-1 w-1/6">{{ c.resources?.limits?.cpu }}</div>
+          <div v-else class="py-1 w-1/6">∞</div>
+        </div>
+        <div class="flex">
+          <div class="px-2 py-1 w-1/4">Memory</div>
+          <div v-if="c.resources?.requests?.memory" class="py-1 w-1/6">{{ c.resources?.requests?.memory }}</div>
+          <div v-else class="py-1 w-1/6">∞</div>
+          <div v-if="c.resources?.limits?.memory" class="py-1 w-1/6">{{ c.resources?.limits?.memory }}</div>
+          <div v-else class="py-1 w-1/6">∞</div>
+        </div>
+        <template v-if="c.resources?.limits" v-for="l of Object.entries(c.resources?.limits)">
+          <div v-if="l[0].startsWith('nvidia.com')" class="flex">
+            <div class="px-2 py-1 w-1/4">GPU</div>
+            <div class="py-1 w-1/6">{{ l[0].split('/')[1] }}</div>
+          </div>
+        </template>
+      </div>
+      <div v-if="c.args" class="flex">
+        <div class="px-2 py-1 w-1/4">Arguments</div>
+        <div class="flex flex-wrap w-3/4 truncate">
+          <template v-for="a in c.args">
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-0.5 px-1 mr-2 mb-1 overflow-hidden">{{ a }}</div>
+          </template>
+        </div>
+      </div>
+      <div v-if="c.env || c.envFrom" class="flex mb-1">
+        <div class="px-2 py-0.5 w-1/4 flex justify-between select-none"
+          @@click="visibility.variables = !visibility.variables">
+          <div>Environment</div>
+          <div v-if="!visibility.variables">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
+          </div>
+          <div v-else>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+            </svg>
+          </div>
+        </div>
+        <div class="flex flex-col w-3/4 truncate">
+          <template v-if="visibility.variables">
+            <template v-if="c.env">
+              <template v-for="e in c.env">
+                <div v-if="e.valueFrom?.fieldRef" class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-1 mb-1 overflow-hidden">
+                  {{ e.name }}: fieldRef({{e.valueFrom.fieldRef.apiVersion }}:{{ e.valueFrom.fieldRef.fieldPath }})
+                </div>
+                <div v-else-if="e.valueFrom?.secretKeyRef" title="Value and mapping hidden" 
+                  class="bg-gray-200 dark:bg-zinc-800 flex w-fit rounded py-0.5 px-1 mb-1 overflow-hidden">
+                  {{ e.name }}: secret({{ e.valueFrom.secretKeyRef.name}})
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ps-1 w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.25-8.25-3.286Zm0 13.036h.008v.008H12v-.008Z" />
+                  </svg>
+                </div>
+                <div v-else-if="e.valueFrom?.configMapKeyRef"
+                  class="bg-gray-200 dark:bg-zinc-800 flex w-fit rounded py-0.5 px-1 mb-1 overflow-hidden">
+                  {{ e.name }}: configMap({{ e.valueFrom.configMapKeyRef.name}}).{{ e.valueFrom.configMapKeyRef.key}}
+                </div>
+                <div v-else class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-1 mb-1 overflow-hidden">
+                  {{ e.name }}: {{ e.value}}
+                </div>
+              </template>
+            </template>
+            <template v-if="c.envFrom">
+              <template v-for="e in c.envFrom">
+                <div v-if="e.secretRef" title="Value and mapping hidden"
+                      class="bg-gray-200 flex dark:bg-zinc-800 w-fit rounded py-0.5 px-1 mb-1 overflow-hidden">
+                  secret({{ e.secretRef.name}})
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ps-1 w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.25-8.25-3.286Zm0 13.036h.008v.008H12v-.008Z"/>
+                  </svg>
+                </div>
+                <div v-else-if="e.configMapRef"
+                  class="bg-gray-200 dark:bg-zinc-800 flex w-fit rounded py-0.5 px-1 mb-1 overflow-hidden">
+                  configMap({{ e.configMapRef?.name}})
+                </div>
+              </template>
+            </template>
+          </template>
+          <div v-else class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-1 mb-1 overflow-hidden">
+            {{ c.env?.length ?? 0 + c.envFrom?.length ?? 0 }} variables ...
+          </div>
+        </div>
+      </div>
+      <div v-if="c.volumeMounts" class="flex mb-1">
+        <div class="px-2 py-0.5 w-1/4 flex justify-between select-none"
+          @@click="visibility.mounts = !visibility.mounts">
+          <div>Mounts</div>
+          <div v-if="!visibility.mounts">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
+          </div>
+          <div v-else>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+            </svg>
+          </div>
+        </div>
+        <div class="flex flex-col w-3/4 truncate">
+          <div class="w-fit">
+            <template v-if="visibility.mounts">
+              <div v-for="e in c.volumeMounts" 
+                class="rounded py-0.5 mb-1 overflow-hidden">
+                <div class="bg-gray-200 dark:bg-zinc-800 px-1">{{ e.mountPath }}</div>
+                <div class="px-1">from {{ e.name}}</div>
+              </div>
+            </template>
+            <div v-else class="bg-gray-200 dark:bg-zinc-800 w-fit rounded py-0.5 px-1 mb-1 overflow-hidden">
+              {{ c?.volumeMounts.length }} volume mounts ...
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-if="c.ports" class="flex">
+        <div class="px-2 py-1 w-1/4">Ports</div>
+        <div class="flex flex-wrap w-3/4 truncate">
+          <template v-for="p in c.ports">
+            <div class="bg-gray-200 dark:bg-zinc-800 rounded py-0.5 px-1 mr-2 mb-1 overflow-hidden">{{p.name}}: {{ p.containerPort }}/{{ p.protocol}}</div>
+          </template>
+        </div>
+      </div>
+      <div v-if="c.livenessProbe" class="flex">
+        <div class="px-2 py-1 w-1/4">Liveness</div>
+        <div class="flex flex-wrap w-3/4">
+          <div v-if="c.livenessProbe.httpGet" class="bg-gray-200 dark:bg-zinc-800 rounded py-0.5 px-1 mr-1 mb-1">
+            http-get: {{ c.livenessProbe.httpGet.path }}
+          </div>
+          <div class="bg-gray-200 dark:bg-zinc-800 rounded py-0.5 px-1 mr-2 mb-1">Initial Delay: {{c.livenessProbe.initialDelaySeconds}}s</div>
+          <div class="bg-gray-200 dark:bg-zinc-800 rounded py-0.5 px-1 mr-2 mb-1">Interval: {{c.livenessProbe.periodSeconds}}s</div>
+          <div class="bg-gray-200 dark:bg-zinc-800 rounded py-0.5 px-1 mr-2 mb-1">Timeout: {{c.livenessProbe.timeoutSeconds}}s</div>
+          <div class="bg-gray-200 dark:bg-zinc-800 rounded py-0.5 px-1 mr-2 mb-1">#Failure: {{c.livenessProbe.failureThreshold}}</div>
+          <div class="bg-gray-200 dark:bg-zinc-800 rounded py-0.5 px-1 mr-2 mb-1">#Success: {{c.livenessProbe.successThreshold}}</div>
+        </div>
+      </div>
+      <div v-if="c.readinessProbe" class="flex">
+        <div class="px-2 py-1 w-1/4">Readiness</div>
+        <div class="flex flex-wrap w-3/4">
+          <div v-if="c.readinessProbe.httpGet" class="bg-gray-200 dark:bg-zinc-800 rounded py-0.5 px-1 mr-1 mb-1">
+            http-get: {{ c.readinessProbe.httpGet.path }}
+          </div>
+          <div class="bg-gray-200 dark:bg-zinc-800 rounded py-0.5 px-1 mr-2 mb-1">Initial Delay: {{c.readinessProbe.initialDelaySeconds}}s</div>
+          <div class="bg-gray-200 dark:bg-zinc-800 rounded py-0.5 px-1 mr-2 mb-1">Interval: {{c.readinessProbe.periodSeconds}}s</div>
+          <div class="bg-gray-200 dark:bg-zinc-800 rounded py-0.5 px-1 mr-2 mb-1">Timeout: {{c.readinessProbe.timeoutSeconds}}s</div>
+          <div class="bg-gray-200 dark:bg-zinc-800 rounded py-0.5 px-1 mr-2 mb-1">#Failure: {{c.readinessProbe.failureThreshold}}</div>
+          <div class="bg-gray-200 dark:bg-zinc-800 rounded py-0.5 px-1 mr-2 mb-1">#Success: {{c.readinessProbe.successThreshold}}</div>
+        </div>
+      </div>
+      <div class="flex">
+        <div class="px-2 py-1 w-1/4">Last Status</div>
+        <div class="py-1 w-3/4">
+          <template v-for="s in getContainerStatusObjects(c.name, pod)">
+            <div v-if="s.lastState.terminated">
+              <div>Terminated</div>
+              <div>Reason: {{ s.lastState?.terminated?.reason }} - Exit code: {{ s.lastState?.terminated?.exitCode }}</div>
+              <div>Started At: {{ toLocal(s.lastState.terminated.startedAt) }} ({{ toHuman(s.lastState.terminated.startedAt) }})</div>
+              <div>Finished At: {{ toLocal(s.lastState.terminated.finishedAt) }} ({{ toHuman(s.lastState.terminated.finishedAt) }})</div>
+            </div>
+            <div v-else-if="s.lastState.waiting">
+              <div>Waiting</div>
+            </div>
+            <div v-else-if="s.ready">
+              <div>Ready</div>
+            </div>
+            <div v-else>
+              <div>None</div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script type="module">
+let setup = (props, ctx) => {
+  const visibility = useGlobalPodDetails();
+  
+  let getContainerStatusObjects = (name, pod) => {
+    let containers = pod?.status?.containerStatuses?.filter(x => x.name === name);
+    return containers;
+  };
+  
+  let getContainerStatus = (name, pod) => {
+    let container = pod?.status?.containerStatuses?.filter(x => x.name === name)[0];
+    let status = 'Running';
+    let color = 'text-green-500';
+    if (container?.state?.waiting)
+    {
+        status = 'Waiting';
+        color = 'text-orange-500';
+    }
+    
+    return `<div class="py-1 ${color}">${status}</div>`;
+  };
+      
+  return { visibility, getContainerStatusObjects, getContainerStatus, toLocal, toHuman }
+}
+
+components["pod-containers"] = {template: "#pod-containers", props: ['pod'], setup};
+</script>
