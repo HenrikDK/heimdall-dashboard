@@ -86,7 +86,7 @@
 
 <script type="module">
 import { createApp, ref } from 'vue'
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import { registerTheme } from 'echarts/core'
 import { default as ECharts } from 'vue-echarts'
 import { useEventBus, createGlobalState, useStorage } from '@@vueuse/core'
@@ -152,7 +152,7 @@ let scrollBehavior = (to, from, savedPosition) => {
 }
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes,
   scrollBehavior,
 })
