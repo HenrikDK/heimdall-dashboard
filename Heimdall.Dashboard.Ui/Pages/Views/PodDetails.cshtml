@@ -498,12 +498,15 @@ let setup = (props, ctx) => {
   }
 
   let updateMetrics = async () => {
-    if (props.config.metrics){
-      streamMetrics(metrics.value.cpu, updateCpu, connections.value);
-      streamMetrics(metrics.value.memory, updateMemory, connections.value);
-      streamMetrics(metrics.value.network, updateNetworking, connections.value);
-      streamMetrics(metrics.value.filesystem, updateFilesystem, connections.value);
-    }
+    if (props.config.metrics !== true) return;
+
+    if (streams.value.metrics) return;
+    //console.log("scheduling metrics updates");
+    streamMetrics(metrics.value.cpu, updateCpu, connections.value, false);
+    streamMetrics(metrics.value.memory, updateMemory, connections.value, false);
+    streamMetrics(metrics.value.network, updateNetworking, connections.value, false);
+    streamMetrics(metrics.value.filesystem, updateFilesystem, connections.value, false);
+    streams.value.metrics = true;
   }
   
   let updateCpu = () => {
