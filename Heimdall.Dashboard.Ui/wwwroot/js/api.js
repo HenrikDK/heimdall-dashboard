@@ -1,4 +1,4 @@
-﻿function closeConnections(connections){
+function closeConnections(connections){
     connections.forEach(x => {
         try {
             x();
@@ -310,7 +310,7 @@ function connectStream(path, cb, onFail, isJson) {
     }
 }
 
-async function request(path) {
+async function request(path, json=true) {
     const response = await fetch(path);
 
     if (!response.ok) {
@@ -327,6 +327,7 @@ async function request(path) {
         error.status = status;
         throw error;
     }
+    if (!json) return response.text();
 
     return response.json();
 }
