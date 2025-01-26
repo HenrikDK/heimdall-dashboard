@@ -68,6 +68,14 @@ function toHumanValues(dur) {
     return result
 }
 
+function toLocal(value) {
+    if (!value) return '';
+      
+    var DT = window.DateTime || luxon.DateTime;
+    let result = DT.fromISO(String(value)).setLocale('da-dk').toFormat('y-LL-dd HH:mm:ss');
+    return result;
+}
+
 function getMetricUrl(options, begin, end, step = '60s'){
     let host = window.location.origin;
     let query = getMetricQuery(options)
