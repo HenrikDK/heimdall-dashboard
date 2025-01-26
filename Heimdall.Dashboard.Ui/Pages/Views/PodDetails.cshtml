@@ -566,7 +566,7 @@ let setup = (props, ctx) => {
     events.value = clusterEvents.value.filter(x => x?.involvedObject?.name === name).sort(x => x.lastTimestamp).reverse();
   });
   });
-      
+  
   watch([limitState, chartState, isDark], () => {
     updateCpu();
     updateMemory();
@@ -575,8 +575,17 @@ let setup = (props, ctx) => {
   })
 
   onMounted(async () => {
+    if (route.name === 'pod-logs-redirect'){
+      fetch(`/k8s/api/v1/namespaces/${route.params.namespace}/pods/${route.params.name}`)
+        .then(r => r.json())
+        .then(pod => {
+            let container = pod.spec.containers[0].name;
+            router.push({ name: 'pod-logs', params: { namespace: route.params.namespace, name: route.params.name, container: container }, replace: true})
+        });
+      return;
+    }
+    
     let namespace = route.params.namespace;
-    let options = { pods: name, namespace: namespace };
 
     updateMetrics();
 
