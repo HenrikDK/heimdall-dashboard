@@ -11,9 +11,12 @@
 
 <script type="module">
 import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 let setup = (props, ctx) => {  
   const loading = ref(true);
+  const route = useRoute();
+  const router = useRouter();
   const connections = ref([]);
   const clusterWorkloads = ref([]);
   const clusterCronJobs = ref([]);
@@ -61,6 +64,11 @@ let setup = (props, ctx) => {
   watch([() => props.filters, clusterWorkloads, clusterCronJobs, clusterDaemonSets, clusterJobs, clusterStatefulSets], updateWorkloads);
   
   onMounted(async () => {
+    if (route.name === 'workloads-redirect'){
+      nsBus.emit(route.params.namespace)
+      router.push({ name: 'workloads', replace: true})
+    }
+
     streamResults('/k8s/apis/apps/v1/deployments', j => clusterWorkloads.value = j, connections.value)
     streamResults('/k8s/apis/apps/v1/daemonsets', j => clusterDaemonSets.value = j, connections.value)
     streamResults('/k8s/apis/apps/v1/statefulsets', j => clusterStatefulSets.value = j, connections.value)
@@ -81,4 +89,5 @@ let setup = (props, ctx) => {
 
 components["workloads"] = { template: "#workloads", props: ['filters'], setup };
 routes.push({path:'/workloads', name:'workloads', component: components["workloads"]})
+routes.push({path:'/namespaces/:namespace/workloads', name:'workloads-redirect', component: components["workloads"]})
 </script>
