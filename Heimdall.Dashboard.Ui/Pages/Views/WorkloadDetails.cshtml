@@ -244,11 +244,10 @@ let setup = (props, ctx) => {
     let pod = row.metadata.name;
 
     let series = metrics.value['memory'][0].metrics.filter(x => x.metric.pod == pod)[0]
+    if (series === undefined) return '-';
 
     let usage = parseFloat(series.values.slice(-1)[0][1]);
-
     let unit = getUnitFromBytes(usage);
-
     return `${(usage / unit.magnitude).toFixed(1)} ${unit.suffix}`
   }
 
