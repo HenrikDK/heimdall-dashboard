@@ -1,76 +1,90 @@
 ﻿<template id="log-viewer">
+  <div class="absolute top-20 right-12 z-50">
+    <div v-if="direction == 'up' && !isBottom" title="To bottom" alt="To bottom" @@click="toBottomClick"
+         class="flex px-4 py-2 rounded-lg items-center justify-center border cursor-pointer
+                  border-gray-300 bg-white fill-gray-300
+                  hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
+                  dark:border-white/[.4] dark:text-white/[.6]
+                  data-enabled:dark:bg-zinc-700 dark:data-enabled:border-white
+                  dark:hover:border-white dark:hover:text-white dark:hover:fill-white dark:hover:bg-zinc-700
+                  dark:bg-zinc-900">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
+      </svg>
+    </div>
+    <div v-if="direction == 'down' && !isTop" title="To top" alt="To top" @@click="toTop"
+         class="flex px-4 py-2 rounded-lg items-center justify-center border cursor-pointer
+                  border-gray-300 bg-white fill-gray-300
+                  hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
+                  dark:border-white/[.4] dark:text-white/[.6]
+                  data-enabled:dark:bg-zinc-700 dark:data-enabled:border-white
+                  dark:hover:border-white dark:hover:text-white dark:hover:fill-white dark:hover:bg-zinc-700
+                  dark:bg-zinc-900">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />
+      </svg>
+    </div>
+  </div>
+  
   <div ref="parentRef" :style="{contain: 'strict', overflow: 'auto', height: '85vh'}"
+      @@scroll="onScroll"
       class="border border-gray-300 rounded-md
       cursor-text font-mono text-xs 
       dark:border-zinc dark:bg-black dark:border-white/[.4] dark:text-white/[.9]">
-    
+
     <div :style="{ height: `${virtualizer.getTotalSize()}px`, position: 'relative', width: widthStyle }">
+      <div v-if="events.length == 0" class="justify-center w-full flex py-2">
+        <spinner></spinner>
+      </div>
 
-        <div v-if="events.length == 0" class="justify-center w-full flex py-2">
-            <spinner></spinner>
-        </div>
-
-        <div v-for="virtualRow in virtualizer.getVirtualItems()" class="px-2 break-words leading-5 break-all dark:hover:bg-zinc-900 hover:bg-gray-100"
-          :key="virtualRow.key + '-' + updateId"
-          :data-index="virtualRow.index"
-          :ref="measureElement"
-          :style="{ position: 'absolute', top: `${virtualRow.start}px`, left: 0, width: widthStyle }"
-          >
-          <template v-if="query.length > 0 && occurrences[virtualRow.index]">
-            <template v-for="segment in getRow(virtualRow.index)">
-              <span v-if="segment.overlay && segment.active" class="bg-orange-300 dark:bg-orange-700">{{segment.content}}</span>
-              <span v-else-if="segment.overlay" class="bg-green-300 dark:bg-green-700">{{segment.content}}</span>
-              <span v-else>{{ segment.content }}</span>
-            </template>
+      <div v-for="virtualRow in virtualizer.getVirtualItems()"
+           class="px-2 break-words leading-5 break-all dark:hover:bg-zinc-800 hover:bg-sky-100"
+           :class="[activeOverlay.id === logEvents[virtualRow.index].id ? 'dark:bg-zinc-800 bg-sky-100' : '']"
+           :key="virtualRow.key + '-' + updateId"
+           :data-index="virtualRow.index"
+           :ref="measureElement"
+           :style="{ position: 'absolute', top: 0, left: 0, width: widthStyle, transform: `translateY(${virtualRow.start}px)`}">
+        <template v-if="query.length > 0 && logEvents[virtualRow.index].matched">
+          <template v-for="segment in getSegments(logEvents[virtualRow.index])">
+            <span v-if="segment.overlay && segment.active" class="bg-orange-300 dark:bg-orange-700">{{segment.content}}</span>
+            <span v-else-if="segment.overlay" class="bg-green-300 dark:bg-green-700">{{segment.content}}</span>
+            <span v-else>{{ segment.content }}</span>
           </template>
-          <span v-else>{{ logEvents[virtualRow.index] }}</span>
-        </div>
+        </template>
+        <span v-else-if="(query.length > 0 && !filter) || query.length == 0">{{ logEvents[virtualRow.index].raw }}</span>
+      </div>
 
-        <div class="sticky top-5 flex justify-end">
-          <div v-if="direction == 'up' && !isBottom" title="To bottom" alt="To bottom" @@click="toBottom"
-              class="flex px-4 py-2 me-8 rounded-lg items-center justify-center border cursor-pointer
-                border-gray-300 bg-white fill-gray-300
-                hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
-                dark:border-white/[.4] dark:text-white/[.6]
-                data-enabled:dark:bg-zinc-700 dark:data-enabled:border-white
-                dark:hover:border-white dark:hover:text-white dark:hover:fill-white dark:hover:bg-zinc-700
-                dark:bg-zinc-900">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
-            </svg>
-          </div>
-          <div v-if="direction == 'down' && !isTop" title="To top" alt="To top" @@click="toTop"
-              class="flex px-4 py-2 me-8 rounded-lg items-center justify-center border cursor-pointer
-                border-gray-300 bg-white fill-gray-300
-                hover:border-sky-500 hover:bg-sky-100 hover:fill-sky-500
-                dark:border-white/[.4] dark:text-white/[.6]
-                data-enabled:dark:bg-zinc-700 dark:data-enabled:border-white
-                dark:hover:border-white dark:hover:text-white dark:hover:fill-white dark:hover:bg-zinc-700
-                dark:bg-zinc-900">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />
-              </svg>
-          </div>
-        </div>
-
+      <div ref="anchorRef" style="position: absolute; width: 100%; height: 1px; bottom: 0;">&nbsp;</div>
     </div>
   </div>
 </template>
 
 <script type="module">
-import { ref, toRef, watch, computed, onMounted, nextTick } from 'vue'
+import { ref, toRef, toRefs, watch, computed, onMounted, nextTick } from 'vue'
 import { useVirtualizer } from '@@tanstack/vue-virtual'
+import { useIntersectionObserver, useScroll } from '@@vueuse/core'
 
 let setup = (props, ctx) => {
   const parentRef = ref(null);
   const updateId = ref(0);
   const loaded = ref(false);
+  const scrollLockBottom = ref(true);
   const logEvents = ref([]);
   const occurrences = ref([]);
   const overlays = ref([]);
-  const activeOverlay = ref(-1);
+  const activeOverlay = ref({id: -1, position: -1});
   const query = ref('');
+  const anchorRef = ref(null)
+  const anchorIsVisible = ref(false)
   const status = useGlobalOverlays();
+  const { x, y, isScrolling, arrivedState, directions } = useScroll(parentRef, { offset: { bottom: 30 }})
+
+  const { stop } = useIntersectionObserver(
+    anchorRef,
+    ([{ isIntersecting }], observerElement) => {
+      anchorIsVisible.value = isIntersecting
+    },
+  )
 
   let virtualizerOptions = computed(() => {
     return {
@@ -85,14 +99,11 @@ let setup = (props, ctx) => {
 
   const virtualizer = useVirtualizer(virtualizerOptions)
 
-  let getRow = (i) => {
-    let row = logEvents.value[i]
-    let hits = occurrences.value[i] ?? [];
-    if (hits.length === 0) return [{ content: row }];
+  let getSegments = (row) => {
+    let hits = row.matches;
 
     let result = []
     let length = query.value.length;
-    let current = overlays.value[activeOverlay.value];
     hits.forEach((curr, idx) => {
       let prev = hits[idx - 1];
       let next = hits[idx + 1];
@@ -101,19 +112,17 @@ let setup = (props, ctx) => {
       if (prev !== undefined){
         start = prev + length;
       }
-      let end = next ?? row.length;
+      let end = next ?? row.raw.length;
 
-      let segment1 = row.slice(start, curr);
+      let segment1 = row.raw.slice(start, curr);
       result.push({ content: segment1 });
-      let active = false;
-      if (current !== undefined){
-        active = curr === current?.index && i === current?.row;
-      }
-      let segment2 = row.slice(curr, curr + length);
+      let active = activeOverlay.value.id === row.id && activeOverlay.value.pos === curr;
+
+      let segment2 = row.raw.slice(curr, curr + length);
       result.push({ content: segment2, overlay: true, active: active });
 
       if (next === undefined){
-        let segment3 = row.slice(curr + length, end);
+        let segment3 = row.raw.slice(curr + length, end);
         result.push({ content: segment3 });
       }
     });
@@ -121,16 +130,12 @@ let setup = (props, ctx) => {
     return result;
   }
 
-  const viewLoaded = () => {
-    if (loaded.value === true) return;
-    loaded.value = true;
-    if (props.direction === 'up' && logEvents.value.length > 0){
-      virtualizer.value.scrollToIndex(logEvents.value.length - 1, { align: 'end', smoothScroll: false });
-    }
-  }
+  let pinToBottom = () => {
+    virtualizer.value.scrollToIndex(logEvents.value.length - 1, { align: 'end', smoothScroll: false })
+  };
 
   const debouncedSearch = _.debounce((q) => onSearch(q), 300, {maxWait: 2});
-  const debouncedInit = _.debounce(() => viewLoaded(), 500, {maxWait: 2});
+  const debounceToBottom = _.debounce(pinToBottom, 300, {maxWait: 2})
 
   const measureElement = (el) => {
     nextTick(() => {
@@ -143,9 +148,7 @@ let setup = (props, ctx) => {
     let items = virtualizer.value.getVirtualItems()
     if (items.length > 0){
       let index = items[items.length - 1].index
-      if (index < 999){
-        return false
-      }
+      return logEvents.value[index].id === logEvents.value.slice(-1)[0].id
     }
 
     return true;
@@ -163,102 +166,150 @@ let setup = (props, ctx) => {
     return true;
   });
 
+  let toBottomClick = () => {
+    toBottom();
+    scrollLockBottom.value = true;
+  }
+
   let toBottom = () => {
     if (logEvents.value.length > 0){
+      //parentRef.value.scrollTop = parentRef.value.scrollHeight;
+      //parentRef.value.scrollTo(0, virtualizer.value.getTotalSize() + 100)
+      //virtualizer.value.scrollToOffset(virtualizer.value.getTotalSize() + 100, { align: 'end', smoothScroll: false });
       virtualizer.value.scrollToIndex(logEvents.value.length - 1, { align: 'end', smoothScroll: false });
     }
   }
 
   let toTop = () => {
     if (logEvents.value.length > 0){
-      virtualizer.value.scrollToIndex(0, { align: 'end', smoothScroll: false });
+      //parentRef.value.scrollTo(0, 0)
+      virtualizer.value.scrollToIndex(0, { align: 'start', smoothScroll: false });
+    }
+  }
+
+  let toOverlay = () => {
+    if (query.value.length < 1) return;
+
+    let row = logEvents.value.filter(x => x.id === activeOverlay.value.id)[0];
+    if (row !== undefined){
+      let index = overlays.value.indexOf(activeOverlay.value);
+      status.value.current = props.direction === 'up' ? status.value.total - index : index + 1;
+      virtualizer.value.scrollToIndex(logEvents.value.indexOf(row), { align: 'center', smoothScroll: false });
+    }
+  }
+
+  let onScroll = (e) => {
+    if (directions.top){
+      scrollLockBottom.value = false;
+    }
+
+    if (directions.bottom && isBottom.value){
+      scrollLockBottom.value = true
     }
   }
 
   watch(() => props.events, () => {
-    if (props.direction === 'up'){
-      logEvents.value = [...props.events];
-    } else {
-      logEvents.value = [...props.events].reverse();
+    let changed = props.events.length !== logEvents.value.length;
+    let rows = [...props.events];
+    if (props.direction !== 'up'){
+      rows.reverse();
     }
-    debouncedInit();
 
     if (query.value.length > 0){
-      let [ov, oc] = findOccurrences(logEvents.value, query.value);
+      let ov = findOccurrences(rows, query.value);
       overlays.value = ov;
-      occurrences.value = oc;
+      status.value.total = ov.length;
+
+      if (activeOverlay.value.id > -1){
+        let same = overlays.value.filter(x => x.id === activeOverlay.value.id && x.pos === activeOverlay.value.pos)[0]
+        if (same !== undefined){
+          activeOverlay.value = same;
+          toOverlay();
+        }
+      } 
+    }
+
+    let visible = anchorIsVisible.value;
+
+    logEvents.value = rows;
+
+    if (changed && scrollLockBottom.value && !visible && props.direction === 'up' && query.value.length == 0){
+      debounceToBottom();
     }
 
     if (!loaded.value) return;
     updateId.value += 1;
   })
 
-  watch([overlays, activeOverlay], () => {
-    status.value.current = props.direction === 'up' ? overlays.value.length - activeOverlay.value : activeOverlay.value + 1;
-    status.value.total = overlays.value.length;
-  })
+  watch(() => props.filter, () => {
+    toOverlay();
+  });
 
   watch(() => props.direction, () => {
-    if (props.direction === 'up'){
-      logEvents.value = [...props.events];
-      if (query.value.length > 0)
-      {
-        let [ov, oc] = findOccurrences(logEvents.value, query.value);
-        overlays.value = ov;
-        occurrences.value = oc;
-        activeOverlay.value = overlays.value.length - 1;
-      }
-      toBottom();
-    } else {
-      logEvents.value = [...props.events].reverse();
-      if (query.value.length > 0)
-      {
-        let [ov, oc] = findOccurrences(logEvents.value, query.value);
-        overlays.value = ov;
-        occurrences.value = oc;
-        activeOverlay.value = 0;
-      }
-      toTop();
+    let rows = [...props.events];
+    if (props.direction !== 'up'){
+      rows.reverse();
     }
     
+    logEvents.value = rows;
+    
+    if (query.value.length > 0){
+      overlays.value.reverse();
+      activeOverlay.value = props.direction === 'up' ? overlays.value[overlays.value.length - 1] : overlays.value[0];
+      toOverlay();
+    }
+    else {
+      if (props.direction === 'up'){
+        toBottom();
+      }else{
+        toTop();
+      }
+    }
+
     if (!loaded.value) return;
     updateId.value += 1;
   })
+
+  onMounted(() => {
+    setTimeout(() => {loaded.value = true} , 25000);
+  });
 
   let findOccurrences = (lines, query) => {
     const regex = new RegExp(escapeRegExp(query), "gi");
     
     let ol = [];
-    let oc = {};
     lines.forEach((line, index) => {
-      let matches = [...line.matchAll(regex).map(x => x.index)]
+      let matches = [...line.raw.matchAll(regex).map(x => x.index)]
       if (matches.length > 0){
-        oc[index] = matches;
-        ol = ol.concat(matches.map(x => ({row:index, index: x })));
+        ol = ol.concat(matches.map(x => ({id:line.id, pos: x })));
+        line['matched'] = true;
+        line['matches'] = matches
+      } else {
+        line['matched'] = false;
+        line['matches'] = []
       }
     });
 
-    return [ol, oc];
+    return ol;
   }
 
   let getPrevOverlay = (loopResults = false) => {
-    const prev = activeOverlay.value - 1;
-
+    const prev = overlays.value.indexOf(activeOverlay.value) - 1;
     if (prev < 0) {
-      return loopResults ? overlays.value.length - 1 : activeOverlay.value;
+      return loopResults ? overlays.value[overlays.value.length - 1] : activeOverlay.value;
     }
 
-    return prev;
+    return overlays.value[prev];
   }
 
   let getNextOverlay = (loopResults = false) => {
-    const next = activeOverlay.value + 1;
+    const next = overlays.value.indexOf(activeOverlay.value) + 1;
 
     if (next > overlays.value.length - 1) {
-      return loopResults ? 0 : activeOverlay.value;
+      return loopResults ? overlays.value[0] : activeOverlay.value;
     }
 
-    return next;
+    return overlays.value[next];
   }
 
   let escapeRegExp = (str) => {
@@ -273,14 +324,15 @@ let setup = (props, ctx) => {
 
     if (e.key === 'Enter') 
     {
-        if (overlays.value.length === 0) return;
-        
-        let next = reverse ? getPrevOverlay(true) : getNextOverlay(true);
+      if (overlays.value.length === 0) return;
+      
+      let next = reverse ? getPrevOverlay(true) : getNextOverlay(true);
 
-        if (activeOverlay.value === next) return;
-        activeOverlay.value = next;
-        virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'middle', smoothScroll: false });
-        updateId.value += 1; // redraw view
+      if (activeOverlay.value === next) return;
+      activeOverlay.value = next;
+      toOverlay();
+
+      updateId.value += 1;
       return;
     }
 
@@ -292,9 +344,9 @@ let setup = (props, ctx) => {
 
       if (activeOverlay.value === next) return;
       activeOverlay.value = next;
-      virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'middle', smoothScroll: false });
-      updateId.value += 1; // redraw view
-      
+      toOverlay();
+
+      updateId.value += 1; // redraw view    
       return;
     }
 
@@ -306,9 +358,9 @@ let setup = (props, ctx) => {
 
       if (activeOverlay.value === next) return;
       activeOverlay.value = next;
-      virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'middle', smoothScroll: false });
-      updateId.value += 1; // redraw view
+      toOverlay();
 
+      updateId.value += 1; // redraw view
       return;
     }
   }
@@ -318,35 +370,38 @@ let setup = (props, ctx) => {
 
     if (query.value !== q.query){
       query.value = q.query;
-      occurrences.value = [];
       overlays.value = [];
-      activeOverlay.value = -1;
+      activeOverlay.value = {id: -1, pos: -1};
     }
 
     if (query.value === '') {
-      occurrences.value = [];
       overlays.value = [];
-      activeOverlay.value = -1;
+      logEvents.value.forEach(x => {
+        x['matched'] = false;
+        x['matches'] = []
+      });
       return;
     }
 
-    let [ov, oc] = findOccurrences(logEvents.value, query.value);
+    let ov = findOccurrences(logEvents.value, query.value);
     overlays.value = ov;
-    occurrences.value = oc;
+    status.value.total = ov.length;
+    let index = overlays.value.indexOf(activeOverlay.value);
+    status.value.current = props.direction === 'up' ? status.value.total - index : index + 1;
 
-    if (occurrences.value.length === 0) return;
+    if (overlays.value.length === 0) return;
 
     let reverse = props.direction === 'up';
 
     let next = reverse ? getPrevOverlay(true) : getNextOverlay(true);
     
-    if (activeOverlay.value < 0 && overlays.value.length > 0){
-      activeOverlay.value = next;      
+    if (activeOverlay.value.id < 0 && overlays.value.length > 0){
+      activeOverlay.value = next;
     }
 
-    virtualizer.value.scrollToIndex(overlays.value[activeOverlay.value].row, { align: 'middle', smoothScroll: false });
+    toOverlay();
 
-    updateId.value += 1; // redraw view
+    updateId.value += 1;
   }
 
   logBus.on((q) => { 
@@ -354,9 +409,9 @@ let setup = (props, ctx) => {
     handleEvent(q.e);
   })
 
-  return {virtualizer, virtualizerOptions, measureElement, widthStyle, parentRef, 
-    query, status, occurrences, findOccurrences, escapeRegExp, onSearch, debouncedSearch, overlays, activeOverlay, getNextOverlay, getPrevOverlay, getRow, handleEvent, 
-    logEvents, loaded, updateId, isBottom, isTop, toBottom, toTop, viewLoaded, debouncedInit}
+  return {virtualizer, virtualizerOptions, measureElement, widthStyle, parentRef, anchorRef, anchorIsVisible, onScroll, directions, scrollLockBottom,
+    query, status, findOccurrences, escapeRegExp, onSearch, debouncedSearch, overlays, activeOverlay, getNextOverlay, getPrevOverlay, getSegments, handleEvent, 
+    logEvents, loaded, updateId, isBottom, isTop, toBottom, toBottomClick, toTop, toOverlay}
 }
 
 components["log-viewer"] = { template: "#log-viewer", emits: [], setup, 
@@ -364,6 +419,7 @@ components["log-viewer"] = { template: "#log-viewer", emits: [], setup,
     events: Array,
     wrap: Boolean,
     direction: String,
+    filter: Boolean,
   }
 };
 </script>

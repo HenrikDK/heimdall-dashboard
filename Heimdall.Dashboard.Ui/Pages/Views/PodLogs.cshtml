@@ -3,12 +3,12 @@
     <div class="flex my-2 items-center justify-between">
       <span class="text-gray-500 dark:text-gray-300 text-2xl font-light sans">Pod Logs / {{ $route.params.namespace }} / {{ $route.params.name }}</span>
       
-      <log-controls :events="logEvents" :wrap="wrap" :direction="direction" :json="json" 
-        @@wrap="(w) => wrap = w" @@direction="(d) => direction = d">
+      <log-controls :events="logEvents" :wrap="wrap" :direction="direction" :json="json" :filter="filter"
+        @@wrap="(w) => wrap = w" @@direction="(d) => direction = d" @@filter="(f) => filter = f">
       </log-controls>
     </div>
     
-    <log-viewer :events="logEvents" :wrap="wrap" :direction="direction"></log-viewer>
+    <log-viewer :events="logEvents" :wrap="wrap" :direction="direction" :filter="filter"></log-viewer>
   </div>
 </template>
 
@@ -22,14 +22,15 @@ let setup = (props, ctx) => {
   const json = ref(false);
   const direction = ref('up');
   const wrap = ref(true);
+  const filter = ref(false);
 
   const logEvents = ref([]);
 
   let updateLogs = (j) => {
     let result = logEvents.value.concat(j)
     
-    if (result.length > 1000){
-      result = result.slice(-1000)
+    if (result.length > 5000){
+      result = result.slice(-5000)
     }
     
     logEvents.value = result
@@ -40,13 +41,13 @@ let setup = (props, ctx) => {
     let name = route.params.name;
     let container = route.params.container;
     
-    const url = `/k8s/api/v1/namespaces/${namespace}/pods/${name}/log?container=${container}&previous=false&tailLines=1000&follow=true`;
+    const url = `/k8s/api/v1/namespaces/${namespace}/pods/${name}/log?container=${container}&previous=false&tailLines=5000&follow=true`;
     streamLogs(url, updateLogs, connections.value);
 
     setTimeout(() => {
       let event = logEvents.value[logEvents.value.length - 1];
-      json.value = event.startsWith('{')
-    }, 300);
+      json.value = event?.json ?? false;
+    }, 500);
   });
 
   onUnmounted(async () => {
@@ -54,7 +55,7 @@ let setup = (props, ctx) => {
   });
   
   return {
-    logEvents, updateLogs, direction, wrap, connections, json
+    logEvents, updateLogs, direction, wrap, connections, json, filter
   }
 }
 
