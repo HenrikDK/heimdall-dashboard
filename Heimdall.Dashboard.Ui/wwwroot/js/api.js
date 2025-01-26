@@ -11,6 +11,7 @@ function closeConnections(connections){
 function streamMetrics(options, cb, connections = null, multiple = false) {
     var DT = luxon.DateTime;
     let isApiRequestInProgress = false;
+    let errors = 0
 
     const handel = setInterval(getMetrics, 30000);
     getMetrics();
